@@ -42,6 +42,8 @@ rule token = parse
                         { String.iter (function '\n' -> incrline lexbuf | _ -> ()) n ;
                               STRING n }
 | eof                   { raise Eof }
+| "print"             {PRINT}
+| "is"                  {IS}
 | '+'                   { PLUS }
 | '-'                   { MINUS }
 | '*'                   { TIMES }

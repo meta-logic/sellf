@@ -98,11 +98,17 @@ let _ =
   begin
   try 
     Parser.goal Lexer.token query;
-    ( match Interpreter.solve () with
-      | true -> print_string "\nYes.\n"; ()
+    Interpreter.solve (fun () -> 
+      if (Interpreter.empty_nw ()) then 
+        print_string "\nYes.\n"
+      else (Structs.last_fail ())) 
+      
+      (fun () -> print_string "\nNo.\n")
+
+      (*| true -> print_string "\nYes.\n"; ()
       | false -> print_string "\nNo.\n"; ()
       | _ -> print_string "Ooops.\n"; ()
-    )
+    )*)
   with
     | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); exit 1
     | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; exit 1

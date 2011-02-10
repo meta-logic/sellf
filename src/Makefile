@@ -11,7 +11,7 @@ OCAMLLEX = /usr/bin/ocamllex
 
 # SOURCE FILES
 SELLF_ML = sellf.ml
-CORE_ML = term.ml structs.ml norm.ml unify.ml interpreter.ml
+CORE_ML = term.ml structs.ml typeChecker.ml norm.ml unify.ml interpreter.ml
 TEST_ML    = oUnit.ml test.ml
 PARSER_ML = parser.ml lexer.ml
 PARSER_CMO = $(PARSER_ML:.ml=.$(cmo)) 

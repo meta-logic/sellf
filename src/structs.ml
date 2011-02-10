@@ -2,8 +2,14 @@
 
 open Term
 
+(* Integer that indicates the number of the branch (used only during tensor resolution) *)
+let branch = ref 0 ;;
+
 (* Integer to indicate how many tensors I am solving, so that I only check for context emptyness at the end *)
 let tensor = ref 0 ;;
+
+(* Number of states saved *)
+let nstates = ref 0 ;;
 
 (* List to hold the main formulas (everything is here initially *)
 let (goals : (terms list) ref) = ref [] ;;
@@ -13,6 +19,9 @@ let (positives : (terms list) ref) = ref [] ;;
 
 (* List to hold the atoms *)
 let (atoms : (terms list) ref) = ref [] ;;
+
+(*let (bck_cls : (terms list) ref) = ref [] ;;*)
+let is_top = ref (false);;
 
 (* Hashtable for the context (subexponential indexes are the keys, list of formulas is the entry) *)
 let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
@@ -40,12 +49,20 @@ type formType =
 | POS
 | ATM
 | NEG
+| BODY
 
-(* goals, positives, atoms, context, clauses table*)
+let print_formType ft = match ft with
+  | POS -> print_string "POS"
+  | ATM -> print_string "ATM"
+  | NEG -> print_string "NEG"
+  | BODY -> print_string "BODY"
+;;
+
+(* goals, positives, atoms, context, clauses table *)
 type data = 
 | DATA of (terms list) * (terms list) * (terms list) * 
           ((string, (terms list)) Hashtbl.t) * 
-          ((string, terms list) Hashtbl.t)
+          ((string, terms list) Hashtbl.t) * bool
 ;;
 
 (* A state is a sequent and information on the decide rule applied:
@@ -54,9 +71,17 @@ type data =
  * bdTree: formula focused on
  * formType: type of the formula
  * int: index in the list
+ * int: binding stack length
+ * int: branch number
 *)
 type state = 
-| STATE of data * terms * formType * int ;;
+| STATE of data * terms * formType  * int * int * int * (unit -> unit) * (unit -> unit) * (terms list);;
+
+let print_state s = match s with
+  | STATE(dt, form, t, i, b, br, fun1, fun2,_) -> print_string "State: "; print_term form; print_newline ()
+;;
+
+let print_stack s = print_string "STACK\n"; Stack.iter (print_state) s; print_string "EndOfSTACK\n" ;;
 
 (* Stack to save the sequents on non-deterministic choices *)
 let (states : (state Stack.t) ref) = ref (Stack.create ()) ;;
@@ -126,6 +151,23 @@ let add_cls clause =
     Hashtbl.add !clausesTbl predname (clause :: []) 
 ;;
 
+(*type state = int*)
+let bind_stack = Stack.create ()
+let bind_len = ref 0
+
+let save_state () = !bind_len
+
+let restore_state n =
+  assert (n <= !bind_len) ;
+  for i = 1 to !bind_len-n do
+    let (v,contents) = Stack.pop bind_stack in
+      v := contents;
+  done ;
+  bind_len := n
+
+type subst = (ptr*in_ptr) list
+type unsubst = subst
+
 let rec deref t = match t with
   | PTR {contents = T t1} -> deref t1
   | t -> t
@@ -138,12 +180,14 @@ let bind v t =
   in
   let dt = deref t in (* r is a variable equal to dv (binding X to X makes no sense) *)
     if match dt with PTR r when r == dv -> false | _ -> true then begin
-      (*let id = match !dv with
-        | V (v1) -> v1.id
-        | _ -> assert false
-      in*)
-      dv := T dt 
+      Stack.push (dv,!dv) bind_stack ;
+      dv := T dt ;
+      incr bind_len 
     end
+;;
+
+let last_fail () = match Stack.top !states with
+  | STATE(_, _, _, _, _, _, _, f,_) -> f ()
 ;;
 
 (* Removes a formula from a subexponential (only the first occurence) *)
@@ -189,3 +233,17 @@ let print_hashtbl h = let keylst = keys h in
       | k :: t -> print_string ("["^k^"] "); print_list_terms (Hashtbl.find h k); print_newline (); print_h t
   in print_h keylst
 
+let stack_3_stacks s0 s1 s2 s3 = let aux = Stack.create () in
+  while not (Stack.is_empty s3) do 
+    Stack.push (Stack.pop s3) aux 
+  done;
+  while not (Stack.is_empty s2) do
+    Stack.push (Stack.pop s2) aux
+  done;
+  while not (Stack.is_empty s1) do
+    Stack.push (Stack.pop s1) aux 
+  done;
+  while not (Stack.is_empty aux) do 
+    Stack.push (Stack.pop aux) s0
+  done
+;;

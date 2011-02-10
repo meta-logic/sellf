@@ -47,6 +47,8 @@ let rec hnorm term =
     | Term.INT _ | Term.TOP | Term.ONE | Term.CUT
     | Term.DB _ -> term
     | Term.COMP (typ, t1, t2) -> Term.COMP (typ, hnorm t1, hnorm t2)
+    | Term.ASGN(t1,t2) -> Term.ASGN(hnorm t1, hnorm t2)
+    | Term.PRINT(t1) -> Term.PRINT(hnorm t1)
     | Term.EQU (str, i, t1) -> Term.EQU (str, i,  hnorm t1)
     | Term.CLS(_,_,_) -> failwith "Not expected a clause in hnorm."
     | Term.PRED(str, t1) -> Term.PRED(str, hnorm t1)
@@ -104,6 +106,8 @@ let rec hnorm term =
                   hnorm (Term.app (wrap t) (List.map wrap args))
             | Term.PRED (str, t1) -> Term.PRED(str, hnorm (Term.susp t1 ol nl e))
             | Term.COMP (cmp, t1,t2) -> Term.COMP(cmp, hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
+            | Term.ASGN (t1,t2) -> Term.ASGN(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
+            | Term.PRINT (t1) -> Term.PRINT(hnorm (Term.susp t1 ol nl e))
             | Term.EQU (str, i,t1) -> Term.EQU(str, i, hnorm (Term.susp t1 ol nl e))
             | Term.TENSOR (t1,t2) -> Term.TENSOR(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.LOLLI (str, t1,t2) -> Term.LOLLI( hnorm (Term.susp str ol nl e), hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
@@ -141,6 +145,8 @@ let rec deep_norm t =
       | Term.PRED (str,t1) -> Term.PRED (str, deep_norm t1)
       | Term.EQU (str, i, t1) -> Term.EQU (str, i, deep_norm t1)
       | Term.COMP (cmp, t1,t2) -> Term.COMP (cmp,deep_norm t1, deep_norm t2)
+      | Term.ASGN (t1,t2) -> Term.ASGN (deep_norm t1, deep_norm t2)
+      | Term.PRINT (t1) -> Term.PRINT (deep_norm t1)
       | Term.TENSOR (t1,t2) -> Term.TENSOR (deep_norm t1, deep_norm t2)
       | Term.LOLLI (str, t1,t2) -> Term.LOLLI (deep_norm str, deep_norm t1, deep_norm t2)
       | Term.BANG (str,t1) -> Term.BANG (deep_norm str, deep_norm t1)

@@ -2,6 +2,7 @@
 %{
 open Term
 open Structs
+open TypeChecker
 let context = ref "$gamma" 
 
 let rec curry term = let rec curryAux termC termU = (match termU with 
@@ -41,8 +42,8 @@ let rec cls_2_lolli form subexp = match form with
 
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
-LBRACKET RBRACKET LOLLI BANG HBANG TSUBEX NEQ
-%token <string> NAME STRING VAR FORALL  TSUB ABS NEW
+LBRACKET RBRACKET LOLLI BANG HBANG TSUBEX NEQ IS PRINT
+%token <string> NAME STRING VAR FORALL TSUB ABS NEW
 %token <int> INT
 %right ARR  
 %left COMMA
@@ -306,6 +307,8 @@ prop:
 body:
 | prop                  { $1 }
 | intComp               { $1 }
+| intAssign           {$1}
+| print_term          {$1}
 /*| equality              { $1 } */
 | logCst                { $1 }
 | CUT                   { CUT }
@@ -345,44 +348,6 @@ term:
 | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
 | INT               { INT ($1) } 
 | STRING            { STRING ($1) }
-/*| LLIST RLIST       { LIST (LNIL) }
-* | LLIST list RLIST  { LIST ($2) }  */
-;
- 
-/*list:
-* | listTail                      {$1}
-* | listHead LHEADTAIL listTail   {LCONS ($1, $3)}
-* ;
-*
-*
-* listHead: 
-* | listTerms {$1}
-* ;
-
-* listTail:
-* | listTerms                 { LCONS ($1, LNIL) }
-* | listTerms COMMA listTail  { LCONS ($1, $3) }
-* | LPAREN listTail RPAREN    { $2 }   
-* ;
-* 
-* listTerms:
-* | listTerm                          { $1 }
-* | listTerm listTerms                { LAPP ($1, $2) }
-* | LPAREN listTerms RPAREN           { $2 }
-* | LPAREN listTerms RPAREN listTerms { LAPP ($2, $4) }
-* ;
-* 
-* listTerm:
-* | NAME { match (notInTbl tTbl $1) with
-*               | NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
-*                         print_newline(); flush stdout; LCON ($1)
-*               | SOME (k) -> LCON ($1)
-*        }
-* | VAR     { LVAR ($1, 0, LOG) }
-* | INT     { LINT ($1) }
-* | STRING  { LSTRING ($1) }
-* ;
-*/
 
 logCst:
 | TOP {TOP}
@@ -397,6 +362,12 @@ intComp:
 | intBody LEQ intBody    {COMP (LEQ,$1, $3)}
 | intBody NEQ intBody    {COMP (NEQ,$1, $3)}
 ;
+
+intAssign:
+| VAR IS intBody       {ASGN (VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0}, $3) }
+
+print_term:
+| PRINT terms           {PRINT (make_APP $2)}
 
 intBody: 
 | INT                   {INT ($1)}

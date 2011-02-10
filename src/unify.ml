@@ -501,6 +501,8 @@ let makesubst h1 t2 a1 =
       | Term.VAR _ -> failwith "logic variable on the left"
       | PRED(str, t1) -> PRED(str, nested_subst (Norm.hnorm t1) lev)
       | COMP(cmp, t1, t2) -> COMP(cmp, nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
+      | ASGN(t1, t2) -> ASGN(nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
+      | PRINT(t1) -> PRINT(nested_subst (Norm.hnorm t1) lev)
       | TENSOR(t1, t2) -> TENSOR(nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
       | WITH(t1, t2) -> WITH(nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
       | LOLLI(str, t1, t2) -> LOLLI(nested_subst (Norm.hnorm str) lev, nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
@@ -569,7 +571,7 @@ let makesubst h1 t2 a1 =
             | MINUS _ ->  assert false
             | TIMES _ ->  assert false
             | DIV _ ->  assert false
-            | ONE | TOP | EQU _ | COMP _ | CUT |  TENSOR _ | LOLLI _ | BANG _ |  HBANG _ | WITH _ 
+            | ONE | TOP | EQU _ | COMP _ | ASGN _ | PRINT _ | CUT |  TENSOR _ | LOLLI _ | BANG _ |  HBANG _ | WITH _ 
             | FORALL _ | NEW _ | PRED _  | CLS _ | NEW _ -> assert false
             (*| LIST _ ->  assert false*)
           end
@@ -738,6 +740,10 @@ and unify t1 t2 = match Term.observe t1,Term.observe t2 with
       if cmp1 = cmp2 then 
         unify_list [a1;b1] [a2;b2]
       else failwith "ERROR: Unifying two CMPs of different types."
+  | Term.ASGN (a1, b1), Term.ASGN (a2, b2) -> 
+        unify_list [a1;b1] [a2;b2]
+  | Term.PRINT (a1), Term.PRINT (a2) -> 
+        unify a1 a2 
   | Term.TENSOR (a1,b1), Term.TENSOR (a2,b2)  -> unify_list [a1;b1] [a2;b2]
   | Term.LOLLI (str1 ,a1, b1), Term.LOLLI (str2, a2, b2)  -> 
         unify_list [str1; a1;b1] [str2; a2;b2]
