@@ -22,15 +22,25 @@ let rec solve_exp e = match e with
   | PTR {contents = V t} when t.tag = Term.LOG -> 
       print_string "ERROR: Cannot handle comparisons with logical variables.";  print_term e; print_newline (); 0
   | bla -> print_string "[ERROR] Unexpected term in a comparison: "; print_term bla; print_newline (); 0
+;;
 
+let unbounded s = let subexps = keys subexTpTbl in
+  let rec get_unbounded lst = match lst with
+    | [] -> ()
+    | u :: t -> (match Hashtbl.find subexTpTbl s with
+      | UNB -> Hashtbl.add subexOrdTbl s u; (get_unbounded t)
+      | _ -> get_unbounded t
+    )
+  in get_unbounded subexps
+;;
 
 (* Creating a new subexponential *)
 (* TODO: s -> holds all unbounded subexponentials *)
 let new_subexp s = 
   try match Hashtbl.find subexTpTbl s with
   | _ -> ()
-  with Not_found -> Hashtbl.add subexTpTbl s (LIN); Hashtbl.add !context s [] ;;
-  
+  with Not_found -> Hashtbl.add subexTpTbl s (LIN); Hashtbl.add !context s []; unbounded s ;;
+
 (* Verifying if a subexponential is empty *)
 let empty s = List.length (Hashtbl.find !context s) == 0 ;;
 
@@ -108,7 +118,7 @@ let save_state form tp pos bind suc fail bck_clauses =
   nstates := !nstates + 1;
   print_string "+++++ Saving formula "; print_term form; print_string " on state stack as ";
   print_formType tp; print_newline ();
-  print_hashtbl !context;
+  (*print_hashtbl !context;*)
   Stack.push st !states;
   print_stack !states
 ;;
@@ -283,7 +293,7 @@ match Term.observe form with
       let string_sub = "NSUBEXP"^(string_of_int !varid) in
       let new_cons = CONS string_sub in
       let newf = Norm.hnorm (APP (ABS (s, 1, t1), [new_cons])) in
-      new_subexp s;
+      new_subexp string_sub;
       goals := newf :: t;
       solve_neg suc fail
 
@@ -460,9 +470,11 @@ match Term.observe form with
         try match unifies lolli (PRED(str, terms)) with
           | (LOLLI(CONS(s), fp1, fp2), f_ptr) -> (
             print_endline "Creating a new entry in the stack without deleting.";
-            (match Hashtbl.find subexTpTbl s with
+            (try match Hashtbl.find subexTpTbl s with
               | LIN | AFF -> ( rmv_ctx lolli s; rmv_cls lolli )
-              | REL | UNB -> () );
+              | REL | UNB -> () 
+              with Not_found -> print_string ("This subexponential has no type: "^s); print_newline (); fail ()
+            );
             let st = !nstates in
             atoms := t;
             add_goals fp2;
@@ -478,9 +490,9 @@ match Term.observe form with
             | Failure str -> failwith str
           )
           (*| _ :: t -> failwith "Not a lolli in clauses' table"*)
-          | [] -> print_string ("No clauses for this atom: "^str^".\n"); print_string "Backtracking...\n"; fail ()
+      | [] -> print_string ("No clauses for this atom: "^str^".\n"); print_string "Backtracking...\n"; fail ()
         (*in attempt clauses (PRED (str, terms))*)
-          with Not_found -> print_string "[ERROR] Atom not in table: "; print_string str; fail ()
+      with Not_found -> print_string "[ERROR] Atom not in table: "; print_string str; fail ()
   )
   | bla -> failwith "\nNot an atom in atoms' list"
 (*  with 
@@ -550,7 +562,7 @@ and restore_atom n = let s = Stack.length !states in
   reset dt;
   restore_state bl;
   print_stack !states;
-  print_hashtbl !context;
+  (*print_hashtbl !context;*)
   back_chain bck sc fl
 ;;
 

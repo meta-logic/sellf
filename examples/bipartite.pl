@@ -15,8 +15,6 @@ subexprel scolour <= un.
 
 context snodes.
 
-% With this configuration the program should yeld no since there is no matching among the set of clauses of lines 54 to 58
-
 node 1.
 node 2.
 %node 3.
@@ -51,25 +49,25 @@ tComponent :- [sauxN]hbang bipartite.
 % Find a neighbor of X. If it does not have a colour, then assign the correct colour and insert them in 
 % auxN, so that it is picked later.
 
-colourN X Prog :- edge X Z, colour X 1, node Z, 
+colourN X Prog :- edge X Z, colour X 1, node Z,
                       colour X 1 [scolour]-o (colour Z 0 [scolour]-o (auxN Z  [sauxN]-o (auxE X Z [sauxE]-o colourN X Prog))).
 
-colourN X Prog :- edge X Z, colour X 0, node Z, 
+colourN X Prog :- edge X Z, colour X 0, node Z,
                       colour X 0 [scolour]-o (colour Z 1 [scolour]-o (auxN Z  [sauxN]-o (auxE X Z [sauxE]-o colourN X Prog))).
 
-%colourN X Prog :- edge Z X, colour X 1, node Z, 
- %                    colour X 1 [scolour]-o (colour Z 0 [scolour]-o (auxN Z  [sauxN]-o (auxE Z X [sauxE]-o colourN X Prog))).
+colourN X Prog :- edge Z X, colour X 1, node Z, 
+                    colour X 1 [scolour]-o (colour Z 0 [scolour]-o (auxN Z  [sauxN]-o (auxE Z X [sauxE]-o colourN X Prog))).
 
-% colourN X Prog :- edge Z X, colour X 0, node Z, 
- %                    colour X 0 [scolour]-o (colour Z 1 [scolour]-o (auxN Z  [sauxN]-o (auxE Z X [sauxE]-o colourN X Prog))).
+colourN X Prog :- edge Z X, colour X 0, node Z, 
+                    colour X 0 [scolour]-o (colour Z 1 [scolour]-o (auxN Z  [sauxN]-o (auxE Z X [sauxE]-o colourN X Prog))).
 
 % Find a neighbor of X. If it has a different colour, then it means that it was already picked at some moment. Hence, 
 % proceed without the need to pick this node later.
 
-colourN X Prog :- edge X Z, colour X CX, colour Z CZ, CX <> CZ, 
+colourN X Prog :- edge X Z, colour X CX, colour Z CZ, CX <> CZ,
                       colour X CX [scolour]-o (colour Z CZ [scolour]-o (auxE X Z [sauxE]-o colourN X Prog)).
 
-colourN X Prog :- edge Z X, colour X CX, colour Z CZ, CX <> CZ, 
+colourN X Prog :- edge Z X, colour X CX, colour Z CZ, CX <> CZ,
                     colour X CX [scolour]-o (colour Z CZ [scolour]-o (auxE Z X [sauxE]-o colourN X Prog)).
 
 % If one picks an edge that is not connected to X, then just move it to sauxE.
