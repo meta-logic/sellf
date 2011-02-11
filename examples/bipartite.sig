@@ -6,10 +6,10 @@ type auxN int  -> o.
 type colour int -> int -> o.
 
 type bipartite o.
-type colourN  int -> o -> o.
-type moveE o -> o.
+type colourN   int ->  tsub -> tsub -> o -> o.
+type moveE tsub -> o -> o.
 
-type tComponent o.
+type tComponent tsub -> o.
 
 type tCustom o. 
 type test o. 
