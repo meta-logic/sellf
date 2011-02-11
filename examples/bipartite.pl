@@ -17,19 +17,19 @@ context snodes.
 
 node 1.
 node 2.
-%node 3.
-%node 4.
-%node 5.
+node 3.
+node 4.
+node 5.
 
 context sedges.
 
 edge 1 2.
-%edge 2 1.
-%edge 2 3.
-%edge 3 2.
+edge 2 1.
+edge 2 3.
+edge 3 2.
 %edge 1 3.
-%edge 4 5.
-%edge 5 4.
+edge 4 5.
+edge 5 4.
 
 context un.
 
@@ -39,7 +39,7 @@ context un.
 % it means that the graph is bipartite.
 
 bipartite :- node X, colour X 1 [scolour]-o  (auxN X  [sauxN]-o tComponent).
-bipartite :- [snodes]hbang one. 
+bipartite :- [snodes]hbang print "The graph is bipartite!". 
 
 % Traverse a component of the graph.
 
@@ -76,8 +76,8 @@ colourN X Prog :- edge Y Z, X <> Y, Z <> X, (auxE Y Z [sauxE]-o colourN X Prog).
 
 % Find a neighbor of X, if it has a the same colour, then it means that the graph is not bipartite.
 
-% colourN X Prog :- edge X Z, colour X CX, colour Z CX,  tCustom.
-% colourN X Prog :- edge Z X, colour X CX, colour Z CX,  tCustom.
+ colourN X Prog :- edge X Z, colour X CX, colour Z CX,  print "The graph is not bipartite!".
+ colourN X Prog :- edge Z X, colour X CX, colour Z CX,  print "The graph is not bipartite!".
 
 % All neighbors of a node have been checked as all edges of the graph have been traversed. Hence, move the edges from 
 % auxE back to edges.
