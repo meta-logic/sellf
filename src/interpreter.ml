@@ -39,7 +39,7 @@ let unbounded s = let subexps = keys subexTpTbl in
 let new_subexp s = 
   try match Hashtbl.find subexTpTbl s with
   | _ -> ()
-  with Not_found -> Hashtbl.add subexTpTbl s (LIN); Hashtbl.add !context s []; unbounded s ;;
+  with Not_found -> Hashtbl.add subexTpTbl s (AFF); Hashtbl.add !context s []; unbounded s ;;
 
 (* Verifying if a subexponential is empty *)
 let empty s = List.length (Hashtbl.find !context s) == 0 ;;
