@@ -107,6 +107,8 @@ solve_query () =
       end
 
 let _ = 
+print_endline "SELLF -- A linear logic framework for systems with locations.";
+print_endline "Version 0.5.\n";
 while true do
 start ()
 done
