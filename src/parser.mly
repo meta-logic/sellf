@@ -395,5 +395,5 @@ top:
                 print_endline "#help displays this message;"; "help"}
 | VERBOSE EQ ON {"verbose-on"}
 | VERBOSE EQ OFF {"verbose-off"}
-| EXIT                    {exit 1}
+| EXIT                    {print_endline "Thank you for using SELLF."; exit 1}
 | LOAD  FILE  {$2}
