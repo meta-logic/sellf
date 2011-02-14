@@ -10,7 +10,7 @@ let incrline lexbuf =
     pos_bol = lexbuf.lex_curr_p.pos_cnum;
     pos_lnum = 1 + lexbuf.lex_curr_p.pos_lnum }
 }
-
+let filepath =  [^' ']+
 let nameString = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']* (* types and terms start with lower case letters *)
 let commentString = ['%'] [^'\n']* '\n' (* comments start with % *)
 let instring = [^'"'] *
@@ -71,5 +71,5 @@ rule token = parse
 | varName as lxm    { VAR(lxm) }
 | ['0'-'9']+ as lxm     { INT(int_of_string lxm) }
 | '\\' (varName as lxm) { ABS(lxm) }
-| "nsub \\" (varName as lxm)        { NEW(lxm) }     
+| "nsub \\" (varName as lxm)        { NEW(lxm) } 
 

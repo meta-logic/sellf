@@ -42,8 +42,8 @@ let rec cls_2_lolli form subexp = match form with
 
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
-LBRACKET RBRACKET LOLLI BANG HBANG TSUBEX NEQ IS PRINT
-%token <string> NAME STRING VAR FORALL TSUB ABS NEW
+LBRACKET RBRACKET LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE EXIT LOAD
+%token <string> NAME STRING VAR FORALL TSUB ABS NEW FILE
 %token <int> INT
 %right ARR  
 %left COMMA
@@ -61,6 +61,8 @@ LBRACKET RBRACKET LOLLI BANG HBANG TSUBEX NEQ IS PRINT
 %type <Term.terms> intBody
 %start goal             /* the entry point */
 %type <string Term.option> goal
+%start top             /* the entry point */
+%type <string> top 
 %%  
 
 /* G: Saves the kinds and types declared in hash tables. */
@@ -385,4 +387,13 @@ intBody:
 *                          | _ -> failwith "ERROR: Right-side of equality contains too many terms."}
 * ; */
 
-
+top: 
+| HELP    {print_endline "There are the following commands available:";
+                print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
+                print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program.";
+                print_endline "#exit command terminates the program.";
+                print_endline "#help displays this message;"; "help"}
+| VERBOSE EQ ON {"verbose-on"}
+| VERBOSE EQ OFF {"verbose-off"}
+| EXIT                    {exit 1}
+| LOAD  FILE  {$2}

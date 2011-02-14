@@ -120,7 +120,7 @@ let save_state form tp pos bind suc fail bck_clauses =
   print_formType tp; print_newline ();
   (*print_hashtbl !context;*)
   Stack.push st !states;
-  print_stack !states
+  (*print_stack !states*)
 ;;
 
 let reset dt = match dt with
@@ -561,9 +561,7 @@ and restore_atom n = let s = Stack.length !states in
   let STATE(dt, _, _, _, bl, _, sc, fl,bck) = Stack.top !states in
   reset dt;
   restore_state bl;
-  print_stack !states;
-  (*print_hashtbl !context;*)
+  (*print_stack !states;*)
+  print_hashtbl !context;
   back_chain bck sc fl
 ;;
-
-

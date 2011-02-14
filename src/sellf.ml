@@ -41,9 +41,78 @@ let position lexbuf =
   Term.print_term tn; print_newline ();
   Term.print_term (Norm.hnorm t4)*)
 
+let rec start () = 
+    print_string ":> ";
+    let command = read_line() in
+    try 
+      let lexbuf_top = Lexing.from_string command in 
+      let action = Parser.top Lexer_top.token lexbuf_top in 
+      match action with
+      | "help" -> start ()
+      | "verbose-on" -> print_endline "Verbose is set to on."; start ()
+      | "verbose-off" -> print_endline "Verbose is set to off. (Not yet implemented.)"; start ()
+      | file_name -> 
+        begin
+          print_endline ("Loading file"^file_name);
+          let file_sig = open_in (file_name^".sig") in
+          let lexbuf = Lexing.from_channel file_sig in
+          begin
+            try 
+              while true do
+                Parser.types Lexer.token lexbuf
+              done
+            with 
+              |  Lexer.Eof -> 
+                  let file_prog = open_in (file_name^".pl") in 
+                  let lexbuf = Lexing.from_channel file_prog in
+                    begin
+                    try
+                      while true do
+                        Parser.clause Lexer.token lexbuf
+                      done  
+                    with 
+                      |  Lexer.Eof -> solve_query ()
+                      |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file.%s.\n%!" (position lexbuf); start ()
+                      |  Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
+                    end
+              |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file. %s.\n%!" (position lexbuf); start ()
+              |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); start ()
+              |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
+            end
+        end
+    with
+    |  Parsing.Parse_error ->  print_endline "Invalid command. For more information type #help."; start  ()
+and
+solve_query () = 
+    print_string "?> ";
+    let query_string = read_line() in
+    let query = Lexing.from_string query_string in
+      begin
+      try 
+        Parser.goal Lexer.token query;
+        Interpreter.solve (fun () -> 
+          if (Interpreter.empty_nw ()) then 
+            print_string "\nYes.\n"
+          else (Structs.last_fail ())) 
+          
+          (fun () -> print_string "\nNo.\n")
+
+          (*| true -> print_string "\nYes.\n"; ()
+          | false -> print_string "\nNo.\n"; ()
+          | _ -> print_string "Ooops.\n"; ()
+        )*)
+      with
+        | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
+        | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
+      end
+
 let _ = 
-  try 
-    print_endline "Enter the name of program file (without extensions .sig nor ,pl):";
+while true do
+start ()
+done
+
+
+(*    print_endline "Enter the location of program file (without extensions .sig nor ,pl):";
     let file_name = read_line() in 
     let file_sig = open_in (file_name^".sig") in
     let lexbuf = Lexing.from_channel file_sig in
@@ -71,7 +140,7 @@ let _ =
       |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); exit 1
     end
   with 
-  |  Sys_error str -> print_string ("ERROR:"^str); print_endline ". Please double check the name of the file."; exit 0
+  |  Sys_error str -> print_string ("ERROR:"^str); print_endline ". Please double check the name of the file."; exit 0*)
 
 (*let _ =  
   try 
@@ -92,7 +161,7 @@ let _ =
   with
   |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; exit 0*)
     
-let _ = 
+(*let _ = 
   print_endline "Enter the query:";
   let query = Lexing.from_channel stdin in
   begin
@@ -112,7 +181,7 @@ let _ =
   with
     | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); exit 1
     | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; exit 1
-  end
+  end*)
 
     (*let lexbuf = Lexing.from_channel stdin in
       while true do
