@@ -2,6 +2,9 @@
 
 open Term
 
+(* Verbose on/off *)
+let verbose = ref false ;;
+
 (* Integer that indicates the number of the branch (used only during tensor resolution) *)
 let branch = ref 0 ;;
 
@@ -103,6 +106,12 @@ Hashtbl.add !context "$j" [] ;;
 Hashtbl.add !context "$k" [] ;;
 Hashtbl.add !context "$l" [] ;;
 *)
+
+(* Returns the type of a subexponential *)
+let type_of s = try 
+  Hashtbl.find subexTpTbl s
+  with Not_found -> failwith ("[ERROR] Subexponential "^s^" has no type defined.")
+;;
 
 let rec get_pred form = match form with
   | ABS(s, i, t) -> get_pred t

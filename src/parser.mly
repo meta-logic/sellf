@@ -388,11 +388,12 @@ intBody:
 * ; */
 
 top: 
-| HELP    {print_endline "There are the following commands available:";
-                print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
-                print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program.";
-                print_endline "#exit command terminates the program.";
-                print_endline "#help displays this message;"; "help"}
+| HELP    { print_endline "There are the following commands available:\n";
+            print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
+            print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program. The default value is 'off'.";
+            print_endline "#exit command terminates the program.";
+            print_endline "#help displays this message;"; "help"
+          }
 | VERBOSE EQ ON {"verbose-on"}
 | VERBOSE EQ OFF {"verbose-off"}
 | EXIT                    {print_endline "Thank you for using SELLF."; exit 1}

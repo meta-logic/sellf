@@ -24,7 +24,8 @@ let rec solve_exp e = match e with
   | bla -> print_string "[ERROR] Unexpected term in a comparison: "; print_term bla; print_newline (); 0
 ;;
 
-let unbounded s = let subexps = keys subexTpTbl in
+(* Gets all te unbounded subexponentials and make them greater then s (put in s' order list) *)
+let lt_unbounded s = let subexps = keys subexTpTbl in
   let rec get_unbounded lst = match lst with
     | [] -> ()
     | u :: t -> (match Hashtbl.find subexTpTbl s with
@@ -35,11 +36,10 @@ let unbounded s = let subexps = keys subexTpTbl in
 ;;
 
 (* Creating a new subexponential *)
-(* TODO: s -> holds all unbounded subexponentials *)
 let new_subexp s = 
   try match Hashtbl.find subexTpTbl s with
   | _ -> ()
-  with Not_found -> Hashtbl.add subexTpTbl s (AFF); Hashtbl.add !context s []; unbounded s ;;
+  with Not_found -> Hashtbl.add subexTpTbl s (AFF); Hashtbl.add !context s []; lt_unbounded s ;;
 
 (* Verifying if a subexponential is empty *)
 let empty s = List.length (Hashtbl.find !context s) == 0 ;;
@@ -63,14 +63,17 @@ let rec cb s idxs = match idxs with
   | i::t  -> 
     if i == "$gamma" then cb s t
     else
-      try match Hashtbl.find subexTpTbl i with
+      match type_of i with
         | UNB | AFF -> cb s t (* This can suffer weakening, go on... *)
         | REL | LIN -> (try match Hashtbl.find !context i with
           | [] -> cb s t
-          | _ -> if i = s || (greater_than i s) then cb s t (* This subexp can have formulas in it. *)
-                 else (print_string ("Failed in bang rule: "^i^"  "^s^"\n"); false)
-          with Not_found -> cb s t ) (* This means that this subexp is empty *)
-      with Not_found -> print_string ("[ERROR] Subexponential "^i^" has no type defined."); false
+          | _ -> 
+            if i = s || (greater_than i s) then cb s t (* This subexp can have formulas in it. *)
+            else begin
+		      (if !verbose then print_string ("Failed in bang rule with subexponential: "^s^"\n")); 
+		      false
+            end
+	      with Not_found -> cb s t ) (* This means that this subexp is empty *)         
 ;;
 
 let condition_bang s = let idxs = keys !context in cb s idxs;;
@@ -79,19 +82,21 @@ let condition_bang s = let idxs = keys !context in cb s idxs;;
 let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
 
 (* Operation k <l for K context *)
-let k_less_than s = Hashtbl.iter (fun idx forms -> if idx != "$gamma" && not (idx = s) && not (greater_than idx s) then begin print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); remove_all idx end) !context;;
+let k_less_than s = Hashtbl.iter (fun idx forms -> 
+  if idx != "$gamma" && not (idx = s) && not (greater_than idx s) then begin 
+    (if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n")); 
+    remove_all idx 
+  end) 
+  !context;;
 
 (* Checks whether or not a subexponential can suffer weakening *)
-let weak i = try match Hashtbl.find subexTpTbl i with
+let weak i = match type_of i with
   | UNB | AFF -> true
   | REL | LIN -> false
-  with Not_found -> print_string ("[ERROR] Subexponential "^i^" has no type defined."); false
+;;
 
 (* Returns a list with all the formulas that cannot suffer weakening *)
-(* FIXME: this dummy parameter was used so the method was called... *)
-let weakenable dummy = Hashtbl.fold (fun s forms l -> 
-    (*print_string s;
-    print_list_terms forms;*)
+let not_weakenable () = Hashtbl.fold (fun s forms l -> 
     if not (weak s) then 
     begin
       forms@l
@@ -99,12 +104,11 @@ let weakenable dummy = Hashtbl.fold (fun s forms l ->
     else l) !context [] ;;
 
 (* Checks whether K context is empty on the subexponentials that cannot suffer weakening *)
-(* FIXME: this dummy parameter was used so the method was called... *)
-let empty_nw dummy =
-  match (List.length (weakenable ())) with
-    | 0 -> print_string "Weakenable subexponential"; true
-    | n -> print_string "Non-weakenable context is not empty.\n"; 
-    if !is_top then (print_string "However, the proof has a top.\n"; true) else false
+(* TODO: fix the TOP thing. *)
+let empty_nw () =
+  match (List.length (not_weakenable ())) with
+    | 0 -> if !verbose then print_string "Non-weakenable set is empty"; true
+    | n -> if !verbose && !is_top then (print_string "However, the proof has a top.\n"; true) else false
 ;;
 
 (* Saves the state for backtracking later (called whenever a non-deterministic
@@ -113,14 +117,14 @@ let save_state form tp pos bind suc fail bck_clauses =
   let ctx_cp = Hashtbl.copy !context in
   let cls_cp = Hashtbl.copy !clausesTbl in
   let dt = DATA(!goals, !positives, !atoms, ctx_cp, cls_cp, !is_top) in
-  (*let st = STATE(dt, form, tp, pos, !bind_len, !branch, suc, fail, bck_clauses) in*)
   let st = STATE(dt, form, tp, pos, bind, !branch, suc, fail, bck_clauses) in
   nstates := !nstates + 1;
-  print_string "+++++ Saving formula "; print_term form; print_string " on state stack as ";
-  print_formType tp; print_newline ();
-  (*print_hashtbl !context;*)
+  if !verbose then begin
+    print_string "+++++ Saving formula "; 
+    print_term form; print_string " on state stack as ";
+    print_formType tp; print_newline ();
+  end;
   Stack.push st !states;
-  (*print_stack !states*)
 ;;
 
 let reset dt = match dt with
@@ -133,32 +137,34 @@ let reset dt = match dt with
     is_top := isT
 ;;
 
-(* Functions to substitute a variable in a formula *)
+(* Function to substitute a variable in a formula *)
 let rec apply_ptr f = match f with
   | ABS(s, i, t) ->
       varid := !varid + 1;
       let newVar = V {str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0} in
       let ptr = PTR {contents = newVar} in
-      (*print_string "\nApplying "; print_term ptr; print_string " to "; print_term (ABS(s, i, t)); print_newline ();*)
       let newf = Norm.hnorm (APP(ABS(s, i, t), [ptr])) in
       apply_ptr newf
   | x -> x
 
-(* [END] Functions to transform variables to pointers in a formula *)
-
 let unifies f1 f2 =
   let fp1 = apply_ptr f1 in
   let fp2 = apply_ptr f2 in
-    print_string "****** Unifying (head of first with second): \n"; print_term fp1; print_newline (); print_term fp2;
-    print_newline ();
+    if !verbose then begin
+      print_string "****** Unifying (head of first with second): \n"; 
+      print_term fp1; print_newline (); print_term fp2;
+      print_newline ();
+    end;
     match fp1, fp2 with
     | LOLLI(CONS(s), head, body), (PRED (str2, terms2)) -> 
       begin match head with
       | (PRED(str1, terms1)) ->
         begin try match unify terms1 terms2 with
           | () ->
-            print_string "******* After unification: \n"; print_term fp1; print_newline ();
-            print_term fp2; print_newline ();
+	    if !verbose then begin
+              print_string "******* After unification: \n"; print_term fp1; print_newline ();
+              print_term fp2; print_newline ()
+	    end;
             (fp1, fp2)
           with _ ->  failwith "Unification not possible."
         end
@@ -182,23 +188,29 @@ let solve_cmp c e1 e2 =
 
 (*Solves assignment *)
 let solve_asgn e1 e2 = 
-  print_string "****** Unifying (head of first with second): \n"; print_term e1; print_newline (); print_term e2;
-  print_newline ();
+  if !verbose then begin
+    print_string "****** Unifying (head of first with second): \n"; 
+    print_term e1; print_newline (); print_term e2;
+    print_newline ()
+  end;
   let n2 = solve_exp e2 in
   try 
     unify e1 (INT(n2)); 
-    print_string "******* After unification: \n"; print_term e1; print_newline ();
-    print_int n2; print_newline ();
+    if !verbose then begin
+      print_string "******* After unification: \n"; 
+      print_term e1; print_newline (); print_int n2; 
+      print_newline ()
+    end;
     true
   with 
-  | _ -> print_endline "Failed to assign a variable to an int in an assigment."; false;;
+  | _ -> if !verbose then print_endline "Failed to assign a variable to an int in an assigment."; false;;
 
 (* Solves a LL formula *)
 
-(* Classic version *) (* Change this. solve is no longer returning true or false *)
+(* Classic version *)
 let rec solve suc fail = solve_neg suc fail
 
-and solve_neg suc fail = (*match !goals with*)
+and solve_neg suc fail =
 try
 let form = List.hd !goals in
 let t = List.tl !goals in
@@ -251,9 +263,9 @@ match Term.observe form with
       | _ -> failwith "Lolli head error"
     )
   )
+
   (* Solves f1 and f2 with the same context *)
   | WITH (f1, f2) -> (
-    (*let st = !nstates in*)
     let orig_context = !context in
     let orig_states = !states in
     let orig_clauses = !clausesTbl in
@@ -264,24 +276,11 @@ match Term.observe form with
       clausesTbl := orig_clauses;
       add_goals f2; 
       solve_neg suc fail) fail
-    (*let orig_context = !context in
-    let orig_states = !states in
-    let orig_clauses = !clausesTbl in
-    goals := (f1 :: t);
-    if solve_neg () then 
-    (
-      context := orig_context;
-      states := orig_states;
-      clausesTbl := orig_clauses;
-      goals := (f2 :: t);
-      solve_neg ()
-    )
-    else false*)
   )
+
   | FORALL (s, i, f) ->
       varid := !varid + 1;
       let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
-      (*let newf = subst_var new_var f in*)
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
       goals := newf :: t;
       solve_neg suc fail
@@ -325,13 +324,12 @@ match Term.observe form with
 
   | h -> print_term h; failwith " Solving not implemented for this case."
 
-  (* Empty list, solve the positive formulas now *)
-    
+  (* Empty list, solve the positive formulas now *)    
   with 
     | Failure "hd" -> solve_pos suc fail
 
 
-and solve_pos suc fail = (*match !positives with*)
+and solve_pos suc fail =
 try
 let form = List.hd !positives in
 let t = List.tl !positives in
@@ -346,7 +344,7 @@ match Term.observe form with
         add_goals (LOLLI (sub, f1, f2)); 
         solve_neg (fun () -> solve_pos suc fail) fail (* G: I think I can replace this with 'solve suc fail' *)
       | _ -> failwith "Unitialized subexponential while solving postive formulas."
-   end
+    end
 
   | WITH (f1, f2) -> 
     add_goals (WITH (f1, f2));
@@ -371,22 +369,20 @@ match Term.observe form with
     positives := t;
     solve (fun () -> add_goals f2; 
                      let st = !nstates in 
-                     solve suc (fun () -> print_string "Linha 340\n"; restore_atom st)) fail
+                     solve suc (fun () -> restore_atom st)) fail
 
   | BANG (sub, f) -> 
-    begin (*print_string "Context before applying bang rule: \n"; print_hashtbl !context; print_newline ();*)
+    begin
       match Term.observe sub with
       | CONS(s) -> 
-          if condition_bang s then begin
-          (*print_string "Context before k_less_than: \n"; print_hashtbl !context; print_newline ();*)
+        if condition_bang s then begin
           k_less_than s; 
-          (*print_string "Context after k_less_than: \n"; print_hashtbl !context; print_newline ();*)
           positives := t;
           add_goals f;
           solve suc fail
           (* I will not save the state here. If f is proved, I would have to make
-            positives := []; save_state ...; solve_pos ()
-            which would yield true anyway
+             positives := []; save_state ...; solve_pos ()
+             which would yield true anyway
           *)
         end
         else fail ()
@@ -396,9 +392,9 @@ match Term.observe form with
   | HBANG (sub, f) -> begin
     match Term.observe sub with
       | CONS (s) -> ( try match Hashtbl.find !context s with
-        | [] -> print_string "Solved hbang.\n"; positives := t; add_goals f; solve suc fail 
-        | _ -> print_string "Failed in hbang rule\n"; fail ()
-        with Not_found -> print_string "Solved hbang.\n"; positives := t; add_goals f; solve suc fail
+        | [] -> if !verbose then print_string ("Solved hbang "^s^".\n"); positives := t; add_goals f; solve suc fail 
+        | _ -> if !verbose then print_string ("Failed in hbang rule "^s^".\n"); fail ()
+        with Not_found -> if !verbose then print_string ("Solved hbang "^s^".\n"); positives := t; add_goals f; solve suc fail
       )
       | _ -> failwith "Not expected subexponential while solving positive formulas."
     end
@@ -423,19 +419,19 @@ match Term.observe form with
     else fail ()
 
   | ASGN (t1, t2) -> 
-      if (solve_asgn t1 t2) then begin
-        positives := t;
-        if (List.length !positives) != 0 then
-          save_state (List.hd !positives) POS 0 !bind_len suc fail [];
-        solve_pos suc fail
-      end    
-      else fail ()
+    if (solve_asgn t1 t2) then begin
+      positives := t;
+      if (List.length !positives) != 0 then
+        save_state (List.hd !positives) POS 0 !bind_len suc fail [];
+      solve_pos suc fail
+    end    
+    else fail ()
 
   | PRINT (t1) -> print_endline ""; print_term t1; print_endline "";
-       positives := t;
-        if (List.length !positives) != 0 then
-          save_state (List.hd !positives) POS 0 !bind_len suc fail [];
-        solve_pos suc fail
+     positives := t;
+     if (List.length !positives) != 0 then
+       save_state (List.hd !positives) POS 0 !bind_len suc fail [];
+     solve_pos suc fail
 
   (* Atoms *)
   | PRED (str, terms) -> add_atm (PRED (str, terms)); positives := t; solve_pos suc fail
@@ -454,13 +450,11 @@ match Term.observe form with
   | h -> print_term h; failwith " Solving not implemented for this case."
 
   (* Empty list, solve the atoms now *)
-
-  (*| [] -> true*)
   with 
     | Failure "hd" -> solve_atm suc fail
 
+
 and solve_atm_aux suc fail forms =
-(*try*) (*No need for the try anymore. We are sure that there is a goal.*)
 let form = List.hd !atoms in
 let t = List.tl !atoms in
 match Term.observe form with
@@ -469,35 +463,39 @@ match Term.observe form with
       | lolli :: t1 -> (
         try match unifies lolli (PRED(str, terms)) with
           | (LOLLI(CONS(s), fp1, fp2), f_ptr) -> (
-            print_endline "Creating a new entry in the stack without deleting.";
-            (try match Hashtbl.find subexTpTbl s with
+            if !verbose then print_endline "Creating a new entry in the stack without deleting.";
+            (match type_of s with
               | LIN | AFF -> ( rmv_ctx lolli s; rmv_cls lolli )
               | REL | UNB -> () 
-              with Not_found -> print_string ("This subexponential has no type: "^s); print_newline (); fail ()
             );
             let st = !nstates in
             atoms := t;
             add_goals fp2;
-              (*solve suc (fun () -> print_string "Fail 435\n"; restore st)*)
             solve suc fail
           )
           | (a, b) -> print_term a; print_string " and "; print_term b; print_newline ();
             failwith "Unexpected return from unifies"
           with 
-            | Failure "Unification not possible." ->  fail ()
-            | Failure "Head of a clause not a predicate." -> fail ()
-            | Failure "Formulas not compatible (should be lolli and pred)." -> fail ()
+            | Failure "Unification not possible." -> if !verbose then print_string "Unification failure.\n"; fail ()
+	    (* G: these two next failures should be treated as a program failure, not the proof. *)
+            (*| Failure "Head of a clause not a predicate." -> fail ()
+            | Failure "Formulas not compatible (should be lolli and pred)." -> fail ()*)
             | Failure str -> failwith str
           )
-          (*| _ :: t -> failwith "Not a lolli in clauses' table"*)
-      | [] -> print_string ("No clauses for this atom: "^str^".\n"); print_string "Backtracking...\n"; fail ()
-        (*in attempt clauses (PRED (str, terms))*)
-      with Not_found -> print_string "[ERROR] Atom not in table: "; print_string str; fail ()
+      | [] -> 
+        if !verbose then begin
+          print_string ("No clauses for this atom: "^str^".\n"); 
+	  print_string "Backtracking...\n"
+	end;
+	fail ()
+      with Not_found -> 
+        if !verbose then begin
+          print_string "[ERROR] Atom not in table: "; 
+	  print_string str
+	end;
+	fail ()
   )
   | bla -> failwith "\nNot an atom in atoms' list"
-(*  with 
-    | Failure "hd" -> print_string "Strange failure"; print_endline ""; suc ()*)
-
 
 
 and solve_atm suc fail = (*trying to prove an atom and needing to initialize the stack*)
@@ -514,15 +512,24 @@ match Term.observe form with
           atoms := form :: t;
           save_state (PRED(str, terms)) BODY 0 bind_b4 suc fail t1;
           let st = !nstates in
-          solve_atm_aux suc (fun () -> print_endline "Fail: 435"; restore_atom st) (lolli :: t1)
-        | [] -> print_string ("No clauses for this atom: "^str^".\n"); print_string "Backtracking...\n"; fail ()
+          solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
+        | [] -> 
+	  if !verbose then begin
+	    print_string ("No clauses for this atom: "^str^".\n"); 
+	    print_string "Backtracking...\n"
+	  end;
+	  fail ()
       end
-        (*in attempt clauses (PRED (str, terms))*)
-       with Not_found -> print_string "[ERROR] Atom not in table: "; print_string str; fail ()
+       with Not_found -> 
+         if !verbose then begin
+          print_string "[ERROR] Atom not in table: "; 
+	  print_string str
+	end;
+	fail ()
     )
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
-    | Failure "hd" -> (*print_string "Strange failure"; print_endline "";*) suc ()
+    | Failure "hd" -> suc ()
 
 and back_chain forms suc fail = (*already initialized the stack, but now we need to backtrack using another clause in the context.*)
 try
@@ -541,18 +548,30 @@ match Term.observe form with
           Stack.pop !states; nstates := !nstates - 1; 
           save_state (PRED(str, terms)) BODY 0 bind_b4 suc fail t1;
           let st = !nstates in
-          solve_atm_aux suc (fun () -> print_endline "Fail: 435"; restore_atom st) forms
-        | [] -> print_string ("No clauses for this atom: "^str^".\n"); print_string "Backtracking...\n"; fail ()
+          solve_atm_aux suc (fun () -> restore_atom st) forms
+        | [] -> 
+	  if !verbose then begin
+	    print_string ("No clauses for this atom: "^str^".\n"); 
+	    print_string "Backtracking...\n"
+	  end; 
+	  fail ()
       end
-        (*in attempt clauses (PRED (str, terms))*)
-       with Not_found -> print_string "[ERROR] Atom not in table: "; print_string str; fail ()
+      with Not_found -> 
+        if !verbose then begin
+         print_string "[ERROR] Atom not in table: "; 
+	 print_string str
+        end;
+        fail ()
     )
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
-    | Failure "hd" -> (*print_string "Strange failure"; print_endline "";*) suc ()
+    | Failure "hd" -> suc ()
 
 and restore_atom n = let s = Stack.length !states in
-  print_string "Restoring states: "; print_int n; print_newline ();
+  if !verbose then begin
+    print_string "Restoring states: "; 
+    print_int n; print_newline ()
+  end;
   assert (n <= s);
   for i = 1 to s-n do
     let STATE(dt, _, _, _, bl, _, sc, fl,_) = Stack.pop !states in
@@ -561,7 +580,5 @@ and restore_atom n = let s = Stack.length !states in
   let STATE(dt, _, _, _, bl, _, sc, fl,bck) = Stack.top !states in
   reset dt;
   restore_state bl;
-  (*print_stack !states;*)
-  print_hashtbl !context;
   back_chain bck sc fl
 ;;
