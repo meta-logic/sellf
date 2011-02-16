@@ -163,7 +163,7 @@ let rec applySub sub typ = match typ with
 				  | NONE -> typ
 				  | SOME (t) -> (match sub t with
 						| NONE -> t
-						| _ -> applySub sub t))
+						| SOME(t2) -> t2))
  
 (*Function that typechecks a term. It takes a term, possibly with variables, a type, a subsitution for the 
 type variables, an environment that given a term variable returns its type, and a number varC with the 
@@ -389,7 +389,7 @@ let rec typeCheck clause =
     end
 	in
 	match clause with
-	| CLS (_, head, body) -> let (sub, env2) = tCheckBody head envInit
+	| CLS (_, head, body) -> print_string "Cheguei"; let (sub, env2) = tCheckBody head envInit
 				 in let envH = grEnvImgProp sub env2 head 
 				 in  tCheckBody body envH
   | _ -> print_term clause; failwith " Expected a clause while typechecking."
