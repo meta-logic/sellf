@@ -7,10 +7,11 @@ subexprel srght <= un.
 
 context un.
 
-right F :- left F.
 
-left (imp F1 F2) :- (right F1 [srght]-o solve), (left F2 [slft]-o solve).
-right (imp F1 F2) :- left F1 [slft]-o (right F2 [srght]-o solve).
+solve :- rght F,  lft F.
 
-left (and F1 F2) :-  left F1 [slft]-o (left F2 [slft]-o solve).
-right (and F1 F2) :- (right F1 [srght]-o solve), (right F2 [srght]-o solve).
+solve :- lft (imp F1 F2), (rght F1 [srght]-o solve), (lft F2 [slft]-o solve).
+solve :- rght (imp F1 F2), [srght]hbang(lft F1 [slft]-o (rght F2 [srght]-o solve)).
+
+solve :- lft (and F1 F2),  lft F1 [slft]-o (lft F2 [slft]-o solve).
+solve :- rght (and F1 F2),  (rght F1 [srght]-o solve), (rght F2 [srght]-o solve).
