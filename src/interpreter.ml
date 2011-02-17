@@ -20,7 +20,10 @@ let rec solve_exp e = match e with
   | DIV (x, y) -> (solve_exp x) / (solve_exp y)
   | PTR {contents = T t} -> solve_exp t
   | PTR {contents = V t} when t.tag = Term.LOG -> 
-      print_string "ERROR: Cannot handle comparisons with logical variables.";  print_term e; print_newline (); 0
+      print_string "ERROR: Cannot handle comparisons with logical variables.";  
+      print_term e; 
+      print_newline (); 
+      0
   | bla -> print_string "[ERROR] Unexpected term in a comparison: "; print_term bla; print_newline (); 0
 ;;
 
@@ -64,13 +67,13 @@ let rec cb s idxs = match idxs with
     if i == "$gamma" then cb s t
     else
       match type_of i with
-        | UNB | AFF -> cb s t (* This can suffer weakening, go on... *)
-        | REL | LIN -> (try match Hashtbl.find !context i with
+        | UNB | AFF ->  cb s t (* This can suffer weakening, go on... *)
+        | REL | LIN ->  (try match Hashtbl.find !context i with
           | [] -> cb s t
           | _ -> 
             if i = s || (greater_than i s) then cb s t (* This subexp can have formulas in it. *)
             else begin
-		      (if !verbose then print_string ("Failed in bang rule with subexponential: "^s^"\n")); 
+		      if !verbose then print_string ("Failed in bang rule with subexponential: "^s^"\n"); 
 		      false
             end
 	      with Not_found -> cb s t ) (* This means that this subexp is empty *)         
@@ -84,7 +87,7 @@ let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
 (* Operation k <l for K context *)
 let k_less_than s = Hashtbl.iter (fun idx forms -> 
   if idx != "$gamma" && not (idx = s) && not (greater_than idx s) then begin 
-    (if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n")); 
+    if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
     remove_all idx 
   end) 
   !context;;
@@ -96,7 +99,8 @@ let weak i = match type_of i with
 ;;
 
 (* Returns a list with all the formulas that cannot suffer weakening *)
-let not_weakenable () = Hashtbl.fold (fun s forms l -> 
+(* TODO: remove dummy parameter *)
+let not_weakenable dummy = Hashtbl.fold (fun s forms l -> 
     if not (weak s) then 
     begin
       forms@l
@@ -104,25 +108,29 @@ let not_weakenable () = Hashtbl.fold (fun s forms l ->
     else l) !context [] ;;
 
 (* Checks whether K context is empty on the subexponentials that cannot suffer weakening *)
-(* TODO: fix the TOP thing. *)
-let empty_nw () =
+(* TODO: remove the dummy parameter and fix the TOP thing. *)
+let empty_nw dummy =
   match (List.length (not_weakenable ())) with
     | 0 -> if !verbose then print_string "Non-weakenable set is empty"; true
-    | n -> if !verbose && !is_top then (print_string "However, the proof has a top.\n"; true) else false
+    | n -> if !is_top then begin
+        if !verbose then (print_string "However, the proof has a top.\n");
+        true
+      end
+      else false
 ;;
 
 (* Saves the state for backtracking later (called whenever a non-deterministic
  * choice is made, i.e., when a positive formula or atom is focused on) *)
-let save_state form tp pos bind suc fail bck_clauses =  
+let save_state form bind suc fail bck_clauses phs =  
   let ctx_cp = Hashtbl.copy !context in
   let cls_cp = Hashtbl.copy !clausesTbl in
   let dt = DATA(!goals, !positives, !atoms, ctx_cp, cls_cp, !is_top) in
-  let st = STATE(dt, form, tp, pos, bind, !branch, suc, fail, bck_clauses) in
+  let st = STATE(dt, form, bind, suc, fail, bck_clauses, phs) in
   nstates := !nstates + 1;
   if !verbose then begin
     print_string "+++++ Saving formula "; 
-    print_term form; print_string " on state stack as ";
-    print_formType tp; print_newline ();
+    print_term form; print_string " on state stack in phase ";
+    print_phase phs; print_newline ();
   end;
   Stack.push st !states;
 ;;
@@ -392,9 +400,15 @@ match Term.observe form with
   | HBANG (sub, f) -> begin
     match Term.observe sub with
       | CONS (s) -> ( try match Hashtbl.find !context s with
-        | [] -> if !verbose then print_string ("Solved hbang "^s^".\n"); positives := t; add_goals f; solve suc fail 
-        | _ -> if !verbose then print_string ("Failed in hbang rule "^s^".\n"); fail ()
-        with Not_found -> if !verbose then print_string ("Solved hbang "^s^".\n"); positives := t; add_goals f; solve suc fail
+        | [] -> 
+          if !verbose then print_string ("Solved hbang "^s^".\n"); 
+          positives := t; add_goals f; solve suc fail 
+        | _ -> 
+          if !verbose then print_string ("Failed in hbang rule "^s^".\n"); 
+          fail ()
+        with Not_found -> 
+          if !verbose then print_string ("Solved hbang "^s^".\n"); 
+          positives := t; add_goals f; solve suc fail
       )
       | _ -> failwith "Not expected subexponential while solving positive formulas."
     end
@@ -409,11 +423,13 @@ match Term.observe form with
     end    
     else fail ()*)
 
+  (* G: I think we don't have to save states in these cases... Why would we? Maybe if we were dealing with classical logic. *)
+
   | COMP (ct, t1, t2) -> 
     if (solve_cmp ct t1 t2) then begin
       positives := t;
       if (List.length !positives) != 0 then
-        save_state (List.hd !positives) POS 0 !bind_len suc fail [];
+        save_state (COMP(ct, t1, t2)) !bind_len suc fail [] SYNC;
       solve_pos suc fail
     end    
     else fail ()
@@ -422,7 +438,7 @@ match Term.observe form with
     if (solve_asgn t1 t2) then begin
       positives := t;
       if (List.length !positives) != 0 then
-        save_state (List.hd !positives) POS 0 !bind_len suc fail [];
+        save_state (ASGN (t1, t2)) !bind_len suc fail [] SYNC;
       solve_pos suc fail
     end    
     else fail ()
@@ -430,7 +446,7 @@ match Term.observe form with
   | PRINT (t1) -> print_endline ""; print_term t1; print_endline "";
      positives := t;
      if (List.length !positives) != 0 then
-       save_state (List.hd !positives) POS 0 !bind_len suc fail [];
+       save_state (PRINT (t1)) !bind_len suc fail [] SYNC;
      solve_pos suc fail
 
   (* Atoms *)
@@ -463,12 +479,12 @@ match Term.observe form with
       | lolli :: t1 -> (
         try match unifies lolli (PRED(str, terms)) with
           | (LOLLI(CONS(s), fp1, fp2), f_ptr) -> (
+	    (* G: Where is a new entry in the stack created here?? *)
             if !verbose then print_endline "Creating a new entry in the stack without deleting.";
             (match type_of s with
               | LIN | AFF -> ( rmv_ctx lolli s; rmv_cls lolli )
-              | REL | UNB -> () 
+              | REL | UNB ->  () 
             );
-            let st = !nstates in
             atoms := t;
             add_goals fp2;
             solve suc fail
@@ -477,7 +493,7 @@ match Term.observe form with
             failwith "Unexpected return from unifies"
           with 
             | Failure "Unification not possible." -> if !verbose then print_string "Unification failure.\n"; fail ()
-	    (* G: these two next failures should be treated as a program failure, not the proof. *)
+	    (* G: I think these two next failures should be treated as a program failure, not the proof. *)
             (*| Failure "Head of a clause not a predicate." -> fail ()
             | Failure "Formulas not compatible (should be lolli and pred)." -> fail ()*)
             | Failure str -> failwith str
@@ -485,15 +501,15 @@ match Term.observe form with
       | [] -> 
         if !verbose then begin
           print_string ("No clauses for this atom: "^str^".\n"); 
-	  print_string "Backtracking...\n"
-	end;
-	fail ()
+	      print_string "Backtracking...\n"
+	    end;
+	    fail ()
       with Not_found -> 
         if !verbose then begin
           print_string "[ERROR] Atom not in table: "; 
-	  print_string str
-	end;
-	fail ()
+	      print_string str
+	    end;
+	    fail ()
   )
   | bla -> failwith "\nNot an atom in atoms' list"
 
@@ -510,22 +526,22 @@ match Term.observe form with
         | lolli :: t1 -> 
           let bind_b4 = !bind_len in (*We need to get the binding of substitutions used until this point, not after the next unification.*)
           atoms := form :: t;
-          save_state (PRED(str, terms)) BODY 0 bind_b4 suc fail t1;
+          save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
           let st = !nstates in
           solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
         | [] -> 
-	  if !verbose then begin
-	    print_string ("No clauses for this atom: "^str^".\n"); 
-	    print_string "Backtracking...\n"
-	  end;
-	  fail ()
+	      if !verbose then begin
+	        print_string ("No clauses for this atom: "^str^".\n"); 
+	        print_string "Backtracking...\n"
+	      end;
+	      fail ()
       end
-       with Not_found -> 
-         if !verbose then begin
+      with Not_found -> 
+        if !verbose then begin
           print_string "[ERROR] Atom not in table: "; 
-	  print_string str
-	end;
-	fail ()
+	      print_string str
+	    end;
+	    fail ()
     )
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
@@ -545,21 +561,22 @@ match Term.observe form with
           atoms := form :: t;
           (*Removing the top of the stack, so that a new one is pushed 
            with a smaller list of formulas to backtrack on.*)
-          Stack.pop !states; nstates := !nstates - 1; 
-          save_state (PRED(str, terms)) BODY 0 bind_b4 suc fail t1;
+          Stack.pop !states; 
+		  nstates := !nstates - 1; 
+          save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
           let st = !nstates in
           solve_atm_aux suc (fun () -> restore_atom st) forms
         | [] -> 
-	  if !verbose then begin
-	    print_string ("No clauses for this atom: "^str^".\n"); 
-	    print_string "Backtracking...\n"
-	  end; 
-	  fail ()
+	      if !verbose then begin
+	        print_string ("No clauses for this atom: "^str^".\n"); 
+	        print_string "Backtracking...\n"
+	      end; 
+	      fail ()
       end
       with Not_found -> 
         if !verbose then begin
-         print_string "[ERROR] Atom not in table: "; 
-	 print_string str
+          print_string "[ERROR] Atom not in table: "; 
+	      print_string str
         end;
         fail ()
     )
@@ -574,11 +591,12 @@ and restore_atom n = let s = Stack.length !states in
   end;
   assert (n <= s);
   for i = 1 to s-n do
-    let STATE(dt, _, _, _, bl, _, sc, fl,_) = Stack.pop !states in
+    let STATE(_, _, _, _, _, _, _) = Stack.pop !states in
       nstates := !nstates - 1
   done;
-  let STATE(dt, _, _, _, bl, _, sc, fl,bck) = Stack.top !states in
+  let STATE(dt, _, bl, sc, fl, bck, _) = Stack.top !states in
   reset dt;
+  if !verbose then (print_string ("Restoring binding to "); print_int bl; print_string "\n");
   restore_state bl;
   back_chain bck sc fl
 ;;

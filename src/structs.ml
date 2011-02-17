@@ -5,9 +5,6 @@ open Term
 (* Verbose on/off *)
 let verbose = ref false ;;
 
-(* Integer that indicates the number of the branch (used only during tensor resolution) *)
-let branch = ref 0 ;;
-
 (* Integer to indicate how many tensors I am solving, so that I only check for context emptyness at the end *)
 let tensor = ref 0 ;;
 
@@ -38,7 +35,7 @@ Hashtbl.add !context "$gamma" [] ;;
 let (clausesTbl : ( ( (string, terms list) Hashtbl.t) ref)) = ref (Hashtbl.create 100) ;;
 
 (* Hashtable with subexponentials' types ($gamma is the linear context and
- * $def holds the definitions) 
+ * $def holds the definitions (definitions are not being used yet)) 
  *)
 let subexTpTbl = Hashtbl.create 100 ;;
 Hashtbl.add subexTpTbl "$gamma" (LIN) ;;
@@ -48,17 +45,14 @@ Hashtbl.add subexTpTbl "$def" (UNB) ;;
 (* Each subexponential holds those which are greater than it. *)
 let (subexOrdTbl : (string, string) Hashtbl.t ) = Hashtbl.create 100 ;;
 
-type formType =
-| POS
-| ATM
-| NEG
-| BODY
+type phase = 
+| ASYN
+| SYNC
+;;
 
-let print_formType ft = match ft with
-  | POS -> print_string "POS"
-  | ATM -> print_string "ATM"
-  | NEG -> print_string "NEG"
-  | BODY -> print_string "BODY"
+let print_phase p = match p with
+  | ASYN -> print_string "asyn"
+  | SYNC -> print_string "sync"
 ;;
 
 (* goals, positives, atoms, context, clauses table *)
@@ -68,20 +62,20 @@ type data =
           ((string, terms list) Hashtbl.t) * bool
 ;;
 
-(* A state is a sequent and information on the decide rule applied:
- * rghtSide: goals, positives and atoms
- * lftSide: context
- * bdTree: formula focused on
- * formType: type of the formula
- * int: index in the list
- * int: binding stack length
- * int: branch number
-*)
+(* State:
+ * data: tables and etc.
+ * terms: formula chosen
+ * int: bind_len
+ * (unit -> unit): success function
+ * (unit -> unit): failure function
+ * terms list: list of possible bodies for an atom
+ * phase: synchronous or asynchronous
+ *)
 type state = 
-| STATE of data * terms * formType  * int * int * int * (unit -> unit) * (unit -> unit) * (terms list);;
+| STATE of data * terms * int * (unit -> unit) * (unit -> unit) * (terms list) * phase ;;
 
 let print_state s = match s with
-  | STATE(dt, form, t, i, b, br, fun1, fun2,_) -> print_string "State: "; print_term form; print_newline ()
+  | STATE(dt, form, br, fun1, fun2, l, p) -> print_string "State: "; print_term form; print_newline ()
 ;;
 
 let print_stack s = print_string "STACK\n"; Stack.iter (print_state) s; print_string "EndOfSTACK\n" ;;
@@ -160,11 +154,10 @@ let add_cls clause =
     Hashtbl.add !clausesTbl predname (clause :: []) 
 ;;
 
-(*type state = int*)
-let bind_stack = Stack.create ()
-let bind_len = ref 0
+let bind_stack = Stack.create () ;;
+let bind_len = ref 0 ;;
 
-let save_state () = !bind_len
+let save_state () = !bind_len ;;
 
 let restore_state n =
   assert (n <= !bind_len) ;
@@ -173,6 +166,7 @@ let restore_state n =
       v := contents;
   done ;
   bind_len := n
+;;
 
 type subst = (ptr*in_ptr) list
 type unsubst = subst
@@ -196,7 +190,7 @@ let bind v t =
 ;;
 
 let last_fail () = match Stack.top !states with
-  | STATE(_, _, _, _, _, _, _, f,_) -> f ()
+  | STATE(_, _, _, _, f, _, _) -> f ()
 ;;
 
 (* Removes a formula from a subexponential (only the first occurence) *)
@@ -219,6 +213,7 @@ let rmv_cls clause = match (Term.remove_abs clause) with
     | _ -> failwith "Body of a clause not a predicate."
   )
   | _ -> print_term clause; failwith "Clause is not an implication."
+;;
 
 (* Inserting a formula in Gamma (linear context) *)
 let add_lin form = add_ctx form "$gamma" ;;
@@ -235,24 +230,11 @@ let add_atm a = atoms := a :: !atoms ;;
 (* Get all the keys from a hash table, including duplicates *)
 let keys ht = Hashtbl.fold (fun key data accu -> key :: accu) ht [] ;;
 
-let print_hashtbl h = let keylst = keys h in
+let print_hashtbl h = print_string "\nHashTable:\n";
+  let keylst = keys h in
   let rec print_h lst = 
     match lst with
-      | [] -> print_string "\nEOT\n"
+      | [] -> print_string "\nendOfTable\n\n"
       | k :: t -> print_string ("["^k^"] "); print_list_terms (Hashtbl.find h k); print_newline (); print_h t
   in print_h keylst
-
-let stack_3_stacks s0 s1 s2 s3 = let aux = Stack.create () in
-  while not (Stack.is_empty s3) do 
-    Stack.push (Stack.pop s3) aux 
-  done;
-  while not (Stack.is_empty s2) do
-    Stack.push (Stack.pop s2) aux
-  done;
-  while not (Stack.is_empty s1) do
-    Stack.push (Stack.pop s1) aux 
-  done;
-  while not (Stack.is_empty aux) do 
-    Stack.push (Stack.pop aux) s0
-  done
 ;;
