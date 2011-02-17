@@ -22,4 +22,4 @@ checkPerm X Prog :- [pLoc]hbang move (Prog "No").
 move Prog :- pAux X, (perm X [pLoc]-o move Prog). 
 move Prog :- [pAuxLoc]hbang Prog.
 
-finish "Yes" :- top.
+finish "Yes" :- print "Permission granted".
