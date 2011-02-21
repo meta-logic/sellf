@@ -1,12 +1,12 @@
-% Query: (checkPerm 3 finish) should return no.
-% Query: (checkPerm 2 finish) should return yes.
+% Query: (checkPerm 3 finish) should return "Permission Denied".
+% Query: (checkPerm 2 finish) should return "Permission granted.".
 
 subexp un unb.
-subexp pLoc lin.
-subexp pAuxLoc lin.
-subexp ansLoc lin.
+subexp pLoc aff.
+subexp pAuxLoc aff.
 
 subexprel pLoc <= un.
+subexprel pAuxLoc <= un.
 
 context pLoc.
 
@@ -22,4 +22,5 @@ checkPerm X Prog :- [pLoc]hbang move (Prog "No").
 move Prog :- pAux X, (perm X [pLoc]-o move Prog). 
 move Prog :- [pAuxLoc]hbang Prog.
 
-finish "Yes" :- print "Permission granted".
+finish "Yes" :- print "Permission granted.".
+finish "No" :- print "Permission denied!".
