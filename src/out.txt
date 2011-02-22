@@ -1,0 +1,197 @@
+SELLF -- A linear logic framework for systems with locations.
+Version 0.5.
+
+:> Loading file../examples/access_control
+ New type created: perm : int -> o
+ New type created: pAux : int -> o
+ New type created: checkPerm : int -> (string -> o) -> o
+ New type created: move : o -> o
+ New type created: finish : string -> o
+(perm 1) DEF one
+ New clause: (perm 1) [pLoc] o- one
+(perm 2) DEF one
+ New clause: (perm 2) [pLoc] o- one
+(/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) DEF (perm _DB1) , (move (_DB2 Yes)) [pAuxLoc] o- (pAux _DB1)))
+ New clause: (/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) [un] o- (perm _DB1) , (move (_DB2 Yes)) [pAuxLoc] o- (pAux _DB1)))
+(/lamY1 (/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) DEF (perm _DB3) , _DB1 <> _DB3 , ((checkPerm _DB1)_DB2) [pAuxLoc] o- (pAux _DB3))))
+ New clause: (/lamY1 (/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) [un] o- (perm _DB3) , _DB1 <> _DB3 , ((checkPerm _DB1)_DB2) [pAuxLoc] o- (pAux _DB3))))
+(/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) DEF  [pLoc]^! (move (_DB2 No))))
+ New clause: (/lamProg1 (/lamX1 ((checkPerm _DB1)_DB2) [un] o-  [pLoc]^! (move (_DB2 No))))
+(/lamX1 (/lamProg1 (move _DB1) DEF (pAux _DB2) , (move _DB1) [pLoc] o- (perm _DB2)))
+ New clause: (/lamX1 (/lamProg1 (move _DB1) [un] o- (pAux _DB2) , (move _DB1) [pLoc] o- (perm _DB2)))
+(/lamProg1 (move _DB1) DEF  [pAuxLoc]^! _DB1)
+ New clause: (/lamProg1 (move _DB1) [un] o-  [pAuxLoc]^! _DB1)
+(finish Yes) DEF top
+ New clause: (finish Yes) [un] o- top
+?>  New goal: ((checkPerm 1)finish)
++++++ Saving formula ((checkPerm 1)finish) on state stack in phase asyn
+****** Unifying (head of first with second): 
+((checkPerm _LOG_2)ProgLOG_1) [un] o-  [pLoc]^! (move (ProgLOG_1 No))
+((checkPerm 1)finish)
+******* After unification: 
+((checkPerm 1)finish) [un] o-  [pLoc]^! (move (finish No))
+((checkPerm 1)finish)
+Creating a new entry in the stack without deleting.
+checking type of un
+Failed in hbang rule pLoc.
+Restoring states: 1
+Restoring binding to 0
++++++ Saving formula ((checkPerm 1)finish) on state stack in phase asyn
+****** Unifying (head of first with second): 
+((checkPerm _LOG_5)_LOG_4) [un] o- (perm YLOG_3) , _LOG_5 <> YLOG_3 , ((checkPerm _LOG_5)_LOG_4) [pAuxLoc] o- (pAux YLOG_3)
+((checkPerm 1)finish)
+******* After unification: 
+((checkPerm 1)finish) [un] o- (perm YLOG_3) , 1 <> YLOG_3 , ((checkPerm 1)finish) [pAuxLoc] o- (pAux YLOG_3)
+((checkPerm 1)finish)
+Creating a new entry in the stack without deleting.
+checking type of un
++++++ Saving formula (perm YLOG_3) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(perm 2) [pLoc] o- one
+(perm YLOG_3)
+******* After unification: 
+(perm 2) [pLoc] o- one
+(perm 2)
+Creating a new entry in the stack without deleting.
+checking type of pLoc
++++++ Saving formula ((checkPerm 1)finish) on state stack in phase asyn
+****** Unifying (head of first with second): 
+((checkPerm _LOG_7)ProgLOG_6) [un] o-  [pLoc]^! (move (ProgLOG_6 No))
+((checkPerm 1)finish)
+******* After unification: 
+((checkPerm 1)finish) [un] o-  [pLoc]^! (move (finish No))
+((checkPerm 1)finish)
+Creating a new entry in the stack without deleting.
+checking type of un
+Failed in hbang rule pLoc.
+Restoring states: 3
+Restoring binding to 3
++++++ Saving formula ((checkPerm 1)finish) on state stack in phase asyn
+****** Unifying (head of first with second): 
+((checkPerm _LOG_10)_LOG_9) [un] o- (perm YLOG_8) , _LOG_10 <> YLOG_8 , ((checkPerm _LOG_10)_LOG_9) [pAuxLoc] o- (pAux YLOG_8)
+((checkPerm 1)finish)
+******* After unification: 
+((checkPerm 1)finish) [un] o- (perm YLOG_8) , 1 <> YLOG_8 , ((checkPerm 1)finish) [pAuxLoc] o- (pAux YLOG_8)
+((checkPerm 1)finish)
+Creating a new entry in the stack without deleting.
+checking type of un
++++++ Saving formula (perm YLOG_8) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(perm 1) [pLoc] o- one
+(perm YLOG_8)
+******* After unification: 
+(perm 1) [pLoc] o- one
+(perm 1)
+Creating a new entry in the stack without deleting.
+checking type of pLoc
+Restoring states: 4
+Restoring binding to 5
+No clauses for this atom: perm.
+Backtracking...
+Restoring states: 3
+Restoring binding to 3
++++++ Saving formula ((checkPerm 1)finish) on state stack in phase asyn
+****** Unifying (head of first with second): 
+((checkPerm _LOG_12)ProgLOG_11) [un] o- (perm _LOG_12) , (move (ProgLOG_11 Yes)) [pAuxLoc] o- (pAux _LOG_12)
+((checkPerm 1)finish)
+******* After unification: 
+((checkPerm 1)finish) [un] o- (perm 1) , (move (finish Yes)) [pAuxLoc] o- (pAux 1)
+((checkPerm 1)finish)
+Creating a new entry in the stack without deleting.
+checking type of un
++++++ Saving formula (perm 1) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(perm 1) [pLoc] o- one
+(perm 1)
+******* After unification: 
+(perm 1) [pLoc] o- one
+(perm 1)
+Creating a new entry in the stack without deleting.
+checking type of pLoc
++++++ Saving formula (move (finish Yes)) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(move ProgLOG_13) [un] o-  [pAuxLoc]^! ProgLOG_13
+(move (finish Yes))
+******* After unification: 
+(move (finish Yes)) [un] o-  [pAuxLoc]^! (finish Yes)
+(move (finish Yes))
+Creating a new entry in the stack without deleting.
+checking type of un
+Failed in hbang rule pAuxLoc.
+Restoring states: 5
+Restoring binding to 5
++++++ Saving formula (move (finish Yes)) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(move _LOG_15) [un] o- (pAux XLOG_14) , (move _LOG_15) [pLoc] o- (perm XLOG_14)
+(move (finish Yes))
+******* After unification: 
+(move (finish Yes)) [un] o- (pAux XLOG_14) , (move (finish Yes)) [pLoc] o- (perm XLOG_14)
+(move (finish Yes))
+Creating a new entry in the stack without deleting.
+checking type of un
++++++ Saving formula (pAux XLOG_14) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(pAux 1) [pAuxLoc] o- one
+(pAux XLOG_14)
+******* After unification: 
+(pAux 1) [pAuxLoc] o- one
+(pAux 1)
+Creating a new entry in the stack without deleting.
+checking type of pAuxLoc
++++++ Saving formula (move (finish Yes)) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(move ProgLOG_16) [un] o-  [pAuxLoc]^! ProgLOG_16
+(move (finish Yes))
+******* After unification: 
+(move (finish Yes)) [un] o-  [pAuxLoc]^! (finish Yes)
+(move (finish Yes))
+Creating a new entry in the stack without deleting.
+checking type of un
+Failed in hbang rule pAuxLoc.
+Restoring states: 7
+Restoring binding to 7
++++++ Saving formula (move (finish Yes)) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(move _LOG_18) [un] o- (pAux XLOG_17) , (move _LOG_18) [pLoc] o- (perm XLOG_17)
+(move (finish Yes))
+******* After unification: 
+(move (finish Yes)) [un] o- (pAux XLOG_17) , (move (finish Yes)) [pLoc] o- (perm XLOG_17)
+(move (finish Yes))
+Creating a new entry in the stack without deleting.
+checking type of un
++++++ Saving formula (pAux XLOG_17) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(pAux 2) [pAuxLoc] o- one
+(pAux XLOG_17)
+******* After unification: 
+(pAux 2) [pAuxLoc] o- one
+(pAux 2)
+Creating a new entry in the stack without deleting.
+checking type of pAuxLoc
++++++ Saving formula (move (finish Yes)) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(move ProgLOG_19) [un] o-  [pAuxLoc]^! ProgLOG_19
+(move (finish Yes))
+******* After unification: 
+(move (finish Yes)) [un] o-  [pAuxLoc]^! (finish Yes)
+(move (finish Yes))
+Creating a new entry in the stack without deleting.
+checking type of un
+Solved hbang pAuxLoc.
++++++ Saving formula (finish Yes) on state stack in phase asyn
+****** Unifying (head of first with second): 
+(finish Yes) [un] o- top
+(finish Yes)
+******* After unification: 
+(finish Yes) [un] o- top
+(finish Yes)
+Creating a new entry in the stack without deleting.
+checking type of un
+checking type of un
+checking type of pLoc
+checking type of $gamma
+checking type of pAuxLoc
+However, the proof has a top.
+
+Yes.
+:> Thank you for using SELLF.

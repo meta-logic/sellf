@@ -238,3 +238,11 @@ let print_hashtbl h = print_string "\nHashTable:\n";
       | k :: t -> print_string ("["^k^"] "); print_list_terms (Hashtbl.find h k); print_newline (); print_h t
   in print_h keylst
 ;;
+
+let clean_tables () = 
+  Hashtbl.clear !context; 
+  Hashtbl.clear !clausesTbl; 
+  Hashtbl.clear subexTpTbl; 
+  Hashtbl.clear subexOrdTbl; 
+  Hashtbl.add !context "$gamma" []
+;; 

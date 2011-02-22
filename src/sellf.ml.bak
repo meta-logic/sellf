@@ -45,9 +45,9 @@ let rec start () =
                         Parser.clause Lexer.token lexbuf
                       done  
                     with 
-                      | Lexer.Eof -> solve_query ()
-                      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file.%s.\n%!" (position lexbuf); start ()
-                      | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
+                      |  Lexer.Eof -> solve_query ()
+                      |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file.%s.\n%!" (position lexbuf); start ()
+                      |  Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
                     end
               |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file. %s.\n%!" (position lexbuf); start ()
               |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); start ()

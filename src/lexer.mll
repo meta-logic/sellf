@@ -67,7 +67,9 @@ rule token = parse
 | "!"                   { CUT }
 | '&'                   { WITH }
 | '['                   { LBRACKET }
-| ']'                   { RBRACKET } 
+| ']'                   { RBRACKET }
+| '{'			{ LCURLY }
+| '}'			{ RCURLY }
 | varName as lxm    { VAR(lxm) }
 | ['0'-'9']+ as lxm     { INT(int_of_string lxm) }
 | '\\' (varName as lxm) { ABS(lxm) }

@@ -61,6 +61,8 @@ clean:
 	rm *.cmx
 	rm *.o
 	rm sellf
+	rm parser.mli
+	rm parser.ml
 
 test:  $(TEST_CMO)
 	$(OCAMLC) unix.$(cma) $(CORE_CMO)  $(TEST_CMO) -o test

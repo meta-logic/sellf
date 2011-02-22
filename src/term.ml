@@ -74,6 +74,7 @@ type terms =
 | SUSP of terms * int * int * env
 | PTR  of ptr
 | NEW of string * terms
+| BRACKET of terms
 and ptr = in_ptr ref
 and in_ptr = V of var | T of terms
 and env = envitem list

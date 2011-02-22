@@ -330,6 +330,11 @@ match Term.observe form with
         )
     end
 
+  (* TODO: test brackets *)
+  | BRACKET(f) -> add_goals f; goals := t;
+    let st = !nstates in 
+    solve (fun () -> restore_atom st; suc ()) fail
+
   | h -> print_term h; failwith " Solving not implemented for this case."
 
   (* Empty list, solve the positive formulas now *)    
@@ -596,7 +601,6 @@ and restore_atom n = let s = Stack.length !states in
   done;
   let STATE(dt, _, bl, sc, fl, bck, _) = Stack.top !states in
   reset dt;
-  if !verbose then (print_string ("Restoring binding to "); print_int bl; print_string "\n");
   restore_state bl;
   back_chain bck sc fl
 ;;
