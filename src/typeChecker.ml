@@ -107,6 +107,7 @@ let rec collect_free_variables clause =
           let freeVar2 = collect_free_variables_aux freeVar1 bVar t1 in
           let freeVar3 = collect_free_variables_aux freeVar2 bVar t2 in
             freeVar3
+	| BRACKET (form) -> let freeVar1 = collect_free_variables_aux freeVar bVar form in freeVar1
     end
   in 
   collect_free_variables_aux [] [] clause
@@ -385,6 +386,7 @@ let rec typeCheck clause =
       (*VN: The following two cases are for when variables are of type o.*) 
       | VAR v ->  tCheckBody (PRED("", VAR v)) env
       | APP(head, args) -> tCheckBody (PRED("", APP(head, args))) env
+      | BRACKET (f) -> tCheckBody f env
       | _ -> print_term body; failwith " Expected a body element while typechecking."
     end
 	in

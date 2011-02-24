@@ -173,6 +173,7 @@ let rec print_term term = match term with
   | FORALL (s, i, t) -> print_string ("V "^s^(string_of_int i)^" "); print_term t
   | CLS (ty, t1, t2) -> print_term t1; print_type_cls ty; print_term t2
   | NEW (s, t) -> print_string ("new"^"/lam"^s); print_term t
+  | BRACKET (f) -> print_string "{ "; print_term f; print_string " }"
 
 let rec print_list_terms args = 
    match args with
