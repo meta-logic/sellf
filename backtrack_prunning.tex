@@ -1,0 +1,21 @@
+Avoiding unnecessary backtracks.
+
+In a program there might be more than one clause for a predicate (and there usually is). Suppose that a program was implemented and there are two clauses for the predicate ``a'':
+
+\begin{verbatim}
+a X :- b X Y, c X.
+a X :- b X Y, e X.
+\end{verbatim}
+
+The natural behaviour of the proof search to solve ``a'' is to choose the first clause, then try to prove ``b X Y'' and then ``c X''.  If it fails on ``c X'', the interpreter will try to find another proof for ``b X Y''.  But it might be the case that a different proof of ``b'' doesn't change the fact that ``c'' (or anything after that) will fail. In this situation, the search for another proof for ``b X Y'' is unnecessary work, since it will just try each and every possibility until it realizes that the first clause is not the right choice for ``a''.
+
+In order to avoid this processing, one might declare a predicate, like ``a'', as ``no intra-backtracking'', which means that whenever the last element (the continuation) of the conjunction fails, the interpreter will backtrack on the choice for ``a'' and try another clause instead of trying to prove again the predicates of the clause (the choices made to prove ``b X Y'' for example will be ignored).
+
+Note that this will reduce the space of proof searching, so one has to make sure that this does not remove any valid proof.
+
+OBS:
+- Think of an example that this would help.
+- Does it make sense only when ``b X Y'' is on all the clauses?
+- Does it make a difference if ``b'' is a data or a program? Is doesn't make sense to have a continuation in the middle of a clause, does it? Maybe if it is a method or function to compute something. How should we proceed on that case? Backtrack on this function or leave it?
+
+- Implementation issue: how can I know when a clause ended?

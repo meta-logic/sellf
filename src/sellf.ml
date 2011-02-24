@@ -16,6 +16,7 @@ let position lexbuf =
 
 (* TODO: fix the flow so that the user can ask several queries for the same file *)
 let rec start () = 
+    Structs.clear_tables ();
     print_string ":> ";
     let command = read_line() in
     try 

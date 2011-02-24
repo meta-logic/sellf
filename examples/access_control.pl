@@ -16,7 +16,7 @@ perm 2.
 context un.
 
 checkPerm X Prog :- perm X, (pAux X [pAuxLoc] -o move (Prog "Yes")).
-checkPerm X Prog :- perm Y, X <>Y, (pAux Y [pAuxLoc] -o checkPerm X Prog).
+checkPerm X Prog :- perm Y, X <> Y, (pAux Y [pAuxLoc] -o checkPerm X Prog).
 checkPerm X Prog :- [pLoc]hbang move (Prog "No").
 
 move Prog :- pAux X, (perm X [pLoc]-o move Prog). 
