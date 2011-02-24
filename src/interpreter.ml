@@ -327,6 +327,7 @@ match Term.observe form with
         | CONS(str) -> add_atm (PRED (str, CONS(str))); goals := t; solve_neg suc fail
         | APP(CONS(str3), arg2) -> add_atm (PRED (str3, APP(CONS(str3), arg2))); 
           goals := t; solve_neg suc fail
+	| _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline ()
         )
     end
 

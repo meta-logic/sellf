@@ -64,6 +64,7 @@ let rec hnorm term =
     | Term.ABS(_,n,t) -> Term.lambda n (hnorm t)
     | Term.FORALL(str,n,t) -> Term.FORALL(str,n,hnorm t)
     | Term.NEW(str,t) -> Term.NEW(str,hnorm t)
+    | Term.BRACKET (t) -> Term.BRACKET(hnorm t)
     | Term.APP(t,args) ->
         let t = hnorm t in
           begin match Term.observe t with
@@ -114,6 +115,7 @@ let rec hnorm term =
             | Term.BANG (str, t1) -> Term.BANG(hnorm (Term.susp str ol nl e), hnorm (Term.susp t1 ol nl e))
             | Term.HBANG (str, t1) -> Term.HBANG(hnorm (Term.susp str ol nl e), hnorm (Term.susp t1 ol nl e))
             | Term.WITH (t1,t2) -> Term.WITH(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
+	    | Term.BRACKET (f) -> Term.BRACKET(hnorm (Term.susp f ol nl e))
             | Term.CLS(typ,t1,t2) -> Term.CLS(typ,hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.PLUS (t1,t2) -> Term.PLUS(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.MINUS (t1,t2) ->  Term.MINUS(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
@@ -154,6 +156,7 @@ let rec deep_norm t =
       | Term.WITH (t1,t2) -> Term.WITH (deep_norm t1, deep_norm t2)
       | Term.FORALL (str, i, t1) -> Term.FORALL (str, i, deep_norm t1)
       | Term.NEW (str, t1) -> Term.NEW (str, deep_norm t1)
+      | Term.BRACKET (f) -> Term.BRACKET(deep_norm f)
       | Term.CLS (typ, t1, t2) -> Term.CLS (typ, deep_norm t1, deep_norm t2)
       | Term.PLUS (t1,t2) -> Term.PLUS (deep_norm t1, deep_norm t2)
       | Term.MINUS (t1,t2) -> Term.MINUS (deep_norm t1, deep_norm t2)
