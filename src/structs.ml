@@ -243,12 +243,10 @@ let clear_tables () =
   Hashtbl.clear !context; 
   Hashtbl.clear !clausesTbl; 
   Hashtbl.clear subexTpTbl; 
-  Hashtbl.clear subexOrdTbl;
-  Hashtbl.clear tTbl;
+  Hashtbl.clear subexOrdTbl; 
   Hashtbl.clear kTbl;
+  Hashtbl.clear tTbl;
   Hashtbl.clear rTbl;
-  Hashtbl.add kTbl "o" (TPRED); 
-  Hashtbl.add !context "$gamma" [];
-  Hashtbl.add subexTpTbl "$gamma" (LIN);
-  Hashtbl.add subexTpTbl "$def" (UNB)
-;;
+  Hashtbl.add kTbl "o" (TPRED);  
+  Hashtbl.add !context "$gamma" []
+;; 

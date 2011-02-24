@@ -510,6 +510,7 @@ let makesubst h1 t2 a1 =
       | HBANG(str, t1) -> HBANG(nested_subst (Norm.hnorm str) lev , nested_subst (Norm.hnorm t1) lev)
       | FORALL(str, i, t) -> FORALL(str, i, nested_subst t (lev+n))
       | NEW(str, t) -> NEW(str, nested_subst t (lev+n))
+      | BRACKET(t) -> BRACKET(nested_subst t (lev+n))
       | CLS(cmp, t1, t2) -> CLS(cmp, nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
       | PLUS (t1,t2) -> Term.plus (List.map (fun x -> nested_subst (Norm.hnorm x) lev) [t1;t2])
       | MINUS (t1,t2) -> Term.minus (List.map (fun x -> nested_subst (Norm.hnorm x) lev) [t1;t2])
@@ -572,7 +573,7 @@ let makesubst h1 t2 a1 =
             | TIMES _ ->  assert false
             | DIV _ ->  assert false
             | ONE | TOP | EQU _ | COMP _ | ASGN _ | PRINT _ | CUT |  TENSOR _ | LOLLI _ | BANG _ |  HBANG _ | WITH _ 
-            | FORALL _ | NEW _ | PRED _  | CLS _ | NEW _ -> assert false
+            | FORALL _ | NEW _ | PRED _  | CLS _ | NEW _ | BRACKET _ -> assert false
             (*| LIST _ ->  assert false*)
           end
       | Term.PTR _ -> assert false

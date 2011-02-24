@@ -334,7 +334,7 @@ match Term.observe form with
   (* TODO: test brackets *)
   | BRACKET(f) -> add_goals f; goals := t;
     let st = !nstates in 
-    solve (fun () -> restore_atom st; suc ()) fail
+    solve_neg (fun () -> restore_atom st; suc ()) fail
 
   | h -> print_term h; failwith " Solving not implemented for this case."
 
