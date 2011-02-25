@@ -42,6 +42,7 @@ let rec deBruijn_aux flag fVarC nABS body =
   | BANG (sub, body1) -> BANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | HBANG (sub, body1) -> HBANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | WITH (body1, body2) -> WITH (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
+  | BRACKET (body1) -> BRACKET (deBruijn_aux flag fVarC nABS body1)
   | FORALL (str, _, body1) -> 
      let fVarCNew x = 
      begin match x with
@@ -107,7 +108,7 @@ let rec collect_free_variables clause =
           let freeVar2 = collect_free_variables_aux freeVar1 bVar t1 in
           let freeVar3 = collect_free_variables_aux freeVar2 bVar t2 in
             freeVar3
-	| BRACKET (form) -> let freeVar1 = collect_free_variables_aux freeVar bVar form in freeVar1
+	| BRACKET (form) -> collect_free_variables_aux freeVar bVar form
     end
   in 
   collect_free_variables_aux [] [] clause
