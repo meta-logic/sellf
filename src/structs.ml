@@ -189,7 +189,7 @@ let bind v t =
     end
 ;;
 
-let last_fail () = match Stack.top !states with
+let last_fail () = print_string "\nLast fail\n"; match Stack.top !states with
   | STATE(_, _, _, _, f, _, _) -> f ()
 ;;
 
@@ -248,5 +248,22 @@ let clear_tables () =
   Hashtbl.clear tTbl;
   Hashtbl.clear rTbl;
   Hashtbl.add kTbl "o" (TPRED);  
-  Hashtbl.add !context "$gamma" []
-;; 
+  Hashtbl.add !context "$gamma" [];
+  Hashtbl.add subexTpTbl "$gamma" (LIN)
+;;
+
+let remove_states n = let s = Stack.length !states in
+  if !verbose then begin
+    print_string "Removing states: "; 
+    print_int n; print_newline ()
+  end;
+  assert (n <= s);
+  for i = 1 to s-n do
+    let STATE(_, _, _, _, _, _, _) = Stack.pop !states in
+      nstates := !nstates - 1
+  done;
+  (*let STATE(dt, _, bl, sc, fl, bck, _) = Stack.top !states in
+  reset dt;
+  restore_state bl;
+  back_chain bck sc fl*)
+;;

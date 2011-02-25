@@ -327,14 +327,14 @@ match Term.observe form with
         | CONS(str) -> add_atm (PRED (str, CONS(str))); goals := t; solve_neg suc fail
         | APP(CONS(str3), arg2) -> add_atm (PRED (str3, APP(CONS(str3), arg2))); 
           goals := t; solve_neg suc fail
-	| _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline ()
+	| _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline (); flush stdout
         )
     end
 
   (* TODO: test brackets *)
-  | BRACKET(f) -> add_goals f; goals := t;
+  | BRACKET(f) -> goals := t; add_goals (Term.observe f);
     let st = !nstates in 
-    solve_neg (fun () -> restore_atom st; suc ()) fail
+    solve (fun () -> remove_states st; solve suc fail) fail
 
   | h -> print_term h; failwith " Solving not implemented for this case."
 
@@ -507,9 +507,9 @@ match Term.observe form with
       | [] -> 
         if !verbose then begin
           print_string ("No clauses for this atom: "^str^".\n"); 
-	      print_string "Backtracking...\n"
-	    end;
-	    fail ()
+          print_string "Backtracking...\n"
+        end;
+        fail ()
       with Not_found -> 
         if !verbose then begin
           print_string "[ERROR] Atom not in table: "; 

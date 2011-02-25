@@ -1,3 +1,3 @@
 type data int -> o.
-type pred o -> o.
+type pred (int -> o) -> o.
 type finish int -> o.

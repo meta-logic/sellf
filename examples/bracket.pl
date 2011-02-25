@@ -1,5 +1,5 @@
 subexp u unb.
-subexp l lin.
+subexp l unb.
 
 context l.
 
