@@ -247,6 +247,13 @@ let clear_tables () =
   Hashtbl.clear kTbl;
   Hashtbl.clear tTbl;
   Hashtbl.clear rTbl;
+  Stack.clear !states;
+  Stack.clear bind_stack;
+  goals := [];
+  positives := [];
+  atoms := [];
+  bind_len := 0;
+  nstates := 0;
   Hashtbl.add kTbl "o" (TPRED);  
   Hashtbl.add !context "$gamma" [];
   Hashtbl.add subexTpTbl "$gamma" (LIN)
@@ -262,8 +269,4 @@ let remove_states n = let s = Stack.length !states in
     let STATE(_, _, _, _, _, _, _) = Stack.pop !states in
       nstates := !nstates - 1
   done;
-  (*let STATE(dt, _, bl, sc, fl, bck, _) = Stack.top !states in
-  reset dt;
-  restore_state bl;
-  back_chain bck sc fl*)
 ;;
