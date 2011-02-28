@@ -203,9 +203,7 @@ let addKTbl hash entry =
 	| TINT -> NONE
 	| TPRED -> NONE
 	| TKIND (k) -> (match (notInTbl hash k) with
-		        | NONE -> Hashtbl.add hash k (TKIND (k)); 
-			       print_string (" New kind "^k^" created.\n"); flush stdout; 
-			       NONE
+		        | NONE -> Hashtbl.add hash k (TKIND (k)); NONE
 			| SOME (k1) -> SOME (k1))
 	| _ -> NONE
 ;;
@@ -226,10 +224,7 @@ Hashtbl.add tTbl "$example" (ARR ( TBASIC (TINT), TBASIC (TINT) ));;
 (* Example of a rule: $example :- 1.   *)
 Hashtbl.add rTbl "$example" (CLS (DEF, PRED ("$example", CONS ("$example")), ONE ) );;
 
-let addTTbl hash name entry = 
-	Hashtbl.add hash name entry;
-	print_string (" New type created: "^name^" : "); print_type entry; print_newline(); flush stdout
-;; 
+let addTTbl hash name entry = Hashtbl.add hash name entry ;; 
 
 (*Function that takes a term and returns a pair with the head of the term and the list of arguments.*)
 let rec term2list term = 

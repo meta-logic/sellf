@@ -26,6 +26,8 @@ let rec start () =
       | "help" -> start ()
       | "verbose-on" -> Structs.verbose := true; print_endline "Verbose is set to on."; start ()
       | "verbose-off" -> Structs.verbose := false; print_endline "Verbose is set to off."; start ()
+      | "time-on" -> Structs.time := true; print_endline "Time is set to on."; start ()
+      | "time-off" -> Structs.time := false; print_endline "Time is set to off."; start ()
       | file_name -> 
         begin
           print_endline ("Loading file"^file_name);
@@ -65,12 +67,24 @@ solve_query () =
       begin
       try 
         Parser.goal Lexer.token query;
-        Interpreter.solve (fun () -> 
-          if (Interpreter.empty_nw ()) then 
-            print_string "\nYes.\n"
-          else (Structs.last_fail ())) 
-          
-          (fun () -> print_string "\nNo.\n")
+	if !Structs.time then begin
+	  let start_time = Sys.time () in
+          Interpreter.solve (fun () -> 
+            if (Interpreter.empty_nw ()) then 
+              print_string "\nYes.\n"
+            else (Structs.last_fail ()))  
+            (fun () -> print_string "\nNo.\n");
+	  let end_time = Sys.time () in
+	  let total = end_time -. start_time in
+	  Printf.printf "Execution time: %f seconds.\n" total
+        end
+	else 
+          Interpreter.solve (fun () -> 
+            if (Interpreter.empty_nw ()) then 
+              print_string "\nYes.\n"
+            else (Structs.last_fail ()))  
+            (fun () -> print_string "\nNo.\n");
+
       with
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()

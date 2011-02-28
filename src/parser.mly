@@ -42,7 +42,7 @@ let rec cls_2_lolli form subexp = match form with
 
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
-LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE EXIT LOAD
+LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
 %token <string> NAME STRING VAR FORALL TSUB ABS NEW FILE
 %token <int> INT
 %right ARR  
@@ -69,7 +69,10 @@ LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP
 types:
 KIND NAME TYPE DOT { let result = addKTbl kTbl (TKIND ($2)) in
                         match result with
-                            | NONE -> NONE
+                            | NONE -> if !verbose then begin 
+				        print_string (" New kind "^$2^" created.\n")
+				      end;
+				      NONE
                             | SOME (k) -> print_string ("[ERROR] Kind already declared -> "^$2); print_newline(); 
                                           flush stdout; SOME (k)
                    }
@@ -77,7 +80,13 @@ KIND NAME TYPE DOT { let result = addKTbl kTbl (TKIND ($2)) in
                             match dupChk with
                                 | NONE -> let dupChk2 =  notInTbl tTbl $2 in 
                                     (match dupChk2 with
-                                        | NONE -> addTTbl tTbl $2 $3; NONE
+                                        | NONE -> addTTbl tTbl $2 $3; 
+                                                  if !verbose then begin
+						    print_string (" New type created: "^$2^" : ");
+						    print_type $3;
+						    print_newline (); flush stdout;
+						  end;
+						  NONE
                                         | SOME (k) -> print_string ("[ERROR] Type previously declared as a type -> "^$2);
                                                       print_newline(); flush stdout; 
                                                       SOME (k) 
@@ -152,7 +161,7 @@ clause:
      let _ = typeCheck clause_typecheck in
      let clause = deBruijn true raw_clause in
      begin
-     print_term clause; print_newline ();
+     (*print_term clause; print_newline ();*)
      match clause with 
        | ABS (s, i, t) ->
          Hashtbl.add rTbl p clause;
@@ -161,20 +170,24 @@ clause:
          let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!context)) in
          add_cls lolli;
          add_ctx lolli !context;
-         print_string (" New clause: ");
-         print_term lolli;
-         print_newline();
-         flush stdout;
+	 if !verbose then begin
+           print_string (" New clause: ");
+           print_term lolli;
+           print_newline();
+           flush stdout
+	 end;
          NONE
        (* Clause with no variables *)
        | CLS(DEF, head, ONE) -> 
          Hashtbl.add rTbl p clause;
          add_cls (LOLLI(CONS(!context), head, ONE));
          add_ctx (LOLLI(CONS(!context), head, ONE)) !context;
-         print_string " New clause: ";
-         print_term (LOLLI(CONS(!context), head, ONE));
-         print_newline ();
-         flush stdout;
+	 if !verbose then begin
+           print_string " New clause: ";
+           print_term (LOLLI(CONS(!context), head, ONE));
+           print_newline ();
+           flush stdout
+	 end;
          NONE
        | c -> print_term c; print_newline (); failwith "Impossible error while parsing prop DOT."
      end
@@ -190,30 +203,30 @@ clause:
       let _ =  typeCheck clause_typecheck in
       let clause = deBruijn true raw_clause in
       begin
-      print_term clause; print_newline ();
+      (*print_term clause; print_newline ();*)
       match clause with                   
         | ABS(s, i, t) ->  Hashtbl.add rTbl p (clause); 
           let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!context)) in
           add_cls lolli;
           add_ctx lolli !context;
-          (*add_cls (LOLLI (!context, $1, body));
-          add_ctx (LOLLI (!context, $1, body)) !context;*)
-          print_string (" New clause: ");
-          print_term lolli;
-          (*print_string (" := ");
-          print_term body;*)
-          print_newline();
-          flush stdout;
+	  if !verbose then begin
+            print_string (" New clause: ");
+            print_term lolli;
+            print_newline();
+            flush stdout
+	  end;
           NONE
         (* Clause with no variables *)
         | CLS(DEF, head, body) -> 
           Hashtbl.add rTbl p clause;
           add_cls (LOLLI(CONS(!context), head, body));
           add_ctx (LOLLI(CONS(!context), head, body)) !context;
-          print_string " New clause: ";
-          print_term (LOLLI(CONS(!context), head, body));
-          print_newline ();
-          flush stdout;
+	  if !verbose then begin
+            print_string " New clause: ";
+            print_term (LOLLI(CONS(!context), head, body));
+            print_newline ();
+            flush stdout
+	  end;
           NONE
         | _ -> failwith "Impossible error while parsing."
       end
@@ -228,30 +241,30 @@ clause:
       let _ = typeCheck clause_typecheck in
       let clause = deBruijn true raw_clause in
       begin
-        print_term clause; print_newline ();
+        (*print_term clause; print_newline ();*)
         match clause with 
           | ABS(s, i, t) ->  Hashtbl.add rTbl p (clause); 
             let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!context)) in
             add_cls lolli;
             add_ctx lolli !context;
-            (*add_cls (LOLLI (!context, $1, body));
-            add_ctx (LOLLI (!context, $1, body)) !context;*)
-            print_string (" New clause: ");
-            print_term lolli;
-            (*print_string (" :- ");
-            print_term body;*)
-            print_newline();
-            flush stdout;
+	    if !verbose then begin
+              print_string (" New clause: ");
+              print_term lolli;
+              print_newline();
+              flush stdout
+	    end;
             NONE
           (* Clause with no variables *)
           | CLS(DEF, head, body) -> 
             Hashtbl.add rTbl p clause;
             add_cls (LOLLI(CONS(!context), head, body));
             add_ctx (LOLLI(CONS(!context), head, body)) !context;
-            print_string " New clause: ";
-            print_term (LOLLI(CONS(!context), head, body));
-            print_newline ();
-            flush stdout;
+	    if !verbose then begin
+              print_string " New clause: ";
+              print_term (LOLLI(CONS(!context), head, body));
+              print_newline ();
+              flush stdout
+	    end;
             NONE
           | _ -> failwith "Impossible error while parsing."
       end
@@ -270,11 +283,13 @@ body DOT {
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
   let clause_goal = Interpreter.apply_ptr clause in
-  add_goals clause_goal ;
-  print_string (" New goal: ");
-  print_term $1;
-  print_newline();
-  flush stdout;
+  add_goals clause_goal;
+  if !verbose then begin
+    print_string (" New goal: ");
+    print_term $1;
+    print_newline();
+    flush stdout
+  end;
   NONE
 }
 ;
@@ -392,10 +407,13 @@ top:
 | HELP    { print_endline "There are the following commands available:\n";
             print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
             print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program. The default value is 'off'.";
+	    print_endline "#time = on or #time = off: turns on or off the measuring of the execution time of a query. The default value is 'off'.";
             print_endline "#exit command terminates the program.";
             print_endline "#help displays this message;"; "help"
           }
 | VERBOSE EQ ON {"verbose-on"}
 | VERBOSE EQ OFF {"verbose-off"}
+| TIME EQ ON {"time-on"}
+| TIME EQ OFF {"time-off"}
 | EXIT                    {print_endline "Thank you for using SELLF."; exit 1}
 | LOAD  FILE  {$2}

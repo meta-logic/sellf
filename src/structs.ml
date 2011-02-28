@@ -5,6 +5,9 @@ open Term
 (* Verbose on/off *)
 let verbose = ref false ;;
 
+(* Timer on/off *)
+let time = ref false ;;
+
 (* Integer to indicate how many tensors I am solving, so that I only check for context emptyness at the end *)
 let tensor = ref 0 ;;
 
@@ -189,7 +192,7 @@ let bind v t =
     end
 ;;
 
-let last_fail () = print_string "\nLast fail\n"; match Stack.top !states with
+let last_fail () = match Stack.top !states with
   | STATE(_, _, _, _, f, _, _) -> f ()
 ;;
 

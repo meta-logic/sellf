@@ -14,6 +14,7 @@ rule token = parse
 | "#load"     {LOAD}
 | "#help"         {HELP}
 | "#verbose"    {VERBOSE}
+| "#time"	{TIME}
 | "on"          {ON}
 | "off"          {OFF}
 | "#exit"      {EXIT}
