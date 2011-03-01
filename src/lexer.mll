@@ -10,12 +10,11 @@ let incrline lexbuf =
     pos_bol = lexbuf.lex_curr_p.pos_cnum;
     pos_lnum = 1 + lexbuf.lex_curr_p.pos_lnum }
 }
-let filepath =  [^' ']+
-let nameString = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']* (* types and terms start with lower case letters *)
+let nameString = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '_']* (* types and terms start with lower case letters *)
 let commentString = ['%'] [^'\n']* '\n' (* comments start with % *)
 let instring = [^'"'] *
-let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
-let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9']*
+let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']* (* subexponentials start with a lower case letter and can have numbers *)
+let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
 
 rule token = parse 
