@@ -50,8 +50,8 @@ let rec start () =
       let action = Parser.top Lexer_top.token lexbuf_top in 
       match action with
       | "help" -> start ()
-      | "verbose-on" -> print_endline "Verbose is set to on."; start ()
-      | "verbose-off" -> print_endline "Verbose is set to off. (Not yet implemented.)"; start ()
+      | "verbose-on" -> print_endline "Verbose is set to on."; Structs.verbose := true; start ()
+      | "verbose-off" -> print_endline "Verbose is set to off."; Structs.verbose := false; start ()
       | "time-on" -> Structs.time := true; print_endline "Time is set to on."; start ()
       | "time-off" -> Structs.time := false; print_endline "Time is set to off."; start ()
       | file_name -> 
