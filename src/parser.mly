@@ -139,7 +139,7 @@ clause:
                                             | NONE,_ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
                                             | _, NONE -> failwith ("ERROR: Subexponential name not declared: "^$4) 
  }
-| SUBEXPREL NAME GEQ NAME DOT { 
+| SUBEXPREL NAME GEQ NAME DOT {
                                           match (notInTbl subexTpTbl $2), (notInTbl subexTpTbl $4) with
                                             | SOME(_),SOME(_) -> if check_val_subexp $4 $2 then
                                                                               (Hashtbl.add subexOrdTbl $4 $2; NONE) 
@@ -150,7 +150,7 @@ clause:
 
 /* VN: Marks that all formulas appearing after a context keyword are to be stored in the subexponential NAME.*/
 | CONTEXT NAME DOT {  match notInTbl subexTpTbl $2 with
-                                    NONE -> failwith ("ERROR: No such subexponential declared: "^$2)
+                                    NONE ->  failwith ("ERROR: No such subexponential declared: "^$2)
                                     | SOME (_) ->  context := $2; NONE}
 
 | prop DOT { 
