@@ -114,8 +114,8 @@ colourN X SN SE Prog :- edge Y Z, X <> Y, Z <> X, (auxE Y Z [SE]-o colourN X SN 
 
 % Find a neighbor of X, if it has a the same colour, then it means that the graph is not bipartite.
 
-colourN X SN SE Prog :- edge X Z, colour X CX, colour Z CX,  print \"The graph is not bipartite!\".
-colourN X SN SE Prog :- edge Z X, colour X CX, colour Z CX,  print \"The graph is not bipartite!\".
+%colourN X SN SE Prog :- edge X Z, colour X CX, colour Z CX,  print \"The graph is not bipartite!\".
+%colourN X SN SE Prog :- edge Z X, colour X CX, colour Z CX,  print \"The graph is not bipartite!\".
 
 % All neighbors of a node have been checked as all edges of the graph have been traversed. Hence, move the edges from 
 % auxE back to edges.
@@ -175,8 +175,8 @@ colourN X SN SE Prog :- {edge Y Z, X <> Y, Z <> X}, (auxE Y Z [SE]-o colourN X S
 
 % Find a neighbor of X, if it has a the same colour, then it means that the graph is not bipartite.
 
-colourN X SN SE Prog :- {edge X Z, colour X CX, colour Z CX},  print \"The graph is not bipartite!\".
-colourN X SN SE Prog :- {edge Z X, colour X CX, colour Z CX},  print \"The graph is not bipartite!\".
+%colourN X SN SE Prog :- {edge X Z, colour X CX, colour Z CX},  print \"The graph is not bipartite!\".
+%colourN X SN SE Prog :- {edge Z X, colour X CX, colour Z CX},  print \"The graph is not bipartite!\".
 
 % All neighbors of a node have been checked as all edges of the graph have been traversed. Hence, move the edges from 
 % auxE back to edges.
