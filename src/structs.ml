@@ -4,6 +4,7 @@ open Term
 
 (* Verbose on/off *)
 let verbose = ref false ;;
+let tabling = ref false ;;
 
 (* Timer on/off *)
 let time = ref false ;;
@@ -120,12 +121,17 @@ let rec get_pred form = match form with
 ;;
 
 (* Removes an element from a list *)
+let rec remove_element a lst acc = 
+  match lst with 
+  | [] -> acc
+  | a1 :: t when a1 = a -> acc @ t
+  | b :: t -> remove_element a t (acc @ [b])
 (* Important note: removes only the first occurence of the element *)
-let rec remove elm lst = 
-  match lst with
+let rec remove elm lst = remove_element elm lst []
+  (*match lst with
     | [] -> []
     | e::t when e = elm -> t
-    | h::t -> h :: (remove elm t)
+    | h::t -> h :: (remove elm t)*)
 ;;
 
 let make_first elm lst = elm :: (remove elm lst) ;;
@@ -273,3 +279,89 @@ let remove_states n = let s = Stack.length !states in
       nstates := !nstates - 1
   done;
 ;;
+
+(*----------------------------------------------------------
+Code for implementing tabled deduction.
+-----------------------------------------------------------*)
+
+let (fail_table : ((Term.terms, (string, terms list) Hashtbl.t) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
+
+(*Removes a term from a list of terms.*)
+let rec remove_element_terms a lst acc = 
+  match lst with 
+  | [] -> acc
+  | a1 :: t when Term.observe a1 = Term.observe a -> acc @ t
+  | b :: t -> remove_element_terms a t (acc @ [b])
+
+let rec member_term_lst h lst = 
+  match lst with
+  | [] -> false
+  | h1 :: t when Term.observe h = Term.observe h1 -> true
+  | h1 :: t -> member_term_lst h t
+
+let rec equiv_lst_terms lst1 lst2 = 
+ match lst1 with
+ | [] -> if lst2 = [] then true else false
+ | h :: t -> if member_term_lst h lst2 then
+                  equiv_lst_terms t (remove_element_terms h lst2 [])
+                else false
+    
+(*Checks whether all the lists associated to the keys in keylst are empty*)
+let rec all_empty keylst tbl = 
+  match keylst with
+  | [] -> true
+  | h :: t -> if Hashtbl.find tbl h = [] 
+                then all_empty t tbl else false
+
+(*Checks whether there is an equivalent new subexponential that contains the 
+same formulas as in lst*)
+let rec find_equiv_new_context lst keys tbl =
+  match keys with
+  | [] -> failwith "NO_KEY"
+  (*We add the 0000000 to h to avoid a Substring failure.*)
+  | h :: t when String.sub (h^"00000000") 0 7 = "NSUBEXP" -> 
+                if equiv_lst_terms lst (Hashtbl.find tbl h) 
+                then h else find_equiv_new_context lst t tbl
+  | h :: t -> find_equiv_new_context lst t tbl
+
+(*Checks whether the context of two sequents are the same, that is, their 
+associated hashtbls are the same.*)
+let rec equiv_sequents tbl1 tbl2 = 
+  let rec equiv_aux keylst1 keylst2 tbl1 tbl2 =
+    match keylst1 with
+    | [] -> if all_empty keylst2 tbl2  then true else false
+    | h :: t -> 
+              (*We add the 0000000 to h to avoid a Substring failure.*)
+              if String.sub (h^"0000000") 0 7 = "NSUBEXP" then (*This is the case when the subexponential is new*)
+              begin
+              try 
+                let h1 = find_equiv_new_context (Hashtbl.find tbl1 h) keylst2 tbl2 in
+                let key_aux = remove_element h1 keylst2 [] in
+                equiv_aux t key_aux tbl1 tbl2 
+              with (*We capture the case when there is no new subexponential with the same context by using 
+                      a failure.*)
+                | Failure "NO_KEY" -> false 
+              end
+              else if List.mem h keylst2 && equiv_lst_terms (Hashtbl.find tbl1 h) (Hashtbl.find tbl2 h) 
+              then 
+                  let key_aux = remove_element h keylst2 [] in 
+                  equiv_aux t key_aux tbl1 tbl2 
+               else false
+in 
+let keylst1 = keys tbl1 in 
+let keylst2 = keys tbl2 in 
+  equiv_aux keylst1 keylst2 tbl1 tbl2
+
+
+(*Checks all contexts associated to a goal formula whether there is an equivalent one.*)
+let rec not_in_fail_table h = 
+  let rec not_in_fail_table_aux lst = 
+  match lst with
+  | [] -> true
+  | tbl1 :: t -> if equiv_sequents !context tbl1 then
+                     false else not_in_fail_table_aux t
+in 
+let hashlst = Hashtbl.find_all !fail_table h
+in 
+not_in_fail_table_aux hashlst
+                      

@@ -525,30 +525,41 @@ try
 let form = List.hd !atoms in
 let t = List.tl !atoms in
 match Term.observe form with
-  | PRED (str, terms) -> (
-    try 
+  | PRED (str, terms) -> 
+    (*If tabling is activated, then check whether current context has already shown to be a failure*)
+    if !tabling && not_in_fail_table (PRED (str, terms)) then 
       begin
-        match Hashtbl.find !clausesTbl str with
-        | lolli :: t1 -> 
-          let bind_b4 = !bind_len in (*We need to get the binding of substitutions used until this point, not after the next unification.*)
-          atoms := form :: t;
-          save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
-          let st = !nstates in
-          solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
-        | [] -> 
-	      if !verbose then begin
-	        print_string ("No clauses for this atom: "^str^".\n"); 
-	        print_string "Backtracking...\n"
-	      end;
-	      fail ()
+        if !verbose then
+          begin
+            print_endline "Did not find the current state in the fail table: ";
+            print_term (PRED (str, terms)); print_string "\n";
+          end;
+        try 
+        begin
+          match Hashtbl.find !clausesTbl str with
+          | lolli :: t1 -> 
+            let bind_b4 = !bind_len in (*We need to get the binding of substitutions used until this point, not after the next unification.*)
+            atoms := form :: t;
+            save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
+            let st = !nstates in
+            solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
+          | [] -> 
+          if !verbose then begin
+            print_string ("No clauses for this atom: "^str^".\n"); 
+            print_string "Backtracking...\n"
+          end;
+          fail ()
+        end
+        with Not_found -> 
+          if !verbose then begin
+            print_string "[ERROR] Atom not in table: "; 
+          print_string str
+        end;
+        fail ()
       end
-      with Not_found -> 
-        if !verbose then begin
-          print_string "[ERROR] Atom not in table: "; 
-	      print_string str
-	    end;
-	    fail ()
-    )
+    (*It has been already shown that this predicate is not provable using the current context.*)
+    else 
+      if !verbose then print_endline "Tabling at work!\n"; fail ()
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
     | Failure "hd" -> suc ()
@@ -577,6 +588,12 @@ match Term.observe form with
 	        print_string ("No clauses for this atom: "^str^".\n"); 
 	        print_string "Backtracking...\n"
 	      end; 
+        (*It has been shown that this goal is not provable using the current context. Hence add it 
+        to the fail table.*)
+        if !tabling then begin
+          if !verbose then print_string "Adding state to fail_table...\n";
+          Hashtbl.add !fail_table (PRED (str, terms)) !context
+        end;
 	      fail ()
       end
       with Not_found -> 
