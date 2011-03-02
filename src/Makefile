@@ -4,7 +4,7 @@ cmo = cmo
 cma = cma
 cmx = cmx
 OCAMLC = ocamlc -g
-OCAMLRUN = ocamlrun 
+OCAMLRUN = ocamlrun -b
 OCAMLL = ocamlopt
 OCAMLDEP = /usr/bin/ocamldep -native -I ndcore
 OCAMLDOC = ocamldoc
@@ -36,7 +36,7 @@ normal : $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML)
 # 	$(OCAMLL) -c $< 
 
 run : $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
-	env OCAMLRUNPARAM=l=1M $(OCAMLRUN)  sellf 
+	env OCAMLRUNPARAM=l=10M $(OCAMLRUN) sellf 
 
 
 %.cmo:  %.ml
