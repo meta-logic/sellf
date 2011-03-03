@@ -527,7 +527,7 @@ let t = List.tl !atoms in
 match Term.observe form with
   | PRED (str, terms) -> 
     (*If tabling is activated, then check whether current context has already shown to be a failure*)
-    if !tabling && not_in_fail_table (PRED (str, terms)) then 
+    if (not !tabling) || ( !tabling && not_in_fail_table (PRED (str, terms)) ) then 
       begin
         if !verbose then
           begin
@@ -558,8 +558,10 @@ match Term.observe form with
         fail ()
       end
     (*It has been already shown that this predicate is not provable using the current context.*)
-    else 
-      if !verbose then print_endline "Tabling at work!\n"; fail ()
+    else begin 
+      if !verbose then print_endline "Tabling at work!\n"; 
+      fail ()
+    end
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
     | Failure "hd" -> suc ()
@@ -579,7 +581,7 @@ match Term.observe form with
           (*Removing the top of the stack, so that a new one is pushed 
            with a smaller list of formulas to backtrack on.*)
           Stack.pop !states; 
-		  nstates := !nstates - 1; 
+	  nstates := !nstates - 1; 
           save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
           let st = !nstates in
           solve_atm_aux suc (fun () -> restore_atom st) forms

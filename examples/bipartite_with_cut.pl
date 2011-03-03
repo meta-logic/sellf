@@ -24,9 +24,9 @@ node 3.
 context sedges.
 
 edge 1 2.
-%edge 2 1.
+edge 2 1.
 edge 2 3.
-%edge 3 2.
+edge 3 2.
 edge 1 3.
 %edge 4 5.
 %edge 5 4.
@@ -49,30 +49,30 @@ tComponent S1 :- [S1]hbang bipartite.
 % Find a neighbor of X. If it does not have a colour, then assign the correct colour and insert them in 
 % auxN, so that it is picked later.
 
-colourN X SN SE Prog :- {edge X Z, colour X 1, node Z}, 
+colourN X SN SE Prog :- {edge X Z, colour X 1, node Z},  print "Colour 1", print (node X), print (edge X Z),
                       colour X 1 [scolour]-o (colour Z 0 [scolour]-o (auxN Z  [SN]-o (auxE X Z [SE]-o colourN X SN SE Prog))).
 
-colourN X SN SE Prog :- {edge X Z, colour X 0, node Z}, 
+colourN X SN SE Prog :- {edge X Z, colour X 0, node Z}, print "Colour 2",  print (node X), print (edge X Z),
                       colour X 0 [scolour]-o (colour Z 1 [scolour]-o (auxN Z  [SN]-o (auxE X Z [SE]-o colourN X SN SE Prog))).
 
-colourN X SN SE Prog :- {edge Z X, colour X 1, node Z}, 
+colourN X SN SE Prog :- {edge Z X, colour X 1, node Z}, print "Colour 3", print (node X), print (edge Z X),
                     colour X 1 [scolour]-o (colour Z 0 [scolour]-o (auxN Z  [SN]-o (auxE Z X [SE]-o colourN X SN SE Prog))).
 
-colourN X SN SE Prog :- {edge Z X, colour X 0, node Z}, 
+colourN X SN SE Prog :- {edge Z X, colour X 0, node Z}, print "Colour 4", print (node X), print (edge Z X),
                     colour X 0 [scolour]-o (colour Z 1 [scolour]-o (auxN Z  [SN]-o (auxE Z X [SE]-o colourN X SN SE Prog))).
 
 % Find a neighbor of X. If it has a different colour, then it means that it was already picked at some moment. Hence, 
 % proceed without the need to pick this node later.
 
-colourN X SN SE Prog :- {edge X Z, colour X CX, colour Z CZ, CX <> CZ}, 
+colourN X SN SE Prog :- {edge X Z, colour X CX, colour Z CZ, CX <> CZ}, print "Colour 5", print (node X), print (edge X Z),
                       colour X CX [scolour]-o (colour Z CZ [scolour]-o (auxE X Z [SE]-o colourN X SN SE Prog)).
 
-colourN X SN SE Prog :- {edge Z X, colour X CX, colour Z CZ, CX <> CZ}, 
+colourN X SN SE Prog :- {edge Z X, colour X CX, colour Z CZ, CX <> CZ}, print "Colour 6",  print (node X), print (edge Z X),
                     colour X CX [scolour]-o (colour Z CZ [scolour]-o (auxE Z X [SE]-o colourN X SN SE Prog)).
 
 % If one picks an edge that is not connected to X, then just move it to sauxE.
 
-colourN X SN SE Prog :- {edge Y Z, X <> Y, Z <> X}, (auxE Y Z [SE]-o colourN X SN SE Prog).
+colourN X SN SE Prog :- {edge Y Z, X <> Y, Z <> X}, print "Colour 7",  print (node X), print (edge Y Z), (auxE Y Z [SE]-o colourN X SN SE Prog).
 
 % Find a neighbor of X, if it has a the same colour, then it means that the graph is not bipartite.
 
