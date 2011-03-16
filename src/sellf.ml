@@ -80,11 +80,11 @@ let rec start () =
                     end
               |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); start ()
               |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); start ()
-              |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
             end
         end
     with
     |  Parsing.Parse_error ->  print_endline "Invalid command. For more information type #help."; start  ()
+    |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
 and
 solve_query () = 
     print_string "?> ";
