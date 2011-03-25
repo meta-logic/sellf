@@ -107,17 +107,17 @@ solve_query () =
 	      else*) begin
           let loop = ref true in
           let fail = ref (
-            Interpreter.solve (fun () -> fun () -> 
+            Interpreter.solve (fun () () -> 
               if (Interpreter.empty_nw ()) then begin 
                 loop := false; 
                 print_string "\nYes.\n"
               end
               else (Structs.last_fail ()))  
-              (fun () -> fun () -> loop := false; print_string "\nNo.\n") )
+              (fun () () -> loop := false; print_string "\nNo.\n") )
           in
           while !loop do 
             let res = !fail () () in
-            fail := fun () -> fun () -> res
+            fail := fun () () -> res
           done;
           (*
           Interpreter.solve (fun () -> 

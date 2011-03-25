@@ -253,7 +253,7 @@ match Term.observe form with
           else terminate := true
         | PRINT(t1) -> print_endline ""; print_term t1; print_endline ""
         | x -> add_lin x (* Negative formula or atom *)
-      in decompose f2; goals := (f1 :: t); if !terminate then suc () else solve_neg suc fail
+      in decompose f2; goals := (f1 :: t); if !terminate then suc else solve_neg suc fail
     | CONS(subexp) -> ( match f2 with
       (* TODO: Should I check the cases for equalities here also? What about the rest of the cases? *)
       | PRED(str,terms) ->
@@ -293,7 +293,7 @@ match Term.observe form with
       goals := newf :: t;
       solve_neg suc fail
   
-  | TOP -> is_top := true; suc () (* This is in fact not correct. We have to mark the formulas in the context that can be weakened. *)
+  | TOP -> is_top := true; suc (* This is in fact not correct. We have to mark the formulas in the context that can be weakened. *)
 
   | NEW (s, t1) -> 
       varid := !varid + 1;
@@ -317,8 +317,8 @@ match Term.observe form with
   (* Atoms *)
   | PRED(str, terms) -> add_atm (PRED(str, terms)); goals := t; solve_neg suc fail
 
-  | EQU (str, n, trm) -> print_string "Not solving term equality yet."; fail ()
-  | CUT -> print_string "What should I do when encounter a cut?"; fail ()
+  | EQU (str, n, trm) -> print_string "Not solving term equality yet."; fail
+  | CUT -> print_string "What should I do when encounter a cut?"; fail
   | CONS(str) -> add_atm (PRED (str, CONS(str))); goals := t; solve_neg suc fail
   | APP(head, arg1) -> 
     begin
@@ -400,7 +400,7 @@ match Term.observe form with
              which would yield true anyway
           *)
         end
-        else fail ()
+        else fail
       | _ -> failwith "Not expected subexponential while solving positive formulas."
     end
 
@@ -412,7 +412,7 @@ match Term.observe form with
           positives := t; add_goals f; solve suc fail 
         | _ -> 
           if !verbose then print_string ("Failed in hbang rule "^s^".\n"); 
-          fail ()
+          fail
         with Not_found -> 
           if !verbose then print_string ("Solved hbang "^s^".\n"); 
           positives := t; add_goals f; solve suc fail
@@ -420,7 +420,7 @@ match Term.observe form with
       | _ -> failwith "Not expected subexponential while solving positive formulas."
     end
 
-  | ONE -> positives := t; suc () 
+  | ONE -> positives := t; suc 
     (* If I am solving a tensor, I can leave the checking of empty context for the next formula. *)
     (*if empty_nw () then begin
       positives := t;
@@ -439,7 +439,7 @@ match Term.observe form with
         save_state (COMP(ct, t1, t2)) !bind_len suc fail [] SYNC;
       solve_pos suc fail
     end    
-    else fail ()
+    else fail
 
   | ASGN (t1, t2) -> 
     if (solve_asgn t1 t2) then begin
@@ -448,7 +448,7 @@ match Term.observe form with
         save_state (ASGN (t1, t2)) !bind_len suc fail [] SYNC;
       solve_pos suc fail
     end    
-    else fail ()
+    else fail
 
   | PRINT (t1) -> print_endline ""; print_term t1; print_endline "";
      positives := t;
@@ -459,8 +459,8 @@ match Term.observe form with
   (* Atoms *)
   | PRED (str, terms) -> add_atm (PRED (str, terms)); positives := t; solve_pos suc fail
 
-  | EQU (str, n, trm) -> print_string "Not solving term equality yet."; fail ()
-  | CUT -> print_string "What should I do when encounter a cut?"; fail ()
+  | EQU (str, n, trm) -> print_string "Not solving term equality yet."; fail
+  | CUT -> print_string "What should I do when encounter a cut?"; fail
   | CONS(str) -> add_atm (PRED (str, CONS(str))); positives := t; solve_pos suc fail
   | APP(head, arg1) -> 
     begin
@@ -499,7 +499,7 @@ match Term.observe form with
           | (a, b) -> print_term a; print_string " and "; print_term b; print_newline ();
             failwith "Unexpected return from unifies"
           with 
-            | Failure "Unification not possible." -> if !verbose then print_string "Unification failure.\n"; fail ()
+            | Failure "Unification not possible." -> if !verbose then print_string "Unification failure.\n"; fail
 	    (* G: I think these two next failures should be treated as a program failure, not the proof. *)
             (*| Failure "Head of a clause not a predicate." -> fail ()
             | Failure "Formulas not compatible (should be lolli and pred)." -> fail ()*)
@@ -510,13 +510,13 @@ match Term.observe form with
           print_string ("No clauses for this atom: "^str^".\n"); 
           print_string "Backtracking...\n"
         end;
-        fail ()
+        fail
       with Not_found -> 
         if !verbose then begin
           print_string "[ERROR] Atom not in table: "; 
 	      print_string str
 	    end;
-	    fail ()
+	    fail
   )
   | bla -> failwith "\nNot an atom in atoms' list"
 
@@ -549,7 +549,7 @@ match Term.observe form with
               print_string ("No clauses for this atom: "^str^".\n"); 
               print_string "Backtracking...\n"
             end;
-            fail ()
+            fail
           end
         end
         with Not_found -> 
@@ -557,16 +557,16 @@ match Term.observe form with
             print_string "[ERROR] Atom not in table: "; 
           print_string str
         end;
-        fail ()
+        fail
       end
     (*It has been already shown that this predicate is not provable using the current context.*)
     else begin 
       if !verbose then print_endline "Tabling at work!\n"; 
-      fail ()
+      fail
     end
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
-    | Failure "hd" -> suc ()
+    | Failure "hd" -> suc
 
 and back_chain forms suc fail = (*already initialized the stack, but now we need to backtrack using another clause in the context.*)
 try
@@ -598,18 +598,18 @@ match Term.observe form with
             if !verbose then print_string "Adding state to fail_table...\n";
             Hashtbl.add !fail_table (PRED (str, terms)) !context
           end;
-	      fail ()
+	      fail
       end
       with Not_found -> 
         if !verbose then begin
           print_string "[ERROR] Atom not in table: "; 
 	      print_string str
         end;
-        fail ()
+        fail
   end
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
-    | Failure "hd" -> suc ()
+    | Failure "hd" -> suc
 
 and restore_atom n = let s = Stack.length !states in
   if !verbose then begin
