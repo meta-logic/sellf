@@ -93,24 +93,40 @@ solve_query () =
       begin
       try 
         Parser.goal Lexer.token query;
-	if !Structs.time then begin
-	  let start_time = Sys.time () in
-          Interpreter.solve (fun () -> 
-            if (Interpreter.empty_nw ()) then 
-              print_string "\nYes.\n"
-            else (Structs.last_fail ()))  
-            (fun () -> print_string "\nNo.\n");
-	  let end_time = Sys.time () in
-	  let total = end_time -. start_time in
-	  Printf.printf "Execution time: %f seconds.\n" total
+	      (*if !Structs.time then begin
+	        let start_time = Sys.time () in
+                Interpreter.solve (fun () -> 
+                  if (Interpreter.empty_nw ()) then 
+                    print_string "\nYes.\n"
+                  else (Structs.last_fail ()))  
+                  (fun () -> print_string "\nNo.\n");
+	        let end_time = Sys.time () in
+	        let total = end_time -. start_time in
+	        Printf.printf "Execution time: %f seconds.\n" total
         end
-	else 
+	      else*) begin
+          let loop = ref true in
+          let fail = ref (
+            Interpreter.solve (fun () -> fun () -> 
+              if (Interpreter.empty_nw ()) then begin 
+                loop := false; 
+                print_string "\nYes.\n"
+              end
+              else (Structs.last_fail ()))  
+              (fun () -> fun () -> loop := false; print_string "\nNo.\n") )
+          in
+          while !loop do 
+            let res = !fail () () in
+            fail := fun () -> fun () -> res
+          done;
+          (*
           Interpreter.solve (fun () -> 
             if (Interpreter.empty_nw ()) then 
               print_string "\nYes.\n"
             else (Structs.last_fail ()))  
             (fun () -> print_string "\nNo.\n");
-
+          *)
+        end
       with
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()

@@ -325,10 +325,11 @@ match Term.observe form with
       match (Norm.hnorm (APP( (Term.observe head), arg1))) with
       | f -> (match f with 
         | CONS(str) -> add_atm (PRED (str, CONS(str))); goals := t; solve_neg suc fail
-        | APP(CONS(str3), arg2) -> add_atm (PRED (str3, APP(CONS(str3), arg2))); 
+        | APP(CONS(str3), arg2) -> 
+          add_atm (PRED (str3, APP(CONS(str3), arg2))); 
           goals := t; solve_neg suc fail
-	| _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline (); flush stdout
-        )
+	    | _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline (); flush stdout
+      )
     end
 
   (* TODO: test brackets *)
@@ -543,12 +544,13 @@ match Term.observe form with
             save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
             let st = !nstates in
             solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
-          | [] -> 
-          if !verbose then begin
-            print_string ("No clauses for this atom: "^str^".\n"); 
-            print_string "Backtracking...\n"
-          end;
-          fail ()
+          | [] -> begin 
+            if !verbose then begin
+              print_string ("No clauses for this atom: "^str^".\n"); 
+              print_string "Backtracking...\n"
+            end;
+            fail ()
+          end
         end
         with Not_found -> 
           if !verbose then begin
@@ -571,7 +573,7 @@ try
 let form = List.hd !atoms in
 let t = List.tl !atoms in
 match Term.observe form with
-  | PRED (str, terms) -> (
+  | PRED (str, terms) -> begin
     try 
       begin
         match forms with
@@ -581,7 +583,7 @@ match Term.observe form with
           (*Removing the top of the stack, so that a new one is pushed 
            with a smaller list of formulas to backtrack on.*)
           Stack.pop !states; 
-	  nstates := !nstates - 1; 
+	      nstates := !nstates - 1; 
           save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
           let st = !nstates in
           solve_atm_aux suc (fun () -> restore_atom st) forms
@@ -590,12 +592,12 @@ match Term.observe form with
 	        print_string ("No clauses for this atom: "^str^".\n"); 
 	        print_string "Backtracking...\n"
 	      end; 
-        (*It has been shown that this goal is not provable using the current context. Hence add it 
-        to the fail table.*)
-        if !tabling then begin
-          if !verbose then print_string "Adding state to fail_table...\n";
-          Hashtbl.add !fail_table (PRED (str, terms)) !context
-        end;
+          (*It has been shown that this goal is not provable using the current context. Hence add it 
+          to the fail table.*)
+          if !tabling then begin
+            if !verbose then print_string "Adding state to fail_table...\n";
+            Hashtbl.add !fail_table (PRED (str, terms)) !context
+          end;
 	      fail ()
       end
       with Not_found -> 
@@ -604,7 +606,7 @@ match Term.observe form with
 	      print_string str
         end;
         fail ()
-    )
+  end
   | bla -> failwith "\nNot an atom in atoms' list"
   with 
     | Failure "hd" -> suc ()
