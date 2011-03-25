@@ -283,7 +283,7 @@ match Term.observe form with
       states := orig_states;
       clausesTbl := orig_clauses;
       add_goals f2; 
-      solve_neg suc fail) fail
+      solve_neg suc fail ()) fail
   )
 
   | FORALL (s, i, f) ->
@@ -328,14 +328,14 @@ match Term.observe form with
         | APP(CONS(str3), arg2) -> 
           add_atm (PRED (str3, APP(CONS(str3), arg2))); 
           goals := t; solve_neg suc fail
-	    | _ -> print_string "Line 330 - interpreter.ml: "; print_term f; print_newline (); flush stdout
+	    | _ -> failwith "ERROR: line 330" (* print_string "Line 330 - interpreter.ml: "; print_term f; print_newline (); flush stdout *)
       )
     end
 
   (* TODO: test brackets *)
   | BRACKET(f) -> goals := t; add_goals (Term.observe f);
     let st = !nstates in 
-    solve (fun () -> remove_states st; solve suc fail) fail
+    solve (fun () -> remove_states st; solve suc fail ()) fail
 
   | h -> print_term h; failwith " Solving not implemented for this case."
 
@@ -357,25 +357,25 @@ match Term.observe form with
       match Term.observe sub with
       | CONS(s) -> 
         add_goals (LOLLI (sub, f1, f2)); 
-        solve_neg (fun () -> solve_pos suc fail) fail (* G: I think I can replace this with 'solve suc fail' *)
+        solve_neg (fun () -> solve_pos suc fail ()) fail (* G: I think I can replace this with 'solve suc fail' *)
       | _ -> failwith "Unitialized subexponential while solving postive formulas."
     end
 
   | WITH (f1, f2) -> 
     add_goals (WITH (f1, f2));
-    solve_neg (fun () -> solve_pos suc fail) fail
+    solve_neg (fun () -> solve_pos suc fail ()) fail
    
   | FORALL (s, i, f) -> 
     add_goals (FORALL (s, i, f));
-    solve_neg (fun () -> solve_pos suc fail) fail
+    solve_neg (fun () -> solve_pos suc fail ()) fail
     
   | TOP -> 
     add_goals TOP;
-    solve_neg (fun () -> solve_pos suc fail) fail
+    solve_neg (fun () -> solve_pos suc fail ()) fail
    
   | NEW (s,t1) -> 
     add_goals (NEW (s,t1));
-    solve_neg (fun () -> solve_pos suc fail) fail
+    solve_neg (fun () -> solve_pos suc fail ()) fail
     
   (* Positive formulas *)
 
@@ -384,7 +384,7 @@ match Term.observe form with
     positives := t;
     solve (fun () -> add_goals f2; 
                      let st = !nstates in 
-                     solve suc (fun () -> restore_atom st)) fail
+                     solve suc (fun () -> restore_atom st ()) ()) fail
 
   | BANG (sub, f) -> 
     begin
@@ -543,7 +543,7 @@ match Term.observe form with
             atoms := form :: t;
             save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
             let st = !nstates in
-            solve_atm_aux suc (fun () -> restore_atom st) (lolli :: t1)
+            solve_atm_aux suc (fun () -> restore_atom st ()) (lolli :: t1)
           | [] -> begin 
             if !verbose then begin
               print_string ("No clauses for this atom: "^str^".\n"); 
@@ -586,7 +586,7 @@ match Term.observe form with
 	      nstates := !nstates - 1; 
           save_state (PRED(str, terms)) bind_b4 suc fail t1 ASYN;
           let st = !nstates in
-          solve_atm_aux suc (fun () -> restore_atom st) forms
+          solve_atm_aux suc (fun () -> restore_atom st ()) forms
         | [] -> 
 	      if !verbose then begin
 	        print_string ("No clauses for this atom: "^str^".\n"); 
