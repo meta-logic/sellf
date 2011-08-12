@@ -268,6 +268,26 @@ let clear_tables () =
   Hashtbl.add subexTpTbl "$gamma" (LIN)
 ;;
 
+let init_context  : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
+let init_clausesTbl  : ( ( (string, terms list) Hashtbl.t) ref) = ref (Hashtbl.create 100) ;;
+
+let saveInitState () = 
+  init_context := Hashtbl.copy !context;
+  init_clausesTbl := Hashtbl.copy !clausesTbl
+;;
+
+let recoverInitState () = 
+  Stack.clear !states;
+  Stack.clear bind_stack;
+  context := !init_context;
+  clausesTbl := !init_clausesTbl;
+  goals := [];
+  positives := [];
+  atoms := [];
+  bind_len := 0;
+  nstates := 0
+;;
+
 let remove_states n = let s = Stack.length !states in
   if !verbose then begin
     print_string "Removing states: "; 

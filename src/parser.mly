@@ -404,13 +404,15 @@ intBody:
 * ; */
 
 top: 
-| HELP    { print_endline "There are the following commands available:\n";
-            print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
-            print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program. The default value is 'off'.";
-	    print_endline "#time = on or #time = off: turns on or off the measuring of the execution time of a query. The default value is 'off'.";
-            print_endline "#exit command terminates the program.";
-            print_endline "#help displays this message;"; "help"
-          }
+| HELP    { 
+  print_endline "There are the following commands available:\n";
+  print_endline "#load location-of-file (without extensions .sig nor ,pl): loads the corresponding program;";
+  print_endline "#done: you must type this to indicate that you are done working with a file and will load another one.";
+  print_endline "#verbose = on or #verbose = off: turns on or off the printing of the proof search steps taken by the interpreter. This is useful for debugging a program. The default value is 'off'.";
+	print_endline "#time = on or #time = off: turns on or off the measuring of the execution time of a query. The default value is 'off'.";
+  print_endline "#exit command terminates the program.";
+  print_endline "#help displays this message;"; "help"
+  }
 | VERBOSE EQ ON {"verbose-on"}
 | VERBOSE EQ OFF {"verbose-off"}
 | TIME EQ ON {"time-on"}

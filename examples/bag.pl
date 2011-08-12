@@ -38,7 +38,7 @@ if (less X Y) Prog :- X < Y, Prog.
 if (grt X Y) Prog :- X > Y, Prog.
 if (leq X Y) Prog :- X <= Y, Prog.
 if (geq X Y) Prog :- X >= Y, Prog.
-if (isEmpty Sub) Prog :- [Sub]bang Prog.
+if (isEmpty Sub) Prog :- [Sub]hbang Prog.
 
 new Prog :- nsub \X (Prog X).
 

@@ -41,6 +41,8 @@ let position lexbuf =
   Term.print_term tn; print_newline ();
   Term.print_term (Norm.hnorm t4)*)
 
+let samefile = ref true ;;
+
 let rec start () = 
     Structs.clear_tables ();
     print_string ":> ";
@@ -74,7 +76,11 @@ let rec start () =
                         Parser.clause Lexer.token lexbuf
                       done  
                     with 
-                      | Lexer.Eof -> solve_query ()
+                      | Lexer.Eof -> Structs.saveInitState (); 
+                        while !samefile do 
+                          solve_query (); 
+                          Structs.recoverInitState () 
+                        done
                       | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); start ()
                       | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
                     end
@@ -89,6 +95,8 @@ and
 solve_query () = 
     print_string "?> ";
     let query_string = read_line() in
+    if query_string = "#done" then samefile := false      
+    else begin
     let query = Lexing.from_string query_string in
       begin
       try 
@@ -130,6 +138,7 @@ solve_query () =
       with
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
+      end
       end
 
 let _ = 
