@@ -76,7 +76,7 @@ let rec start () =
                         Parser.clause Lexer.token lexbuf
                       done  
                     with 
-                      | Lexer.Eof -> Structs.saveInitState (); 
+                      | Lexer.Eof -> samefile := true; Structs.saveInitState (); 
                         while !samefile do 
                           solve_query (); 
                           Structs.recoverInitState () 

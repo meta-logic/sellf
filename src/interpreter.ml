@@ -86,7 +86,7 @@ let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
 
 (* Operation k <l for K context *)
 let k_less_than s = Hashtbl.iter (fun idx forms -> 
-  if idx != "$gamma" && not (idx = s) && not (greater_than idx s) then begin 
+  if not (idx = "$gamma") && not (idx = s) && not (greater_than idx s) then begin 
     if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
     remove_all idx 
   end) 
