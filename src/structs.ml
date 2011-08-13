@@ -279,8 +279,12 @@ let saveInitState () =
 let recoverInitState () = 
   Stack.clear !states;
   Stack.clear bind_stack;
-  context := !init_context;
-  clausesTbl := !init_clausesTbl;
+  (* G: the facts consumed should not return to the contexts. 
+  Watch out. Even if you uncomment this, it does not have the expected result
+  since the copy method does not make copies of the data structure stored inside
+  the hash.*)
+(*  context := !init_context;
+  clausesTbl := !init_clausesTbl;*)
   goals := [];
   positives := [];
   atoms := [];
