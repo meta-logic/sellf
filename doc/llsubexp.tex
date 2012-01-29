@@ -1,0 +1,266 @@
+In a previous work~\cite{nigam11lsfa}, the authors proposed to use
+linear logic with subexponentials as a
+logical framework for specifying proof systems. We showed that this logic
+can be used as a general framework where a wide range of
+proof systems for different logics can be encoded and therefore it seems to
+be a suitable framework for providing a modular method for checking the
+correctness of proof transformations for different logics. This section 
+reviews this work.
+
+Although we assume that the reader is familiar with linear logic, we
+review some of its basic proof theory. 
+\emph{Literals} are either atomic formulas ($A$) or their
+negations ($A^\bot$).  The connectives $\tensor$ and $\lpar$ and their
+units $1$
+and $\bot$ are \emph{multiplicative}; the connectives $\plus$ and
+$\with$ and their units $0$ and $\top$ are \emph{additive}
+connectives; $\forall$ and $\exists$ are (first-order) quantifiers;
+and $\bang$ and $\quest$ are the exponentials.  We shall assume that
+all formulas are in \emph{negation normal form}, meaning that all
+negations have atomic scope.
+
+Besides sharing all these connectives with linear logic, \sellf\ may
+include as many exponential-like connectives, called
+subexponentials, as one needs. Subexponentials, written
+$\nbang{l}$ and $\nquest{l}$, are labeled with an index, \tsl{l}. The
+subexponentials indexes available in a
+system are formally specified by the tuple 
+$\tup{I, \preceq, \Wscr, \Cscr}$, where $I$ is the set of labels for
+subexponentials, $\preceq$ is a preorder relation among the elements of
+$I$, and both $\Wscr$ and $\Cscr$ are subsets of 
+$I$.  Intuitively, the sets $\Wscr$ and $\Cscr$ specify which
+subexponentials allow, respectively, weakening 
+and contraction. The pre-order $\preceq$, on the other hand, specifies the
+provability relation among subexponentials and is used in the introduction
+rule of $\nbang{l}$. We will require the preorder $\preceq$ to be upwardly
+closed with respect to the sets $\Wscr$ and $\Cscr$, that is, if $x \preceq
+y$ and $x \in \Wscr$ ($x \in \Cscr$), then $y \in \Wscr$ ($y \in
+\Cscr$).
+ We will also assume  the existence of a maximal subexponential, denoted by
+$\maxSE$, for which contraction and weakening are allowed and which is
+greater than all other subexponentials. This subexponential is used for
+linear logic theories specifying proof systems.
+
+
+\begin{figure}[t]
+$$
+\infer[\text{[$\binampersand$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L, F
+\binampersand G}{\vdash \mathcal{K} : \Gamma \Uparrow L, F \;\;\; \vdash
+\mathcal{K} : \Gamma \Uparrow L, G}
+\qquad
+\infer[\text{[$\bindnasrepma$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L, F
+\bindnasrepma G}{\vdash \mathcal{K} : \Gamma \Uparrow L, F, G}
+\qquad
+\infer[\text{[$\top$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L, \top}{}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$\bot$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L,
+\bot}{\vdash \mathcal{K} : \Gamma \Uparrow L}
+\qquad 
+\infer[\text{[$\forall$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L,
+\forall x.F}{\vdash \mathcal{K} : \Gamma \Uparrow L, F\{c/x\}}
+\qquad 
+\infer[\text{[$?^l$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L, ?^l
+F}{\vdash \mathcal{K} +_l F : \Gamma \Uparrow L}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$\oplus_i$]}]{\vdash \mathcal{K} : \Gamma \Downarrow F_1
+\oplus F_2}{\vdash \mathcal{K} : \Gamma \Downarrow F_i}
+\qquad
+\infer[\text{[$\otimes$, given $(\mathcal{K}_1 =
+\mathcal{K}_2)|_{\mathcal{C} \cap \mathcal{W}}$]}]{\vdash \mathcal{K}_1
+\otimes \mathcal{K}_2 : \Gamma, \Delta \Downarrow F \tensor G}{\vdash
+\mathcal{K}_1 : \Gamma \Downarrow F \;\;\; \vdash \mathcal{K}_2 : \Delta
+\Downarrow G}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[1, given $\mathcal{K}[\mathcal{I} \setminus \mathcal{W}] =
+\emptyset$]}]{\vdash \mathcal{K} : \cdot \Downarrow 1}{}
+\qquad
+\infer[\text{[$\exists$]}]{\vdash \mathcal{K} : \Gamma \Downarrow \exists
+x.F}{\vdash \mathcal{K} : \Gamma \Downarrow F\{t/x\}}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$!^l$, given $\mathcal{K}[\{x\ |\ l \npreceq x \wedge x
+\notin \mathcal{W}\}] = \emptyset$]}]{\vdash \mathcal{K} : \cdot \Downarrow
+!^l F}{\vdash \mathcal{K} \leq_l : \cdot \Uparrow F}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[I, given $A \in (\Gamma \cup
+\mathcal{K}[\mathcal{I}])$ and $(\Gamma \cup \mathcal{K}[\mathcal{I}
+\setminus \mathcal{W}]) \subseteq \{A\} $]}]{\vdash \mathcal{K}
+: \Gamma \Downarrow A^\bot}{}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$D_l$, given $l \in \mathcal{C} \cap \mathcal{W}$]}]{\vdash
+\mathcal{K} +_l P : \Gamma \Uparrow \cdot}{\vdash \mathcal{K} +_l P :
+\Gamma \Downarrow P}
+\qquad
+\infer[\text{[$D_l$, given $l \notin \mathcal{C} \cap
+\mathcal{W}$]}]{\vdash \mathcal{K} +_l P : \Gamma \Uparrow \cdot}{\vdash
+\mathcal{K} : \Gamma \Downarrow P}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$D_1$]}]{\vdash \mathcal{K} : \Gamma, P \Uparrow
+\cdot}{\vdash \mathcal{K} : \Gamma \Downarrow P}
+\qquad
+\infer[\text{[$R\Downarrow$]}]{\vdash \mathcal{K} : \Gamma \Downarrow
+N}{\vdash \mathcal{K} : \Gamma \Uparrow N}
+\qquad
+\infer[\text{[$R\Uparrow$]}]{\vdash \mathcal{K} : \Gamma \Uparrow L,
+S}{\vdash \mathcal{K} : \Gamma, S \Uparrow L}
+$$
+\caption{Focused linear logic system with subexponentials with signature
+$\tup{I, \preceq, \Wscr,\Cscr}$. We assume that: $\mathcal{C} \subseteq
+\mathcal{W}$, $\mathcal{K}$ is an indexed context, $L$ is a list of formulas, $\Gamma$ is a multi-set of
+formulas and positive literals, $A^\bot$ is a positive polarity literal,
+$P$ is a non-negative literal, $S$ is a positive literal or formula and $N$
+is a negative formula.}
+\label{figure:sellf}
+\vspace{-5mm}
+\end{figure}
+
+\begin{figure}[t]
+% \vspace{-4mm}
+\[
+\begin{array}{l@{\qquad}l}
+\bullet~(\mathcal{K}_1 \tensor \mathcal{K}_2) [\tsl{i}] = \left\{
+\begin{array}{ll}
+ \mathcal{K}_1[\tsl{i}] \cup \mathcal{K}_2[\tsl{i}] & \hbox{ if }
+\tsl{i} \notin
+\qc\\
+ \mathcal{K}_1[\tsl{i}]  & \hbox{ if } \tsl{i} \in \qc \cap \qw
+\end{array}
+\right.
+& 
+\bullet~\mathcal{K}[\mathcal{S}] =
+\bigcup\{\mathcal{K}[\tsl{i}]\;|\;\tsl{i}\in \mathcal{S}\}\\[15pt]
+\bullet~(\mathcal{K} +_l F) [\tsl{i}] = \left\{
+\begin{array}{ll}
+ \mathcal{K}[\tsl{i}] \cup \{F\} & \hbox{ if } \tsl{i} = l\\
+ \mathcal{K}[\tsl{i}]  & \hbox{ otherwise }
+\end{array}
+\right.
+&
+\bullet~ \mathcal{K} \leq_i[l] = \left\{
+\begin{array}{ll}
+ \mathcal{K}[l] & \hbox{ if } \tsl{i} \preceq l\\
+ \emptyset & \hbox{ if } \tsl{i} \npreceq l 
+\end{array}
+\right.
+\end{array}
+\]
+\[
+\bullet~ (\mathcal{K}_1 \star \mathcal{K}_2)\mid_\mathcal{S}
+\textrm{ is true if and only if }(\mathcal{K}_1[\tsl{j}]
+\star \mathcal{K}_2[\tsl{j}]) \textrm{ for all $\tsl{j} \in \Sscr$.}
+\]
+\caption{Specification of operations on contexts. Here, 
+$\tsl{i} \in I$, $\Sscr \subseteq I$, and the 
+binary connective $\star \in \{=, \subset, \subseteq\}$.}
+\label{Fig:Contexts}
+\vspace{-5mm}
+\end{figure}
+
+\Paragraph{Focusing} The focused proof system for linear logic with
+subexponentials for a given subexponential signature
+$\Sigma$, called $\sellf_\Sigma$, is
+depicted in Figure~\ref{figure:sellf}
+and was proposed in \cite{nigam09ppdp}.\footnote{Whenever it is clear from
+the context, we will elide the
+subexponential signature
+$\Sigma$.}
+First proposed by Andreoli \cite{andreoli92jlc} for linear logic,
+focused proof systems provide the normal form proofs for cut-free proofs.
+In order to introduce \SELLF, we first recall some more terminology. 
+We classify as
+\emph{positive} the formulas whose main connective is either $\tensor,
+\plus, \exists$, the subexponential bang ($\nbang{l}$), the unit $\one$ and
+negative literals ($A^\bot$).\footnote{Atoms may be assigned with any
+polarity, see \cite{andreoli92jlc,nigam10jar}. However as this assignment
+does not play a role here, we assume for simplicity that all atomic
+formulas have negative polarity.} All other formulas are classified as
+\emph{negative}. Figure~\ref{figure:sellf} contains the focused proof
+system $\SELLF$ that
+is a rather straightforward generalization of Andreoli's original
+system. There are two kinds of arrows in this proof system. Sequents
+with the $\Downarrow$ belong to the \emph{positive} phase and introduce
+the logical connective of the ``focused'' formula (the one to the right
+of the arrow): building proofs of such sequents may require
+non-invertible proof steps to be taken.  Sequents with the $\Uparrow$
+belong to the \emph{negative} phase and 
+decompose the formulas on their right in such a way that only
+invertible inference rules are applied. The structural 
+rules $D_1, D_l, R\Uparrow,$ and
+$R \Downarrow$ make the transition between a negative and a positive
+phase. 
+
+Similarly as in the usual presentation of linear logic, there is a pair
+of contexts to the left of $\Uparrow$ and $\Downarrow$ of
+sequents, called \emph{sequent context}, written here as $\mathcal{K}:
+\Gamma$. 
+The second context, $\Gamma$, collects the formulas whose main
+connective is not a question-mark, behaving as the bounded context
+in linear logic. But differently from linear logic, where the first
+context is a multiset of formulas whose main connective is a
+question-mark, $\mathcal{K}$ is an \emph{indexed context}, which is a
+mapping from each index in the set $I$ to a finite multiset of formulas. In
+Andreoli's focused system for linear
+logic, the index set contains a single subexponential, $\maxSE$, and
+$\mathcal{K}[\maxSE]$ contains the set of unbounded formulas.
+
+Figure \ref{Fig:Contexts} contains different
+operations used for indexed contexts $\Kscr$. For example, the
+operation 
+$(\mathcal{K}_1 \tensor \mathcal{K}_2)$, used in the tensor rule, 
+specifies the resulting indexed context obtained by merging two contexts
+$\Kscr_1$ and $\Kscr_2$. The merging is done by taking into account the
+subexponentials that are allowed to contract, in which case their contexts
+are copied among the premises, from those that are not allowed
+to contract, in which case their contexts are split among the premises. 
+The bang introduction rule, $\nbang{l}$, also deserves some explanation.
+It takes into account the pre-order $\preceq$ among the subexponential
+indexes. This rule specifies that one can only introduce a bang labeled
+with $l$ if all formulas in the premise are in contexts whose
+subexponentials, $s_1, \ldots, s_n$, are such that $l \preceq s_i$ for all
+$i$. Moreover, all formulas in the end sequent that are
+in a weakenable context, $s'$, such that $l \npreceq
+s'$, are weakened.
+The side conditions of \sellf's rules will
+provide us with formal guidelines on when an encoded inference rule is
+valid. 
+
+Danos \etal\ showed that \sellf\ admits cut-elimination~\cite{danos93kgc}
+and Nigam proved the completeness of the focused proof system described in
+this section~\cite{nigam09phd}. 
+
+As previously mentioned, the $\preceq$ specifies the provability
+relation among subexponentials. In particular, one
+can show that for any subexponential signature $\Sigma = \tup{I, \preceq,
+\Wscr, \Cscr}$ such that $s_1 \preceq s_2$, the formula $(\nquest{s_1}
+F)^\bot \lpar \nquest{s_2} F$ is a \sellf\ theorem. This means that if one
+sequent $\Sscr_1$ where a formula $F$ appears in
+the context of $s_1$ is known to be provable, then a sequent obtained from
+$\Sscr_1$ by moving the formula $F$ to the context of $s_2$ is also
+provable. This will be a valuable result when specifying the provability
+relation of sequents in Section~\ref{sec:provif}.
+
+Finally, to improve readability, we will often show explicitly the 
+formulas appearing in the image of the indexed
+context, $\Kscr$, of a sequent. For example, if the set of subexponential
+indexes is $\{x1, \ldots, xn \}$, then the following negative sequent 
+$ \vdash \Theta : \Theta_1 :_{x1} \Theta_2 :_{x2} \cdots \Theta_n :_{xn}
+\Gamma
+\Uparrow L$
+denotes the \SELLF\ sequent $\vdash \Kscr: \Gamma \Uparrow L$, where
+$\Kscr[xi] = \Theta_i$ for all $1 \leq i \leq n$ and $\Kscr[\maxSE] =
+\Theta$.
+
+

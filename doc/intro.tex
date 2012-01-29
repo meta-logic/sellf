@@ -1,0 +1,220 @@
+Proof transformation is a powerful technique used in the proof of many
+foundational results about proof systems. For instance, one demonstrates
+the admissibility of the cut-rule~\cite{gentzen35} by showing
+how to transform a proof with cuts into a proof without cuts.
+Similarly, in order to show the completeness of a proof search strategy,
+such as uniform provability~\cite{miller91apal}  and the focusing
+discipline~\cite{andreoli92jlc}, one demonstrates how to transform an
+arbitrary (cut-free) proof into another (cut-free) proof that follows the
+given strategy, such as an uniform proof or a focused proof. 
+
+However, it is often a tedious task to verify whether a proof
+transformation is valid, specially when there is a great number of cases to
+consider. For example, in the proof of completeness of the focusing
+discipline, one needs to show that some rules permute over other
+rules~\cite{miller07cslb}.
+These results are called permutation lemmas and they involve
+a number of proof transformations. The following transformation is one of
+the many cases that need to be considered: A linear logic proof ending with
+the following derivation, where $\tensor_R$ is applied last,
+{\small
+\[
+\infer[\tensor_R]{\Gamma, \Gamma' \vdash \Delta, \Delta', A\tensor B,
+C\with
+D}
+{
+{\Gamma \vdash \Delta, A}
+&
+\infer[\with_R]{\Gamma' \vdash \Delta', B, C\with D}
+{
+{\Gamma' \vdash \Delta', B, C}
+&
+{\Gamma' \vdash \Delta', B, D}
+}
+}
+\]
+}
+can be transformed into another linear logic proof ending with the
+following
+derivation, where the $\with_R$ is applied last:
+{\small
+\[
+\infer[\with_R]{\Gamma, \Gamma' \vdash \Delta, \Delta', A\tensor B, C\with
+D}
+{
+\infer[\tensor_R]{\Gamma, \Gamma' \vdash \Delta, \Delta', A\tensor B, C}
+{
+{\Gamma \vdash \Delta, A}
+&
+{\Gamma' \vdash \Delta', B, C}
+}
+&
+\infer[\tensor_R]{\Gamma, \Gamma' \vdash \Delta, \Delta', A\tensor B, D}
+{
+{\Gamma \vdash \Delta, A}
+&
+{ \Gamma' \vdash  \Delta', B, D}
+}
+}
+\]
+}
+The proof transformation above is one of the cases required in showing
+that any instance of a $\tensor_R$ rule can permute over any instance
+of a $\with_R$. In
+particular, to check the correctness of such a transformation, one needs to
+check that (1) all rules are correctly applied and that (2) the premises of
+the latter derivation can be proved using the proofs introducing the
+premises of the former derivation. For instance, in the case above, the
+proof introducing the sequent $\Gamma \vdash \Delta, A$ in the former
+derivation can be used twice in the latter derivation. 
+
+Although one can check by hand the validity of such proof transformations,
+this procedure is prone to human error as one can easily miss a case or
+another. A much better approach is to automate this process. However, it
+would be easy to build a specific tool that checks the validity
+proof transformations for a specific proof system for a given
+logic, such as linear logic. Our goal here is a bit more ambitious, as we
+propose a general method that can be used for checking proof
+transformations for a number of proof systems for different logics, such as
+proof systems for intuitionistic, classical, and linear logics. 
+Up to our knowledge there is no such a tool yet available.
+
+% \newcommand\rules[1]{\tsl{Rules}{(\ensuremath{#1})}}
+% \newcommand\provif[2]{\tsl{Provif}{(\ensuremath{#1}, \ensuremath{#2})}}
+
+We specify proof systems in the linear logic framework with
+subexponentials proposed by Nigam \etal\ in \cite{nigam11lsfa}. It was
+shown in~\cite{nigam10jar,nigam11lsfa} that a wide range of proof systems,
+including natural deduction systems, can be encoded in this
+framework. 
+Then given a specification of a proof system, this paper shows
+how one can check the validity of some proof transformations in the encoded
+system by constructing two types of propositional
+theories.\footnote{Our theories are also
+called answer-set programs~\cite{gelfond90iclp} in the non-monotonic logic
+programming community.} The first
+theory, $\Tscr$, is constructed for a given inference rule,
+$r$, and specifies the set of its valid instances. 
+We show that $\Tscr$ is sound and complete in the sense
+that its set of \emph{minimal models} corresponds 
+exactly to the set of all possible valid instances of the given inference
+rule $r$. On the other hand, for two given sequents, $\Sscr_1$ and
+$\Sscr_2$, the second theory specifies whether
+the sequent $\Sscr_2$ is provable, when assuming that $\Sscr_1$ is also
+provable. Although the
+latter theory is not complete, but only sound, we use facts about our 
+linear logic framework to increase its power. For example,
+we are able to show that $\Sscr_2$ is provable,
+assuming that $\Sscr_1$ is provable, when the only difference between
+$\Sscr_2$ and $\Sscr_1$ is that $\Sscr_2$ has an additional formula that
+can be weakened. In the framework proposed in \cite{lutovac.unp}, such
+cases seems to require much more machinery.
+
+The main advantage of using propositional theories is that they enable the
+use of powerful off-the-shelf
+provers~\cite{niemela97lpmnr,leone06tcl}. We
+implemented a tool that takes the specification of a proof system and
+checks automatically which inference rules of the object-system permute
+over another rule. Whenever the tool can find a valid permutation
+it outputs the corresponding proof transformation,
+and whenever it cannot
+show that a rule permutes over another, it outputs the cases that it failed
+to find a valid permutation. 
+We used this tool to show a number of proof
+transformations. For instance, our tool checks all cases of the key
+permutation lemmas
+needed for showing the completeness of the focusing
+discipline~\cite{andreoli92jlc} and uniform proofs~\cite{miller91apal}.
+%as well
+%as all the general permutation cases
+%identified in \cite{lutovac.unp}.
+
+We now summarize our main contributions. Sections~\ref{sec:sellf} and
+\ref{sec:encoding_PF}
+review the linear logic framework with subexponentials used to encode
+proof systems. Sections~\ref{sec:reason} and \ref{sec:provif} detail the
+construction the propositional theories described above. We also
+prove the
+soundness and completeness of the theory that specifies the validity of 
+an inference rule, and prove the soundness of
+theory specifying the provability relation among sequents. In
+Section~\ref{sec:examples}, we report on the use
+of existing propositional provers to construct our tool that checks
+automatically whether a rule permutes over another. We also summarize our
+experimental results on the examples described above.
+Finally in Sections~\ref{sec:related} and \ref{sec:conc} we conclude by
+discussing related and future work.
+
+% Proof transformation is an important proof theoretic technique that has
+% been used for showing a number of foundational results about proof
+% systems. For instance, one normally relies on proof transformation to
+% show the admissibility of the cut-rule. Similarly,
+% proof transformation has also been used to prove the completeness of
+% proof
+% search strategies, such as uniform provability and the focusing
+% discipline. However, in order to check the validity of some proof
+% transformation, such as when one inference rule permutes over
+% another, one needs to check a number of tedious cases involving a
+% number of symbols. Therefore, checking the correctness of proof
+% transformations is prone to human error. This paper offers the means to
+% automatize this process. In particular, we specify proof systems in the
+% logical framework based on linear logic with subexponentials proposed
+% previously by the authors. Then, given an specification, we construct a
+% classical propositional theory, such that the validity of an instance of
+% a
+% specified inference rule is reduced to the satisfiability of this logical
+% theory. We show that this encoding is sound and complete in the sense
+% that the set of minimal models of the propositional theory corresponds 
+% exactly to the set of all
+% possible valid instances of the given inference rules. Moreover, we also
+% provide a theory for checking the provability of a sequent when assuming
+% the provability of another sequent an operation needed in many proof
+% transformations.
+% Finally, we constructed a tool that
+% can check automatically which inference rules of a given theory permute
+% over each other. Among our examples, we used this tool to prove the key
+% permutation lemmas used in the completeness proofs of uniform
+% provability of intuitionistic logic and of the focusing discipline of
+% linear logic. 
+% 
+% 
+% We show that this encoding is sound and complete, in the sense
+% that the set of minimal models of the theory corresponds to the set of
+% all
+% possible valid instances of the given inference rule.
+
+
+\begin{comment}
+- Logical Frameworks have been proposed and used to specify proof systems
+cite previous work of Elaine, Dale, Vivek, and Pfenning. 
+
+- Advantages of using logical frameworks. 
+
+- Proving cut-elimination. 
+- Variable binding is precise.
+- Connecting different proof systems in a common theory. 
+
+- This paper continues this line of research. In particular, we show how
+to derive in an automated fashion, permutation lemmas. Permutation lemmas 
+are of great importance for proof search: focusing theorems. Apply
+invertible rules first. Moreover, since they involve many cases, they are
+prone to human error. 
+
+Main contributions:
+
+- From a logical specification encoding a proof systems, we extract a set 
+of set of constraints. Each set of constraints specifies an inference rule 
+of the encoded object logic. 
+
+- We show that our algorithm is sound and complete. 
+
+- We show how to relate the provability of two encoded inference rules. 
+
+- We implemented the system and used to automatically enumerate all the
+cases for the permutation lemmas of linear logic. 
+
+- Can we show automatically the permutation lemmas of Prawitz's
+normalization theorem for Natural Deduction?
+\end{comment}
+
+

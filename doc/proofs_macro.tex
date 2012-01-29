@@ -1,0 +1,296 @@
+Given a satisfiable set of constraints $T$, it has a model $M$ which
+can be described by a set of predicates $emp \backslash 1$,
+$mctx \backslash 2$, $union \backslash 3$ and $elin \backslash 2$ that are true. 
+Each valid instance of these predicates will trigger a rewritting rule as
+described in Figure \ref{fig:rewriting}. Using
+these rules it is possible to rewrite the generic
+contexts of a derivation in terms of some formulas.
+
+The generic contexts that are left in the end can be considered arbitrary sets
+of formulas (and can be merged, or course, after all possible modifications).
+%and the initial contexts
+%(numbered 0). The generic contexts number 0 can all be considered arbitrary sets
+%of formulas.
+
+\begin{figure}
+\begin{align*}
+\emp{\Gamma} \qquad & \Gamma \rightarrow \cdot \\
+\mctx{F}{\Gamma} \qquad & \Gamma \rightarrow \Gamma, F \\
+\union{\Gamma'}{\Gamma''}{\Gamma} \qquad & \Gamma \rightarrow \Gamma', \Gamma'' \\
+%\In{F}{\Gamma} \qquad & \Gamma \rightarrow \Gamma, F \\
+\elin{F}{\Gamma} \qquad & \Gamma \rightarrow F \\
+\top \qquad & \cdot, \Gamma \rightarrow \Gamma
+\end{align*}
+\caption{Rewritting rules used to transform the generic contexts into actual
+sets of formulas.}
+\label{fig:rewriting}
+\end{figure}
+
+We will prove that these rewriting rules converge in our case. For that, we need
+the following lemma:
+
+\begin{lemma}
+\label{lemma:crit_pairs}
+Let $M$ be any model of a set of constraints $T$. Then, the following always
+holds:
+\begin{align}
+&\{ \emp{\Gamma}, \mctx{F}{\Gamma} \} \not\subseteq M \label{em} \\
+&\{ \emp{\Gamma}, \elin{F}{\Gamma} \} \not\subseteq M \label{ee} \\
+&\{ \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma} \} \subseteq M \Rightarrow \{ 
+    \emp{\Gamma'}, \emp{\Gamma''} \} \subseteq M \label{eu} \\
+&\{ \elin{F}{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma} \} \subseteq M
+\Rightarrow \{ \emp{\Gamma'}, \elin{F}{\Gamma''} \} \subseteq M \vee \nonumber \\
+&\{ \emp{\Gamma''}, \elin{F}{\Gamma'} \} \subseteq M \label{elun}
+\end{align}
+\end{lemma}
+
+\begin{proof}
+To prove \ref{em} and \ref{ee}, note the clauses:
+\[
+\begin{array}{l}
+  \In{F}{\Gamma} \subset \elin{F}{\Gamma}.\\
+  \In{F}{\Gamma} \subset \mctx{F}{\Gamma}.\\
+  \bot \subset \In{X}{\Gamma}, \form{X},\emp{\Gamma}.
+\end{array}
+\]
+It is clear that if $\mctx{F}{\Gamma}$ or $\elin{F}{\Gamma}$ and $\emp{\Gamma}$
+occur on the same set of constraints, it is unsatisfiable, thus, it has no
+models.
+
+Statement \ref{eu} is a direct consequence of the following clauses:
+\[
+\begin{array}{l}
+\emp{\Gamma'} \subset \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}. \\
+\emp{\Gamma''} \subset \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}.
+\end{array}
+\]
+
+Statement \ref{elun} is a direct consequence of the following clauses:
+\[
+\begin{array}{l}
+1 \{ \elin{F}{\Gamma'}, \elin{F}{\Gamma''} \} 1 \subset \elin{F}{\Gamma},
+\union{\Gamma'}{\Gamma''}{\Gamma}. \\
+1 \{ \emp{\Gamma'}, \emp{\Gamma''} \} 1 \subset \elin{F}{\Gamma},
+\union{\Gamma'}{\Gamma''}{\Gamma}.
+\end{array}
+\]
+\end{proof}
+
+\begin{giselle}
+Define $\mathcal{R}$:
+For a model $M$ and a sequent $S$, $\mathcal{R}$ is defined as:
+if M is empty, then, return S
+else let el in M, then
+  use rule corresponding to el to rewrite the contexts of S, obtaining S'
+  return $\mathcal{R}(M \setminus \{el\}, S')$.
+\end{giselle}
+
+\begin{lemma}
+\label{lemma:convergence}
+Let $M$ be a model of a set of constraints $T$. The rewriting of contexts using
+each element in $M$ once to apply the rules of Figure \ref{fig:rewriting} is convergent.
+\end{lemma}
+
+\begin{proof}
+Since the model $M$ has a finite set of predicates, the rewriting always
+terminates. Now, let's evaluate the critical pairs. By Lemma
+\ref{lemma:crit_pairs}, we know that $\emp{\Gamma}$ never occurs on the same
+model as $\elin{F}{\Gamma}$ or $\mctx{F}{\Gamma}$, and therefore we don't need to
+treat them as critical pairs. 
+
+If $\emp{\Gamma}$ and
+$\union{\Gamma'}{\Gamma''}{\Gamma}$ occur on the same model, it is the case that
+$\emp{\Gamma'}$ and $\emp{\Gamma''}$ also occur on this set, by Lemma
+\ref{lemma:crit_pairs}. There are basically two possible options for rewriting:
+
+$$\Gamma \xrightarrow{{\scriptstyle \emp{\Gamma}}} \cdot$$
+$$\Gamma \xrightarrow{{\scriptstyle \union{\Gamma'}{\Gamma''}{\Gamma}}} \Gamma', \Gamma''
+\xrightarrow{{\scriptstyle \emp{\Gamma'}}} \cdot, \Gamma''
+\xrightarrow{{\scriptstyle \emp{\Gamma''}}} \cdot,
+\cdot \rightarrow \cdot$$
+
+The rule for $\emp{\Gamma}$ can be applied first, and we will get the empty set at once or
+the rule for $\union{\Gamma'}{\Gamma''}{\Gamma}$ is applied and the $\Gamma'$
+and $\Gamma''$ are rewritten as empty sets. In both cases, the result is the
+same.
+
+$\mctx{F}{\Gamma}$ and $\union{\Gamma'}{\Gamma''}{\Gamma}$ will not occur on the
+same model since $\Gamma$ is unbounded on the first predicate but bounded on the
+second.
+
+If $\union{\Gamma'}{\Gamma''}{\Gamma}$ and $\elin{F}{\Gamma}$ occur on the same
+model, by Lemma \ref{lemma:crit_pairs}, it is the case that one of the sets $\{
+\emp{\Gamma'}, \elin{F}{\Gamma''} \}$ or $\{ \emp{\Gamma''}, \elin{F}{\Gamma'}
+\}$ also occur in this model. There are basically three options for rewriting:
+
+$$\Gamma \xrightarrow{{\scriptstyle \elin{F}{\Gamma}}} F$$
+$$\Gamma \xrightarrow{{\scriptstyle \union{\Gamma'}{\Gamma''}{\Gamma}}} \Gamma', \Gamma''
+\xrightarrow{{\scriptstyle \emp{\Gamma'}}} \cdot, \Gamma''
+\xrightarrow{{\scriptstyle \elin{F}{\Gamma''}}} \cdot,
+F \rightarrow F$$
+$$\Gamma \xrightarrow{{\scriptstyle \union{\Gamma'}{\Gamma''}{\Gamma}}} \Gamma', \Gamma''
+\xrightarrow{{\scriptstyle \emp{\Gamma''}}} \Gamma', \cdot
+\xrightarrow{{\scriptstyle \elin{F}{\Gamma'}}} F,
+\cdot \rightarrow F$$
+
+One of the possible derivations is to rewrite
+$\Gamma$ as $F$ at once, because of $\elin{F}{\Gamma}$. The other possible
+derivation will rewrite $\Gamma$ as $\Gamma', \Gamma''$ and then one of these
+symbols as the empty set and the other as $F$. In any of the possible
+derivations, the result is the same.
+
+We can conclude that this rewriting system converges under our assumptions.
+\end{proof}
+
+\begin{definition}[Correspondence]
+Let $M$ be a model of a set of constraints $T$, $F$ be a formula, $\Oscr$ and
+$\Cscr$ be a set of open and closed leaves and $S$ be a set of generic contexts.
+Let $\Cscr'$, $\Oscr'$ and $S'$ be the multi-sets of closed,
+open and end sequent contexts obtained from rewriting $\Cscr$, $\Oscr$ and
+$S$ using $\mathcal{R}$ and $M$. 
+Let $\sigma$ be a substitution mapping all
+generic contexts in $\Cscr'$, $\Oscr'$ and $S'$ to multi-sets of formulas.
+We say that $\langle \Oscr, \Cscr, S, F \rangle_M^{\sigma}$ corresponds to a derivation
+$\Xi$ if its end sequent is $S'\sigma$ and the multi-sets of open and closed
+leaves are exactly $\Oscr'\sigma$ and $\Cscr'\sigma$ respectively.
+\end{definition}
+
+\begin{theorem}
+\label{thm:soundness}
+(\textit{Soundness})
+Let $F$ be a \sellf\ formula and $\mr{F}{S}{\Tscr} = \langle \Cscr, \Oscr,
+\Tscr' \rangle$
+be the macro-rule computed by the procedure described in Section 
+\ref{sec:macro_def}. Let $T$ be a set of constraints in $\Tscr'$ and $M$ be an
+arbitrary model of $T$. 
+%Let $\Cscr'$, $\Oscr'$ and $S'$ be the multi-sets of closed,
+%open and end sequent contexts obtained from rewriting $\Cscr$, $\Oscr$ and
+%$S$ using $\mathcal{R}$ and $M$. 
+Then, for any substitution $\sigma$ there
+exists a derivation in \sellf\ corresponding to $\langle \Oscr, \Cscr, S, F
+\rangle_M^{\sigma}$.  
+
+%mapping all
+%generic contexts in $\Cscr'$, $\Oscr'$ and $S'$ to multi-sets of formulas, there
+%is a derivation in SELL whose end sequent is $S'\sigma$ and whose multi-sets of open and
+%closed leaves are exactly $\Oscr'\sigma$ and $\Cscr'\sigma$ respectively.
+
+
+%. If $M$ is a
+%model of $T$, then the derivation using generic contexts can be transformed to
+%an actual derivation in \sellf, in which the open and closed sequents
+%correspond, respectively, to sequents in $\Oscr$ and $\Cscr$.
+
+%Then, every satisfiable set $T \in \Tscr$ has a model $M$
+%which can be translated to a derivation in \sellf\ when focusing in $F$.
+\end{theorem}
+
+\begin{proof}
+Let $T$ be a satisfiable set of constraints in $\Tscr$ of a macro-rule for the 
+formula $F$. Since this set is satisfiable, it has a model $M$ which can be
+represented by a set of constraints that are true. For each of these valid
+constraints, we rewrite the generic contexts of the derivation obtained as
+described in Section \ref{sec:macro_def} using the rules of
+Figure \ref{fig:rewriting}. Considering that the generic contexts left after
+the rewritting is complete are arbitrary sets of formulas, we obtain a valid 
+derivation in \sellf.
+
+\begin{giselle}
+It might be the
+case that the set has more than one model, but the argument here should be valid for
+all of them.
+\end{giselle}
+
+We prove this by induction on the size of the formula. 
+
+The base case is when $F$ is atomic. If $F$ is a positive atomic formula $A$, the
+following sets of constraints are generated:
+
+\begin{enumerate}
+  \item $T_u = \{\elin{A^{\bot}}{\Gamma}\} \cup \{ \emp{\Gamma_s} \mid \forall s
+        \notin \Wscr\} $
+  \item $T_l = \{\elin{A^{\bot}}{\Gamma_l} \} \cup \{ \emp{\Gamma_s} \mid \forall s
+        \neq l \wedge s \notin \Wscr \} \cup \{ \emp{\Gamma} \}$
+  \item $T_w = \{\mctx{A^{\bot}}{\Gamma_w} \} \cup \{ \emp{\Gamma_s} \mid \forall s
+        \notin \Wscr \} \cup \{ \emp{\Gamma} \}$
+\end{enumerate}
+
+\begin{giselle}
+TODO: explain the role of the models.
+\end{giselle}
+
+In all these cases, the indices of the generic contexts are not altered. All
+that has to be done is rewrite some context $\Gamma_x$ as $A^{\bot}, \Gamma_x$
+(for case 3) or $A^{\bot}$ (for case 1 and 2) and transform all other contexts
+that cannot suffer weakening into empty sets. In that way, the derivation
+becomes a valid application of \sellf's inital rule.
+
+If $F$ is a negative atomic formula $A$, the rule $\alg{R\Uparrow}$ is applied and the
+constraints 
+
+$$T = \{ \elin{A}{\Gamma^{i+1}}, \union{\Gamma^i}{\Gamma^{i+1}}{\Gamma^{i+2}} \}$$
+
+are generated. In this case, the derivation looks like this:
+
+$$
+\infer[R\Uparrow]{\genK : \Gamma^{i} \Uparrow A}{\genK :
+\Gamma^{i+2} \Uparrow \cdot}
+$$
+
+Applying the rewritting rules defined previously, we obtain:
+
+$$
+\infer[R\Uparrow]{\genK : \Gamma^{i} \Uparrow A}{\genK :
+\Gamma^{i}, A, \Gamma^{i+1} \Uparrow \cdot}
+$$
+
+Considering the leftover generic contexts as arbitrary sets of formulas:
+
+$$
+\infer[R\Uparrow]{\mathcal{K} : \Gamma \Uparrow A}{\mathcal{K} :
+\Gamma, A \Uparrow \cdot}
+$$
+
+Which is a valid derivation in \sellf.
+\end{proof}
+
+\begin{comment}
+1) Metodo (K): 
+   model ---> tree
+2) Metodo
+   root sequent e formula --> set of set of constraints
+             
+{ K(M) | forall C in T. forall M. T |= M} = { set of derivations in SELLF introducing Root sequent}
+\end{comment}
+
+\begin{giselle}
+Define T as a set of $in$ constraints for each formula on the contexts.
+
+Define $\sigma$ as a mapping of any extra generic context to the empty set. 
+\end{giselle}
+
+\begin{theorem}
+\label{thm:completeness}
+(\textit{Completeness})
+Let $F$ be a \sellf\ formula and $\Xi$ a derivation of sequent focused in $F$. 
+Let $S$ be a generic context. Then there exists a set of constraints $\Tscr$ such that
+$\mr{F}{S}{\Tscr} = \langle \Cscr, \Oscr, \Tscr' \rangle$ and there exists a
+model $M$ for some $T \in \Tscr'$ and substitution $\sigma$, such that the $\langle \Oscr,
+\Cscr, S, F \rangle_M^{\sigma}$ corresponds to $\Xi$. 
+%obtained during the
+%process described in Section \ref{sec:macro_def} that represents this
+%derivation.
+\end{theorem}
+
+% inducao no tamanho da prova
+
+% pegar todas as derivacoes em sellf -> 
+
+Note that it is not required that the macro-rule is computed completely (until
+no more operations are applicable). This is because all intermediate macro-rules
+obtained during the process corresponds to a parcial derivation in \sellf. It is
+important to notice that sets of constraints $T \in \Tscr$ that are
+unsatisfiable correspond to derivations that fail. In fact, the inference rule
+for a connective $c$ cannot be applied during proof search if the macro-rule it
+generates makes unsatisfiable all previously satisfiable sets of constraints in
+$\Tscr$.

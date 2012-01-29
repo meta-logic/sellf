@@ -1,0 +1,57 @@
+Linear logic~\cite{girard87tcs} has been successfully used as a logical
+framework for specifying
+proof systems~\cite{miller.ep,nigam10jar,cervesato02ic}. Moreover, a number
+of techniques have been proposed that allow one to reason about the
+encoded systems. For instance, \cite{miller.ep,pfenning95lics} demonstrate
+how to check whether an encoded system admits cut-elimination.
+\cite{miller.ep} proposes additionally ways to automatize this process. 
+This paper continues this line of work. However, instead of tackling the
+admissibility of cut-elimination, we studied the automation of another
+important problem, namely of checking the correctness of proof
+transformations. Another main difference to previous work is that we use
+linear logic with subexponentials which seems to allow for the encoding of
+a wider range of proof systems. 
+
+Checking whether a rule permutes over another was also topic
+of the recent work~\cite{lutovac.unp}. Lutovac and Harland investigate
+syntactic conditions which allow to check the validity of such
+permutations. A number of cases of permutations and examples are
+provided. A main difference to our approach is that we fixed
+the specification language, namely \sellf, to specify inference rules and
+proof systems, whereas \cite{lutovac.unp} does not make such commitment. 
+On the one hand, we can only specify proof systems that can be specified in
+\sellf, but on the other hand, the use a logical framework allows for the
+construction of a general tool that can check for permutations
+automatically. It is not yet clear how one could construct a similar tool
+using the approach in~\cite{lutovac.unp}. Another important point is that our
+system does not have to individually identify ``active'', ``quasi-active'' and
+``principal'' formulas, as classified in \cite{lutovac.unp}. The use of
+constraints and the level of adequacy of derivations in \sellf\ already specify
+correctly the conditions in which an inference can be applied. If fact, all the
+known linear logic permutations in \cite{lutovac.unp} were identified by our
+system, and we believe that the other examples can be correctly identified using
+an initial set of constraints for each rule.
+% ative and principal formula problem -> not present in our setting due to the
+% use of specifications, e.g.: \Gamma, a, a -> F |- \Delta
+% the need to have "a" in the context can be modeled in the specification
+% formula or using constraints.
+% we can deal with multiple premises (more than 2)
+
+% There are some rules that have, for example, two principal formulas that I'm
+% not yet sure on how to specify them.
+%Finally, we have implemented all the permutation
+%examples in~\cite{lutovac.unp} in our tool and it reached the same
+%conclusions. \textbf{CHECK THIS LAST SENTENCE!} 
+
+Our implementation uses the propositional prover
+DLV~\cite{leone06tcl}. As shown in our experiments, DLV has shown itself
+to be efficient. Moreover, it also provides friendly interfaces to external
+programs and therefore it was suitable for our current needs. However, as
+our propositional theories are basically encoding multiset operations, one
+could imagine to use Satisfiability Modulo Theories (SMT) solvers,
+specialized in solving such type of constraints. One such solver was
+proposed in \cite{piskac10ijcar}. We hope that with the maturity of these
+tools, one can improve performance and reasoning power of our method. This
+is, however, a topic for future work.
+
+

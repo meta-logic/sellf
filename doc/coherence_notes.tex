@@ -1,0 +1,20 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+
+\title{Observations about the specification of sequent calculus systems}
+\author{Giselle Machado N. Reis \\ \texttt{giselle@logic.at}}
+
+\begin{document}
+\maketitle
+
+\begin{itemize}
+    \item The predicates that identify object-level formulas ($\lfloor \cdot
+    \rfloor$ and $\lceil \cdot \rceil$) are \texttt{lft} and \texttt{rght}.
+    \item If a connective $\diamond$ is introduced on the left by two rules which are
+    specified as $B_{l1}$ and $B_{l2}$, than it is stored as $B_{l1}
+    \oplus B_{l2}$.
+\end{itemize}
+
+\end{document}

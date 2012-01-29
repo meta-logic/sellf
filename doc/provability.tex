@@ -1,0 +1,105 @@
+\begin{table}[t]
+ \caption{\small Theory $\Prov$ specifying the provability relation of
+among the
+premises of two derivations, \derOne\ and \derTwo. Assume that the
+premises of derivation \derTwo\ have labels $\tsl{lf}_1, \ldots,
+\tsl{lf}_n$. Following  usual logic programming convention, the symbol
+``$\_$'' denotes an argument that can be replaced by any term.}
+\label{fig:provif-predicates}
+\begin{tabular}{p{13cm}}
+\toprule
+$\inLeaf{F}{\tsl{Lf}} \subset
+\In{F}{\Gamma}, \ctx{\Gamma}{\_\,}{\tsl{Lf}}{\_\,}$ \\[1pt]
+
+$\provIf{\tsl{Lf2}}{\tsl{Lf1}} \xor \notProvIf{\tsl{Lf2}}{\tsl{Lf1}}
+\subset \ctx{\_\,}{\_\,}{\tsl{Lf1}}{\derOne},
+\ctx{\_\,}{\_\,}{\tsl{Lf2}}{\derTwo}$ \\[1pt]
+
+$\notProvIf{\tsl{Lf2}}{\tsl{Lf1}} \subset
+\inLeaf{F}{\tsl{Lf1}},\tsl{not}\,\inLeaf{F}{\tsl{Lf2}},\ctx{\_\,}{\_\,}{
+\tsl{Lf1}}{\derOne},$ 
+$ \ctx{\_\,}{\_\,}{\tsl{Lf2}}{\derTwo} $  \\[1pt]
+
+$\notProvIf{\tsl{Lf2}}{\tsl{Lf1}} \subset
+\In{F}{\Gamma_2},\ctx{\Gamma_2}{S_2}{\tsl{Lf2}}{\derTwo}, S_2 \notin \Wscr,
+\tsl{not}~\inLeaf{F}{\tsl{Lf1}},\ctx{\_\,}{\_\,}{\tsl{Lf1}}{\derOne}$
+\\[1pt]
+
+$\notProvIf{\tsl{Lf2}}{\tsl{Lf1}} \subset
+\In{F}{\Gamma_1},\ctx{\Gamma_1}{S_1}{\tsl{Lf1}}{\derOne},
+\In{F}{\Gamma_2},\ctx{\Gamma_2}{S_2}{\tsl{Lf2}}{\derTwo}, S_1 \npreceq S_2$
+\\[1pt]
+
+$\tsl{valid} \subset \provIf{\tsl{lf}_1}{\_\,}, \ldots,
+\provIf{\tsl{lf}_n}{\_\,}$\\[1pt]
+
+$\bot \subset \tsl{not}~\tsl{valid}$\\
+\bottomrule
+\end{tabular}
+\vspace{-4mm}
+\end{table}
+
+In order to check the correctness
+of a transformation $\Xi_1 \rightsquigarrow \Xi_2$, we need to check that
+all open premises of $\Xi_2$, called \derTwo, can be proved assuming that
+all open premises of $\Xi_1$, called \derOne, are also provable.
+Similarly to the previous section, we tackle this problem by reducing it
+to the satisfiability of a propositional logic theory, namely the
+the theory $\Prov$, shown in Table~\ref{fig:provif-predicates}. It
+contains a number of predicates:
+
+\noindent
+\textbullet~\ctx{\Gamma_S}{\tsl{S}}{\tsl{Lf}}{\tsl{Der}} denotes that 
+$\Gamma_S$ is the context variable for the context of the subexponential
+\tsl{S} in the open premise \tsl{Lf} of the derivation \tsl{Der}. We
+assume that the names used to refer the premises and contexts of the 
+derivations \derOne\ and \derTwo are disjoint;
+
+\noindent
+\textbullet~\inLeaf{F}{\tsl{Lf}} denotes that the occurrence of the formula
+$F$ appears in the premise \tsl{Lf};
+
+\noindent
+\textbullet~\provIf{\tsl{Lf1}}{\tsl{Lf2}} and
+\notProvIf{\tsl{Lf1}}{\tsl{Lf2}} denote, respectively, that one can or
+cannot determine whether the premise \tsl{Lf2} is
+provable when assuming the provability of \tsl{Lf1}.
+
+The first clause in the Table~\ref{fig:provif-predicates} specifies when 
+a formula is in an premise of a derivation, while the second clause 
+specifies that exactly one of the following propositions
+must be true: \provIf{\tsl{Lf2}}{\tsl{Lf1}} and
+\notProvIf{\tsl{Lf2}}{\tsl{Lf1}}. That is, either one can determine the
+provability relation of two premises or not. The following three clauses
+are more interesting, as they specify conditions for when it is not clear
+whether \tsl{Lf2} is provable even when \tsl{Lf1} is assumed to be
+provable. The third clause specifies that this is the case when there is
+an occurrence of a formula $F$ in \tsl{Lf1} that does not appear anywhere
+in \tsl{Lf2}. The fourth clause specifies that this is also the case when
+there is formula $F$ in a non-weakenable context in \tsl{Lf2}, but nowhere
+in \tsl{Lf1}. The fifth clause specifies that
+it is also the case that \notProvIf{\tsl{Lf1}}{\tsl{Lf2}} is true whenever
+there is formula $F$ in both \tsl{Lf1} and \tsl{Lf2}, but in contexts of
+subexponentials $S_1$ and $S_2$, such that $S_1 \npreceq S_2$ (see the
+end of Section~\ref{sec:sellf}). Finally, the last two clauses check
+whether all open premises of \derTwo\ are provable; otherwise the theory
+is unsatisfiable.
+
+Using the properties described above, one can show how to construct a proof
+for 
+$\tsl{Lf2}$ by using the proof of $\tsl{Lf1}$: one relies on  
+the facts that (1) provability is preserved when moving a formula from a
+context of the subexponential $s_2$ to a context of the
+subexponential $s_1$, such that $s_1 \preceq s_2$, and that (2)
+provability is also preserved when adding formulas to weakenable contexts.
+We then obtain the following soundness result.
+
+\begin{theorem}
+Let $\Xi_1$ and $\Xi_2$ be two \sellf\ derivations, whose open premises are
+specified by using context variables and the set of constraints,
+$\groundSet$. Then $\Xi_2$ is
+provable assuming that $\Xi_1$ is provable in \sellf\ if 
+the theory $\groundSet \cup \Prov$ is satisfiable.
+\end{theorem}
+
+

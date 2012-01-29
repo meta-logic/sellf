@@ -1,0 +1,68 @@
+In order to construct the macro-rules, we must find a good way to represent the
+sequents. During proof search, a sequent is composed by the formula (or list of formulas)
+focused on and a function from the subexponential indices to a set of formulas
+(and a separated set for the formulas in $\Gamma$).
+
+Now suppose that we are deriving the second macro rule of
+Figure~\ref{fig:macro}. The macro rule is:
+
+$$
+\infer=[]{\mathcal{K}_1 \otimes \mathcal{K}_2 : \Gamma, \Delta \Downarrow A \oplus (B \otimes C)}
+{
+  \mathcal{K}_1 : \Gamma, B \Uparrow \cdot \;\;\;\;
+  \infer[]{\mathcal{K}_2 : \Delta \Downarrow C}{}
+}
+$$
+
+Of course, the formulas in $\Gamma$ and $\Delta$ are represented by only one
+list before the application of the $\otimes$ rule. What is done in proof search
+is the lazy split of the original list. This means that if the branch on the
+left is resolved first, all formulas are ``carried'' to this branch and after
+finishing (if it finishes successufully), the formulas that were left are
+``moved'' to the right branch and must be used there. The same approach is used
+with the linear subexponentials of $\mathcal{K}$.
+
+The problem of using this solution in deriving a macro-rule is that we do not
+really know what is inside the set $\Gamma \cup \Delta$, and the derivation of
+the left branch does not even terminate (it could be the case that neither of
+them terminates). Nevertheless, we still need
+the information that this set was splitted and that some formulas can be used in
+one branch and others on the other, but not in both. In particular, we must
+ensure that a formula $C^{\bot}$, if it exists, will go to the right branch so
+that the initial rule can be applied. To solve this problem we
+use \textit{generic contexts}.
+
+Generic contexts are ``new'' lists of formulas that are created during the
+derivation of a macro-rule and are often included on the constraints. On the
+example above, let $\Gamma_0 = \Gamma \cup \Delta$. On the application of rule
+$\otimes$, the new lists $\Gamma$ and $\Delta$ will be created and a constraint
+that $\Gamma \cup \Delta$ is equal to $\Gamma_0$ will be added to the
+macro-rule. This solution is also used for the linear subexponentials of
+$\mathcal{K}$.
+
+\begin{giselle}
+On the next paragraph, I am suggesting a notation for the generic context, but I
+am not sure if it's the one used on all the examples. We should check this and
+make the document consistent.
+\end{giselle}
+
+Initially, there will be one list for each subexponential and another list for
+the purely linear formulas ($\Gamma$). Throughout this document, we will
+represent these lists by $\genG{s}{i}$, where $i$ is an index used to keep track
+of the created sets and $s$ is the subexponential name or it
+is not present if it is actually $\Gamma$ (the set of formulas that are not marked with
+$?$). The set $\mathcal{K}$ will be represented as $\genK$ when we are refering
+that it contains generic contexts instead of sets of formulas.
+%Everytime a list is splitted or modified, we will mark it's parts or the
+%modified list with a superscript, e.g. $\Gamma_s^1$ and $\Gamma_s^2$.
+
+We call the generic contexts of a sequent a \textit{side-formula context} (because it
+contains only side-formulas of the sequent) and this is represented as a
+function from the set of subexponential indices to a natural number.
+
+% GR: it does not go to a set of formulas. We will only use those on the
+% constraints.
+
+A sequent is represented by a side-formula context and a formula (or list of
+formulas) focused on.
+

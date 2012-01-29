@@ -1,0 +1,497 @@
+We show how one
+can extract from a bipole, $B$, propositional theories that specify the
+\bDers\ that can introduce $B$. These theories are also called answer-set
+programs in the logic programming community and can be used in
+existing off-the-shelf propositional
+provers~\cite{niemela97lpmnr,leone06tcl}, which have good overall
+performance.
+
+\newcommand\xor{\veebar}
+\newcommand\thSeq{\ensuremath{\Tscr}}
+\newcommand\groundSet{\ensuremath{\mathcal{B}}}
+\begin{table}[t]
+ \caption{\small List of atomic formulas, called constraints, used together
+with their denotations and their logical axiomatization $\thSeq$. Here,
+a symbol with subscript $u$, such as $\Gamma_u$, denotes an unbounded
+context, while a symbol with subscript $b$, such as $\Gamma_b$, denotes a
+bounded context. Moreover, $\Gamma$ and $\Gamma'$ can be an unbounded or
+a bounded context. Following usual logic programming conventions, all
+non-predicate
+term symbols are assumed to be universally quantified, and we use commas,
+``$,$'', for conjunctions and the reverse implication $\subset$. Finally,
+the symbol $\xor$ stands for exclusive-or, while $\uplus$ for multiset
+union.}
+\label{fig:predicates}
+\begin{tabular}{l@{\quad}p{2cm}@{\quad}l}
+\toprule
+Constraints & Denotation & Logical Specifications \\[1pt]
+\midrule
+$\In{F}{\Gamma}$ & $F \in \Gamma$. & No theory.\\
+\midrule
+$\mctx{F}{\Gamma_u}$ &  $F \in \Gamma_u$. & $\In{F}{\Gamma_u}
+\subset \mctx{F}{\Gamma_u}.$\\
+\midrule
+$\elin{F}{\Gamma_b}$ &  $\Gamma_b =
+\{F\}$. &   $\In{F}{\Gamma_b} \subset \elin{F}{\Gamma_b}$ \\[1pt]
+& &  $\bot \subset \In{X}{\Gamma_b}, X \neq F,
+\elin{F}{\Gamma_b}$ \\
+\midrule
+$\emp{\Gamma}$ &  $\Gamma = \emptyset$. & $\bot \subset
+\In{X}{\Gamma}, \emp{\Gamma}$\\
+\midrule
+$\union{\Gamma_b'} {\Gamma_b''} {\Gamma_b}$ & 
+$\Gamma_b = \Gamma_b' \uplus \Gamma_b''$
+& $\In{X}{\Gamma_b} \subset \In{X}{\Gamma_b'},
+\union{\Gamma_b'}{\Gamma_b''}{\Gamma_b}$ \\[1pt]
+&& $\In{X}{\Gamma_b} \subset \In{X}{\Gamma_b''},
+\union{\Gamma_b'}{\Gamma_b''}{\Gamma_b}$ \\[1pt]
+&& $\emp{\Gamma_b}  \subset
+\emp{\Gamma_b'},\emp{\Gamma_b''},
+\union{\Gamma_b'}{\Gamma_b''}{\Gamma_b}$\\[1pt]
+&& $(\In{X}{\Gamma_b'} \xor \In{X}{\Gamma_b''})  \subset
+\In{X}{\Gamma_b}, \union{\Gamma_b'}{\Gamma_b''}{\Gamma_b}$\\
+\midrule
+$\addform{F}{\Gamma_u}{\Gamma_u'}$ &  
+$\Gamma_u' = \Gamma_u \cup \{F\}$ & 
+$\mctx{F}{\Gamma'} \subset \addform{F}{\Gamma}{\Gamma'}$ \\[1pt]
+&& $\mctx{F'}{\Gamma'} \subset \addform{F}{\Gamma}{\Gamma'},
+\mctx{F'}{\Gamma}$ \\
+\bottomrule
+\end{tabular}
+\vspace{-4mm}
+\end{table}
+
+
+\Paragraph{Basic Constraints and the Specification of Derivations}
+We start by introducing the set of atomic formulas, called basic
+constraints, depicted in Table~\ref{fig:predicates}. These 
+constraints are axiomatized by the logical specification, \thSeq, also
+shown in Table~\ref{fig:predicates}. Most of the clauses specify
+constraints as expected.
+For instance, the clause for \emp{\Gamma}\ specifies that
+if the context $\Gamma$ contains a formula, specified by the constraint
+\In{F}{\Gamma}, then the theory is unsatisfiable. The clause for
+$\union{\Gamma_b'}{\Gamma_b''}{\Gamma_b}$ is the most interesting one. It
+specifies that any formula $X$ that is in $\Gamma_b$ is either in
+$\Gamma_b'$ or $\Gamma_b''$, but not both. This is specified by using
+exclusive-or $\xor$. \tsl{Union} constraints will be used to specify the
+splitting of context in the tensor rule. 
+
+In order to specify a derivation, we make use of \emph{context variables},
+normally written with a superscript number, \eg, $\Gamma^i$. Intuitively,
+context variables represent holes that could be replaced by 
+any multiset of formulas. For example, the following
+is such a derivation with two branches and four context variables:
+{\small
+\[
+% \infer{\vdash \Theta : \Gamma_1, \Gamma_2, A \tensor B }
+% {
+% {\vdash \Theta : \Gamma_1,  A  }
+% &
+% {\vdash \Theta : \Gamma_2,  B  }
+% }
+% \quad \rightsquigarrow \quad 
+\infer{\vdash \Theta^1 : \Gamma^1 }
+{
+{\vdash \Theta^1 : \Gamma^2  }
+&
+{\vdash \Theta^1 : \Gamma^3  }
+}
+\]
+}
+To correctly specify the dependencies
+among these context variables, we also specify a set of constraints,
+\groundSet, mentioning the context variables above.
+For instance, the following set of constraints, which
+contains auxiliary new variables, $\Gamma^{i}$ for $4 \leq i \leq 9$,
+specifies linear logic's tensor rule:
+{\small
+\[
+\groundSet = \left\{
+\begin{array}{c}
+\union{\Gamma^4}{\Gamma^5}{\Gamma^1},
+\elin{A \tensor B}{\Gamma^4}, \union{\Gamma^6}{\Gamma^7}{\Gamma^5}, \\
+\elin{A}{\Gamma^8}, \union{\Gamma^6}{\Gamma^8}{\Gamma^2},
+\elin{B}{\Gamma^9}, \union{\Gamma^7}{\Gamma^9}{\Gamma^3}, \\
+\form{A \tensor B}, \form{A}, \form{B}
+\end{array}\right\}
+\]
+}
+It is easy to check that the theory $\groundSet \cup \thSeq$ has a single
+\emph{minimal model}, containing the formulas $\In{A \tensor B}{\Gamma^1}$,
+$\In{A}{\Gamma^2}$ and $\In{B}{\Gamma^3}$. As we show later, from this
+model and the derivation tree above we can in fact reconstruct a
+derivation corresponding to the tensor introduction rule. 
+
+On the other hand, if we added the formula $\In{C}{\Gamma^1}$ to
+\groundSet,
+resulting in the set \groundSet', then, because of the clauses specifying
+the union of contexts, the theory $\groundSet' \cup
+\thSeq$ would have two models: one where $\In{C}{\Gamma^2}$ is true and
+another where $\In{C}{\Gamma^3}$ is true. The former model corresponds
+to the case when $C$ is moved to the left branch, while the latter model
+to the case when $C$ is moved to the right branch. Hence, a single
+propositional theory may represent a number of derivations. On the other
+hand, if a theory is not satisfiable, then no derivation is valid.
+We make such statements more precise later in this section.
+
+The following are some properties of the theory $\thSeq$, which can be
+easily shown by inspecting the formulas in $\thSeq$.
+
+\vspace{-2mm}
+\begin{proposition}
+\label{lemma:crit_pairs}
+Let $\groundSet$ be a set of constraints. Let $M$ be an arbitrary model of
+the theory $T \cup
+\groundSet$. Then, the following always holds:
+\begin{align}
+&\{ \emp{\Gamma}, \mctx{F}{\Gamma} \} \not\subseteq M \label{em} \\
+&\{ \emp{\Gamma}, \elin{F}{\Gamma} \} \not\subseteq M \label{ee} \\
+&\{ \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma} \} \subseteq M
+\Rightarrow \{ 
+    \emp{\Gamma'}, \emp{\Gamma''} \} \subseteq M \label{eu} \\
+&\{ \elin{F}{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma} \} \subseteq M
+\Rightarrow \nonumber \\ 
+& \quad ~~ (\{ \emp{\Gamma'}, \elin{F}{\Gamma''} \} \subseteq M) \xor
+(\{ \emp{\Gamma''}, \elin{F}{\Gamma'} \} \subseteq M) \label{elun}
+\end{align}
+\end{proposition}
+
+\Paragraph{Recovering a Derivation from a Model} 
+From a model, $M$, and a derivation, $\Xi$, containing only context
+variables, we construct a derivation, $\Xi_f$, where all context variables
+are instantiated according to the model $M$, by simply applying the
+rewrite rules shown in Figure~\ref{fig:rewriting}, which consists of two
+phases. In the first phase, for every applicable constraint, \tsl{mctx},
+\tsl{emp}, \tsl{unitctx}, and \tsl{union} in $M$, and applicable context
+variable, $\Gamma$, we apply the corresponding rule exactly once. 
+Then in the second phase, for every \tsl{in} constraint in $M$ and
+applicable context variable context variable, $\Gamma$, we apply the
+corresponding rule exactly once. 
+
+It is easy to check that the derivation obtained from this two-phased
+procedure over the derivation shown above and using the minimal model
+of $\Bscr \cup \thSeq$ corresponds exactly to the tensor introduction
+rule. 
+
+By using Proposition~\ref{lemma:crit_pairs}, which handles all critical
+pairs, we can show that this procedure is strongly confluent.
+
+\begin{proposition}
+\label{lemma:convergence}
+Let $\groundSet$ be a set of constraints. Let $M$ be an arbitrary model of
+the theory $\thSeq \cup
+\groundSet$. Then the rewriting procedure described above is
+strongly confluent.
+\end{proposition}
+
+
+\begin{figure}[t]
+\[
+ \begin{array}{l@{\quad}r@{\quad}l@{\qquad}|@{\qquad}r@{\quad}l}
+\toprule
+\multirow{2}{*}{\textrm{Phase 1:}} & \mctx{F}{\Gamma}: & \Gamma \rightarrow
+\Gamma, F 
+& \elin{F}{\Gamma}:  & \Gamma \rightarrow F \\
+& \emp{\Gamma}: & \Gamma \rightarrow \cdot 
+& \union{\Gamma'}{\Gamma''}{\Gamma}: & \Gamma \rightarrow \Gamma',
+\Gamma''\\
+\midrule
+\textrm{Phase 2:} & \multicolumn{4}{c}{
+\In{F}{\Gamma}: \quad \Gamma \rightarrow \Gamma, F
+}\\
+\bottomrule
+ \end{array}
+\]
+\caption{Rewriting rules used to instantiate context variables in a
+derivation using a given model.}
+\label{fig:rewriting}
+\vspace{-5mm}
+\end{figure}
+
+\newcommand\bipole{\tsl{bipole}}
+\newcommand\bipoleAux{\tsl{bipoleNegative}}
+
+\Paragraph{Propositional Theories from Bipoles}
+
+
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+\begin{algorithm}[pth]
+\caption{\small Algorithm used to compute a set of sets of constraints
+that specify the \bDers\ that can introduce a bipole.} 
+\label{alg1}
+\textbf{Function: }\bipole
+\begin{small}
+\begin{algorithmic}[1]
+\REQUIRE  $(B, \Sscr, \Upsilon)$, where $B$ is a bipole,
+$\Sscr = \Kscr : \Gamma$ is a sequent context, and $\Upsilon =
+\{\groundSet_1, \ldots, \groundSet_n\}$ is a set of sets of constraints.
+We write $\Gamma_l$ for the context variable in $\Kscr[l]$.
+\ENSURE A set of pairs $\Phi = \{\tup{\Oscr_1, \Upsilon_1}, \ldots,
+\tup{\Oscr_m, \Upsilon_m} \}$, 
+where $\Oscr_i$s are multisets of sequent
+contexts each specifying the contexts of the open premises of
+a derivation and $\Upsilon_i$s is set of sets of constraints;
+\STATE \textbf{match} $B$ \textbf{with}
+
+\STATE $\mid$ $A^\bot \rightarrow$ \COMMENT{Case: Positive atomic formula}
+\STATE \qquad \textbf{let} $\groundSet_u = \{\elin{A}{\Gamma}\}
+\cup \{ \emp{\Gamma_s} \mid \forall s. s 
+  \notin \Wscr\} $ \textbf{in} %\COMMENT{Case $A^\bot$ is in $\Gamma$.}
+\STATE \qquad \textbf{let} $\groundSet_l = \{\elin{A}{\Gamma_l} \}
+\cup \{ \emp{\Gamma_s} \mid \forall s. s
+  \neq l \wedge s \notin \Wscr \} \cup \{ \emp{\Gamma} \}$ \textbf{in}
+% \COMMENT{Case $A^\bot$ is in a linear context.}
+\STATE \qquad \textbf{let} $\groundSet_w = \{\mctx{A}{\Gamma_w} \}
+\cup \{ \emp{\Gamma_s} \mid \forall s. s
+  \notin \Wscr \} \cup \{ \emp{\Gamma} \}$ \textbf{in}
+%\COMMENT{Case $A^\bot$ is in a weakenable context.}
+\STATE \qquad \textbf{return} $\{\tup{\emptyset, \{\groundSet_1 \cup
+\groundSet_u, \groundSet_1 \cup \groundSet_l, \groundSet_1 \cup
+\groundSet_w,\ldots, \groundSet_n \cup \groundSet_u, \groundSet_n \cup
+\groundSet_l, \groundSet_n \cup \groundSet_w\}}\}$
+
+% \STATE $\mid$ $A^\bot \rightarrow$ \COMMENT{Case: Negative atomic
+% formula}
+% \STATE \qquad \textbf{create new contexts} $\Gamma'$
+% and $\Gamma''$
+% \STATE \qquad \textbf{let} $\groundSet_\nu = \{ \elin{A}{\Gamma'},
+% \union{\Gamma}{\Gamma'}{\Gamma''} \}$ \textbf{in}
+% \STATE \qquad \textbf{let} $\Sscr'$ be obtained from $\Sscr$ by
+% replacing $\Gamma$ by $\Gamma''$ \textbf{in}
+% \STATE \qquad \textbf{return} $\tup{\Sscr', \{\groundSet_1 \cup
+% \groundSet_\nu, \ldots, \groundSet_n \cup \groundSet_\nu }$
+
+\STATE $\mid$ $\one \rightarrow$ \COMMENT{Case: One}
+\STATE \qquad \textbf{let} $\groundSet_\emptyset = \{ \emp{\Gamma_s}
+\mid
+\forall s. s \in I\}$ \textbf{in}
+\STATE \qquad \textbf{return} $\{\tup{\emptyset, \{\groundSet_1 \cup
+\groundSet_\emptyset,\ldots, \groundSet_n \cup \groundSet_\emptyset\}}\}$
+
+\STATE $\mid$ $F \tensor G \rightarrow$ \COMMENT{Case: Tensor}
+\STATE \qquad \mbox{\textbf{create new contexts} $\Gamma^1$ and
+$\Gamma^2$ and contexts $\Gamma^1_s$
+and $\Gamma^2_s$ for every subexponential $s\notin \Cscr$;}
+\STATE \qquad \textbf{let} $\groundSet_\cup =
+\{\union{\Gamma^1_s}{\Gamma^2_s}{\Gamma_s} \mid \forall s. s \notin \Cscr\}
+\cup \{\union{\Gamma^1}{\Gamma^2}{\Gamma}\}$ \textbf{in}
+\STATE \qquad \textbf{let} $\Sscr_1$ be obtained from $\Sscr$ by
+replacing $\Gamma$ by $\Gamma^1$, and  $\Gamma_s$ by
+$\Gamma^1_s$ for every $s \notin \Cscr$ \textbf{in}
+\STATE \qquad \textbf{let} $\Sscr_2$ be obtained from $\Sscr$ by
+replacing $\Gamma$ by $\Gamma^2$, and $\Gamma_s$ by
+$\Gamma^2_s$ for every $s\notin \Cscr$ \textbf{in}
+\STATE \qquad \textbf{let} $\Phi_1 =
+\bipole(F, \Sscr_1, \Upsilon)$ \textbf{in}
+\textbf{let} $\Phi_2 =
+\bipole(G, \Sscr_2, \Upsilon)$ \textbf{in}
+\STATE \qquad \mbox{\textbf{return} $\{\tup{\Oscr_1 \cup \Oscr_2,
+\{ \groundSet_1
+\cup \groundSet_2 \cup \groundSet_\cup \mid \groundSet_1 \in \Upsilon_1,
+\groundSet_2 \in \Upsilon_2 \}} \mid \tup{\Oscr_1, \Upsilon_1} \in \Phi_1,
+\tup{\Oscr_2,
+\Upsilon_2} \in \Phi_2\}$}
+
+\STATE $\mid$ $F \plus G \rightarrow$ \COMMENT{Case: Plus}
+\STATE \qquad \textbf{let} $\Phi_1 =
+\bipole(F, \Sscr, \Upsilon)$ \textbf{in}
+\textbf{let} $\Phi_2 =
+\bipole(G, \Sscr, \Upsilon)$ \textbf{in}
+\STATE \qquad \textbf{return} $\{ \Phi_1, \Phi_2 \}$
+
+\STATE $\mid$ $\nbang{l} F \rightarrow$ \COMMENT{Case: Bang}
+\STATE \qquad \textbf{create new contexts} $\Gamma_s'$ for every
+subexponential $s$, such that $l \npreceq s$ and $s \in \Wscr$;
+\label{lineNewContextsBang}
+\STATE \qquad \textbf{let} $\Sscr'$ be obtained from $\Sscr$ by
+replacing $\Gamma_s$ by $\Gamma_s'$ created in
+line~\ref{lineNewContextsBang} \textbf{in} 
+\STATE \qquad \mbox{\textbf{let} $\groundSet_\emptyset =
+\{\emp{\Gamma_s'} \mid \forall s. l \npreceq s, s \in \Wscr\} \cup \{
+  \emp{\Gamma_s} \mid \forall s. l \npreceq s, s \notin \Wscr \} \cup \{
+    \emp{\Gamma} \}$
+\textbf{in}}
+\STATE \qquad \textbf{return} $\{ \bipole(F, \Sscr', \{\groundSet_1 \cup
+\groundSet_\emptyset, \ldots, \groundSet_n \cup \groundSet_\emptyset\}) \}$
+
+\STATE $\mid$ Negative Formula $N \rightarrow$ \COMMENT{Case: Negative
+formulas}
+\STATE \qquad \textbf{return} $\{ \bipoleAux(\{N\}, \Sscr, \Upsilon) \}$
+\end{algorithmic}
+
+\textbf{Function:} \bipoleAux
+ \begin{algorithmic}[1]
+ \REQUIRE  $(\Fscr, \Sscr, \Upsilon)$, where $\Fscr$ is a multiset of
+formulas,
+$\Sscr = \Kscr : \Gamma$ is a sequent context, and $\Upsilon =
+\{\groundSet_1, \ldots, \groundSet_n\}$ is a set of sets of constraints.
+We write $\Gamma_l$ for the context variable in $\Kscr[l]$.
+\ENSURE A set of pairs $\Phi = \{\tup{\Oscr_1, \Upsilon_1}, \ldots,
+\tup{\Oscr_m, \Upsilon_m} \}$, 
+where $\Oscr_i$s are multisets of sequent
+contexts each specifying the contexts of the open premises of
+a derivation and $\Upsilon_i$s is set of sets of constraints;
+\STATE \textbf{if} $\Fscr = \emptyset$ \textbf{then} $\{\tup{\{\Sscr\},
+\Upsilon}\}$ \textbf{else match} element $A \in \Fscr$ \textbf{with}
+\STATE $\cdots$
+\STATE $\mid$ $\nquest{l} F \rightarrow$ \COMMENT{Case: Question-mark}
+\STATE \qquad \textbf{create new contexts} $\Gamma_l'$ and $\Gamma_l''$
+\STATE \qquad \textbf{let} $\Sscr'$ be obtained from $\Sscr$ by
+replacing $\Gamma_l$ by $\Gamma_l''$ \textbf{in}
+\STATE \qquad \textbf{let} $\groundSet_? =$ \textbf{if} $l \notin \Cscr$
+\textbf{then} $\{ \elin{A}{\Gamma_l'},
+\union{\Gamma_l'}{\Gamma_l}{\Gamma_l''} \}$ \textbf{else} $\{
+\addform{A}{\Gamma_l}{\Gamma_l''} \}$ \textbf{in}
+\STATE \qquad \textbf{return} $\{ \bipoleAux(\Fscr\setminus\{\nquest{l} F\},
+\Sscr', \{\groundSet_1 \cup \groundSet_?, \ldots, \groundSet_n \cup
+\groundSet_?\}) \}$
+\STATE $\cdots$
+\end{algorithmic}
+\end{small}
+\end{algorithm}
+
+We now demonstrate that the theory shown in Table~\ref{fig:predicates}
+suffices to characterize all \bDers. 
+Given a bipole, $B$, a sequent
+context $\Sscr = \Kscr : \Gamma$, and an initial set of sets of
+constraints $\Upsilon = \{\groundSet_1, \ldots, \groundSet_n\}$,
+specifying $\Sscr$'s context variables, 
+we construct a set of pairs $\tup{\Oscr', \Upsilon'}$, each specifying a
+possible \bDer\ that can introduce a sequent focused on $B$. In particular,
+$\Oscr'$ specifies the contexts of the derivation's open premises,
+while 
+each $\Bscr_i \in \Upsilon'$ is a set of constraints on the
+context variables appearing in $\Oscr'$.\footnote{Here we do not care
+about the order of the open premises. If this is important, one could use
+lists instead. Using multisets also simplifies considerably presentation.} 
+Each set of constraints specifies a possible finishing state for the contexts of
+$\Oscr'$.
+We assume that the
+subexponential signature $\tup{I, \preceq, \Wscr, \Cscr}$ is given. 
+
+The algorithm \bipole, described in Algorithm~\ref{alg1}, basically
+traverses \emph{once} the subformulas of a
+bipole and adds constraints specifying when a \sellf\
+rule introducing a subformula is applicable. For
+example, there are three possible ways of introducing a positive atomic
+formula $A^\bot$: Either $A$ appears in the
+sequent without any
+question-mark, or it appears in a context that is not weakenable, or in a
+context that is weakenable. Moreover in all these three cases, there
+should be no bounded formula in the context. These three cases are
+specified by the constraints in lines 3, 4 and 5 of \bipole, respectively.
+Similarly, the splitting of the bounded contexts in the tensor rule is
+specified by the constraints in line 12. In order to traverse the
+negative trunk of \bDers, we also use the auxiliary function \bipoleAux. We
+show in Algorithm~\ref{alg1} just the case for introducing $\nquest{l} F$,
+where the formula $F$ is moved to the corresponding context
+as specified by the constraints in line 6.
+
+For example, consider the following sequent context $\Sscr = \Gamma_u^1
+:_u \Gamma_b^1 :_l \Gamma$ and the bipole $B = A_1^\bot \tensor \nbang{b}
+\nquest{u} F$. If we provide $\Sscr$ and $B$ to the function \bipole\
+assuming no initial constraints, \bipole\ returns one single pair,
+$\tup{\Oscr, \Upsilon}$, where $\Oscr$ corresponds to a \bDer\ of the
+following shape:
+{\small
+\[
+ \infer={\vdash \Gamma_u^1 :_u \Gamma_b^1 :_b \Gamma^1 
+}
+{
+\infer{\vdash \Gamma_u^1 :_u \Gamma_b^2 :_b \Gamma^2}{}
+& 
+\vdash \Gamma_u^2 :_u \Gamma_b^3 :_b \Gamma^3
+}
+\]
+}
+and $\Upsilon$ is the following set
+\begin{small}
+\[ \left\{\begin{array}{c}
+\{\elin{A}{\Gamma^2}, \emp{\Gamma_b^2},
+\emp{\Gamma_b^3}, \emp{\Gamma^3},\addform{A}{\Gamma_u^1}{\Gamma_u^2} \}
+\cup \tsl{Unions}\\
+\{\elin{A}{\Gamma_b^2}, \emp{\Gamma^2},\emp{\Gamma_b^3},
+\emp{\Gamma^3},\addform{A}{\Gamma_u^1}{\Gamma_u^2}\}\cup \tsl{Unions}\\
+\{\mctx{A}{\Gamma_u^1}, \emp{\Gamma^2}, \emp{\Gamma_b^2},\emp{\Gamma_b^3},
+\emp{\Gamma^3},\addform{A}{\Gamma_u^1}{\Gamma_u^2}\}\cup \tsl{Unions}\\
+ \end{array}\right\}
+\]
+\end{small}%
+where $\tsl{Unions} = \{\union{\Gamma^2}{\Gamma^3}{\Gamma^1}, 
+\union{\Gamma^2_b}{\Gamma^3_b}{\Gamma^1_b}\}$. Notice that each set of
+constraints corresponds to one possible \bDer, depending on which
+context $A$ is. For instance, the first set of constraints specifies
+derivations where $A$ is in $\Gamma$, while the remaining two
+specify derivations where $A$ is in $\Gamma_b^1$ and $\Gamma_u^1$,
+respectively. Although all constraints above are
+satisfiable, it
+may well be the case that some set of constraints is unsatisfiable. For
+instance, if we added the initial constraint that a
+formula $C$ is in $\Gamma^1$, \ie, $\In{C}{\Gamma^1}$, then all three
+sets above would no longer be satisfiable. 
+
+One can prove by induction on the height of derivations (for completeness)
+and on the size of bipoles (for soundness) that \bipole's output is
+sound and complete to \sellf's \bDers.
+
+\begin{theorem}
+ For any given bipole, $B$, and sequent, $\Sscr$, focused on $B$, and
+whose context is specified by a set of initial constraints, the set
+of pairs, $\tup{\Oscr_j, \{\groundSet_1^j, \ldots, \groundSet_{n_j}^j\}}$
+for some $i$ and $j$,
+computed by \bipole\ is sound and complete. That is, 
+an arbitrary model of $\groundSet_i^j \cup \thSeq$ corresponds, by using
+the rewrite theory described above on $\Oscr_j$ and $\Sscr$, to a correct
+\bDer\ introducing $\Sscr$
+and for any $\bDer$, $\Xi$, introducing $\Sscr$ there is a
+model of $\groundSet_k^l \cup \thSeq$, for some $k$ and $l$, that
+corresponds to $\Xi$  by using the rewrite theory described above on
+$\Oscr_k$ and $\Sscr$.
+\end{theorem}
+
+Recall from Section~\ref{sec:encoding_PF} that we are assuming that
+\sellf\ encodings of proof systems have the strongest level of adequacy,
+namely the level of derivations~\cite{nigam10jar}. This means that a
+\bDer\ corresponds exactly to a inference rule of the system. Hence from
+the theorem above, we are able to characterize any valid inference rule of
+any proof system that can be encoded in \sellf. Furthermore, since there 
+are existing tools that can efficiently compute the models of our
+propositional theories, we can construct tools that can reason about
+encoded proof systems by using their \sellf\ encoding.
+
+Although we have not shown it due to space constraints, it is not hard to
+handle quantifiers. In particular, one needs to keep track additionally of
+the signature of sequents. Whenever a universal quantifier is introduced a
+new fresh constant is created, while whenever an existential quantifier is
+introduced, the instantiated variable may only contain constants in the
+corresponding sequent. 
+
+Finally, we can also use \bipole\ to construct theories specifying
+derivations larger than \bDers. For instance, assume that we want to
+construct all derivations where the \bDer\ introducing a formula $F_2$
+appears on top of the \bDer\ introducing the formula $F_1$ for a
+given sequent context $\Sscr$. We apply \bipole\ with the formula
+$F_1$, obtaining the theories ($\tup{\Oscr, \{\groundSet_1, \ldots,
+\groundSet_n}$) for all \bDers\
+that can introduce $F_1$. Then we apply again
+\bipole\ once for each open premise (specified in $\Oscr$) and set of
+constraints ($\groundSet_i$) computed. The union of all pairs specifies the
+desired derivation.
+
+\newcommand{\ctx}[4]{{\ensuremath{\tsl{ctx}(\ensuremath{#1},
+\ensuremath{#2},\ensuremath{#3},\ensuremath{#4})}}}
+\newcommand{\inLeaf}[2]{{\ensuremath{\tsl{inLf}(\ensuremath{#1},\ensuremath
+{#2})
+}}}
+\newcommand{\notProvIf}[2]{\ensuremath{{\tsl{nPrIf}(\ensuremath{#1},
+\ensuremath {#2})}}}
+\newcommand{\provIf}[2]{\ensuremath{{\tsl{prIf}(\ensuremath{#1},
+\ensuremath{#2})}}}
+
+\newcommand\derOne{\tsl{dr1}}
+\newcommand\derTwo{\tsl{dr2}}
+\newcommand\Prov{\Pscr}
+

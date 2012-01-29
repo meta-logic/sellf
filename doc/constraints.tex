@@ -1,0 +1,134 @@
+We will make use of a set with the following type of constraints to
+represent in a generic fashion a macro-rule in \sellf:
+
+\vspace{0.5cm}
+\begin{tabular}{|l|p{8cm}|}
+\hline
+$\fail$ & Denotes that the set of constraints is
+unsatisfiable.\\
+\hline
+$\mctx{F}{\Gamma}$ & Denotes that the formula $F$ is in the
+unbounded context $\Gamma$, that is, $F \in \Gamma$.\\
+\hline
+$\elin{F}{\Gamma}$ & Denotes that the formula $F$ is the
+only element in the linear context $\Gamma$, that is, $\Gamma = \{F\}$.\\
+\hline
+$\emp{\Gamma}$ & Denotes that the context $\Gamma$ is empty,
+that is, $\Gamma = \emptyset$.\\
+\hline
+$\eqf{F}{G}$ & Denotes that the formulas $F$ and $G$ are the
+same \emph{occurrence} of the same formula.\\
+\hline
+$\eqctx{\Gamma}{\Gamma'}$ & Denotes that the contexts $\Gamma$ and
+$\Gamma'$ contain the same elements.\\
+\hline
+$\union{\Gamma'} {\Gamma''} {\Gamma}$ & Denotes that the bounded context
+$\Gamma = \Gamma' \cup \Gamma''$.\\
+\hline
+$\addform{F}{\Gamma}{\Gamma'}$ & Denotes that the unbounded context $\Gamma'$ is the result of adding the formula $F$ to $\Gamma$.\\
+\hline
+\end{tabular}
+\vspace{0.5cm}
+
+These constraints are defined by the following clauses:
+
+\begin{itemize}
+
+\item $\union{\Gamma'}{\Gamma''}{\Gamma}$
+\[
+\begin{array}{l}
+\In{X}{\Gamma} \subset \In{X}{\Gamma'}, \union{\Gamma'}{\Gamma''}{\Gamma},
+\form{X}. \\
+\In{X}{\Gamma} \subset \In{X}{\Gamma''}, \union{\Gamma'}{\Gamma''}{\Gamma},
+\form{X}. \\
+1~ \{\In{X}{\Gamma'}, \In{X}{\Gamma''}\}~ 1  \subset \In{X}{\Gamma},
+\union{\Gamma'}{\Gamma''}{\Gamma}, \form{X}.\\
+\end{array}
+\]
+where $1~ \{A, B\}~ 1$ denotes that either the atom $A$ or the atom $B$
+is true.
+
+\item $\elin{F}{\Gamma}$
+\[
+ \begin{array}{l}
+  \In{F}{\Gamma} \subset \elin{F}{\Gamma}.\\
+  \bot \subset \In{X}{\Gamma}, \tsl{not} \Equ{X}{F}, \form{X},
+\elin{F}{\Gamma}.
+ \end{array}
+\]
+
+\item $\emp{\Gamma}$
+\[
+ \begin{array}{l}
+  \bot \subset \In{X}{\Gamma}, \form{X},\emp{\Gamma}.
+ \end{array}
+\]
+
+\item $\mctx{F}{\Gamma}$
+\[
+\begin{array}{l}
+  \In{F}{\Gamma} \subset \mctx{F}{\Gamma}.\\
+\end{array}
+\]
+
+\item $\eqctx{\Gamma}{\Gamma'}$
+\[
+ \begin{array}{l}
+  \In{F}{\Gamma} \subset \In{F}{\Gamma'}, \eqctx{\Gamma}{\Gamma'},
+\form{F}.\\
+  \In{F}{\Gamma'} \subset \In{F}{\Gamma}, \eqctx{\Gamma}{\Gamma'},
+\form{F}.
+ \end{array}
+\]
+
+\item $\addform{F}{\Gamma}{\Gamma'}$
+\[
+\begin{array}{l}
+\mctx{F}{\Gamma'} \subset \addform{F}{\Gamma}{\Gamma'}, \form{F}.\\
+\mctx{F'}{\Gamma'} \subset \addform{F}{\Gamma}{\Gamma'}, \mctx{F'}{\Gamma},
+\form{F}, \form{F}.\\
+\end{array}
+\]
+
+\end{itemize}
+
+Besides the clauses above, the following are added for consistency:
+
+$$
+\begin{array}{l}
+\emp{\Gamma'} \subset \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}. \\
+\emp{\Gamma''} \subset \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}. \\
+1 \{ \elin{F}{\Gamma'}, \elin{F}{\Gamma''} \} 1 \subset \elin{F}{\Gamma},
+\union{\Gamma'}{\Gamma''}{\Gamma}. \\
+1 \{ \emp{\Gamma'}, \emp{\Gamma''} \} 1 \subset \elin{F}{\Gamma},
+\union{\Gamma'}{\Gamma''}{\Gamma}. \\
+\end{array}
+$$
+
+From the constraint specifying the union of two generic contexts and 
+the constraint specifying that two contexts have the same elements, 
+we can construct the more general constraint:
+\[
+ \eqctx{\{\Gamma_1, \ldots, \Gamma_n\}}{\{\Gamma_1', \ldots, \Gamma_m'\}}
+\]
+denoting that $\Gamma_1 \cup \cdots \cup \Gamma_n = \Gamma_1' \cup \cdots 
+\Gamma_m'$. We first specify that $\Delta = \Gamma_1 \cup \cdots \cup
+\Gamma_n$ and $\Delta' = \Gamma_1' \cup \cdots \cup
+\Gamma_n'$, where $\Delta$ and $\Delta'$ are fresh generic contexts.
+These constraints are specified inductively by introducing new auxiliary 
+generic contexts. The base case is when there is a single generic context, 
+$\Gamma$, in which case we return $\Gamma$. Otherwise pick two generic
+contexts $\Gamma_i$ and $\Gamma_j$ and create a new generic context
+$\Delta_{i,j}$ and specify $\Delta_{i,j} = \Gamma_i \cup \Gamma_j$ using 
+the constraint \union{\Gamma_i}{\Gamma_j}{\Delta_{i,j}}. Then we replace 
+both $\Gamma_i$ and $\Gamma_i$ by a single occurrence of $\Delta_{i,j}$.
+We repeat this procedure with the resulting set of generic contexts. 
+We apply this operation to both  $\{\Gamma_1, \ldots, \Gamma_n\}$ and
+$\{\Gamma_1, \ldots, \Gamma_n\}$ obtaining two generic contexts $\Delta$
+and $\Delta'$ and two sets of union constraints $\Tscr$ and $\Tscr'$. Then
+we add the constraint $\eqctx{\Delta}{\Delta'}$ to the set $\Tscr \cup
+\Tscr'$. 
+
+% LEMMA: mostrar que se uma formula esta no delta final de um lado ela tb esta
+% no delta final do outro lado. Prova por inducao no tamanho do set.
+

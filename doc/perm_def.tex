@@ -1,0 +1,141 @@
+\begin{comment}
+\begin{giselle}
+I though it was better to separate the concepts of macro-rules and
+permutability. First we introduce what are macro-rules and prove it's
+completeness and after that we present the problem of permutation of rules and
+show how macro-rules can help us solve this automatically.
+\end{giselle}
+
+\begin{vivek} 
+Define the problem of permuting two rules: Given a side-formula
+context, and two formulas. Forall possible ways of 
+introducing...
+\end{vivek}
+
+\begin{giselle}
+There is a good definition of permutations on sequent calculus here:
+http://www.lix.polytechnique.fr/~nguenot/pub/sd09.pdf Should we follow this
+notation and definitions? I think they differ from what was defined in your
+thesis Vivek.
+
+Are we defining this for specifications of sequent calculus systems only?
+\end{giselle}
+\end{comment}
+
+The proof of a theorem (or formula) in sequent calculus involves the systematic
+application of inference rules to sequents. One major problem during proof
+search on these systems is the existence of redundant derivations. By redundant
+we mean derivations that can be obtained from each other just by a simple
+reordering on the application of inference rules, without affecting the
+end-sequent or the leaves. In this document, we will deal only with derivations
+that are obtained by applying two inference rules. 
+
+\begin{definition}[Permutability]
+Let $\mathcal{S}$ be an end sequent and $\pi$ a derivation of $\mathcal{S}$
+which consists of the application of rules $\alpha$ and $\beta$, in this
+order, resulting on the set of sequents $\{\mathcal{S}_1, ..., \mathcal{S}_n\}$ as
+leaves:
+
+\[
+\infer[\alpha]{\mathcal{S}}
+{
+  \mathcal{S}_1 &
+  ... &
+  \infer[\beta]{\mathcal{S}'}{\mathcal{S}_i & ... & \mathcal{S}_{i+k}} &
+  ... &
+  \mathcal{S}_n
+}
+\]
+
+We say that rule $\alpha$ \textit{permutes over} rule $\beta$, denoted by
+$\alpha/\beta$, if there exists a derivation:
+
+\[
+\infer[\beta]{\mathcal{S}}
+{
+  \mathcal{S'}_1 &
+  ... &
+  \infer[\alpha]{\mathcal{S}'}{\mathcal{S'}_i & ... & \mathcal{S'}_{i+j}} &
+  ... &
+  \infer[\alpha]{\mathcal{S}''}{\mathcal{S'}_r & ... & \mathcal{S'}_{r+j}} &
+  ... &
+  \mathcal{S'}_m
+}
+\]
+
+Such that the existence of a proof for each $\mathcal{S}_1, ..., \mathcal{S}_n$
+implies the existence of proofs for each $\mathcal{S'}_1, ..., \mathcal{S'}_m$.
+
+We say that two rules $\alpha$ and $\beta$ are permutable if $\alpha/\beta$ and
+$\beta/\alpha$.
+
+\end{definition}
+
+\subsection{Checking permutability}
+
+In this section we show how it's possible to verify automatically if two rules
+permute by using the macro-rules.
+
+\begin{giselle}
+Let $\alpha(A_1, ..., A_n)$ and $\beta(B_1, ..., B_m)$ be formulas with the
+connectives $\alpha$ and $\beta$. We proceed by building the macro rule for
+$\alpha$, thus obtaining a set of open leaves $\Oscr_{\alpha}$. Choose one leaf
+$S$ from this set and use its generic contexts and constraints to build a macro rule
+for $\beta$. The new set $\Oscr$ of open leaves is $\Oscr_{\beta} \cup
+\Oscr_{\alpha} \setminus \{S\}$.
+
+Let $M_1$ be the model satisfying the final set of constraints of this first
+part.
+
+Now, build the macro rule for $\beta$ first and then $\alpha$ proceeding the
+same way. Let $M_2$ be the model satisfying the set of constraints of this
+operation.
+
+If $M_2 \Rightarrow M_1$, then a proof of the sequents on the first derivation
+implies in a proof of the sequents on the second derivation (because $M_2$ is
+``bigger'' then $M_1$ - remember: $x > 6 \Rightarrow x > 5$).
+
+Otherwise, try to choose another open leaf for $\alpha$ on the second
+derivation. If one leaf does not work, try every subset.
+\end{giselle}
+
+\begin{comment}
+\begin{giselle} 
+The idea of showing the permutability of two rules
+$\alpha$ and $\beta$ is to construct the macro rules for both derivations and
+check if they are equivalent.
+
+If this is the case, I am putting the paragraph below in a new section so that
+it can be explained and proved.
+
+Formalize and prove soudness and completeness of permutation algorithm.
+\end{giselle}
+
+\paragraph{Constructing more complex derivations}
+Above we have shown how to represent a single macro-rule using
+simple constraints. However, in order to show the permutability of rules, 
+we will need to construct derivations with height of two macro-rules.
+Assume that $\Sscr$ is the root context and that we want to construct a
+such a derivation introducing $\Sscr$, where the formula $F_1$ is
+introduced last, resulting on the macro rule
+$\mr{F_1}{\Cscr}{\Oscr}{\Tscr}{\Sscr}$, and $F_2$ is introduced (possibly
+many times) on some of the open leaves of $\Oscr$, say the open leaves 
+$\Sscr_{i_1}, \ldots, \Sscr_{i_n}$, where $i_j$ is its position in list
+$\Oscr$.
+Then we construct the macro-rules as shown above
+$\mr{F_2}{\Cscr_{i_1}}{\Oscr_{i_1}}{\Tscr_{i_1}}{\Sscr_{i_1}}$, $\ldots,$
+$\mr{F_2}{\Cscr_{i_n}}{\Oscr_{i_n}}{\Tscr_{i_n}}{\Sscr_{i_n}}$.
+Let $\Cscr'$ be the list of closed leaves obtained by appending the lists 
+$\Cscr_j$ and $\Oscr_j$ by replacing the ${i_j}$ element with the elements
+in the list $\Oscr_{i_j}$. Let $\Tscr'$ be the set of sets of constraints, 
+where the constraints above are merges, as in the case for tensor above.
+We denote such
+derivation as $\der{F_1}{F_2}{[i_1,
+\ldots, i_n]}{\Cscr'}{\Oscr'}{\Tscr'}{\Sscr}$. 
+
+Notice that it is not hard to generalize the definition above to describe 
+derivations of with greater heights $\tsl{mr}^i$. However, this would
+complicate unnecessarily notation and therefore we limit ourselves to 
+$\tsl{mr}^2$.
+\end{comment}
+

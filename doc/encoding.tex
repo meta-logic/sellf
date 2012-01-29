@@ -1,0 +1,147 @@
+\Paragraph{Encoding Sequents}
+Similar as in Church's simple type theory \cite{church40}, we assume that 
+linear logic propositions
+have type $o$ and  that the linear logic quantifiers
+have type $(\tsl{term} \rightarrow \tsl{form}) \rightarrow o$, where 
+\tsl{term} and \tsl{form} are respectively the types for an
+object-logic term and for object-logic formulas. 
+Moreover, following \cite{pimentel05lpar,pimentel01phd,nigam10jar}, 
+we encode
+a sequent in \SELLF\ by using two meta-level atoms $\lft{\cdot}$ and 
+$\rght{\cdot}$ of type $\tsl{form} \rightarrow o$. They denote 
+respectively an object logic formula appearing on the left and on the 
+right-hand-side of a sequent. For example, the sequent 
+$B_1, \ldots, B_n \vdash C_1, \ldots, C_m$ could be encoded by 
+the \SELLF\ sequent $\vdash \Theta : 
+\lft{B_1}, \cdots, \lft{B_n} :_l \rght{C_1}, \cdots, \rght{C_m} :_r \cdot
+\Uparrow \cdot$, where $\Theta$ encodes the proof system's
+introduction rules. 
+
+Notice that in \SELLF\ we can specify the contexts
+for the
+subexponentials \tsl{l} (for left) and \tsl{r} (for right) to either 
+behave like sets or multisets by changing the subexponential signature 
+accordingly. For instance, if we use the subexponentials signature 
+$\tup{\{l,r, \maxSE\},\preceq,\{l, \maxSE\}, \{l, \maxSE\}}$, with some
+preorder $\preceq$, 
+the contexts \tsl{l} and $\maxSE$ are treated as sets, while
+the context \tsl{r} is treated as a multiset.
+Such specifications could be used for proof systems which treat formulas
+in the right-hand-side of sequents differently from the formulas in the
+left-hand-side, such as proof systems for intuitionistic logic. 
+Notice, however,  that one is not restricted to using only the three
+subexponentials above, but is also allowed to use as many
+subexponentials as needed.
+
+% Finally, for convenience, if $\Gamma$ is a (multi)set of object-logic 
+% formulas, then $\lft{\Gamma}$ (respectively, $\rght{\Gamma}$) denotes 
+% the (multi)set of meta-level atoms $\{\lft{F} \mid F \in \lft{\Gamma}\}$
+% (respectively, $\{\rght{F} \mid F \in \rght{\Gamma}\}$).
+
+\Paragraph{Encoding Inference Rules}
+An inference rule is encoded by using \sellf\ monopoles and
+bipoles~\cite{miller.ep}. A \emph{monopole} is a formula constructed from
+atomic formulas, $\lft{\cdot}$ and $\rght{\cdot}$, and occurrences of
+negative connectives, with the restriction that for any
+subexponential index \tsl{l}, $\nquest{l}$ has always atomic scope. A
+\emph{bipole} is constructed using monopoles, negated atomic literals
+($A^\bot$), and
+occurrences of positive connectives, with the restriction that for any
+subexponential index \tsl{l}, $\nbang{l}$ can only be applied to monopoles.
+
+\newcommand\bDer{\textrm{bipole-derivation}}
+\newcommand\BDer{\textrm{Bipole-derivation}}
+\newcommand\bDers{\textrm{bipole-derivations}}
+\newcommand\BDers{\textrm{Bipole-derivations}}
+
+\newcommand{\lftQ}[1]{\nquest{l} \lfloor #1 \rfloor}
+\newcommand{\rghtQ}[1]{\nquest{r} \lceil #1 \rceil}
+
+According to the focusing discipline, bipoles are necessarily introduced by
+derivations containing a \emph{single} positive trunk and a \emph{single}
+negative trunk, \ie, derivations containing a single alternation of phases.
+We call these derivations \emph{\bDers}.
+In particular, whenever a bipole $B$ is focused on, it is necessarily
+introduced by a derivation of the following form:
+{\small
+\[
+\infer{\vdash \Kscr: \Gamma \Uparrow \cdot}{
+ \infer={\vdash \Kscr' : \Gamma' \Downarrow B}
+{
+\vdash \Kscr_1 : \Gamma_1 \Uparrow \cdot
+\qquad \cdots \qquad
+\vdash \Kscr_n : \Gamma_n \Uparrow \cdot
+}
+}
+\]
+}
+where the elided derivation contains a single
+positive and a single negative trunk. A bipole can also be interpreted as a
+formula with two big-step connectives, one positive and another negative,
+hence the name bipole. 
+
+It turns out that one can match exactly the shape
+of a \bDer\ with the
+shape of the inference rule the bipole
+encodes.
+Consider, for example, the
+following bipole $F = \exists A \exists B.[\lft{A\iimp B}^\bot \tensor
+(\nbang{l} \rghtQ{A}\tensor\lftQ{B})]$ encoding the $\iimp$
+left-introduction rule
+for intuitionistic logic with signature $\tup{\{l,r,
+\maxSE\},\preceq,\{l, \maxSE\}, \{l, \maxSE\}}$, the same as given above.
+The only way to introduce $F$ in \sellf\ is by using a \bDer\ of the
+following form, where $F$  is in the theory $\Theta$:
+{\small
+\[
+ \infer{\vdash \Theta : \lft{\Gamma}, \lft{A \iimp B} :_l \rght{G} :_r
+\cdot
+\Uparrow \cdot}{
+\infer={\vdash \Theta : \lft{\Gamma}, \lft{A \iimp B} :_l \rght{G} :_r
+\cdot
+\Downarrow F}{
+\vdash \Theta : \lft{\Gamma}, \lft{A \iimp B} :_l \rght{A} :_r \cdot
+\Uparrow \cdot
+&
+\vdash \Theta : \lft{\Gamma}, \lft{A \iimp B}, \lft{B} :_l \rght{G} :_r
+\cdot
+\Uparrow \cdot
+}}
+\]
+}
+The \bDer\ above corresponds exactly to the left implication
+introduction rule for intuitionistic logic with premises
+$\Gamma, A\iimp B \lra A$ and $\Gamma, A \iimp B, B \lra G$ and conclusion
+$\Gamma, A\iimp B \lra G$. 
+Nigam and Miller in \cite{nigam10jar} classify this adequacy as \emph{on
+the level of derivations}. Moreover \cite{nigam10jar,nigam11lsfa} provides
+a number of the encodings of proof systems for different logics that have
+this level of
+adequacy. In the remainder of this paper, we assume that all specifications
+are of this level of adequacy.
+
+% \section{Stable Models}
+
+% \newcommand{\fail}{\hbox{\tsl{false}}}
+\newcommand{\mctx}[2]{\ensuremath{{\tsl{mctx}(\ensuremath{#1},
+\ensuremath{#2}) } }}
+\newcommand{\elin}[2]{\ensuremath{{\tsl{unitctx}(\ensuremath{#1},
+\ensuremath{#2})}
+}}
+\newcommand{\emp}[1]{\ensuremath{{\tsl{emp}(\ensuremath{#1})}}}
+% \newcommand{\eqf}[2]{
+% \ensuremath{\hbox{\tsl{eqf}(\ensuremath{#1},\ensuremath{#2})}}}
+\newcommand{\addform}[3]{\ensuremath{{\tsl{addfm}(\ensuremath{#1},
+\ensuremath{#2},\ensuremath{
+#3})}}}
+\newcommand{\eqctx}[2]{\ensuremath{{\tsl{eqctx}(\ensuremath{#1},\ensuremath
+{#2})}}}
+\newcommand{\union}
+[3]{\ensuremath{{\tsl{union}(\ensuremath{#1},\ensuremath{#2},
+\ensuremath{ #3})}}}
+\newcommand{\In}
+[2]{\ensuremath{\tsl{in}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\Equ}
+[2]{\ensuremath{\tsl{Equ}(\ensuremath{#1},\ensuremath{#2})}}
+
+

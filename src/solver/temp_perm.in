@@ -1,0 +1,96 @@
+% We use the following predicate names:
+%
+%  form(X) ->  Denotes that X is a formula;
+%  in(X, Ctx) -> Denotes that the  formula X is in the context Ctx; 
+%  union(C1, C2, C3)  -> Denotes that the union of the contexts C1 and C2
+%    contains the same elements as the context C3;
+% ctx(Ctx, Sub, Lin/Unb, Leaf, Tree) -> Denotes that the context Ctx belongs to the 
+%   linear/unbounded subexponential of the open leaf Leaf of the tree Tree.
+% in_geq(F, Sub, Leaf) -> Denotes that the formula F is in a context of a subexponential of 
+%   of the Leaf that is greater than the subexponential Sub.
+% provIf(Leaf1, Leaf2) -> Denotes that the Leaf1 is provable if Leaf2 is provable.
+
+in(X, S) :- in(X, S1), union(S1, S2, S).
+in(X, S) :- in(X, S2), union(S1, S2, S).
+in(X, S1) v in(X, S2) :- in(X, S), union(S1, S2, S).
+
+in(F, G) :- elin(F, G).
+:- in(F, G), elin(F1, G), F != F1.
+
+:- in(X, G), emp(G).
+
+in(F, G) :- mctx(F, G).
+
+mctx(F, G1) :- addform(F, G, G1).
+mctx(F1, G1) :- addform(F, G, G1), mctx(F1, G).
+
+emp(G1) :- emp(G), union(G1, G2, G).
+emp(G2) :- emp(G), union(G1, G2, G).
+elin(F, G1) v elin(F, G2) :- elin(F, G), union(G1, G2, G).
+emp(G1) v emp(G2) :- elin(F, G), union(G1, G2, G).
+emp(G) :- emp(G1), emp(G2), union(G1, G2, G).
+
+
+%% Clauses to certify: proof of Lf1 => proof of Lf2
+provIf(Lf2, Lf1) :- not not_provIf(Lf2, Lf1), ctx(_, _, _, Lf2, tree2), ctx(_, _, _, Lf1, tree1).
+
+% Every subexponential is greater than itself.
+% TODO: not safe. Find a way to specify this.
+% geq(X, X).
+
+% Definition of in_leaf
+in_leaf(F, Lf) :- in(F, C), ctx(C, _, _, Lf, _).
+
+% There is a formula in S1 that is not present in S2
+not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, _, _, Lf1, tree1), not in_leaf(F, Lf2), ctx(_, _, _, Lf2, tree2).
+
+% There is a formula in a linear context of S2 such that it is not in S1.
+not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), not in_leaf(F, Lf1), ctx(_, _, _, Lf1, tree1).
+
+% There is a formula in S1 that is in a lower context in S2.
+not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(C2, Sub2, _, Lf2, tree2), not geq(Sub2, Sub1). 
+
+% There is a formula in a linear context of S2 such that it is in S1 in a greater context.
+%not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), not geq(Sub2, Sub1). 
+ok :- provIf(leaf5, _), provIf(leaf6, _), provIf(leaf7, _), provIf(leaf8, _).
+:- not ok.
+
+geq(slin, slin).
+geq( gamma,  gamma).
+ctx(slin155, slin, lin, leaf0, tree1).
+ctx( gamma75,  gamma, lin, leaf0, tree1).
+ctx(slin150, slin, lin, leaf1, tree1).
+ctx( gamma74,  gamma, lin, leaf1, tree1).
+ctx(slin21, slin, lin, leaf2, tree1).
+ctx( gamma9,  gamma, lin, leaf2, tree1).
+ctx(slin16, slin, lin, leaf3, tree1).
+ctx( gamma8,  gamma, lin, leaf3, tree1).
+ctx(slin1, slin, lin, leaf4, tree1).
+ctx( gamma1,  gamma, lin, leaf4, tree1).
+
+
+ctx(slin283, slin, lin, leaf5, tree2).
+ctx( gamma139,  gamma, lin, leaf5, tree2).
+ctx(slin281, slin, lin, leaf6, tree2).
+ctx( gamma138,  gamma, lin, leaf6, tree2).
+ctx(slin276, slin, lin, leaf7, tree2).
+ctx( gamma136,  gamma, lin, leaf7, tree2).
+ctx(slin10, slin, lin, leaf8, tree2).
+ctx( gamma6,  gamma, lin, leaf8, tree2).
+emp(gamma1). emp(gamma74). elin("(rght ((tensor a)b))",slin1). elin("(rght a)",slin5). elin("(rght ((plus a)b))",slin150). elin("(rght b)",slin7). elin("(rght b)",slin154). union(gamma1,gamma2,gamma0). union(slin1,slin2,slin0). union(gamma3,gamma4,gamma2). union(slin3,slin5,slin6). union(slin3,slin4,slin2). union(slin4,slin7,slin8). union(gamma74,gamma75,gamma4). union(slin150,slin151,slin8). union(slin151,slin154,slin155). in("(rght ((tensor a)b))",slin0). in("(rght ((tensor a)b))",slin1). in("(rght a)",slin6). in("(rght a)",slin5). in("(rght ((plus a)b))",slin0). in("(rght ((plus a)b))",slin2). in("(rght ((plus a)b))",slin4). in("(rght ((plus a)b))",slin8). in("(rght ((plus a)b))",slin150). in("(rght b)",slin7). in("(rght b)",slin8). in("(rght b)",slin155). in("(rght b)",slin151). in("(rght b)",slin154).
+elin("(rght b)", slin282).
+union(slin279, slin282, slin283).
+elin("(rght a)", slin280).
+union(slin278, slin280, slin281).
+union( gamma138,  gamma139,  gamma137).
+union(slin278, slin279, slin277).
+elin("(rght ((tensor a)b))",  gamma136).
+emp(slin276).
+union( gamma136,  gamma137,  gamma7).
+union(slin276, slin277, slin15).
+elin("(rght b)", slin14).
+union(slin11, slin14, slin15).
+elin("(rght ((plus a)b))",  gamma6).
+emp(slin10).
+union( gamma6,  gamma7,  gamma5).
+union(slin10, slin11, slin9).

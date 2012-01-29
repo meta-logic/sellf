@@ -1,0 +1,524 @@
+\documentclass{llncs}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{amsmath}
+%\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{comment}
+\usepackage{mathbbol}
+
+\DeclareMathAlphabet{\mathsl}{OT1}{cmr}{m}{sl}
+\newcommand\tsl[1]{\hbox{\ensuremath{\mathsl{#1}}}}
+
+\newcommand{\sellf}{\hbox{SELLF}}
+\newcommand\zero{0}
+\newcommand\one{1}
+\newcommand\bottom{\perp}
+\newcommand\bang{\mathop{!}}
+\newcommand\quest{\mathord{?}}
+\newcommand\limp{\mathbin{-\hspace{-0.70mm}\circ}}
+\newcommand\tensor\otimes
+\newcommand\bla{\mathrel{\mbox{$\circ\!-$}}}
+\newcommand\lftall{\forall_{l}}
+\newcommand\lexists{\exists_{l}}
+\newcommand\lolli{\multimap}
+\newcommand\plus{\oplus}
+\newcommand\lpar{\mathrel{\bindnasrepma}}
+\newcommand\bigpar{\mathrel{\bindnasrepma}}
+\newcommand{\with}{\mathbin{\&}}
+
+\newcommand{\nbang}[1]{\hbox{$\bang^\mathsl{#1}$}}
+\newcommand{\nquest}[1]{\hbox{$\quest^\mathsl{#1}$}}
+
+\newcommand{\unb}{\tsl{unb}}
+
+\newcommand{\fail}{\hbox{\tsl{fail}}}
+\newcommand{\mctx}[2]{\hbox{\tsl{mctx}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\elin}[2]{\hbox{\tsl{elin}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\emp}[1]{\hbox{\tsl{emp}(\ensuremath{#1})}}
+\newcommand{\eqf}[2]{\hbox{\tsl{eqf}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\addform}[3]{\hbox{\tsl{addform}(\ensuremath{#1},\ensuremath{#2},\ensuremath{#3})}}
+\newcommand{\eqctx}[2]{\hbox{$
+\tsl{eqctx}$(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\union}
+[3]{\hbox{\tsl{union}(\ensuremath{#1},\ensuremath{#2},\ensuremath{#3})}}
+\newcommand{\In}
+[2]{\hbox{\tsl{in}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\form}
+[1]{\hbox{\tsl{form}(\ensuremath{#1})}}
+\newcommand{\Equ}
+[2]{\hbox{\tsl{Equ}(\ensuremath{#1},\ensuremath{#2})}}
+
+
+\newcommand{\mr}[3]{\tsl{mr}(#1,#2,#3)}
+\newcommand{\der}[7]{\tsl{mr^2}(#1,#2,#3,#4,#5,#6,#7)}
+
+\newcommand{\Oscr}{\mathcal{O}}
+\newcommand{\Cscr}{\mathcal{C}}
+\newcommand{\Lscr}{\mathcal{L}}
+\newcommand{\Sscr}{\mathcal{S}}
+\newcommand{\Tscr}{\mathcal{T}}
+\newcommand{\Wscr}{\mathcal{W}}
+
+% For generic contexts
+\newcommand{\genK}{\mathcal{K}_{g}}
+\newcommand{\genG}[2]{\Gamma_{#1}^{#2}}
+
+\newcommand{\eg}{{\em e.g.}}
+\newcommand{\ie}{{\em i.e.}}
+\newcommand{\etal}{\emph{et al.}}
+
+\newcommand{\alg}[1]{\mathbb{\Lbrack} #1 \mathbb{\Rbrack}}
+
+% Evironments for comments
+\newcommand{\Endmark}{$\diamond$}
+\newenvironment{giselle}{\begin{trivlist}\item[]{\bf Giselle:\ }}%
+                       {{\hfill \Endmark}\end{trivlist}}
+
+\newenvironment{vivek}{\begin{trivlist}\item[]{\bf Vivek:\ }}%
+                       {{\hfill \Endmark}\end{trivlist}}
+
+%opening
+\title{Automating the Proof of Permutation Lemmas}
+\author{Vivek Nigam \texttt{vivek.nigam at ifi.lmu.de}\\
+  Giselle Reis \texttt{giselle at logic.at}}
+
+\institute{Ludwig-Maximilians-Universit{\"a}t, Munich, Germany\\
+Technische Universit{\"a}t Wien, Vienna, Austria}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+
+\input{intro}
+\section{Linear Logic}
+
+Focusing;
+Subexponentials.
+
+\section{Encoding Proof Systems}
+
+Linear logic with subexponentials as a logical framework for proof systems.
+
+\section{Macro-rules}
+
+\input{macro}
+
+\subsection{Representing Sequents: generic contexts}
+\label{sec:generic_contexts}
+
+\input{gen_contexts}
+
+\begin{comment}
+\begin{giselle}
+Maybe we don't need to make a distinction between the unbounded context or the
+others... since it is declared in the specification just like the other
+subexponentials. Do we?
+\end{giselle}
+
+We assume that the names of the contexts in the object-logic are specified
+as subexponential names and that the meta-logic has an unbounded
+subexponential, referred to as \unb, that may only contain the clauses specifying 
+the inference rules of the object-logic.
+
+A side-formula context is represented as a function from the set of
+subexponential 
+indexes to a set of \sellf\ formulas and generic context names, such as 
+$\Gamma$. 
+\end{comment}
+
+\subsection{Constraints}
+\label{sec:constraints}
+
+\input{constraints}
+
+\subsection{Macro-rules}
+\label{sec:macro_def}
+
+\input{macro_def}
+
+\begin{comment}
+Then, the set of macro-rules,
+$\mr{F}{\Cscr}{\Oscr}{\Tscr}{\Sscr}$, that can introduce a formula, $F$,
+given a root side-formula context $\Sscr$, is represented by a list of
+closed leaves
+$\Cscr$, a list of open leaves $\Oscr$, and a set of sets of constraints,
+$\Tscr$.
+\end{comment}
+
+\begin{comment}
+Given a formula, $F$, and a root side-formula context, $\Sscr$, we
+macro-rules of a formula inductively. Our procedure will have an invariant
+that the unbounded contexts will have exactly one generic context. This
+does not mean, however, that an unbounded context might not have more than 
+a formula. 
+
+There are two base cases: The first base case is when a derivation
+finishes with an initial rule. In this case $F = A^\bot$. The set of closed
+and open leaves are, respectively,  $\Cscr = \{S\}$ and $\Oscr
+= \emptyset$. We construct the set of constraints as follows. Assume that
+$u_1, \ldots, u_n$ are the unbounded
+subexponentials and $\Lscr = l_1, \ldots, l_m$ are the linear
+subexponentials. In order for the initial rule to be applicable $A$ must be
+present in some context of the side-formula context $\Sscr$. There are two 
+cases, $A$ appears in an unbounded context or $A$ is the only element in 
+a linear context. 
+
+If $A$ appears in an unbounded context $\tsl{u}_j$, then 
+all the linear contexts must contain only generic contexts, $\Gamma_{l_i}$.
+% G: Why generic contexts? Can't we just say that all linear context must be
+% empty? They are always generic in some sense...
+% VN: Here what I meant is that no formulas can appear in linear contexts. 
+% Remember that we have two types of objects that can appear in contexts:
+% generic contexts and formulas. 
+We construct the constraints specifying that the linear contexts are all
+empty as follows: $\Tscr_l = \{\emp{\Gamma_i} \mid i \in \Lscr \}$.
+If any linear context contains a formula, then the macro-rule is not valid.
+% G: Do we really have to include this fail by ourselves? Won't smodels realize
+% it's unsatisfiable if there is a constraint elin(X, \Gamma_i)?
+% VN: There are two ways of handling this. One is transforming Gamma, F
+% into a new generic context Delta, and then specifying that emp(Delta)
+% or we do this by hand by using the fail constraint.
+% GR: Do you mean that if we have the following constraints co-existing: elin(X,
+% \Gamma_i) and emp(\Gamma_i) it will not fail by itself?
+In this case,  $\Tscr_l = \{ \fail \}$, that is, it is macro-rule that 
+is not satisfiable.
+Moreover, if the context for $\tsl{u}$ is $\Gamma_u, F_1, \ldots, F_{k_u}$,
+then there are $k_u+1$ possible macro-rules: either $A \in \Gamma_{u_j}$ or
+$A = F_i$, for $1 \leq i \leq k_u$. These possible macro-rules are again
+specified by using
+constraints:
+$\Tscr_{u_j}^{\Gamma_u} = \{\mctx{F}{\Gamma_u}\}$, and
+$\Tscr_{u_j}^i = \{\eqf{F}{F_i}\}$ for $1 \leq i \leq k$.
+
+\[\Tscr_u = \bigcup_{1\leq j\leq n} \left\{\{\Tscr_{u_j}^{\Gamma_{u_j}}
+\cup \Tscr_l \} \cup \bigcup_{1 \leq i \leq k_{u_j}}\{\Tscr_{u_j}^i \cup
+\Tscr_l\}\right\}.\]
+
+If $A$ is in a linear context, say $l_j$, then $A$ must be the only 
+formula in that context. Hence, the context of $l_j$ may contain 
+a generic context, $\Gamma_{l_j}$, or a context and a single formula
+$F_{l_j}$. 
+In the former case, $\Gamma_{l_j}$ contains only one formula $A$, which 
+is specified by the constraint
+$\elin{F}{\Gamma_{l_j}}$, while in the latter case, $\Gamma_{l_j} =
+\emptyset$ and $A = F_{l_j}$, which is specified by the constraints 
+$\{\emp{\Gamma_{l_j}}, \eqf{A}{F_{l_j}}\}$. Moreover, all the other 
+linear context must be empty, which is specified by the set of constraints
+$\Tscr_{l_j} = \Tscr_l \setminus \{\emp{\Gamma_{l_j}}\}$. If any
+context contains a formula, then the macro-rule is not valid. In this
+case,  $\Tscr_{l_j} = \{ \fail \}$. 
+Hence, we obtain the following set of set of constraints:
+
+\[\Tscr_l = \bigcup_{1\leq j\leq m} \{\{\elin{F}{\Gamma_{l_j}}\} \cup
+\Tscr_{l_j}\} \cup \{\{\emp{\Gamma_{l_j}}, \eqf{A}{F_{l_j}}\} \cup
+\Tscr_{l_j}\}.\]
+Finally the set of constraints is $\Tscr = \Tscr_u \cup \Tscr_l$. 
+
+% G: Should I stop if I encounter a positive formula??
+% I thought we were stopping when we got to atomic principal formulas, since
+% this means that the whole clause was decomposed...
+The
+other base cases result at the end of the 
+negative phase, in which case the set of closed and open leaves are,
+respectively, $\Cscr = \emptyset$ and $\Oscr = \{S\}$. Moreover, there
+are no constraints, that is, $\Tscr = \emptyset$.
+\end{comment}
+
+\begin{comment}
+For the negative rules, there are no constraints generated nor does
+one need to change the root side-formula context.  One
+simply appends the list of open and closed leaves, whenever needed, \eg, 
+for the $\with$ rule. 
+\begin{giselle}
+Not entirely true... rule ?l generates a constraint.
+\end{giselle}
+\end{comment} 
+
+\begin{comment}
+For the positive rules, each requires some special 
+attention. In particular, for the introduction rule for the existential 
+quantifier, one simply instantiates the existentially quantified variable 
+with a new variable, so that the resulting formula is uniquely identified. 
+The bang introduction rule one changes the root side-formula context of
+the premise
+so that the side condition of the bang rule is satisfied. In the process
+some contexts for unbounded contexts are deleted and some new constraints
+of the form $\emp{\Gamma_l}$ might be added for linear contexts
+$\Gamma_l$. If a linear context that should be empty contains a formula, 
+then the constraint \fail\ is added instead.
+
+The case that one needs to take a bit more care is with the $\tensor$
+introduction rule. In particular,  we create a pair of new
+generic context for each linear 
+subexponential. They are split among the premises of the tensor. On the 
+other hand, the contexts for the unbounded contexts are copied to the
+premises. We illustrate this case with an example.
+Assume that there are only three
+subexponentials, one unbounded \tsl{u} and two linear \tsl{l_1} and 
+\tsl{l_2}:
+
+% G: Do we need to show the formulas explicitly? Why?
+\[
+ \infer[\tensor]{\vdash \Gamma_u : \Gamma_{l_1}, \Delta_1 :
+\Gamma_{l_2}, \Delta_2: \cdot \Downarrow F_1 \tensor F_2}
+{
+\vdash \Gamma_u : \Gamma_{l_1}' : \Gamma_{l_2}': \cdot \Downarrow F_1
+&
+\vdash \Gamma_u : \Gamma_{l_1}'' : \Gamma_{l_2}'': \cdot \Downarrow F_2
+}
+\]
+where $\Delta_i$ are sequences of formulas. 
+Notice that the unbounded context $\Gamma_u$ is copied among the premises
+and the
+new linear contexts $\Gamma_{l_1}', \Gamma_{l_1}'', \Gamma_{l_2}',$ and
+$\Gamma_{l_2}''$ are split among the premises. Moreover, that the
+formulas in $\Delta_i$ do not appear anymore in the premises. 
+
+For the set of open and closed leaves, we proceed as before and
+simply append the set of open and closed leaves obtained using the premises
+above as root side-formula contexts. 
+
+For the set of constraints, we proceed in two steps. First, we merge the
+constraints obtained by the rule's premises as follows: Assume
+$\Tscr_1$ and $\Tscr_2$ are the set of
+sets of constraints of the premises of the tensor rule. Then the
+constraints of the tensor should include the set:
+\[
+ \Tscr' = \{T_1 \cup T_2 \mid T_1 \in \Tscr_1 \textrm{ and } T_2 \in
+\Tscr_2\}
+\]
+Intuitively, any macro-rule introducing first premise together with
+any macro-rule introducing the second premise is a valid macro-rule for 
+the tensor. 
+
+However, we still need to express the relation between the linear 
+contexts in the conclusion side-formula context and the new linear contexts
+in the premise side-formula contexts. In particular, we want to specify
+that $\Gamma_{l_i} \cup \Delta_i = \Gamma_{l_i}' \cup \Gamma_{l_i}''$, 
+which could be specified by
+constraints of the form
+$\eqctx{\{\Gamma_{l_i}, \Delta_i\}}{\{\Gamma_{l_i}', \Gamma_{l_i}'' \}}$.
+However, the formulas in $\Delta_i$ are not generic contexts and therefore
+this constraint is not well-formed. Therefore, we pre-process 
+the set $\Gamma_{l_i} \cup \Delta_i$ so to obtain a set containing only 
+generic contexts. This is done by the following operation that introduces
+inductively new generic contexts:
+if $\Delta_i = \emptyset$ then we are done; otherwise let $F \in
+\Delta_i$. Then we introduce two new generic contexts $\Gamma_{l_i}^1$ and 
+$\Gamma_{l_i}^F$,
+such that $\Gamma_{l_i}^1 = \Gamma_{l_i} \cup \Gamma_{l_i}^F$
+specified by the
+constraint \union{\Gamma_{l_i}}{\Gamma_{l_i}^F}{\Gamma_{l_i}^1} and that 
+$\Gamma_{l_i}^F = \{F\}$, specified by the constraint
+\elin{F}{\Gamma_{l_i}^F}. We repeat this operation to the set 
+$\Gamma_{l_i}^1 \cup \Delta_i\setminus\{F\}$ that contains less formulas. 
+At the end we add all the resulting constraints to all the sets of
+constraints in the set $\Tscr'$. 
+\end{comment}
+
+\input{example}
+
+\subsection{Soundness and Completeness}
+
+\input{proofs_macro}
+
+%\paragraph{Soundness and Completeness}
+
+%\textbf{VN: Perhaps to make things a bit more clearer, we need a notion of 
+%$\alpha$-equivalence among sequent contexts.}
+
+%Let $F$ be a \sellf\ formula. Then, every satisfiable instance of the macro-rules generated
+%using the algorithm proposed corresponds to a derivation in \sellf\ when
+%focusing on $F$.
+
+%\vspace{0.5cm}
+
+% G: Can I say that macro-rules with unsatisfiable constraints corresponds to
+% derivations that fail at some point?
+
+% Yes, this is what the soundness and completeness results will imply.
+
+%  VN: Since there is no negation, there is a least model using standard 
+%  Horn theory semantics. There are constraints, but those do not
+% introduce 
+% % models.
+% 
+
+% The following lemma is indeed not correct. The assumption that the 
+% our constraints are Horn theories is false, due to the specification of 
+% union constraints.
+
+% \begin{lemma}
+%  Let $\Tscr$ be a set of constraints of the form above. If $\Tscr$ is 
+% satisfiable, then it has a model.
+% \end{lemma}
+
+% G: It's not a least model anymore. Check this proof.
+
+%To formalize the soundness of our translation, that takes a
+%model of a set of constraints, $\Cscr$, the root side-formulas, and the
+%list of open leaves and returns the macro-rule using the least model of
+%$\Cscr$. 
+
+% TODO: verify this after making the necessary changes on the example.
+\begin{comment}
+We illustrate using our
+previous example how this translation works. Consider the first set of
+constraints. 
+
+\[
+\Tscr = \left\{\begin{array}{c}
+\emp{\Gamma_r'},\emp{\Gamma_l'}, \mctx{A}{\Gamma_u},
+\union{\Gamma_r}{\Gamma_F}{\Gamma_r^1},\\
+\elin{F}{\Gamma_F}, \union{\Gamma_r'}{\Gamma_r''}{\Gamma_r^1},
+\union{\Gamma_l'}{\Gamma_l''}{\Gamma_l}, \emp{\Gamma_l''}
+\end{array}\right\} 
+\]
+These constraints are satisfiable. To determine its least model, we use the
+smodels logic program engine~\cite{niemela97lpmnr}, obtaining the following
+model:
+\[
+ \left\{\begin{array}{c}
+\In{F}{\Gamma_r^1},\In{F}{\Gamma_F}, \In{F}{\Gamma_r''},
+\In{A}{\Gamma_u}\\
+\end{array}\right\}  \cup \Tscr
+\]
+We then use this model to trigger the rewrite rules of Figure
+\ref{fig:rewritting} to the 
+contexts appearing in the open leaves and the root side-formulas:
+
+\[
+ \begin{array}{l@{\quad}l}
+  \emp{\Gamma} & \Gamma \rightarrow \emptyset\\
+  \mctx{F}{\Gamma} & \Gamma \rightarrow \Gamma, F\\
+  \union{\Gamma'}{\Gamma''}{\Gamma} & \Gamma \rightarrow \Gamma',
+\Gamma''\\
+  \In{F}{\Gamma} & \Gamma \rightarrow \Gamma, F\\
+  \top & \emptyset, \Gamma \rightarrow \Gamma
+ \end{array}
+\]
+
+The last rewrite is always applicable. Notice that for the other
+constraints, such as \eqctx{\cdot}{\cdot}, we do not need rewrite
+rules. These are used only for specifying the model.
+
+\vspace{0.5cm}
+
+\begin{lemma}
+Let $mr(F) = \langle \Cscr, \Oscr, \Tscr \rangle$ be a macro-rule computed as shown
+above. Let $M$ be an arbitrary model of a set of constraints in $\Tscr$
+that is satisfiable.
+% GR: which translation? the rewritting?
+Then the macro-rule obtained by applying the translation shown above using 
+$\Oscr, \Sscr$ and $M$ is derivable in \sellf\ by focusing on the
+formula $F$. 
+\end{lemma}
+
+\begin{proof}
+The proof follows by induction on the size of $F$.
+The model of $\Tscr'$ is then used as an oracle on the non-deterministic
+choices, such as how to do the splitting of contexts.
+
+The first base case is when $F$ is a positive atomic formula. Then the set
+of constraints
+obtained from the macro-rule algorithm above is of the following form:
+\[
+ \In{F}{\Gamma} \quad \textrm{and} \quad \emp{\Gamma'}
+\]
+where $\Gamma$ is a context in the root side-formulas. All of these
+constraints are satisfiable. Moreover, it returns an empty set of open leaves.
+Then, the translation from (the) of a constraint model to a macro-rule
+replaces a generic context $\Gamma$ appearing in an \In{F}{\Gamma}
+constraint by $\Gamma, F$ and a generic context $\Gamma'$ appearing 
+in a \emp{\Gamma'} by $\emptyset$. The
+resulting 
+macro-rule corresponds exactly to the a macro-rule when an initial rule is
+applied. The second base case, which is when 
+$F$ is a negative atomic formula, is straightforward, as no constraints 
+are generated.
+
+For the inductive cases, the most interesting case is when $F = F_1
+\tensor F_2$. Assume that $\mr{F_1}{\Cscr_1}{\Oscr_1}{\Tscr_1}{\Sscr_1}$
+and $\mr{F_2}{\Cscr_2}{\Oscr_2}{\Tscr_2}{\Sscr_2}$ are given, which encode
+the macro-rules computed by introducing the subformulas of $F$. Then 
+from the definition of the algorithm, the set of constraints $T$ from which
+the model is obtained contains necessarily a set of constraints
+constraint $T_1 \in \Tscr_1$ and $T_2 \in \Tscr_2$. Moreover, $T$
+contains a set of \tsl{union} constraints specifying the split of linear
+formulas among the branches.
+Hence the \In{\cdot}{\cdot} elements of the model $M$ of $T$ specifies
+how the formulas in the linear contexts of $\Sscr$ are to be split among
+the linear contexts of $\Sscr_1$ and $\Sscr_2$. We use the same
+split of formulas in the \sellf\ derivation. Finally, since the names used 
+for the (linear) generic contexts appearing in one premise are different
+from the names used in the other premise, 
+the model $M$ restricted to the names appearing in the resulting
+root side-formulas, $\Sscr_1$ and $\Sscr_2$, will also be a model of 
+$T_1$ and $T_2$. Hence by induction hypothesis these are also valid
+derivations in \sellf. 
+
+Notice that the unbounded generic contexts do not 
+cause a problem, although, their names are shared among the premises, since
+they are subject to no constraints, except \tsl{mctx}, and that unbounded
+contexts allow weakening.
+\end{proof}
+
+Completeness follows in a similar fashion, but by induction on the height
+of derivations. It follows very closely the proof of the soundness lemma.
+Notice that in the base case our algorithm a new set of constraints where
+$F$ is any one of the subexponential 
+contexts.
+
+\begin{lemma}
+Let $\Sscr$ be a root sequent context and $F$ a formula. Let $\Xi$ be a
+macro-rule obtained in \sellf\ whose end sequent is $\vdash \Sscr
+\Downarrow F$. Let $\mr{F}{\Cscr}{\Oscr}{\Tscr}{\Sscr}$ be the macro-rule
+constructed using the algorithm above. Then there is a model $M$ of a 
+set of constraints in $\Tscr$ that when used to rewrite $\Oscr$ the
+resulting open premises are equivalent to those in $\Xi$. 
+\end{lemma}
+
+\end{comment}
+
+\subsection{Putting two derivations together}
+
+%Given a common root sequent context $\Sscr$, we will be interested in 
+%determining whether if there is a proof where one formula in the
+%meta-logic is focused 
+
+Let $\mr{F_1}{\Sscr}{\Tscr_0}$ be the macro-rule of a formula $F_1$. After
+finishing all possible applications of the rules, we obtain a final tuple
+$\langle \Cscr_f, \Oscr_f, \Tscr_f \rangle$. Each sequent in $\Oscr_f$ is described only
+by a set of generic contexts (since they are of the form $\genK : \Gamma^i
+\Uparrow \cdot$), which are related through the constraints determined in
+$\Tscr_f$.
+
+Given this generic context and constraints, we can use them as an initial state
+for the construction of another macro-rule of, say, a formula $F_2$:
+$\mr{F_2}{\Sscr_f}{\Tscr_f}$. By the soundness and completeness of the
+macro-rules, this is equivalent to a derivation in \sellf\ that focus on $F_1$
+and later on $F_2$ in one of its branches.
+
+Using this combination of macro-rules, it's possible to reason about the
+permutation of inference rules of the system specified. This is described in
+details in Section \ref{sec:permutations}
+
+\section{Permutation Lemmas}
+\label{sec:permutations}
+
+\input{perm_def}
+
+\bibliographystyle{abbrv}
+\bibliography{permutation}
+
+
+\end{document}

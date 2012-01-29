@@ -1,0 +1,281 @@
+\begin{giselle}
+TODO: make the notation of macro rule consistent over the document.
+\end{giselle}
+
+After introducing the concepts of side-context, generic contexts and
+constraints, we can define a macro-rule in our setting.
+
+A \textit{macro-rule} is a function that takes a formula $F$, a side-context
+$\Sscr$ and a set of sets of constraints $\Tscr_0$ and returns a tuple:
+
+$$\mr{F}{\Sscr}{\Tscr_0} = \langle \Cscr, \Oscr, \Tscr \rangle$$
+
+where $\Cscr$ is a set of closed leaves (sequents), $\Oscr$ is a set of open
+leaves (sequents) and $\Tscr$ is a \underline{set of sets} of constraints. We
+will represent \underline{sets} of constraints by the letter $T$ possibly
+subscripted.
+
+%% G: Introducing the notion of instance of macro-rule in this paragraph to
+% avoid confusion. A formula has two (or more) different macro-rules when
+% there's a non-deterministic choice involved (such as the additive or
+% operator), but it has two instances when it can be satisfied by different
+% constraints at the top level (such as an atom being on the classical or linear
+% context).
+Intuitively, each satisfiable set of constraints $T_i$ in $\Tscr$ specifies one possible
+\underline{instance} of the macro-rule that can introduce the formula $F$. Instances of a
+macro-rule consist of the same set of open and closed leaves but a different
+configuration of the context. For example, if the macro-rule ends with the
+sequent: $\genK : \Gamma^i \Downarrow A$, it might be the case that
+$A^{\bot}$ is in $\Gamma^i$ or in one of the subexponentials. Each of these cases,
+if it can occur given the previous constraints, consist of an instance of this
+macro-rule. Therefore, the set $\Tscr$ will contain one set for each one of
+these possibilities. On the other hand, if there are more than one 
+macro-rule that can introduce a
+formula, as it was the case of our example with $A \oplus (B \otimes C)$, these
+are represented by two different tuples, say $mr_1(F, \Sscr, \Tscr_0)$ and
+$mr_2(F, \Sscr, \Tscr_0)$, since the
+sets of open and closed leaves are different.
+
+Given a formula $F$, a side-context $\Sscr$ and a set of sets of constraints
+$\Tscr_0$, we construct its macro-rules according to the rules described below.
+The derivation ends when the leaves are either closed (and are put in $\Cscr$) or
+open but of the form $\genK : \Gamma^i \Uparrow \cdot$ (and are put in $\Oscr$).
+
+If we don't have any previous information about $\Sscr$, we build it by
+assigning one generic context for each subexponential and one for $\Gamma$ and
+giving the index 0 for all of them. If we don't have any initial constraints,
+then $\Tscr_0$ is set to $\emptyset$.
+
+The initial sequent for the derivation of a macro-rule are the generic contexts
+for subexponentials, represented by $\genK$, and the one for $\Gamma$,
+represented by $\Gamma^i$.
+
+We can divide the cases into negative rules and positive
+rules. The order of application of these rules will follow the focusing
+discipline, i.e., the negative rules are applied whenever possible on the open
+sequents, just like it would be done in proof search.
+
+We will denote the rules of this algorithm by $\alg{\circ}$, where $\circ$ is
+the connective or name used in \sellf.
+
+\paragraph{$\alg{I}$: $\mathbf{\vdash \genK : \Gamma^i \Downarrow A}$\\} 
+$A$ is a positive atom in a
+synchronous phase. In that case, there is only one possibility, which is to
+close the sequent. For that, one of two things must occur:
+\begin{itemize}
+  \item $A^{\bot}$ is in $\Gamma^i$ and every context that cannot suffer
+  weakening in $\genK$ is empty. This is represented by the following
+  constraint:
+
+  $$T_u = \{\elin{A^{\bot}}{\Gamma^i}\} \cup \{ \emp{\Gamma_s} \mid \forall s
+  \notin \Wscr\} $$
+
+  where $\Wscr$ is the set of subexponential indices that can suffer weakening. 
+
+  \item $A^{\bot}$ is in one of the subexponentials, say $s$. Again, we have two cases:
+  either $s$ can suffer weakening (in which case the formula can co-exist with
+  others) or $s$ cannot suffer weakening (in which case $A^{\bot}$ must be the
+  only formula in $s$). Each of the possible subexponentials will generate one different
+  set of constraints. For each subexponential considered that cannot suffer weakening, the
+  constraints are the following:
+
+  $$T_l = \{\elin{A^{\bot}}{\Gamma_l} \} \cup \{ \emp{\Gamma_s} \mid \forall s
+  \neq l \wedge s \notin \Wscr \} \cup \{ \emp{\Gamma^i} \}$$
+
+  And for each subexponential considered that can suffer weakening, the
+  constraints are the following:  
+
+  $$T_w = \{\mctx{A^{\bot}}{\Gamma_w} \} \cup \{ \emp{\Gamma_s} \mid \forall s
+  \notin \Wscr \} \cup \{ \emp{\Gamma^i} \}$$
+
+  As before, $\Wscr$ represents the set of subexponential indices that can
+  suffer weakening.
+\end{itemize}
+
+Assuming that $\Tscr = \{ T_1, ..., T_n \}$ was the set of set of constraints so
+far, the new set of constraints for this macro-rule the are the sets resulting
+from the union of each $T_i \in \Tscr$ with each $T_u$, $T_l$ and $T_w$.
+
+\paragraph{$\alg{R\Uparrow}$: $\mathbf{\genK : \Gamma^i, A \Uparrow \cdot}$\\} 
+In order to come to this configuration, it must be the case that some literal
+(possibily negative) or
+positive formula $A$ was put in the context by the $R\Uparrow$ rule. As we are
+dealing with specifications of sequent calculus systems, we stress that it must
+be a literal, and never a positive formula. This happens because the formulas
+that specify the inference rules of such systems are always
+\textit{bipoles}~\cite{paper da Elaine e Dale? da Agata?}. Roughly, this means
+that there are no positive formulas as subformulas of negative ones, so when
+negative formulas are being decomposed its subformulas are either other negative
+formulas (in this way focus is not lost) or literals.
+
+\begin{giselle}
+I am putting this observation above about atomic formulas and bipoles because
+that's what we are dealing with at the moment, but there are no restrictions on
+the method if $A$ were a formula. In that case, the only thing that would happen
+is that the rule would not be specified by only one macro-rule, since it was not
+completely decomposed.
+\end{giselle}
+
+If the end sequent is of this form, what needs to be done regarding the
+constraints is add the formula $A$ to $\Gamma^i$. Let's say that the last number
+assigned for $\Gamma$ in the derivation so far is $n$. Two new generic
+contexts, $\Gamma^{n+1}$ and $\Gamma^{n+2}$ will be created and 
+the following set of contraints should be added to each element of $\Tscr$:
+
+$$T = \{ \elin{A}{\Gamma^{n+1}}, \union{\Gamma^i}{\Gamma^{n+1}}{\Gamma^{n+2}} \}$$
+
+And the new number of $\Gamma$ on this end sequent will be $n+2$.
+
+\paragraph{$\alg{\binampersand}$: $\mathbf{F = A\ \binampersand\ B}$\\}
+Therefore, it is the case that $\Sscr = \genK : \Gamma^i \Uparrow L, A\
+\binampersand\ B$. Applying the inference rule for $\binampersand$ corresponds to
+removing $\Sscr$ from $\Oscr$ and adding the following open sequents to the set:
+$\genK : \Gamma^i \Uparrow L, A$ and $\genK : \Gamma^i \Uparrow L, B$. The
+generic contexts of $\Sscr$ are copied to each new sequent.
+
+\paragraph{$\alg{\bindnasrepma}$: $\mathbf{F = A\ \bindnasrepma\ B}$\\}
+In this case $\Sscr = \genK : \Gamma^i \Uparrow L, A\ \bindnasrepma\ B$, and
+the application of rule $[\bindnasrepma]$ corresponds simply to replacing
+$\Sscr$ in $\Oscr$ by $\genK : \Gamma^i \Uparrow L, A, B$.
+
+\paragraph{$\alg{\bot}$: $\mathbf{F = \bot}$\\}
+As before, the application of rule $[\bot]$ will only involve replacing the
+sequent $\Sscr = \genK : \Gamma^i \Uparrow L, \bot$ by $\genK : \Gamma^i
+\Uparrow L$.
+
+\begin{comment}
+\paragraph{$\mathbf{F = \forall x. A}$\\}
+Again, the application of rule $[\forall]$ will correspond with the sustitution
+of the sequent $\Sscr = \genK : \Gamma^i \Uparrow L, \forall x. A$ in
+$\Oscr$ with $\genK : \Gamma^i \Uparrow L, A\{c/x\}$, where $c$ is a fresh
+variable.
+\end{comment}
+
+\paragraph{$\alg{\top}$: $\mathbf{F = \top}$\\}
+In the case that $\Sscr = \genK : \Gamma^i \Uparrow L, \top$, all that needs
+to be done is remove this sequent from $\Oscr$ and add it to $\Cscr$, since it
+concludes a derivation and it is therefore a closed sequent.
+
+\paragraph{$\alg{?^l}$: $\mathbf{F = ?^l A}$\\}
+This case will involve a change on the constraints. The inference rule for $?^l$
+involves the inclusion of formula $A$ in one of the subexponentials, so we have
+to take this into consideration for the next sequent. Suppose that the number of
+the generic context for $l$ in the macro-rule so far is $i$. We have two possible cases,
+either this is a linear subexponential or it's an unbounded one. In both cases
+we will need an auxiliary generic context $\Gamma_l^{i+1}$. For the linear case,
+the new constraint will be:
+
+$$T_l = \{ \elin{A}{\Gamma_l^{i+1}} \cup
+\union{\Gamma_l^{i}}{\Gamma_l^{i+1}}{\Gamma_l^{i+2}} \}$$
+
+For the unbounded case, we use the $addform$ constraint:
+
+$$T_u = \{ \addform{A}{\Gamma_l^{i}}{\Gamma_l^{i+1}} \}$$
+
+In both cases, the new constraint $T_l$ or $T_u$ is added to all sets in
+$\Tscr$.
+
+\vspace{0.5cm}
+
+Those were the negative cases. The positive cases follow.
+
+% restrict the terms that can be used to instantiate the existential (do
+% not use the terms created by forall rules)
+
+% Do not worry about first order cases by now.
+\begin{comment}
+\paragraph{$\alg{\exists}$: $\mathbf{F = \exists x. A}$\\}
+In this case, $\Sscr = \genK : \Gamma^i \Downarrow \exists x. A$ and the
+application of the inference rule $[\exists]$ will replace $\Sscr$ in $\Oscr$ by
+$\genK : \Gamma^i \Downarrow A\{t/x\}$, where $t$ is a new variable.
+\end{comment}
+
+\paragraph{$\alg{1}$: $\mathbf{F = 1}$\\}
+If the focused formula is $1$, we can consider this sequent as a closed one, but
+notice that the inference rule has the emptiness of $\Gamma^i$ as a side
+condition. Therefore the constraint $\emp{\Gamma^i}$ is added to every set in $\Tscr$.
+
+\paragraph{$\alg{!^l}$: $\mathbf{F = !^l A}$\\}
+In this case, $\Sscr = \genK : \Gamma^i \Downarrow !^l A$ and the inference
+rule to be applied is $[!^l]$. This rule has the emptiness of some sets as a
+side condition, and this will generate some constraints to be added to all sets
+in $\Tscr$. First of all, $\Gamma^i$ must be empty, so the following constraint 
+must hold: $\emp{\Gamma^i}$. Also,
+every subexponential that is less than or not related to $l$ in the parcial
+order defined by the subexponential signature must be empty (note that this
+subexponential index must not allow contraction). So, for each subexponential
+$x$ that satisfies this criteria ($x$ is less than or not related to $l$ and $x$
+cannot suffer weakening), the following constraint is generated:
+$\emp{\Gamma_x^{i_x}}$ (considering that $i_x$ is the index of the generic
+context of subexponential $x$ is $\Sscr$). The idea of this side condition is to
+avoid that formulas that cannot suffer weakening are not erased by the operation
+$K_{\leq_l}$. This operation will be represented in our setting with the
+instantiation of new generic contexts for those that should have their formulas
+erased, namely, subexponentials $y$ such that $y$ is less than or not related to
+$l$ and $y$ \underline{can} suffer weakening. This is done by incrementing the
+index $i_y$ of each $y$ and adding the constraint $\emp{\Gamma_y^{i_y + 1}}$.
+
+Summarizing the operations, for the application of the $[!^l]$ rule we generate
+the following constraints:
+
+\begin{itemize}
+    \item $T_l = \{ \emp{\Gamma^i} \}$
+    \item $T_x = \{ \emp{\Gamma_x^{i_x}} | \forall x. (x \preceq l \vee x \text{ is
+    not related to } l) \wedge x \notin \Wscr \}$
+    \item $T_y = \{ \emp{\Gamma_y^{i_y + 1}} | \forall y. (y \preceq l \vee y \text{ is
+    not related to } l) \wedge y \in \Wscr \}$
+\end{itemize}
+
+We also must increment the index $i_y$ of each generic context $\Gamma_y$ as
+defined above. The set $T = T_l \cup T_x \cup T_y$ is added to each set in
+$\Tscr$. The sequent $\Sscr$ in $\Oscr$ is replaced by $\genK' : \Gamma
+\Uparrow A$, where $\genK'$ are the generic contexts modified as
+described.
+
+% TODO: GR: modify the explanation of indexes. We need a global counter because of
+% the tensor rule... review everything above =(
+% Actually, we need a global counter and we also need the local number on each
+% sequent... oh god, what a mess... I need to explain this right.
+
+\paragraph{$\alg{\otimes}$: $\mathbf{F = A\ \otimes\ B}$\\}
+For the $\otimes$ introduction rule the context must be splitted, so we create a
+new pair of generic contexts for each subexponential that cannot suffer
+contraction\footnote{If the subexponential can suffer contraction, we can copy
+all the formulas to both premisses.}, and add a union constraint to relate the
+generic contexts. Suppose that $s$ is a subexponential that cannot suffer
+contraction, so it's generic context must be splited. Let $i_{sg}$ be the global
+index of $s$ and $i_s$ be the index in $\Sscr$. 
+Two new generic contexts $\Gamma_s^{i_{sg} + 1}$ and $\Gamma_s^{i_{sg} +
+2}$ are created and the constraint $\union{\Gamma_s^{i_s}}{\Gamma_s^{i_{sg} +
+1}}{\Gamma_s^{i_{sg} + 2}}$ is added to each set in $\Tscr$. The new index of
+the generic context for $s$ in each of the premisses are now $i_{sg} + 1$ and
+$i_{sg} + 2$. In this rule we notice the need to keep a global index counter for
+each generic context. The operation described above is executed for every
+subexponential that cannot suffer weakening and for the set $\Gamma$, and the sequent $\Sscr =
+\genK : \Gamma \Downarrow A\ \otimes\ B$ in $\Oscr$ is substituted by
+$\genK' : \Gamma' \Downarrow A$ and $\genK'' : \Gamma'' \Downarrow
+B$, where $\genK'$, $\genK''$, $\Gamma'$ and $\Gamma''$ are the
+generic contexts with the new indexes as we described.
+
+\paragraph{$\alg{\oplus}$: $\mathbf{F = A\ \oplus\ B}$\\}
+The $\oplus$ introduction rule is a particular one. It is responsible for
+generating multiple macro-rules for the same formula since it involves a choice
+of one of the formulas $A$ or $B$ to continue with. Suppose that this formula is
+encoutered in a macro-rule $\langle \Cscr, \Oscr, \Tscr \rangle$, where the
+sequent $\Sscr = \genK : \Gamma \Downarrow A\ \oplus\ B$ is in $\Oscr$.
+The way to procede in this case is to duplicate the macro-rule and work
+separately on the new ones. The new macro-rules are:
+
+$$mr' = \langle \Cscr, \Oscr', \Tscr \rangle$$
+$$mr'' = \langle \Cscr, \Oscr'', \Tscr \rangle$$
+
+where $\Oscr'$ is $(\Oscr \backslash \Sscr) \cup \{ \genK : \Gamma
+\Downarrow A \}$ and $\Oscr''$ is $(\Oscr \backslash \Sscr) \cup \{ \genK : \Gamma
+\Downarrow B \}$. 
+
+\vspace{0.5cm}
+
+Using the previous description of how a macro-rule is build, it is easy to
+implement an algorithm from it.
+
+

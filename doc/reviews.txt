@@ -1,0 +1,63 @@
+** The author could have promote the paper better by showing and dramatizing that
+   there are challenges in building an automatic checker for proof transformation.
+** It would be interesting to know how the author derived the proposed two types
+   of propositional theories to better grasp the innovative character of the
+   research.
+** I would suggest to highlight the obstacles that the author came across when
+   trying to achieve the goal stated in the paper.
+** Since the framework will deal primarily with linear logic, the benefit of
+   using it (and not a different logic) could also be included.
+** I found it difficult
+   to understand exactly what it was the authors did--in part due to
+   overall poor organization (technical terms used without definition,
+   hard-to-interpret figures, typos/bugs), but also because the main
+   technical contributions (sections 4 and 5) were presented more as code
+   dumps than as mathematical developments.
+** There was very little
+   motivation/justification for the theory described in the paper, and
+   much of it has the feel (perhaps unjustified) of being ad hoc.  As
+   mentioned above, some incompleteness in the permeable-rules-finding
+   tool was acknowledged, but not described or explained.
+** see precise explanations of how the different aspects of
+   linear logic and the subexponentials contribute in the different
+   stages of the authors' solution.
+** understand why the authors go through the trouble of translating to
+   propositional theories, rather than directly building a specialized
+   prover for SELFF (or alternatively, if it is not possible to state the
+   correctness of these proof transformations in terms of SELLF
+   provability, to understand why that is the case).
+** L163-165: "Similar as in Church's simple type theory, [...] the linear
+   logic quantifiers have type (term -> form) -> o".  Primed with the
+   analogy to Church's type theory, I was expecting you to give the type
+   (term -> o) -> o here.  How does this type allow you to represent
+   nested quantifiers (e.g., such as in the formula at L197).
+** L212 and Table 1: Could you give some motivation for where this
+   particular collection of basic contraints comes from?  Also, I am not
+   sure what you mean by "Logical Specifications" in the third column.
+   Does it have a formal sense?  For example, the table lists the
+   predicate "in" as having "No theory", yet "in" clauses appear both as
+   conclusions and premises in other rows.
+** Proposition 1: "Let M be an arbitrary model of the theory..."  For the
+   benefit of the reader, could you give the definition of "model"?
+** Section 5 and Table 2: it is very difficult to evaluate this section
+   because practically no intuition is given for the construction, nor
+   argument for its correctness nor explanation of its incompleteness.
+** L367: "a proof of \Xi_i implies in a proof of \Xi_j"...not sure what
+   you mean here.
+** Although the paper is nicely written at the beginning, the main
+   contribution (Algorithm 1) and Theorem 1 (soundness and completeness
+   of Algorithm 1) are written in naive style and lack mathematical
+   rigor.
+** Furthermore it
+   is not clear if the work is extendible to other proof transformations
+   (i.e. different from permutations).
+** There is little to no description of prior
+   work (except a detailed technical comparison with [9]) and the paper
+   lacks in motivation which makes it difficult to judge its importance.
+** L13,14,15: sentence is unclear
+** L18: does your tool always work? when/how does it fail? is it trying to solve
+   an undecidable problem?
+   L19: on what examples does it fail (if ever)?
+** L53: how does your tool perform on the different examples that you list here?
+   L59: make explicit the link to answer-set programming
+   L64: remove "also"; sentence is not clear

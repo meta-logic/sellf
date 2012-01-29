@@ -1,0 +1,3 @@
+:tabe <name of the file>    # Open a file in another tab
+gt    # Change tabs
+\t    # Get the type of an Ocaml function

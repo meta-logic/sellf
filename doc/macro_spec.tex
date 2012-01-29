@@ -1,0 +1,212 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{proof}
+
+\title{Specification of context constraints for focused linear logic}
+\author{Giselle Reis \\ \texttt{giselle@logic.at}}
+
+\begin{document}
+\maketitle
+
+When searching for a proof in linear logic, it is common to have conditions over
+the content of the context(s) so that a rule can be applied. In fact, this is
+what allows a greater control over the resources and therefore increases this
+logic's expressiveness.
+
+When generating macro rules, the content of the context is not known. Therefore,
+it is necessary to generate some constraints over the resulting context of the
+macro rule that will guarantee that all ``micro'' rules (the single inference
+rules that were applied to generate that macro) are valid.
+
+The aim of this document is to list all these constraints for each rule of
+linear logic's sequent calculus. The final constraints of the macro rule will be
+a combination of the constraints of each individual inference rule used.
+
+For every formula below, we assume that $\Theta_i$ are unbounded contexts,
+$\Gamma_i$ are bounded contexts, $\Delta_i$ are sets of formulas which we are
+aware that exists in the context $i$ (this is necessary since some rules put 
+formulas on the context). The contexts are separated by a colon (:). The number
+of bounded and unbounded contexts will depend on each specification. 
+%Whenever
+%possible, only one context will be used for the sake of simplicity, but if there
+%is more than one context, the constraints are easily generalized.
+
+\section*{Inference rules for formulas focused on the right of the sequent}
+
+\subsection*{Synchronous phase}
+
+$$
+\infer[\otimes_R]{\Theta_i : \Gamma_i, \Delta_i \gg A \otimes B}
+{
+    \Theta_i : \Gamma_{1i} \gg A \;\;\;\;
+    \Theta_i : \Gamma_{2i} \gg B
+}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_i \cup \Delta_i = \Gamma_{1i} \cup \Gamma_{2i}$ :  
+    eqctx($\{\Gamma_i, \Delta_i\}, \{\Gamma_{1i}, \Gamma_{2i}\}$)
+\end{itemize}
+
+$$
+\infer[\oplus_R]{\Theta_i : \Gamma_i \gg A_1 \oplus B_2}
+{
+    \Theta_i : \Gamma_i \gg A_i
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged. 
+\end{itemize}
+
+$$
+\infer[!^l_R]{\Theta_i : \Gamma_i \gg !^l A}
+{
+    \Theta_i : \Gamma_i \Longrightarrow A
+}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_x  = \emptyset$ if $l \npreceq x$ :  
+    emp($\Gamma_x$)
+    \item If there exists any $\Delta_x$, the rule should fail.
+\end{itemize}
+
+$$
+\infer[1_R]{\Theta_i : \Gamma_i \gg 1}{}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_i  = \emptyset$ :
+    emp($\Gamma_i$)
+\end{itemize}
+
+$$
+\infer[\exists_R]{\Theta_i : \Gamma_i \gg \exists x. A}
+{
+    \Theta_i : \Gamma_i \gg A[x \backslash t]
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.  
+\end{itemize}
+
+$$
+\infer[init \text{($P$ is a positive atom.)}]{\Theta_i : \Gamma_i \gg P}{}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_x = \{P\} \wedge \forall y \neq x \Gamma_y = \emptyset$ :
+    $elin(P, \Gamma_x) \wedge \forall y \neq x. emp(\Gamma_y)$
+    \item $P \in \Theta_x \wedge \Gamma_i = \emptyset$ : $mctx(P, \Theta_x)
+    \wedge \forall i. emp(\Gamma_i)$
+\end{itemize}
+It is important to note that this case generates several different macro rules.
+One for each linear subexponential (where we consider that $P$ is the only
+formula of one of them and the rest is empty) and one for the case that $P$ is
+on an unbounded context and in this case, all the linear contexts are empty.
+
+
+\subsection*{Asynchronous phase}
+
+$$
+\infer[\&_R]{\Theta_i : \Gamma_i \Longrightarrow A \& B}
+{
+    \Theta_i : \Gamma_i \Longrightarrow A \;\;\;\;
+    \Theta_i : \Gamma_i \Longrightarrow B
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.
+\end{itemize}
+
+%% OBS: Introducing this notation for subexponentials.
+$$
+\infer[\multimap_R]{\Theta_i : \Gamma_i \Longrightarrow A \multimap^l B}
+{
+    \Theta_i : \Gamma'_i \Longrightarrow B
+}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma'_i = \Gamma_i \cup \{\Delta_l \cup A\}$ : This does not
+    characterize a constraint in itself. Just states that the formula $A$ is
+    added to context $l$. Actually, this constraint will have to be included in
+    the case $A$ is an atom.
+\end{itemize}
+
+%% OBS: Should we mark here which formulas can be wekened later?
+$$
+\infer[\top_R]{\Theta_i : \Gamma_i \Longrightarrow \top}{}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.
+\end{itemize}
+
+$$
+\infer[\forall_R]{\Theta_i : \Gamma_i \Longrightarrow \forall x. A}
+{
+    \Theta_i : \Gamma_i \Longrightarrow A [x \backslash t]
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.
+\end{itemize}
+
+\section*{Inference rules for formulas focused on the left of the sequent}
+
+\subsection*{Synchronous phase}
+
+$$
+\infer[\&_L]{\Theta_i : \Gamma_i ; A_1 \& A_2 \ll \gamma}
+{
+    \Theta_i : \Gamma_i ; A_i \ll \gamma
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.
+\end{itemize}
+
+$$
+\infer[\multimap_L]{\Theta_i : \Gamma_i ; A \multimap B \ll \gamma}
+{
+    \Theta_i : \Gamma_{1i} ; B \ll \gamma \;\;\;\;
+    \Theta_i : \Gamma_{2i} \gg A
+}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_i = \Gamma_{1i} \cup \Gamma_{2i}$
+\end{itemize}
+
+$$
+\infer[\forall_L]{\Theta_i : \Gamma_i ; \forall x. A \ll \gamma}
+{
+    \Theta_i : \Gamma_i ; A[x \backslash t] \ll \gamma
+}
+$$
+Constraints:
+\begin{itemize}
+    \item NONE. Contexts remain unchanged.
+\end{itemize}
+
+$$
+\infer[init \text{($N$ is a negative atom.)}]{\Theta_i : \Gamma_i ; N \ll \gamma}
+{}
+$$
+Constraints:
+\begin{itemize}
+    \item $\Gamma_i = \emptyset$ : emp($\Gamma_i$)
+    \item $\gamma = N$ %% TODO: how to represent that?
+\end{itemize}
+
+\subsection*{Asynchronous phase}
+
+\end{document}

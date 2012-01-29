@@ -1,0 +1,86 @@
+% TODO: GR: check this example because somethings changed on the generation of the
+% macro-rule.
+
+\paragraph{Example} In order to illustrate the definitions above, consider
+extracting the macro-rules for the following 
+formula using the algorithm proposed previously: 
+\[\exists x. [(A\,x)^\bot \tensor (\nbang{r} \nquest{l} B\,x)].
+\]
+Moreover, assume that there is only one unbounded context $u$ and two 
+linear contexts $l$ and $r$. Assume that the root side-formula context is
+$\vdash \Gamma_u : \Gamma_r, F : \Gamma_l$, where all subexponentials have
+only 
+generic contexts, except for the context of $r$, which contains the formula
+$F$. Also assume that $l, r \preceq u$. We proceed by introducing the
+existential quantifier, which causes 
+$x$ to be replaced by a new value, $t$: 
+\[
+ (A\,t)^\bot \tensor (\nbang{r} \nquest{l} B\,t).
+\]
+The root context does not change and no constraints are added. To introduce
+the tensor, we first have to replace formulas appearing in the side-formula
+context by 
+generic context. In particular, we replace $\Gamma_r \cup \{F\}$ by the 
+context $\Gamma_r'$ and add the constraints:
+\union{\Gamma_r}{\Gamma_F}{\Gamma_r^1} and \elin{F}{\Gamma_F}. Then we
+create a pair of new contexts for each linear context: $\Gamma_r',
+\Gamma_r'', \Gamma_l',$ and $\Gamma_l''$ and add the constraints 
+\union{\Gamma_r'}{\Gamma_r''}{\Gamma_r^1} and
+\union{\Gamma_l'}{\Gamma_l''}{\Gamma_l}. The resulting premises are 
+the following: $\vdash \Gamma_u : \Gamma_r' : \Gamma_l'$ focused on 
+$(A\,t)^\bot$ and $\vdash \Gamma_u : \Gamma_r'' : \Gamma_l''$ focused on $\nbang{r} \nquest{l} B\,t$. 
+
+The first premise is then finished by an initial rule, which means that 
+more constraints are generated. In particular, $A$ can be either in 
+$\Gamma_u$, generating the constraints $\{\emp{\Gamma_r'},
+\emp{\Gamma_l'}, \mctx{A}{\Gamma_u}\}$ or in one of the linear contexts,
+generating the set of constraints $\{\emp{\Gamma_r'},
+\elin{A}{\Gamma_l'}\}$ and $\{\elin{A}{\Gamma_r'}, \emp{\Gamma_l'}\}$. 
+Moreover the closed leaf $\vdash \Gamma_u : \Gamma_r' : \Gamma_l'$ is 
+added. 
+
+For the second premise one introduces the $\nbang{r}$, which generates 
+the constraint $\emp{\Gamma_l''}$ then the negative phase starts by 
+adding $B\,t$ to the context $l$. Hence the macro-rule that introduces
+the formula above has the following shape:
+\[
+ \infer={\vdash \Gamma_u : \Gamma_r, F : \Gamma_l}
+{
+\infer{\vdash \Gamma_u : \Gamma_r' : \Gamma_l'}{}
+&
+\vdash \Gamma_u : \Gamma_r'' : \Gamma_l'', B\,t
+}
+\]
+and the constraints specify the relationship between the generic contexts 
+and formulas. There are namely three sets of constraints, which means
+that there are three possible macro-rules that can introduce the 
+formula above:
+\[
+\begin{array}{c}
+\left\{\begin{array}{c}
+\emp{\Gamma_r'},\emp{\Gamma_l'}, \mctx{A}{\Gamma_u},
+\union{\Gamma_r}{\Gamma_F}{\Gamma_r^1},\\
+\elin{F}{\Gamma_F}, \union{\Gamma_r'}{\Gamma_r''}{\Gamma_r^1},
+\union{\Gamma_l'}{\Gamma_l''}{\Gamma_l}, \emp{\Gamma_l''}
+\end{array}\right\} \\\\
+
+\left\{\begin{array}{c}
+\emp{\Gamma_r'}, \elin{A}{\Gamma_l'},
+\union{\Gamma_r}{\Gamma_F}{\Gamma_r^1},\\
+\elin{F}{\Gamma_F}, \union{\Gamma_r'}{\Gamma_r''}{\Gamma_r^1},
+\union{\Gamma_l'}{\Gamma_l''}{\Gamma_l}, \emp{\Gamma_l''}
+\end{array}\right\} \\\\
+
+\left\{\begin{array}{c}
+\elin{A}{\Gamma_r'}, \emp{\Gamma_l'},
+\union{\Gamma_r}{\Gamma_F}{\Gamma_r^1},\\
+\elin{F}{\Gamma_F}, \union{\Gamma_r'}{\Gamma_r''}{\Gamma_r^1},
+\union{\Gamma_l'}{\Gamma_l''}{\Gamma_l}, \emp{\Gamma_l''}
+\end{array}\right\} 
+\end{array}
+\]
+Notice that, for example, the auxiliary generic contexts $\Gamma_r^1$ and
+$\Gamma_F$ do not appear in the shape of the macro-rule above, but it is
+used for binding the contexts $\Gamma_r', \Gamma_r''$ and $\Gamma_r$
+together. 
+

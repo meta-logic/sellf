@@ -1,0 +1,96 @@
+
+These are the permutation trees generated when the system finds a permutation
+for $\tensor / \oplus$. They are focused proof trees in \sellf, and not in the
+object logic, and are built by the composition of Algorithm~\ref{alg1}. All the
+explanation below considers that the tree is built in a bottom-up manner. Notice
+that the formula focused on is a specification in linear logic with
+subexponentials.
+
+The first tree shows a derivation that focus first on the formula specifying the
+linear logic connective \textit{tensor}\footnote{Here we use the name of the
+connective instead of its symbol to avoid confusion.} and then on the formula
+specifying the \textit{plus} (additive or). Since the level of adequacy is on
+the level of derivations, this tree corresponds exactly to the derivation in LL
+that has a \textit{tensor} followed by a \textit{plus}.
+{\tiny
+$$
+\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{0}\; \Gamma_{slin}^{0}\;  \Downarrow  ?^{slin} (rght a) \otimes  ?^{slin} (rght b) :: }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{2}\; \Gamma_{slin}^{2}\;  \Downarrow  ?^{slin} (rght b) :: }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{2}\; \Gamma_{slin}^{6}\;  \Uparrow }
+{}
+}
+\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{1}\; \Gamma_{slin}^{1}\;  \Downarrow  ?^{slin} (rght a) :: }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{1}\; \Gamma_{slin}^{4}\;  \Uparrow }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{1}\; \Gamma_{slin}^{4}\;  \Downarrow  ?^{slin} (rght c) \oplus  ?^{slin} (rght d) :: }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{1}\; \Gamma_{slin}^{4}\;  \Uparrow  ?^{slin} (rght d) :: }
+{\;\;\infer{ \Gamma_{sunb}^{0}\; \Gamma_{ gamma}^{1}\; \Gamma_{slin}^{103}\;  \Uparrow }
+{}
+}
+}
+}
+}
+}
+$$
+}
+
+The second tree shows the derivation that focus first on the specification of
+\textit{plus} and secondly on the specification of \textit{tensor}. Our system
+generated a \LaTeX\  file with both trees when it identified that a proof of the
+first derivation implies the existence of a proof of the second derivation.
+
+{\tiny
+$$
+\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{3}\; \Gamma_{slin}^{7}\;  \Downarrow }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{3}\; \Gamma_{slin}^{7}\;  \Downarrow  ?^{slin} (rght c) \oplus  ?^{slin} (rght d) :: }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{3}\; \Gamma_{slin}^{7}\;  \Uparrow  ?^{slin} (rght d) :: }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{3}\; \Gamma_{slin}^{11}\;  \Uparrow }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{3}\; \Gamma_{slin}^{11}\;  \Downarrow  ?^{slin} (rght a) \otimes  ?^{slin} (rght b) :: }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{35}\; \Gamma_{slin}^{123}\;  \Downarrow  ?^{slin} (rght b) :: }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{35}\; \Gamma_{slin}^{127}\;  \Uparrow }
+{}
+}
+\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{34}\; \Gamma_{slin}^{122}\;  \Downarrow  ?^{slin} (rght a) :: }
+{\;\;\infer{ \Gamma_{sunb}^{1}\; \Gamma_{ gamma}^{34}\; \Gamma_{slin}^{125}\;  \Uparrow }
+{}
+}
+}
+}
+}
+}
+}
+$$
+}
+
+
+%The next two trees are the derivations for the example with the syntatic
+%connectives, which require weakening of some formulas of the leaf. We can
+%observe the index of $\Gamma_r$ modifying as the operations of adding a new
+%formula ($\circ A$ - specified as $?^r A$) and erasing all formulas ($\square A$
+%- specified as $!^l ?^r A$) are applied.
+%{\tiny
+%$$
+%\;\;\infer{ \Gamma_{l}^{0}\; \Gamma_{r}^{0}\; \Gamma_{ gamma}^{0}\;  \Downarrow  !^{l}  ?^{r} (rght b) :: }
+%{\;\;\infer{ \Gamma_{l}^{0}\; \Gamma_{r}^{0}\; \Gamma_{ gamma}^{0}\;  \Uparrow  ?^{r} (rght b) :: }
+%{\;\;\infer{ \Gamma_{l}^{0}\; \Gamma_{r}^{1}\; \Gamma_{ gamma}^{0}\;  \Uparrow }
+%{\;\;\infer{ \Gamma_{l}^{0}\; \Gamma_{r}^{1}\; \Gamma_{ gamma}^{0}\;  \Downarrow  ?^{r} (rght a) :: }
+%{\;\;\infer{ \Gamma_{l}^{0}\; \Gamma_{r}^{4}\; \Gamma_{ gamma}^{0}\;  \Uparrow }
+%{}
+%}
+%}
+%}
+%}
+%\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{2}\; \Gamma_{ gamma}^{1}\;  \Downarrow }
+%{\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{2}\; \Gamma_{ gamma}^{1}\;  \Downarrow  ?^{r} (rght a) :: }
+%{\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{3}\; \Gamma_{ gamma}^{1}\;  \Uparrow }
+%{\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{3}\; \Gamma_{ gamma}^{1}\;  \Downarrow  !^{l}  ?^{r} (rght b) :: }
+%{\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{3}\; \Gamma_{ gamma}^{1}\;  \Uparrow  ?^{r} (rght b) :: }
+%{\;\;\infer{ \Gamma_{l}^{1}\; \Gamma_{r}^{5}\; \Gamma_{ gamma}^{1}\;  \Uparrow }
+%{}
+%}
+%}
+%}
+%}
+%}
+%$$
+%}
+%

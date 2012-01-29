@@ -1,0 +1,186 @@
+SELLF -- A linear logic framework for systems with locations.
+Version 0.5.
+
+:> Loading file ../examples/lj
+?> 
+Let 
+r1 =  [l]!  [r]? (rght m) ,  [l]? (lft n) and 
+r2 =  [l]? (lft j) |  [r]? (rght k)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [l]? (lft j) |  [r]? (rght k) and 
+r2 =  [l]!  [r]? (rght m) ,  [l]? (lft n)
+Then, r1 does NOT permute over r2.
+Execution time: 0.044003 seconds.
+
+Let 
+r1 =  [l]!  [r]? (rght m) ,  [l]? (lft n) and 
+r2 =  [l]? (lft h) &  [l]? (lft i)
+Then r1 permutes over r2.
+Execution time: 0.028001 seconds.
+
+Let 
+r1 =  [l]? (lft h) &  [l]? (lft i) and 
+r2 =  [l]!  [r]? (rght m) ,  [l]? (lft n)
+Then r1 permutes over r2.
+Execution time: 0.036002 seconds.
+
+Let 
+r1 =  [l]!  [r]? (rght m) ,  [l]? (lft n) and 
+r2 =  [r]? (rght f) ;  [r]? (rght g)
+Then r1 permutes over r2.
+Execution time: 0.064004 seconds.
+
+Let 
+r1 =  [r]? (rght f) ;  [r]? (rght g) and 
+r2 =  [l]!  [r]? (rght m) ,  [l]? (lft n)
+Then r1 permutes over r2.
+Execution time: 0.112008 seconds.
+
+Let 
+r1 =  [l]!  [r]? (rght m) ,  [l]? (lft n) and 
+r2 =  [l]? (lft c) |  [l]? (lft d)
+Then r1 permutes over r2.
+Execution time: 0.012000 seconds.
+
+Let 
+r1 =  [l]? (lft c) |  [l]? (lft d) and 
+r2 =  [l]!  [r]? (rght m) ,  [l]? (lft n)
+Then r1 permutes over r2.
+Execution time: 0.020001 seconds.
+
+Let 
+r1 =  [l]!  [r]? (rght m) ,  [l]? (lft n) and 
+r2 =  [r]? (rght a) &  [r]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.056004 seconds.
+
+Let 
+r1 =  [r]? (rght a) &  [r]? (rght b) and 
+r2 =  [l]!  [r]? (rght m) ,  [l]? (lft n)
+Then, r1 does NOT permute over r2.
+Execution time: 0.108006 seconds.
+
+Let 
+r1 =  [l]? (lft j) |  [r]? (rght k) and 
+r2 =  [l]? (lft h) &  [l]? (lft i)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [l]? (lft h) &  [l]? (lft i) and 
+r2 =  [l]? (lft j) |  [r]? (rght k)
+Then r1 permutes over r2.
+Execution time: 0.020002 seconds.
+
+Let 
+r1 =  [l]? (lft j) |  [r]? (rght k) and 
+r2 =  [r]? (rght f) ;  [r]? (rght g)
+Then r1 permutes over r2.
+Execution time: 0.012000 seconds.
+
+Let 
+r1 =  [r]? (rght f) ;  [r]? (rght g) and 
+r2 =  [l]? (lft j) |  [r]? (rght k)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [l]? (lft j) |  [r]? (rght k) and 
+r2 =  [l]? (lft c) |  [l]? (lft d)
+Then r1 permutes over r2.
+Execution time: 0.004001 seconds.
+
+Let 
+r1 =  [l]? (lft c) |  [l]? (lft d) and 
+r2 =  [l]? (lft j) |  [r]? (rght k)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [l]? (lft j) |  [r]? (rght k) and 
+r2 =  [r]? (rght a) &  [r]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.016000 seconds.
+
+Let 
+r1 =  [r]? (rght a) &  [r]? (rght b) and 
+r2 =  [l]? (lft j) |  [r]? (rght k)
+Then r1 permutes over r2.
+Execution time: 0.008001 seconds.
+
+Let 
+r1 =  [l]? (lft h) &  [l]? (lft i) and 
+r2 =  [r]? (rght f) ;  [r]? (rght g)
+Then, r1 does NOT permute over r2.
+Execution time: 0.064005 seconds.
+
+Let 
+r1 =  [r]? (rght f) ;  [r]? (rght g) and 
+r2 =  [l]? (lft h) &  [l]? (lft i)
+Then r1 permutes over r2.
+Execution time: 0.064004 seconds.
+
+Let 
+r1 =  [l]? (lft h) &  [l]? (lft i) and 
+r2 =  [l]? (lft c) |  [l]? (lft d)
+Then r1 permutes over r2.
+Execution time: 0.024001 seconds.
+
+Let 
+r1 =  [l]? (lft c) |  [l]? (lft d) and 
+r2 =  [l]? (lft h) &  [l]? (lft i)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [l]? (lft h) &  [l]? (lft i) and 
+r2 =  [r]? (rght a) &  [r]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.040002 seconds.
+
+Let 
+r1 =  [r]? (rght a) &  [r]? (rght b) and 
+r2 =  [l]? (lft h) &  [l]? (lft i)
+Then r1 permutes over r2.
+Execution time: 0.048003 seconds.
+
+Let 
+r1 =  [r]? (rght f) ;  [r]? (rght g) and 
+r2 =  [l]? (lft c) |  [l]? (lft d)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [l]? (lft c) |  [l]? (lft d) and 
+r2 =  [r]? (rght f) ;  [r]? (rght g)
+Then r1 permutes over r2.
+Execution time: 0.020001 seconds.
+
+Let 
+r1 =  [r]? (rght f) ;  [r]? (rght g) and 
+r2 =  [r]? (rght a) &  [r]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.052003 seconds.
+
+Let 
+r1 =  [r]? (rght a) &  [r]? (rght b) and 
+r2 =  [r]? (rght f) ;  [r]? (rght g)
+Then, r1 does NOT permute over r2.
+Execution time: 0.068005 seconds.
+
+Let 
+r1 =  [l]? (lft c) |  [l]? (lft d) and 
+r2 =  [r]? (rght a) &  [r]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [r]? (rght a) &  [r]? (rght b) and 
+r2 =  [l]? (lft c) |  [l]? (lft d)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+Done.
+?> 

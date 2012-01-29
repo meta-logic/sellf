@@ -1,0 +1,438 @@
+SELLF -- A linear logic framework for systems with locations.
+Version 0.5.
+
+:> Loading file ../examples/ll
+?> 
+Let 
+r1 = bot and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = top and 
+r2 = bot
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = bot and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = one and 
+r2 = bot
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [sunb]!  [slin]? (rght j)
+Then r1 permutes over r2.
+Execution time: 0.004000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.008001 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.004000 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then r1 permutes over r2.
+Execution time: 0.008000 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.016002 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.012000 seconds.
+
+Let 
+r1 = bot and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 = bot
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 = top and 
+r2 = one
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = one and 
+r2 = top
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = top and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.008001 seconds.
+
+Let 
+r1 = top and 
+r2 =  [sunb]? (rght i)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = top and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.004000 seconds.
+
+Let 
+r1 = top and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = top and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.004000 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = top and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 = top
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = one and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.004000 seconds.
+
+Let 
+r1 = one and 
+r2 =  [sunb]? (rght i)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = one and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.004001 seconds.
+
+Let 
+r1 = one and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 = one and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.004000 seconds.
+
+Let 
+r1 = one and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Error: Failure("Macro rule of r1 has no open leaves to apply r2.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 = one
+Error: Failure("Macro rule of r2 has no open leaves to apply r1.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.004000 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 =  [sunb]!  [slin]? (rght j)
+Then r1 permutes over r2.
+Execution time: 0.008001 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then, r1 does NOT permute over r2.
+Execution time: 0.008001 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Some r1/r2 is unsatisfiable.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then, r1 does NOT permute over r2.
+Execution time: 0.012000 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Some r1/r2 is unsatisfiable.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then, r1 does NOT permute over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Some r1/r2 is unsatisfiable.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]!  [slin]? (rght j) and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then, r1 does NOT permute over r2.
+Execution time: 0.024001 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 =  [sunb]!  [slin]? (rght j)
+Error: Failure("Some r1/r2 is unsatisfiable.")
+Execution time: 0.000000 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then r1 permutes over r2.
+Execution time: 0.004000 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.004001 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.008001 seconds.
+
+Let 
+r1 =  [sunb]? (rght i) and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.020001 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 =  [sunb]? (rght i)
+Then r1 permutes over r2.
+Execution time: 0.012001 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then r1 permutes over r2.
+Execution time: 0.024001 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then r1 permutes over r2.
+Execution time: 0.020002 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then r1 permutes over r2.
+Execution time: 0.012000 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght g) |  [slin]? (rght h) and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then, r1 does NOT permute over r2.
+Execution time: 0.040003 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 =  [slin]? (rght g) |  [slin]? (rght h)
+Then r1 permutes over r2.
+Execution time: 0.016001 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then, r1 does NOT permute over r2.
+Execution time: 0.076004 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then r1 permutes over r2.
+Execution time: 0.056003 seconds.
+
+Let 
+r1 =  [slin]? (rght e) &  [slin]? (rght f) and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then, r1 does NOT permute over r2.
+Execution time: 0.092006 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 =  [slin]? (rght e) &  [slin]? (rght f)
+Then r1 permutes over r2.
+Execution time: 0.044003 seconds.
+
+Let 
+r1 =  [slin]? (rght c) ;  [slin]? (rght d) and 
+r2 =  [slin]? (rght a) ,  [slin]? (rght b)
+Then r1 permutes over r2.
+Execution time: 0.116007 seconds.
+
+Let 
+r1 =  [slin]? (rght a) ,  [slin]? (rght b) and 
+r2 =  [slin]? (rght c) ;  [slin]? (rght d)
+Then r1 permutes over r2.
+Execution time: 0.064005 seconds.
+Done.
+?> 

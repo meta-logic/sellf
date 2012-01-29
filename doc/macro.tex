@@ -1,0 +1,115 @@
+\begin{giselle}
+I noticed that in Elaine and Dale's paper, they refer to this as ``big-step
+inference rules''. You suggested that we changed this name Vivek, what do you
+think about it?
+\end{giselle}
+
+Given a specification of a proof system in linear logic with subexponentials, it
+is possible to build ``macro-rules'' for each formula that specifies a rule of
+the system. A \textbf{macro-rule} of a formula is a partial derivation in
+\sellf\ focusing on this formula. This derivation stops when the only possible
+inference rules to be applied are either the initial one (corresponds to the end
+of the proof search) or one of the decide rules (corresponds to the lost of
+focusing of the formula).
+
+\paragraph{Example} Suppose that the rule $\diamondsuit$ of the system is specified by
+the formula: $A \oplus (B \otimes C)$, where $A$ and $B$ are negative polarity
+atoms and $C$ is a positive polarity atom. The two
+possible derivations for this formula are depicted in
+Figure~\ref{fig:derivations}\footnote{We make it explicit here that the
+derivation starts from the application of a decide rule because we will need
+this when generating derivations of more than one macro-rules. (Put reference)}.
+
+\begin{figure}
+$$
+\infer[D]{\mathcal{K} : \Gamma \Uparrow \cdot}
+{
+\infer[\oplus_1]{\mathcal{K} : \Gamma \Downarrow A \oplus (B \otimes
+C)}{
+  \infer[R\Downarrow]{\mathcal{K} : \Gamma \Downarrow A}
+  {
+    \infer[R\Uparrow]{\mathcal{K} : \Gamma \Uparrow A}
+    {\mathcal{K} : \Gamma, A \Uparrow \cdot}
+  }
+}
+}
+\;\;\;\;
+\infer[D]{\mathcal{K}_1 \otimes \mathcal{K}_2 : \Gamma, \Delta \Uparrow \cdot}
+{
+\infer[\oplus_2]{\mathcal{K}_1 \otimes \mathcal{K}_2 : \Gamma, \Delta \Downarrow A \oplus (B \otimes C)}
+{
+  \infer[\otimes]{\mathcal{K}_1 \otimes \mathcal{K}_2 : \Gamma, \Delta \Downarrow B \otimes C}
+  {
+    \infer[R\Downarrow]{\mathcal{K}_1 : \Gamma \Downarrow B}
+      {
+        \infer[R\Uparrow]{\mathcal{K}_1 : \Gamma \Uparrow B}{\mathcal{K}_1 :
+        \Gamma, B \Uparrow \cdot}
+      } \;\;\;\;
+    \infer[I]{\mathcal{K}_2 : \Delta \Downarrow C}{}
+  }
+}
+}
+$$
+\caption{Two possible derivations for the formula $A \oplus (B \otimes C)$.}
+\label{fig:derivations}
+\end{figure}
+
+% TODO: colocar o end sequent com o pontinho
+\begin{figure}
+$$
+\infer=[]{\mathcal{K} : \Gamma \Downarrow A \oplus (B \otimes C)}{\mathcal{K} :
+\Gamma, A \Uparrow \cdot}
+\;\;\;\;
+\infer=[]{\mathcal{K}_1 \otimes \mathcal{K}_2 : \Gamma, \Delta \Downarrow A \oplus (B \otimes C)}
+{
+  \mathcal{K}_1 : \Gamma, B \Uparrow \cdot \;\;\;\;
+  \infer[]{\mathcal{K}_2 : \Delta \Downarrow C}{}
+}
+$$
+\caption{The two corresponding macro-rules for the derivations of
+Figure~\ref{fig:derivations}.}
+\label{fig:macro}
+\end{figure}
+
+
+The macro-rules for each of the derivations consist only of its sequent that
+focused on the formula and
+the leaves, and they are shown in Figure~\ref{fig:macro}. They can be seen as a 
+``macro''\footnote{``Macro'' in this context has
+the same meaning as when it is used in programming languages.} for the whole 
+derivation, therefore the name.
+
+Since the specifications in \sellf have the highest possible level of adequacy, the
+application of $\diamondsuit$ on the object logic is equivalent to the derivation of
+the formula $A \oplus (B \otimes C)$, which is represented by the two macro-rules
+of Figure~\ref{fig:macro}. Thus we can use the macro rules generated from a
+specification to do proof search on the specified system, since each of them
+would correspond to a sequent calculus inference rule. 
+% TODO: GR: maybe elaborate this proof search part, or not cite at all.
+
+In order to build a macro rule for a formula, we must consider that we don't
+have any information about the state of the rest of the sequent. Namely, we do
+not know what is the content of the context, only how many are there (each
+context corresponds to a subexponential of the specification). During the
+derivation of the formula, some operations over the context might be applied
+(such as the context splitting on the second derivation of our example). To
+make sure that all the ``micro'' rules applied are valid and that the leaves'
+context reflect these operations we use
+\textbf{constraints} (explained in Section~\ref{sec:constraints}) and
+\textbf{generic contexts} (Section~\ref{sec:generic_contexts}).
+
+\begin{giselle}
+Explain here or later the reason why specifications of sequent calculus systems
+will have its formulas decomposed until atoms if we use this terminating
+criteria.
+\end{giselle}
+
+As we said before, the macro-rules in our setting will be derivations until the
+only applicable inference rules are the initial or decide. In the specification
+of sequent calculus sytems, this means that the formula is completely decomposed
+until atomic level (because they are \textit{bipoles}). 
+Each one of these finishing states will generate some
+conditions for the proof to continue from there or terminate.
+These are some of the constraints added to the macro-rule (in addition to the
+ones generated by the application of the ``micro'' rules).
+

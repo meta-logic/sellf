@@ -1,0 +1,36 @@
+Proof transformation is an important proof theoretic technique that has
+been used for showing a number of foundational results about proof
+systems. For instance, it is used in showing the admissibility of the
+cut-rule and the completeness of proof search strategies, such as uniform
+provability and the focusing discipline. However, in order to check the
+validity of a proof transformation, such as when one inference
+rule
+permutes over another, a number of tedious cases
+involving lots of of symbols must be considered. Therefore, checking the correctness of proof
+transformations is prone to human error. This paper offers the means to
+automatize this process. In particular, 
+% proof systems are specified in the linear logic framework with
+% subexponentials proposed previously by the authors.
+we construct two
+types of classical propositional theories to check the validity of a proof
+transformation.
+% Then, we provide the means for
+% automatically checking the following two operations: (1) whether an
+% inference rule is a valid instance of the proof system and (2) whether a
+% given sequent is provable when assuming that another given sequent is
+% also  provable.
+Given the specification of an inference rule, the first theory specifies
+the set of all its valid instances. Moreover, we also show how to compose
+such theories to specify the set of valid derivations in general. For two
+given sequents, $\Sscr_1$ and $\Sscr_2$, the second theory 
+specifies whether the sequent $\Sscr_2$ is provable, when assuming that
+$\Sscr_1$ is provable. We show that with these two types of theories 
+a number of proof transformations can be checked automatically. 
+We have implemented a tool that takes an specification of
+a proof system and automatically checks,
+by enumerating all possible cases, which rules permute over each
+other. In particular, our tool can automatically
+check, among other examples, all the cases of the key permutation lemmas
+used in showing the completeness of the
+focusing discipline for linear logic.
+
