@@ -1,3 +1,4 @@
+** Emphasize the non-triviality of the solution already on the introduction.
 ** The author could have promote the paper better by showing and dramatizing that
    there are challenges in building an automatic checker for proof transformation.
 ** It would be interesting to know how the author derived the proposed two types
