@@ -79,7 +79,9 @@ let permute r1 r2 =
     let clstCp = Constraints.copy clst in
     let openlvsr1 = ProofTree.getOpenLeaves ptCp in
     let subsets1 = allnonemptysubsets openlvsr1 in
-    if (List.length openlvsr1) = 0 then failwith "Macro rule of r1 has no open leaves to apply r2.";
+    if (List.length openlvsr1) = 0 then failwith "Macro rule of r1 has no open
+      leaves to apply r2. Nothing can permute over an axiom because there is
+      never something on top of an axiom =)";
 
     let findPermutation1 set1 = 
       
@@ -138,6 +140,8 @@ let permute r1 r2 =
         end;
         let models = Constraints.getAllModels mcrr1r2Constr in
         (*print_string ("Number of models for r1/r2: "^(string_of_int (List.length models))^"\n");*)
+        (* G TODO: Should this really fail? Maybe it should just return false
+        and allow the outter method to choose another subset of leaves of r1*)
         if List.length models = 0 then failwith "Some r1/r2 is unsatisfiable."
         else begin
           let findPermutation3 mdl =
@@ -154,7 +158,9 @@ let permute r1 r2 =
               let openlvsr2 = ProofTree.getOpenLeaves mr2cp in
               (* Get all subsets of the leaves in macro-r2 *)
               let subsets = allnonemptysubsets openlvsr2 in
-              if (List.length subsets) = 0 then failwith "Macro rule of r2 has no open leaves to apply r1.";
+              (* if (List.length subsets) = 0 then failwith "Macro rule of r2 has no open leaves to apply r1."; *)
+              
+              if (List.length subsets) = 0 then failwith "r2 is an axiom, so the rules permute by definition";
            
               let findPermutation5 set =
                 (* Apply r1 over a set of leaves of macro-r2 *)
@@ -203,6 +209,10 @@ let permute r1 r2 =
                   let okStr = genOkStr (List.length leaves1) ((List.length leaves1) + (List.length leaves2) - 1) in
            
                   (* Check if the macro-rule r2/r1 found satisfy all models of r1/r2 *)
+                  (* G TODO: not checking if it satisfies all models, but only
+                  one. Is it possible that one permutation satisfies one model
+                  and another permutation satisfies another? Or is it the case
+                  that all models must be satisfied by the same permutation? *)
                   if !verbose then begin
                     print_endline ("Checking if all "^(string_of_int (List.length models))^" models of r1/r2 are satisfiable by r2/r1");
                     flush stdout;
