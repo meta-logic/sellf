@@ -48,8 +48,8 @@ let rec cls_2_lolli form subexp = match form with
 
 let rec spec_2_form spec = match spec with
   | ABS(s, i, t) -> ABS(s, i, (spec_2_form t))
-  (*| CLS(ct, head, body) -> TENSOR(NOT(head), body)*)
-  | CLS(ct, head, body) -> body
+  | CLS(ct, head, body) -> TENSOR(NOT(head), body)
+  (*| CLS(ct, head, body) -> body*)
   | _ -> failwith "No clause inside abstraction."
 ;;
 %}
@@ -310,14 +310,13 @@ clause:
     match clause with 
       | ABS(_, _, _)
       | CLS(DEF, _, _) -> 
-        (* NOTE: this will get only the formula of the specification, and not
-        the head *)
+        (* NOTE: transforms the clause into a formula ((not A) x B) *)
         let f = spec_2_form clause in
         
         (* For macro-rules *)
         rules :=  f :: !rules;
         (* For coherence *)
-        (*addSpec f;*)
+        addSpec f;
 
         if !verbose then begin
           print_string (" New clause: ");

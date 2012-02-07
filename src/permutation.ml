@@ -82,6 +82,7 @@ let permute r1 r2 =
     if (List.length openlvsr1) = 0 then failwith "Macro rule of r1 has no open
       leaves to apply r2. Nothing can permute over an axiom because there is
       never something on top of an axiom =)";
+    (* TODO: This permutation will occur iff r2/r1 has no open leaves. *)
 
     let findPermutation1 set1 = 
       

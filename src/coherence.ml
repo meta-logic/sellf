@@ -52,7 +52,6 @@ let addSpec t =
     | _ -> seqcalc := false
 
 (* Procedure to actually check the coherence of a system *)
-(* TODO: put init and cut rule in the context. *)
 
 let coherent = ref true ;;
 
