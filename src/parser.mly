@@ -57,7 +57,7 @@ let rec spec_2_form spec = match spec with
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
 LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
-QST BOT ZERO POS NEG NOT SPEC
+QST BOT ZERO POS NEG NOT
 %token <string> NAME STRING VAR FORALL EXISTS TSUB ABS NEW FILE
 %token <int> INT
 %right ARR  
@@ -85,46 +85,46 @@ QST BOT ZERO POS NEG NOT SPEC
 /* G: Saves the kinds and types declared in hash tables. */
 types:
 KIND NAME TYPE DOT { 
-  let result = addKTbl kTbl (TKIND ($2)) in
+  let result = addKindTbl (TKIND ($2)) in
   match result with
     | NONE -> if !verbose then begin 
       print_string (" New kind "^$2^" created.\n")
       end;
       NONE
-    | SOME (k) -> print_endline ("[ERROR] Kind already declared -> "^$2);
+    | SOME (k) -> print_endline ("[ERROR] Kind already declared: "^$2);
       flush stdout; SOME (k)
 }
 | TYPE NAME typeN DOT { 
-  let dupChk = notInTbl kTbl $2 in 
+  let dupChk = notInTbl kindTbl $2 in 
   match dupChk with
     | NONE -> 
-      let dupChk2 =  notInTbl tTbl $2 in 
+      let dupChk2 =  notInTbl typeTbl $2 in 
       begin
         match dupChk2 with
-          | NONE -> addTTbl tTbl $2 $3; 
+          | NONE -> addTypeTbl $2 $3; 
             if !verbose then begin
               print_string (" New type created: "^$2^" : ");
               print_type $3;
               print_newline (); flush stdout;
             end;
             NONE
-          | SOME (k) -> print_string ("[ERROR] Type previously declared as a type -> "^$2);
+          | SOME (k) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
             print_newline(); flush stdout; 
             SOME (k) 
       end
-    | SOME (k)-> print_string ("[ERROR] Type previously declared as a kind -> "^$2);
+    | SOME (k)-> print_string ("[ERROR] Type previously declared as a kind: "^$2);
       print_newline(); flush stdout; SOME (k)
 }
 ;
 
 /* G: Checks whether the types declared are valid and of existing kinds. */
 typeN: 
-NAME 				{ match  notInTbl (kTbl) $1 with 
-    | NONE -> print_string ("[ERROR] Kind not declared -> "^$1);
+NAME { match  notInTbl kindTbl $1 with 
+  | NONE -> print_string ("[ERROR] Kind not declared: "^$1);
     print_newline(); flush stdout; 
     assert false
-        | SOME (_) -> if $1 = "o" then TBASIC (TPRED)
-        else TBASIC (TKIND ($1)) 
+  | SOME (_) -> if $1 = "o" then TBASIC (TPRED)
+    else TBASIC (TKIND ($1)) 
 }
 | TINT                           { TBASIC (TINT) }
 | TSTRING                        { TBASIC (TSTRING) }
@@ -204,7 +204,7 @@ clause:
       begin
         match clause with 
           | ABS (s, i, t) ->
-            Hashtbl.add rTbl p clause;
+            (*Hashtbl.add rTbl p clause;*)
             let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!context)) in
             add_cls lolli;
             add_ctx lolli !context;
@@ -217,7 +217,7 @@ clause:
             end;
             NONE
           | CLS(DEF, head, ONE) -> 
-            Hashtbl.add rTbl p clause;
+            (*Hashtbl.add rTbl p clause;*)
             add_cls (LOLLI(CONS(!context), head, ONE));
             add_ctx (LOLLI(CONS(!context), head, ONE)) !context;
             (*rules := (LOLLI(CONS(!context), head, ONE)) :: !rules;*)
@@ -235,38 +235,6 @@ clause:
     | _ -> NONE
 }
 
-/* What should be the difference between the def and invlolli regarding context storage? */
-/* GR: Currently there is no difference between a def and lolli*/
-| prop DEF body DOT { 
-  match $1 with 
-    | PRED (p, ts, pol) -> 
-      let raw_clause = (CLS (DEF, $1, $3)) in
-      let clause_typecheck = deBruijn false raw_clause in
-      let _ =  typeCheck clause_typecheck in
-      let clause = deBruijn true raw_clause in
-      begin
-        match clause with                   
-          | ABS(_, _, _) 
-          | CLS(DEF, _, _) -> (* Clause with no variables *)
-            Hashtbl.add rTbl p (clause); 
-            let lolli = cls_2_lolli clause (CONS(!context)) in
-            add_cls lolli;
-            add_ctx lolli !context;
-            (* For macro rules *)
-            (*rules := lolli :: !rules;*)
-            
-            if !verbose then begin
-              print_string (" New clause: ");
-              print_term lolli;
-              print_newline();
-              flush stdout
-            end;
-            NONE
-          | _ -> failwith "Impossible error while parsing."
-      end
-    | _ -> NONE
-}
-
 | prop INVLOLLI body DOT { 
   match $1 with 
     | PRED (p,ts,pol) -> 
@@ -277,8 +245,8 @@ clause:
       begin
         match clause with 
           | ABS(_, _, _)
-          | CLS(DEF, _, _) -> 
-            Hashtbl.add rTbl p (clause); 
+          | CLS(DEF, _, _) -> (* Clause with no variables *) 
+            (*Hashtbl.add rTbl p (clause); *)
             let lolli = cls_2_lolli clause (CONS(!context)) in
             add_cls lolli;
             add_ctx lolli !context;
@@ -297,11 +265,8 @@ clause:
     | _ -> NONE 
 }
 
-/* 
- * The two cases below are for specifications of systems.
- * Only init and cuts go to the context for the coherence proof.
- */
-| prop SPEC body DOT { 
+/* G: DEF is used for specification of systems */
+| prop DEF body DOT { 
   let raw_clause = (CLS (DEF, $1, $3)) in
   let clause_typecheck = deBruijn false raw_clause in
   let _ = typeCheck clause_typecheck in
@@ -328,6 +293,7 @@ clause:
       | _ -> failwith "Impossible error while parsing."
   end
 }
+
 /* Initial and cut specifications must have this form. */
 | body DOT {
   let clause_typecheck = deBruijn false $1 in
@@ -377,7 +343,7 @@ body DOT {
  */
 prop:
 | NAME { 
-  match (notInTbl tTbl $1), (notInTbl subexTpTbl $1) with
+  match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
       PRED ($1, CONS($1), (getAtomPol $1) )
@@ -385,7 +351,7 @@ prop:
     | _, SOME (k) -> PRED ($1, CONS($1), (getAtomPol $1) )
 }
 | NAME terms {
-  match (notInTbl tTbl $1), (notInTbl subexTpTbl $1) with
+  match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
       PRED ($1,CONS($1), (getAtomPol $1) )
@@ -426,7 +392,7 @@ body:
 | LPAREN body RPAREN    { $2 }
 | NEW body              { NEW ($1, $2) }
 | LCURLY body RCURLY    {BRACKET($2)}
-| NOT term              {Common.deMorgan (NOT($2)) }
+| NOT body              {Common.deMorgan (NOT($2)) }
 ;
 
 terms:
@@ -445,7 +411,7 @@ terms:
         ;
 
 term:
-| NAME { match (notInTbl tTbl $1), (notInTbl subexTpTbl $1) with
+| NAME { match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
       PRED ($1, CONS($1), (getAtomPol $1) ) 

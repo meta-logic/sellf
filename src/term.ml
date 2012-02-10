@@ -156,34 +156,33 @@ let rec equals t1 t2 = match (t1, t2) with
  *)
 
 (* Hashtable with the kind *)
-let kTbl = Hashtbl.create 100 ;;
+let kindTbl : (string, basicTypes) Hashtbl.t = Hashtbl.create 100 ;;
 (* Hashtable with the types*)
-let tTbl = Hashtbl.create 100 ;;
-(* Hashtable with the rules*)
-(* TODO: check if this is being used. *)
-let rTbl = Hashtbl.create 100 ;;
+let typeTbl : (string, types) Hashtbl.t = Hashtbl.create 100 ;;
+(* XXX: Commented every reference to this table. Things were only added to it
+without ever being used. *)
+(*let rTbl = Hashtbl.create 100 ;;*)
 
-(* Need to add "o" as a pre-defined kind *)
-Hashtbl.add kTbl "o" (TPRED);;
-(* Example of a type *)
-Hashtbl.add tTbl "$example" (ARR ( TBASIC (TINT), TBASIC (TINT) ));;
 (* Example of a rule: $example :- 1.   *)
-Hashtbl.add rTbl "$example" (CLS (DEF, PRED ("$example", CONS ("$example"), NEG), ONE ) );;
+(*Hashtbl.add rTbl "$example" (CLS (DEF, PRED ("$example", CONS ("$example"),
+NEG), ONE ) );;*)
 
-let addTTbl hash name entry = Hashtbl.add hash name entry ;; 
+let addTypeTbl name entry = Hashtbl.add typeTbl name entry ;; 
 
 let notInTbl hash entry = 
 	let l = (Hashtbl.find_all hash entry) in
 	   if List.length l == 0 then NONE           (* kind not in table*)
        else SOME (entry)       		             (* kind in table *)
 
-let addKTbl hash entry = 
+let addKindTbl entry = 
 	match entry with
 	| TINT -> NONE
 	| TPRED -> NONE
-	| TKIND (k) -> (match (notInTbl hash k) with
-		        | NONE -> Hashtbl.add hash k (TKIND (k)); NONE
-			| SOME (k1) -> SOME (k1))
+	| TKIND (k) -> (
+    match (notInTbl kindTbl k) with
+	    | NONE -> Hashtbl.add kindTbl k (TKIND (k)); NONE
+			| SOME (k1) -> SOME (k1)
+    )
 	| _ -> NONE
 ;;
 
@@ -283,6 +282,7 @@ let rec remove_abs clause =
     | ABS (str, i, t) -> remove_abs t
     | _ -> clause
 
+(* G: This is also implemented in typeChecker.ml. What is it doing here??
 (*Function that assigns de Bruijn numbers to variables.*)
 let rec deBruijn_aux flag fVarC nABS body =   
   match body with
@@ -394,7 +394,7 @@ let rec collect_free_variables clause =
     end
   in 
   collect_free_variables_aux [] [] clause
-
+*)
 
 module Hint = struct
   module M = Map.Make(struct type t = int let compare = compare end)

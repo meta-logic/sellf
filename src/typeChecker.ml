@@ -222,7 +222,7 @@ match term with
       | _ -> 
           begin
             try 
-              let typC = Hashtbl.find tTbl x in (typC, unifyTypes typC typ sub, env, varC)
+              let typC = Hashtbl.find typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
             with
           | Not_found -> failwith ("ERROR: Constant not declared -> "^x)
           end
@@ -340,6 +340,7 @@ let rec grEnvImgProp sub env prop = match prop with
 
 (*Main function used to typecheck a clause.
   We do not typecheck terms inside prints.
+  G: We typecheck also terms that are not clauses (needed for init and cut clauses of specifications)
 *)
 let rec typeCheck clause = 
 	let subInit x = (match x with 
@@ -405,6 +406,7 @@ let rec typeCheck clause =
       | VAR v ->  tCheckBody (PRED("", VAR v, NEG)) env
       | APP(head, args) -> tCheckBody (PRED("", APP(head, args), NEG)) env
       | BRACKET (f) -> tCheckBody f env
+      | NOT body1 -> tCheckBody body1 env
       | _ -> print_term body; failwith " Expected a body element while typechecking."
     end
 	in
@@ -412,5 +414,6 @@ let rec typeCheck clause =
 	| CLS (_, head, body) -> let (sub, env2) = tCheckBody head envInit
 				 in let envH = grEnvImgProp sub env2 head 
 				 in  tCheckBody body envH
-  | _ -> print_term clause; failwith " Expected a clause while typechecking."
+  | body -> tCheckBody body envInit
+  (*| _ -> print_term clause; failwith " Expected a clause while typechecking."*)
   

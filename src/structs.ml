@@ -515,14 +515,15 @@ let bind v t =
 
 (************************ EXTRAS **********************)
 
-let clear_tables () = 
+let initialize () = 
   Hashtbl.clear !context; 
   Hashtbl.clear !clausesTbl; 
   Hashtbl.clear subexTpTbl; 
   Hashtbl.clear subexOrdTbl; 
-  Hashtbl.clear kTbl;
-  Hashtbl.clear tTbl;
-  Hashtbl.clear rTbl;
+  Hashtbl.clear kindTbl;
+  Hashtbl.clear typeTbl;
+  Hashtbl.clear lr_hash;
+  (*Hashtbl.clear rTbl;*)
   Stack.clear !states;
   Stack.clear bind_stack;
   goals := [];
@@ -530,7 +531,14 @@ let clear_tables () =
   atoms := [];
   bind_len := 0;
   nstates := 0;
-  Hashtbl.add kTbl "o" (TPRED);  
+  (* Bult-in kind for formulas *)
+  Hashtbl.add kindTbl "o" (TPRED) ;
+  (* Built-in types and kinds for systems' specification *)
+  addKindTbl (TKIND("form")) ;
+  addKindTbl (TKIND("term")) ;
+  addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
+  addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *)
+  (* \infty context (classical) *)
   Hashtbl.add !context "$gamma" [];
   Hashtbl.add subexTpTbl "$gamma" (LIN)
 ;;

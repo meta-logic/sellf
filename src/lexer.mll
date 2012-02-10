@@ -57,7 +57,6 @@ rule token = parse
 | '='                   { EQ }          
 | ":="                  { DEF }
 | ":-"                  { INVLOLLI } 
-| "::"                  { SPEC }
 | "-o"                { LOLLI }
 | ','                   { COMMA }
 | ';'                   { SEMICOLON }

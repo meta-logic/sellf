@@ -1,10 +1,16 @@
-(* 
- * CODE FOR PROVING COHERENCE OF SEQUENT SYSTEMS' SPECIFICATION
- *
- * NOTE:
- * - the predicates that map object-level formulas to meta-level atoms are 'lft'
- * and 'rght'
- *)
+(* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  
+ *                                                                      * 
+ * CODE FOR PROVING COHERENCE OF SEQUENT SYSTEMS' SPECIFICATION         *
+ *                                                                      *
+ * NOTE:                                                                *
+ * - the predicates that map object-level formulas to meta-level        *
+ *   atoms are 'lft' and 'rght'                                         *
+ * - formulas from the object logic have type 'form'                    *
+ * - terms from the object logic have type 'term'                       *
+ *                                                                      *
+ * Giselle Machado Reis - 2011                                          *
+ *                                                                      *
+  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 
 open Term
 open Structs
@@ -35,7 +41,9 @@ let getFirstArgName p = match p with
   | APP(CONS(n), lst) -> begin match lst with
     | CONS(s) :: t -> s
     | APP(CONS(s), _) :: t -> s
-    | _ -> failwith "Error while getting the name of an application."
+    | _ -> failwith "Error while getting the name of a connective. Are you sure
+    this is a connective specification? Cut, init, weakening and contraction
+    should not be specified with ':='"
   end
   | _ -> failwith "Function is not an application."
 
@@ -64,9 +72,10 @@ let checkDuality str (t1, t2) =
   print_endline "After negation:";
   print_term nt1; print_newline ();
   print_term nt2; print_newline ();
+  (* TODO: find free variables and quantify them universally *)
+  (* TODO: print proofs. *)
   add_goals (PARR(nt1, nt2));
   prove 4 (fun () -> 
-  (*solve (fun () -> *)
           if (empty_nw ()) then begin 
           print_string ("Connective "^str^" has dual specification.\n");
           end

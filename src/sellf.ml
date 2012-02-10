@@ -20,7 +20,7 @@ let position lexbuf =
 let samefile = ref true ;;
 
 let rec start () = 
-    Structs.clear_tables ();
+    Structs.initialize ();
     Structs_macro.rules := [];
     print_string ":> ";
     let command = read_line() in
