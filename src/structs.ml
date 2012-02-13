@@ -113,8 +113,8 @@ let getAtomPol s =
  * $def holds the definitions (definitions are not being used yet)) 
  *)
 let subexTpTbl = Hashtbl.create 100 ;;
-Hashtbl.add subexTpTbl "$gamma" (LIN) ;;
-Hashtbl.add subexTpTbl "$def" (UNB) ;;
+(*Hashtbl.add subexTpTbl "$gamma" (LIN) ;;
+Hashtbl.add subexTpTbl "$def" (UNB) ;;*)
 
 (* Hashtable with subexponentials' parcial order *)
 (* Each subexponential holds those which are greater than it. *)
@@ -154,7 +154,7 @@ let rec erased s idxs = match idxs with
   | i::t -> 
     match type_of i with
       | UNB | AFF -> 
-        if i = "$def" || i = s || (greater_than i s) then erased s t
+        if i = "$infty" || i = s || (greater_than i s) then erased s t
         else i::(erased s t)
       | _ -> erased s t
 ;;
@@ -225,7 +225,7 @@ let add_atm a = atoms := a :: !atoms ;;
 
 (* Hashtable for the context *)
 let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
-Hashtbl.add !context "$gamma" [] ;;
+(*Hashtbl.add !context "$gamma" [] ;;*)
 
 let init_context  : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
 
@@ -234,8 +234,9 @@ let add_ctx f s = try match Hashtbl.find !context s with
   | forms -> 
     Hashtbl.remove !context s; 
     Hashtbl.add !context s (f :: forms)
-  with Not_found ->
-    Hashtbl.add !context s (f :: [])
+  with Not_found -> failwith ("Trying to add a formula to "^s^" but it was not
+  declared.\n")
+    (*Hashtbl.add !context s (f :: [])*)
 ;;
 
 (* Inserts a formula in Gamma (linear context) *)
@@ -252,7 +253,9 @@ let rmv_ctx form subexp =
  * empty *)
 let get_forms s = try match Hashtbl.find !context s with
   | x -> x
-  with Not_found -> []
+  with Not_found -> failwith ("Trying to get the formulas from "^s^" but it was
+  not declared.")
+    (*[]*)
 
 (* Checks whether a formula f is in subexponential s *)
 let in_subexp f s = in_list f (get_forms s) ;;
@@ -295,8 +298,9 @@ let condition_bang s =
 let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
 
 (* Operation k <l for K context *)
+(* NOTE: $infty is greater than everybody, no need to put this in the hash. *)
 let k_less_than s = Hashtbl.iter (fun idx forms -> 
-  if not (idx = "$gamma") && not (idx = s) && not (greater_than idx s) then begin 
+  if not (idx = "$gamma") && not (idx = "$infty") && not (idx = s) && not (greater_than idx s) then begin 
     if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
     remove_all idx 
   end) 
@@ -522,7 +526,6 @@ let initialize () =
   Hashtbl.clear subexOrdTbl; 
   Hashtbl.clear kindTbl;
   Hashtbl.clear typeTbl;
-  Hashtbl.clear lr_hash;
   (*Hashtbl.clear rTbl;*)
   Stack.clear !states;
   Stack.clear bind_stack;
@@ -538,9 +541,12 @@ let initialize () =
   addKindTbl (TKIND("term")) ;
   addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
   addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *)
-  (* \infty context (classical) *)
+  (* \Gamma context (linear): stores the formulas that have no exponential *)
   Hashtbl.add !context "$gamma" [];
-  Hashtbl.add subexTpTbl "$gamma" (LIN)
+  Hashtbl.add subexTpTbl "$gamma" (LIN);
+  (* \infty context (classical): stores specifications *)
+  Hashtbl.add !context "$infty" [];
+  Hashtbl.add subexTpTbl "$infty" (UNB)
 ;;
 
 (*  Some examples on how things are inserted in the hashtables.

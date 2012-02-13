@@ -21,6 +21,7 @@ let samefile = ref true ;;
 
 let rec start () = 
     Structs.initialize ();
+    Coherence.initialize ();
     Structs_macro.rules := [];
     print_string ":> ";
     let command = read_line() in

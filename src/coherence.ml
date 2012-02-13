@@ -7,6 +7,7 @@
  *   atoms are 'lft' and 'rght'                                         *
  * - formulas from the object logic have type 'form'                    *
  * - terms from the object logic have type 'term'                       *
+ * - specification formulas are saved on the context $infty             *
  *                                                                      *
  * Giselle Machado Reis - 2011                                          *
  *                                                                      *
@@ -25,6 +26,8 @@ let seqcalc = ref true ;;
 (* The specifications of each connective are stored in a hash 
  * The key is the name of the predicate representing the connective *)
 let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 100) ;;
+
+let initialize () = Hashtbl.clear !lr_hash ;;
 
 (* Operation for the case that there is more than one specification for one side *)
 let addLSpec str t = try match Hashtbl.find !lr_hash str with

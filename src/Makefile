@@ -7,10 +7,10 @@ OCAMLC = ocamlc -g -annot
 OCAMLRUN = ocamlrun -b
 OCAMLDEBUG = ocamldebug
 OCAMLL = ocamlopt
-OCAMLDEP = /usr/bin/ocamldep -native -I ndcore
+OCAMLDEP = ocamldep -native -I ndcore
 OCAMLDOC = ocamldoc
-OCAMLYACC = /usr/bin/ocamlyacc
-OCAMLLEX = /usr/bin/ocamllex
+OCAMLYACC = ocamlyacc
+OCAMLLEX = ocamllex
 
 # SOURCE FILES
 SELLF_ML = sellf.ml

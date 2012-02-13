@@ -7,7 +7,7 @@ open TypeChecker
 open Structs_macro
 open Coherence
 
-let context = ref "$gamma" 
+let currentctx = ref "$gamma" 
 
 let rec curry term = 
   let rec curryAux termC termU = begin
@@ -143,16 +143,24 @@ clause:
   match notInTbl subexTpTbl $2 with
     | NONE -> begin
       match $3 with 
-        | "lin" -> Hashtbl.add subexTpTbl $2 LIN; 
+        | "lin" ->
+          Hashtbl.add !context $2 [];
+          Hashtbl.add subexTpTbl $2 LIN; 
           if !verbose then print_endline ("New linear subexponential: "^$2);
           NONE
-        | "aff" -> Hashtbl.add subexTpTbl $2 AFF; 
+        | "aff" -> 
+          Hashtbl.add !context $2 [];
+          Hashtbl.add subexTpTbl $2 AFF; 
           if !verbose then print_endline ("New affine subexponential: "^$2);
           NONE
-        | "rel" -> Hashtbl.add subexTpTbl $2 REL; 
+        | "rel" -> 
+          Hashtbl.add !context $2 [];
+          Hashtbl.add subexTpTbl $2 REL; 
           if !verbose then print_endline ("New relevant subexponential: "^$2);
           NONE
-        | "unb" -> Hashtbl.add subexTpTbl $2 UNB; 
+        | "unb" -> 
+          Hashtbl.add !context $2 [];
+          Hashtbl.add subexTpTbl $2 UNB; 
           if !verbose then print_endline ("New unbounded subexponential: "^$2);
           NONE
         | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
@@ -191,7 +199,7 @@ clause:
 | CONTEXT NAME DOT {  
   match notInTbl subexTpTbl $2 with
     | NONE ->  failwith ("ERROR: No such subexponential declared: "^$2)
-    | SOME (_) ->  context := $2; NONE
+    | SOME (_) ->  currentctx := $2; NONE
 }
 
 | prop DOT { 
@@ -205,9 +213,9 @@ clause:
         match clause with 
           | ABS (s, i, t) ->
             (*Hashtbl.add rTbl p clause;*)
-            let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!context)) in
+            let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!currentctx)) in
             add_cls lolli;
-            add_ctx lolli !context;
+            add_ctx lolli !currentctx;
             rules := lolli :: !rules;
             if !verbose then begin
               print_string (" New clause: ");
@@ -218,12 +226,12 @@ clause:
             NONE
           | CLS(DEF, head, ONE) -> 
             (*Hashtbl.add rTbl p clause;*)
-            add_cls (LOLLI(CONS(!context), head, ONE));
-            add_ctx (LOLLI(CONS(!context), head, ONE)) !context;
-            (*rules := (LOLLI(CONS(!context), head, ONE)) :: !rules;*)
+            add_cls (LOLLI(CONS(!currentctx), head, ONE));
+            add_ctx (LOLLI(CONS(!currentctx), head, ONE)) !currentctx;
+            (*rules := (LOLLI(CONS(!currentctx), head, ONE)) :: !rules;*)
             if !verbose then begin
               print_string " New clause: ";
-              print_term (LOLLI(CONS(!context), head, ONE));
+              print_term (LOLLI(CONS(!currentctx), head, ONE));
               print_newline ();
               flush stdout
             end;
@@ -247,9 +255,9 @@ clause:
           | ABS(_, _, _)
           | CLS(DEF, _, _) -> (* Clause with no variables *) 
             (*Hashtbl.add rTbl p (clause); *)
-            let lolli = cls_2_lolli clause (CONS(!context)) in
+            let lolli = cls_2_lolli clause (CONS(!currentctx)) in
             add_cls lolli;
-            add_ctx lolli !context;
+            add_ctx lolli !currentctx;
             (* For macro-rules *)
             (*rules :=  lolli :: !rules;*)
             
@@ -303,7 +311,7 @@ clause:
   (* For macro-rules *)
   rules := clause :: !rules;
   (* For coherence *)
-  add_ctx clause "$gamma";
+  add_ctx clause "$infty";
 
   if !verbose then begin
     print_string (" New clause: ");

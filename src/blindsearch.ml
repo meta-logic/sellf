@@ -6,6 +6,8 @@
  * Using only the goals list.
  * goals and context are global variables.
  * Not using the clauses table.
+ *
+ * Giselle Machado Reis - 2011
  *)
 
 open Common
@@ -487,7 +489,8 @@ and decide h ctx suc fail =
             print_hashtbl !context;*)
             if !verbose then begin
               print_endline "Failed, deciding again...";
-              List.iter (fun (s, f) -> print_term f; print_string " // ";) tl;
+              print_endline "Available options: ";
+              List.iter (fun (s, f) -> print_term f; print_string " || ";) tl;
               print_newline ()
             end;
             decide h tl suc fail ())
