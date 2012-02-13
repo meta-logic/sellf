@@ -3,24 +3,19 @@
  * E.g.: in the files interpreter, macro and blindsearch
  *)
 
+open Basic
 open Structs
 open ProofTree
 open Term
 open Prints
 
-let proof = ProofTree.create EMPSEQ ;;
+(* Incremented when solving the first branch of a tensor. Decremented when
+solving the second branch of a tensor. *)
+let flagTensor = ref 0 ;;
 
-let activeseq : ProofTree.prooftree ref = ref proof ;;
-
-(* TODO: should not be a list, but a more complex structure *)
-(*let erasable : list ref = ref [] ;;*)
-
-let initProof formula =
-  let seq = SEQ(!context, formula, ASYN) in
-    ProofTree.setConclusion proof seq;
-    ProofTree.setPremisses proof [];
-    activeseq := proof
-;;
+(* Set to true when a top is found, set to false when an additive binary rule is
+applied (only & on our case). *)
+let flagTop = ref false ;;
 
 let unify = 
   let module Unify = 
@@ -29,30 +24,6 @@ let unify =
       let constant_like = Term.EIG
     end )
   in Unify.pattern_unify
-
-(* TODO: check if the rest of the non weakenable formulas is empty or if they
-can be consumed because of a top or a tensor.*)
-(* TODO: implement a smarter unification function that returns true if the terms
-are the same and an error or exception if they are not unifiable. *)
-let condition_init f = 
-  let rec find_unifiable f lst = match lst with
-    | [] -> false
-    | (s, f1) :: tl -> begin
-      match (f, f1) with
-        | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
-          try match unify t t1 with
-            | () -> true
-            with _ -> find_unifiable f tl
-          end
-        | (NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
-          try match unify t t1 with
-            | () -> true
-            with _ -> find_unifiable f tl
-          end
-        | (_, _) -> find_unifiable f tl
-    end
-  in
-  find_unifiable f (to_pairs !context)
 
 (* TODO: put this in terms? *)
 (* Function to substitute a variable in a formula *)
@@ -90,6 +61,54 @@ let unifies f1 f2 =
       end
     | _ -> failwith "Formulas not compatible (should be lolli and pred)."
 ;;
+
+(**************** SIDE CONDITIONS OF RULES **********************)
+
+(* Checks if bang rule can be applied with subexponential s *)
+let condition_bang s = 
+  let subsempt = empty_bang s in
+  let rec all_empty subs = match subs with
+    | [] -> true
+    | h::t -> match get_forms h with
+      | [] -> all_empty t
+      | _ -> 
+        if !verbose then 
+          print_string ("Failed in bang rule with subexponential: "^s^"\n"); 
+	      false
+  in all_empty subsempt
+;;
+
+(* NOTE: this can be optimized as follows: get all non weakenable formulas, if
+it contains something, check if it is unifiable, if its empty, check the
+classical contexts *)
+(* TODO: implement a smarter unification function that returns true if the terms
+are the same and an error or exception if they are not unifiable. *)
+let condition_init f = 
+  let rec init_aux f lst = match lst with
+    | [] -> false
+    | (s, f1) :: tl -> begin
+      match (f, f1) with
+        | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
+          try match unify t t1 with
+            | () -> 
+              let rest = not_weakenable () in
+              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then true
+              else init_aux f tl
+            with _ -> init_aux f tl
+          end
+        | (NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
+          try match unify t t1 with
+            | () ->
+              let rest = not_weakenable () in
+              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then true
+              else init_aux f tl
+            with _ -> init_aux f tl
+          end
+        | (_, _) -> init_aux f tl
+    end
+  in
+  init_aux f (to_pairs !context)
+
 
 (* Solves negation of formulas by applying DeMorgan rules until atomic level *)
 let rec deMorgan f = match f with

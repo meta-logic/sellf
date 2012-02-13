@@ -11,11 +11,25 @@
  *)
 
 open Common
-open Structs_macro
 open Structs
+open Basic
 open Term
 open ProofTree
 open Prints
+
+(******************** PROOF TREE **********************)
+
+let proof = ProofTree.create EMPSEQ ;;
+
+let activeseq : ProofTree.prooftree ref = ref proof ;;
+
+let initProof formula =
+  let seq = SEQ(!context, formula, ASYN) in
+    ProofTree.setConclusion proof seq;
+    ProofTree.setPremisses proof [];
+    activeseq := proof
+;;
+
 
 (* Proves a LL formula *)
 
@@ -66,6 +80,7 @@ match Term.observe form with
       goals := f2 :: t;
       let sq = SEQ(!context, !goals, ASYN) in
       activeseq := ProofTree.update !activeseq sq;
+      flagTop := false;
       prove_asyn h suc fail ()) fail
   end
 
@@ -116,11 +131,8 @@ match Term.observe form with
       print_term TOP;
       print_newline ()
     end;
-    is_top := true; 
+    flagTop := true; 
     ProofTree.close !activeseq;
-    (* TODO: create a data structure to accumulate formulas that can be weakened
-     * because they appeared in a top. Update this here. Only the formulas from 
-     * the context should be stored. *)
     suc
 
   | BOT -> 
@@ -277,7 +289,6 @@ match Term.observe form with
       prove_sync h suc fail ())
   end
 
-  (* TODO: check this restore_atom st thing *)
   | TENSOR (f1, f2) ->
     if !verbose then begin
       print_endline "-- Tensor 1st:"; 
@@ -288,6 +299,7 @@ match Term.observe form with
     goals := f1 :: t;
     let sq = SEQ(!context, !goals, SYNC) in
     activeseq := ProofTree.update !activeseq sq;
+    flagTensor := !flagTensor + 1;
     prove_sync h (fun () -> 
       if !verbose then begin
         print_endline "-- Tensor 2st:"; 
@@ -298,9 +310,8 @@ match Term.observe form with
       activeseq := orig_proof;
       let sq = SEQ(!context, !goals, SYNC) in
       activeseq := ProofTree.update !activeseq sq;
-      (*let st = !nstates in *)
+      flagTensor := !flagTensor - 1;
       prove_sync h suc fail ()) fail
-      (*prove_sync h suc (fun () -> restore_atom st ()) ()) fail*)
 
   | EXISTS (s, i, f) ->
     if !verbose then begin
@@ -353,33 +364,36 @@ match Term.observe form with
         | _ -> 
           if !verbose then print_string ("Failed in hbang rule "^s^".\n"); 
           fail
-        with Not_found -> 
-          if !verbose then print_string ("Solved hbang "^s^".\n"); 
+        with Not_found -> failwith ("Hbang applied on non-existing
+        subexponential: "^s^"\n") 
+          (*if !verbose then print_string ("Solved hbang "^s^".\n"); 
           goals := f :: t; 
           let sq = SEQ(!context, !goals, SYNC) in
           activeseq := ProofTree.update !activeseq sq;
-          prove_asyn h suc fail
+          prove_asyn h suc fail*)
       )
       | _ -> failwith "Not expected subexponential while solving positive formulas."
     end
 
-  (* TODO: I still need to check if gamma is empty or has formulas that
-   * were in a top or has formulas that can be splitted to the other side. *)
   | ONE -> 
     if !verbose then begin
       print_endline "-- ONE:"; 
       print_term (Term.observe form);
       print_newline ()
     end;
-    goals := t; 
-    ProofTree.close !activeseq;
-    suc 
+    let gamma = Hashtbl.find !context "$gamma" in
+    if !flagTop || !flagTensor > 0 || gamma = [] then begin
+      goals := t; 
+      ProofTree.close !activeseq;
+      suc
+    end
+    else fail
 
   | COMP (ct, t1, t2) -> 
     if (solve_cmp ct t1 t2) then begin
       goals := t;
-      if (List.length !positives) != 0 then
-        save_state (COMP(ct, t1, t2)) !bind_len suc fail [] SYNC;
+      (*if (List.length !positives) != 0 then
+        save_state (COMP(ct, t1, t2)) !bind_len suc fail [] SYNC;*)
         prove_sync h suc fail
     end   
     else fail
@@ -387,16 +401,16 @@ match Term.observe form with
   | ASGN (t1, t2) -> 
     if (solve_asgn t1 t2) then begin
       goals := t;
-      if (List.length !positives) != 0 then
-        save_state (ASGN (t1, t2)) !bind_len suc fail [] SYNC;
+      (*if (List.length !positives) != 0 then
+        save_state (ASGN (t1, t2)) !bind_len suc fail [] SYNC;*)
       prove_sync h suc fail
     end    
     else fail
 
   | PRINT (t1) -> print_endline ""; print_term t1; print_endline "";
      goals := t;
-     if (List.length !positives) != 0 then
-       save_state (PRINT (t1)) !bind_len suc fail [] SYNC;
+     (*if (List.length !positives) != 0 then
+       save_state (PRINT (t1)) !bind_len suc fail [] SYNC;*)
        prove_sync h suc fail
 
   (* Initial rules *)

@@ -1,4 +1,4 @@
-(* Definitions for the smodels file *)
+(* Definitions for the dlv file *)
 
 let description = 
 "% We use the following predicate names:

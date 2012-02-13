@@ -1,19 +1,14 @@
 (* Data structures used during proof search *)
 
+open Basic
 open Term
 open Prints
 
-(* Verbose on/off *)
-let verbose = ref false ;;
-(* Tabling on/off *)
-let tabling = ref false ;;
-(* Timer on/off *)
-let time = ref false ;;
-
 (* Integer to indicate how many tensors I am solving, 
  * so that I only check for context emptyness at the end *)
+(* TODO: these need to be removed. Declared as flagTop and flagTensor in
+common.ml*)
 let tensor = ref 0 ;;
-
 let is_top = ref (false);;
 
 type phase = 
@@ -26,95 +21,12 @@ let print_phase p = match p with
   | SYNC -> print_string "sync"
 ;;
 
-(******************* LISTS ************************)
-(*
- * Auxiliary functions for lists.
- *)
-
-(* Removes an element from a list *)
-let rec remove_element a lst acc = 
-  match lst with 
-  | [] -> acc
-  | a1 :: t when a1 = a -> acc @ t
-  | b :: t -> remove_element a t (acc @ [b])
-(* Important note: removes only the first occurence of the element *)
-let rec remove elm lst = remove_element elm lst []
-;;
-
-(* Remove the elements of rem from the list lst *)
-let rec removeLst rem lst = match rem with
-  | [] -> lst
-  | hd::tl -> removeLst tl (remove hd lst)
-
-let make_first elm lst = elm :: (remove elm lst) ;;
-
-(* Decides if an element e is in a list l *)
-let rec in_list l e = try match List.hd l with
-    | h when h = e -> true
-    | _ -> in_list (List.tl l) e
-    with Failure "hd" -> false
-;;
-
-(******************* HASHTABLES ************************)
-(*
- * Auxiliary functions for hashtables.
- *)
-
-(* Get all the keys from a hash table, including duplicates *)
-let keys ht = Hashtbl.fold (fun key data accu -> key :: accu) ht [] ;;
-
-(* Transforms a hashtable into a list of pairs *)
-(* Note that the hashtable data is a list. *)
-let to_pairs ht = Hashtbl.fold (fun key data acc -> 
-  let rec pairs k lst = match lst with
-    | [] -> []
-    | elm :: tl -> (k, elm) :: pairs k tl
-  in
-  (pairs key data) @ acc
-  ) ht [] ;;
-
-let print_hashtbl h = print_string "\nHashTable:\n";
-  let keylst = keys h in
-  let rec print_h lst = 
-    match lst with
-      | [] -> print_string "\n"
-      | k :: t -> 
-        print_string ("["^k^"] "); 
-        print_list_terms (Hashtbl.find h k); 
-        print_newline (); print_h t
-  in print_h keylst
-;;
-
-(******************* ATOMS ************************)
-(*
- * Functions to handle atoms' polaritites.
- *)
-
-(* Hashtable to store the polarities *)
-let atomspol : (string, polarity) Hashtbl.t ref = ref (Hashtbl.create 100) ;; 
-
-let addAtomPol s p = 
-  try match Hashtbl.find !atomspol s with
-    | _ -> failwith ("[ERROR] Polarity of "^s^" already declared.") 
-    with Not_found -> Hashtbl.add !atomspol s p 
-;;
-
-let getAtomPol s = 
-  try match Hashtbl.find !atomspol s with
-    | p -> p
-    with Not_found -> 
-      (*print_string ("[WARNING] Atom "^s^" has no polarity defined, considering it negative.\n");*)
-      NEG
-;;
-
 (***************** SUBEXPONENTIALS ***************)
 
 (* Hashtable with subexponentials' types ($gamma is the linear context and
- * $def holds the definitions (definitions are not being used yet)) 
+ * $infty holds specifications) 
  *)
 let subexTpTbl = Hashtbl.create 100 ;;
-(*Hashtbl.add subexTpTbl "$gamma" (LIN) ;;
-Hashtbl.add subexTpTbl "$def" (UNB) ;;*)
 
 (* Hashtable with subexponentials' parcial order *)
 (* Each subexponential holds those which are greater than it. *)
@@ -178,6 +90,183 @@ let weak i = match type_of i with
   | REL | LIN -> false
 ;;
 
+(******************** CONTEXT **********************)
+(*
+ * A hashtable implements the context of a sequent. The key is the
+ * name of the subexponential, and this is mapped to a list of formulas.
+ * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
+ * The formulas of specification of systems are stored with the key '$infty'
+ *)
+
+(* Hashtable for the context *)
+let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
+
+let init_context : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
+
+(* Inserts a formula in a subexponential *)
+let add_ctx f s = try match Hashtbl.find !context s with
+  | forms -> 
+    Hashtbl.remove !context s; 
+    Hashtbl.add !context s (f :: forms)
+  with Not_found -> failwith ("Trying to add a formula to "^s^" but it was not
+  declared.\n")
+;;
+
+(* Removes a formula from a subexponential (only the first occurence) *)
+(* TODO: check if this is not supposed to remove only of the context is linear *)
+let rmv_ctx form subexp = 
+  let forms = Hashtbl.find !context subexp in
+  let new_list = remove form forms in
+    Hashtbl.remove !context subexp; Hashtbl.add !context subexp new_list
+;;
+
+(* Returns all the formulas in the subexponential s or an empty list if it's
+ * empty *)
+let get_forms s = try match Hashtbl.find !context s with
+  | x -> x
+  with Not_found -> failwith ("Trying to get the formulas from "^s^" but it was
+  not declared.")
+    (*[]*)
+
+(* Checks whether a formula f is in subexponential s *)
+let in_subexp f s = in_list f (get_forms s) ;;
+
+(* Returns a list with all the formulas that cannot suffer weakening *)
+let not_weakenable () = Hashtbl.fold (fun s forms l -> 
+    if not (weak s) then 
+    begin
+      forms@l
+    end
+    else l) !context [] ;;
+
+(* Removes all formulas from a subexponential *)
+let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
+
+(* Operation k <l for K context *)
+(* NOTE: $infty is greater than everybody, no need to put this in the hash. *)
+let k_less_than s = Hashtbl.iter (fun idx forms -> 
+  if not (idx = "$gamma") && not (idx = "$infty") && not (idx = s) && not (greater_than idx s) then begin 
+    if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
+    remove_all idx 
+  end) 
+  !context;;
+
+(* Verifies if a subexponential is empty *)
+let empty s = List.length (Hashtbl.find !context s) == 0 ;;
+
+(* Creating a new subexponential *)
+let new_subexp s = 
+  try match Hashtbl.find subexTpTbl s with
+  | _ -> ()
+  with Not_found -> 
+    Hashtbl.add subexTpTbl s (AFF); 
+    Hashtbl.add !context s []; 
+    lt_unbounded s ;;
+
+
+(******************* ATOMS ************************)
+(*
+ * Functions to handle atoms' polaritites.
+ *)
+
+(* Hashtable to store the polarities *)
+let atomspol : (string, polarity) Hashtbl.t ref = ref (Hashtbl.create 100) ;; 
+
+let addAtomPol s p = 
+  try match Hashtbl.find !atomspol s with
+    | _ -> failwith ("[ERROR] Polarity of "^s^" already declared.") 
+    with Not_found -> Hashtbl.add !atomspol s p 
+;;
+
+let getAtomPol s = 
+  try match Hashtbl.find !atomspol s with
+    | p -> p
+    with Not_found -> 
+      (*print_string ("[WARNING] Atom "^s^" has no polarity defined, considering it negative.\n");*)
+      NEG
+;;
+
+(***************** SUBEXPONENTIALS ***************)
+
+(* Hashtable with subexponentials' types ($gamma is the linear context and
+ * $infty holds specifications) 
+ *)
+let subexTpTbl = Hashtbl.create 100 ;;
+
+(* Hashtable with subexponentials' parcial order *)
+(* Each subexponential holds those which are greater than it. *)
+let (subexOrdTbl : (string, string) Hashtbl.t ) = Hashtbl.create 100 ;;
+
+(* Returns the type of a subexponential *)
+let type_of s = try 
+  Hashtbl.find subexTpTbl s
+  with Not_found -> failwith ("[ERROR] Subexponential "^s^" has no type defined.")
+;;
+
+(* Gets all the unbounded subexponentials and make them greater then s 
+ * (put in s' order list) *)
+let lt_unbounded s = let subexps = keys subexTpTbl in
+  let rec get_unbounded lst = match lst with
+    | [] -> ()
+    | u :: t -> (match Hashtbl.find subexTpTbl s with
+      | UNB -> Hashtbl.add subexOrdTbl s u; (get_unbounded t)
+      | _ -> get_unbounded t
+    )
+  in get_unbounded subexps
+;;
+
+(* Checks if a subexponential s1 > s2 *)
+let rec bfs root queue goal = match queue with
+  | [] -> false
+  | h :: t when h = root -> failwith "Circular dependency on subexponential order."
+  | h :: t when h = goal -> true
+  | h :: t -> bfs root (t @ Hashtbl.find_all subexOrdTbl h) goal
+;;
+let greater_than s1 s2 = bfs s2 (Hashtbl.find_all subexOrdTbl s2) s1 ;;
+
+(* Returns a list with all subexponentials from idxs that will have their 
+ * formulas erased if !s is applied. *)
+let rec erased s idxs = match idxs with
+  | [] -> []
+  | i::t -> 
+    match type_of i with
+      | UNB | AFF -> 
+        if i = "$infty" || i = s || (greater_than i s) then erased s t
+        else i::(erased s t)
+      | _ -> erased s t
+;;
+let erased_bang s = erased s (keys subexTpTbl) ;;
+(* Returns a list with all subexponentials from idxs that will be checked 
+ * for emptiness if !s is applied. *)
+let rec checked_empty s idxs = match idxs with
+  | [] -> []
+  | i::t -> 
+    match type_of i with
+      | REL | LIN -> 
+        if i = "$gamma" || i = s || (greater_than i s) then checked_empty s t
+        else i::(checked_empty s t)
+      | _ -> checked_empty s t
+;;
+let empty_bang s = checked_empty s (keys subexTpTbl) ;;
+
+(* Checks whether or not a subexponential can suffer weakening *)
+let weak i = match type_of i with
+  | UNB | AFF -> true
+  | REL | LIN -> false
+;;
+
+(*************** STRUCTURES FOR MACRO RULES *************************)
+
+let sqntcounter = ref 1 ;;
+
+(* Stores all the rules for the generation of the macros *)
+let rules : (terms list) ref = ref [] ;;
+
+(* The context of the macro rule will save the name of the subexponential and
+its "version" (starting from 0) *)
+let macroctx : (string, int) Hashtbl.t ref = ref (Hashtbl.create 100) ;;
+
+
 (******************* FOCUSED ************************)
 (*
  * The focused part of the sequent can be a formula or a list of them.
@@ -219,15 +308,14 @@ let add_atm a = atoms := a :: !atoms ;;
  * A hashtable implements the context of a sequent. The key is the
  * name of the subexponential, and this is mapped to a list of formulas.
  * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
- * The list of '$gamma' is initalized by hand. All the other subexponentials are
- * created in the table when there's the need to insert a formula in them.
+ * The formulas of specification of systems are stored with the key '$infty'
  *)
 
 (* Hashtable for the context *)
 let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
 (*Hashtbl.add !context "$gamma" [] ;;*)
 
-let init_context  : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
+let init_context : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
 
 (* Inserts a formula in a subexponential *)
 let add_ctx f s = try match Hashtbl.find !context s with
@@ -270,7 +358,7 @@ let not_weakenable () = Hashtbl.fold (fun s forms l ->
 
 (* Checks whether K context is empty on the subexponentials that cannot suffer weakening *)
 (* TODO: fix the TOP thing. *)
-let empty_nw () =
+(*let empty_nw () =
   match (List.length (not_weakenable ())) with
     | 0 -> if !verbose then print_string "Non-weakenable set is empty"; true
     | n -> if !is_top then begin
@@ -279,6 +367,7 @@ let empty_nw () =
       end
       else false
 ;;
+*)
 
 (* Checks if bang rule can be applied with subexponential s *)
 let condition_bang s = 

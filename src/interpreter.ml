@@ -1,9 +1,32 @@
-open Common
-open Structs_macro
+open Basic
 open Structs
+open Common
 open Term
 open ProofTree
 open Prints
+
+(******************** PROOF TREE **********************)
+
+let proof = ProofTree.create EMPSEQ ;;
+
+let activeseq : ProofTree.prooftree ref = ref proof ;;
+
+let initProof formula =
+  let seq = SEQ(!context, formula, ASYN) in
+    ProofTree.setConclusion proof seq;
+    ProofTree.setPremisses proof [];
+    activeseq := proof
+;;
+
+
+(* Incremented when solving the first branch of a tensor. Decremented when
+solving the second branch of a tensor. *)
+let flagTensor = ref 0 ;;
+
+(* Set to true when a top is found, set to false when an additive binary rule is
+applied (only & on our case). *)
+let flagTop = ref false ;;
+
 
 (* Solves a LL formula *)
 

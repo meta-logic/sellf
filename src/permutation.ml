@@ -4,8 +4,8 @@
  *
  *)
 
+open Term
 open Macro
-open Structs_macro
 open Structs
 open ProofTree
 open Constraints

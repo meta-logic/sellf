@@ -18,11 +18,12 @@ let position lexbuf =
       print_string "";Format.sprintf ": line %d, character %d" line char
 
 let samefile = ref true ;;
+let fileName = ref "" ;;
 
 let rec start () = 
     Structs.initialize ();
     Coherence.initialize ();
-    Structs_macro.rules := [];
+    Structs.rules := [];
     print_string ":> ";
     let command = read_line() in
     try 
@@ -30,12 +31,13 @@ let rec start () =
       let action = Parser.top Lexer_top.token lexbuf_top in 
       match action with
       | "help" -> start ()
-      | "verbose-on" -> print_endline "Verbose is set to on."; Structs.verbose := true; start ()
-      | "verbose-off" -> print_endline "Verbose is set to off."; Structs.verbose := false; start ()
-      | "time-on" -> Structs.time := true; print_endline "Time is set to on."; start ()
-      | "time-off" -> Structs.time := false; print_endline "Time is set to off."; start ()
+      | "verbose-on" -> print_endline "Verbose is set to on."; Term.verbose := true; start ()
+      | "verbose-off" -> print_endline "Verbose is set to off."; Term.verbose := false; start ()
+      | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
+      | "time-off" -> Term.time := false; print_endline "Time is set to off."; start ()
       | file_name -> 
         begin
+          fileName := file_name;
           print_endline ("Loading file "^file_name);
           let file_sig = open_in (file_name^".sig") in
           let lexbuf = Lexing.from_channel file_sig in
@@ -82,28 +84,28 @@ solve_query () =
       let rec gen_macros rls = match rls with
         | [] -> print_endline "\nDone."
         | hd :: tl ->
-          Structs_macro.initMacro hd;
+          Macro.initMacro hd;
           print_string "\nMacro rule(s) for term: "; 
           Prints.print_term hd; print_newline (); 
           Macro.rmacro (fun () ->
-            ProofTree.printLeaves !Structs_macro.macrorule;
+            ProofTree.printLeaves !Macro.macrorule;
             flush stdout;
-            Constraints.printConstraints !Structs_macro.constrs;
+            Constraints.printConstraints !Macro.constrs;
             flush stdout;
-            Constraints.genSolverInput !Structs_macro.constrs !n;
+            Constraints.genSolverInput !Macro.constrs !n;
             n := !n + 1;
             print_string "End of Macro.\n";
-            Structs_macro.save_macro ()
+            Macro.save_macro ()
             );
           gen_macros tl
-          in gen_macros !Structs_macro.rules;
+          in gen_macros !Structs.rules;
 		      (* Printing the results... *)
           (*let macro_file = open_out ("viewer/macro.xml") in*)
-          print_endline ("Number of macro rules: "^(string_of_int (List.length !Structs_macro.macrolst)));
+          print_endline ("Number of macro rules: "^(string_of_int (List.length !Macro.macrolst)));
 		      let tex_file = open_out ("viewer/macro.tex") in
 		      (*let jit_file = open_out ("viewer/macro.jit") in*)
           (*ProofTree.printTreesMacros !Structs_macro.macrolst macro_file; *)
-          ProofTree.printTexMacros !Structs_macro.macrolst tex_file;
+          ProofTree.printTexMacros !Macro.macrolst tex_file;
           close_out tex_file;
           (*ProofTree.printJitMacros !Structs_macro.macrolst jit_file;*)
 
@@ -152,11 +154,11 @@ solve_query () =
               check_perm f t    
 
           in check_perm hd tl; every_pair tl
-      in every_pair !Structs_macro.rules;
+      in every_pair !Structs.rules;
 
     | "#coherence" ->
       if !Coherence.seqcalc then
-        Coherence.check ()
+        Coherence.check !fileName
       else
         print_string "\nCannot prove coherence (please check the correct use of the predicates).\n";
 
@@ -191,21 +193,23 @@ solve_query () =
 	      else*) 
           begin
           (*let term = List.hd (!Structs.goals) in*)
-          Common.initProof !Structs.goals;
+          Interpreter.initProof !Structs.goals;
           let proof_file = open_out "viewer/proof.xml" in
           let tex_file = open_out "viewer/proof.tex" in
           (*let jit_file = open_out "viewer/proof.jit" in*)
           let loop = ref true in
           let fail = ref (
-            Interpreter.solve (fun () -> 
-              if (Structs.empty_nw ()) then begin 
+            Interpreter.solve (fun () ->
+              (* TODO: this emtiness is checked on the condition_init function,
+              we should not deal with it here. Check interpreter functionality *)
+              (*if (Structs.empty_nw ()) then begin*) 
                 loop := false; 
                 print_string "\nYes.\n";
-                ProofTree.printTree Common.proof proof_file; 
-                ProofTree.printTexProof Common.proof tex_file;
+                ProofTree.printTree Interpreter.proof proof_file; 
+                ProofTree.printTexProof Interpreter.proof tex_file;
                 (*ProofTree.printJitTree Interpreter.proof jit_file*)
-              end
-              else (Structs.last_fail ()))  
+              (*end
+              else (Structs.last_fail ())*) )  
               (fun () -> loop := false; print_string "\nNo.\n") )
           in
           while !loop do 

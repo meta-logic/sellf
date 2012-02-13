@@ -184,7 +184,6 @@ can drop it. *)*)
       printConstrList cList file;
       close_out file
 
-    (* TODO: put this somewhere else *)
     let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
       "geq("^(remSpecial data)^", "^(remSpecial key)^").\n"^acc
     ) subexOrdTbl ""
@@ -192,7 +191,7 @@ can drop it. *)*)
       "geq("^(remSpecial key)^", "^(remSpecial key)^").\n"^acc
     ) subexTpTbl ""
 
-    let genPermFile cList ctxStr okStr model name = 
+    let genPermFile cList ctxStr okStr model name =  
       let file = open_out ("solver/"^name^".in") in
       Printf.fprintf file "%s" description;
       Printf.fprintf file "%s" union_clauses_set;

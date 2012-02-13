@@ -4,7 +4,6 @@ open Term
 open Prints
 open Structs
 open TypeChecker
-open Structs_macro
 open Coherence
 
 let currentctx = ref "$gamma" 

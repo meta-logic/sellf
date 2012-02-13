@@ -16,9 +16,10 @@
 open Term
 open Structs
 open Common
-open Blindsearch
+open Boundedproofsearch
 open Interpreter
 open Prints
+open ProofTree
 
 (* Indicates if this is the specification of a sequent calculus system *)
 let seqcalc = ref true ;;
@@ -65,6 +66,7 @@ let addSpec t =
 (* Procedure to actually check the coherence of a system *)
 
 let coherent = ref true ;;
+let dirName = ref "" ;;
 
 let checkDuality str (t1, t2) = 
   print_endline "Trying to prove duality of:";
@@ -76,20 +78,25 @@ let checkDuality str (t1, t2) =
   print_term nt1; print_newline ();
   print_term nt2; print_newline ();
   (* TODO: find free variables and quantify them universally *)
-  (* TODO: print proofs. *)
   add_goals (PARR(nt1, nt2));
+  Boundedproofsearch.initProof [(PARR(nt1, nt2))];
   prove 4 (fun () -> 
-          if (empty_nw ()) then begin 
+          (*if (empty_nw ()) then begin*)
           print_string ("Connective "^str^" has dual specification.\n");
-          end
-          else (Structs.last_fail ())
+          (* FIXME: formula printing is not working *)
+          let file = open_out ((!dirName)^"_"^str^"_duality.tex") in
+          ProofTree.printTexProof Boundedproofsearch.proof file;
+          close_out file;
+          (*end
+          else (Structs.last_fail ())*)
         )  
         (fun () ->
           coherent := false;
           print_string ("Connective "^str^" does not have dual specifications.\n");
         ) ()
 
-let check () = 
+let check sysName =
+  dirName := sysName;
   Hashtbl.iter checkDuality !lr_hash; 
   if !coherent then print_string "\nThe system is coherent.\n"
   else print_string "\nThe system in NOT coherent.\n"

@@ -1,3 +1,10 @@
+(* Verbose on/off *)
+let verbose = ref false ;;
+(* Tabling on/off *)
+let tabling = ref false ;;
+(* Timer on/off *)
+let time = ref false ;;
+
 type 'a option = NONE | SOME of 'a
 
 (* Each logical variable is identified by this number. 
