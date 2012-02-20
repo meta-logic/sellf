@@ -1,4 +1,5 @@
 (* TODO: transform this into a module? *)
+(* Giselle Machado Reis - 2012 *)
 
 open Basic
 open Term

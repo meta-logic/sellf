@@ -137,7 +137,7 @@ let rec hnorm term =
             | Term.PTR _ -> assert false
           end
 
-    | Term.PTR _-> Prints.print_term term; assert false
+    | Term.PTR _-> print_string (Prints.termToString term); assert false
 
 let rec deep_norm t =
   let t = hnorm t in

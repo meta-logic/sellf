@@ -3,11 +3,14 @@
  * name of the subexponential, and this is mapped to a list of formulas.
  * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
  * The formulas of specification of systems are stored with the key '$infty'
+ *
+ * Giselle Machado Reis - 2012
  *)
 
 open Basic
 open Term
 open Subexponentials
+open Prints
 
 (* This is to be used by the parser. Initially, all the formulas are stored here. *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
@@ -80,9 +83,12 @@ module Context =
     let newctx = Hashtbl.copy ctx.hash in
     Hashtbl.iter (fun idx forms ->
       match idx with
-        (* We don't care about formulas from these contexts (they are never erased)  *)
-        | "$gamma" | "$infty" -> ()
+        (* Unbouded context  *)
+        | "$infty" -> ()
+        (* For every subexponential s < s holds. *)
         | s when s = subexp -> ()
+        (* Formulas with no exponential must be erased *)
+        | "$gamma" -> Hashtbl.replace newctx "$gamma" []
         (* These are deleted independently of being linear or classical *)
         | s -> 
           if not (greater_than idx s) then Hashtbl.replace newctx s []
@@ -94,7 +100,7 @@ module Context =
     let newctx = Hashtbl.copy ctx.hash in
     Hashtbl.iter (fun idx forms ->
       match idx with
-        (* We don't care about formulas from these contexts  *)
+        (* These will always go to the out context  *)
         | "$gamma" | "$infty" -> ()
         | s when s = subexp -> ()
         | s -> match type_of s with
@@ -136,8 +142,7 @@ module Context =
     (pairs key data) @ acc
     ) ctx.hash []
 
-  (* TODO printing function *)
-  (*let print ctx =*) 
+  let toString ctx = "CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "<"^k^">"^(termsListToString d)^"\n"^acc) ctx.hash "")
 
   end
 ;;

@@ -1,3 +1,4 @@
+(* Giselle Machado Reis - 2012 *)
 
 (************************** SEQUENTS ************************)
 
@@ -54,7 +55,7 @@ module Sequent =
   let setCtxIn seq ic = seq.ctxin <- ic
   let getCtxIn seq = seq.ctxin
 
-  let setCtxOut seq oc = seq.ctxout <- oc
+  let setCtxOut seq oc = print_string ("Setting ctx out: "^(Context.toString oc)); seq.ctxout <- oc
   let getCtxOut seq = seq.ctxout
 
   let addGoal seq f = seq.goals <- f::seq.goals
@@ -67,15 +68,13 @@ module Sequent =
     | _, _ -> false
 *)
 
-  let print seq = match seq.pol with
-    | ASYN -> 
-      print_string "K : Γ ⇑ ";
-      print_list_terms seq.goals;
-      print_newline ()
-    | SYNC ->
-      print_string "K : Γ ⇓ ";
-      print_list_terms seq.goals;
-      print_newline ()
+  let toString seq = match seq.pol with
+    | ASYN -> "K : Γ ⇑ "^(termsListToString seq.goals)
+    | SYNC -> "K : Γ ⇓ "^(termsListToString seq.goals)
+
+  let toTexString seq = match seq.pol with
+    | ASYN -> ("\\mathcal{K} : \\Gamma \\Uparrow "^(termsListToTexString seq.goals) )
+    | SYNC -> ("\\mathcal{K} : \\Gamma \\Downarrow "^(termsListToTexString seq.goals) )
 
   end
 ;;

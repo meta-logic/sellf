@@ -162,7 +162,7 @@ let rec unifyTypes gTyp vTyp sub = match (gTyp, vTyp) with
 						   in sub2
 					| SOME (x1) when x1 = x -> sub
 					| SOME (_) -> failwith "Failed when unifying type variables.")
-		| _ -> print_string" Type1:"; print_type gTyp; print_string "  Type2:"; print_type vTyp; 
+		| _ -> print_string (" Type1:"^(typeToString gTyp)^"  Type2:"^(typeToString vTyp)); 
              print_newline (); failwith "Failed when unifying type variables:"
 
 (* Function that applies a substitution eagerly to a type. *)
@@ -253,7 +253,7 @@ match term with
                   | (x1,y1) -> env (x1,y1))
               in 
               tCheckAux term2 t2 sub2 env2 varC)
-      | _ -> print_type typ; failwith " Expected an arrow type.")
+      | _ -> print_string (typeToString typ); failwith " Expected an arrow type.")
 	| APP (head, body) -> 
       (*VN: Construct an arrow type for all body elements with type variables.*)
       let rec construct_type_arr args endType varC = 
@@ -407,7 +407,7 @@ let rec typeCheck clause =
       | APP(head, args) -> tCheckBody (PRED("", APP(head, args), NEG)) env
       | BRACKET (f) -> tCheckBody f env
       | NOT body1 -> tCheckBody body1 env
-      | _ -> print_term body; failwith " Expected a body element while typechecking."
+      | _ -> print_string (termToString body); failwith " Expected a body element while typechecking."
     end
 	in
 	match clause with

@@ -104,9 +104,8 @@ KIND NAME TYPE DOT {
         match dupChk2 with
           | NONE -> addTypeTbl $2 $3; 
             if !verbose then begin
-              print_string (" New type created: "^$2^" : ");
-              print_type $3;
-              print_newline (); flush stdout;
+              print_endline (" New type created: "^$2^" : "^(typeToString $3));
+              flush stdout;
             end;
             NONE
           | SOME (k) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
@@ -221,9 +220,7 @@ clause:
             store lolli !currentctx;
             (*rules := lolli :: !rules;*)
             if !verbose then begin
-              print_string (" New clause: ");
-              print_term lolli;
-              print_newline();
+              print_endline (" New clause: "^(termToString lolli));
               flush stdout
             end;
             NONE
@@ -233,14 +230,11 @@ clause:
             store (LOLLI(CONS(!currentctx), head, ONE)) !currentctx;
             (*rules := (LOLLI(CONS(!currentctx), head, ONE)) :: !rules;*)
             if !verbose then begin
-              print_string " New clause: ";
-              print_term (LOLLI(CONS(!currentctx), head, ONE));
-              print_newline ();
+              print_endline (" New clause: "^(termToString (LOLLI(CONS(!currentctx), head, ONE))));
               flush stdout
             end;
             NONE
-          | c -> 
-            print_term c; print_newline (); 
+          | c -> print_endline (termToString c);
             failwith "Impossible error while parsing prop DOT."
       end
     | _ -> NONE
@@ -265,9 +259,7 @@ clause:
             (*rules :=  lolli :: !rules;*)
             
             if !verbose then begin
-              print_string (" New clause: ");
-              print_term lolli;
-              print_newline();
+              print_endline (" New clause: "^(termToString lolli));
               flush stdout
             end;
             NONE
@@ -295,9 +287,7 @@ clause:
         addSpec f;
 
         if !verbose then begin
-          print_string (" New clause: ");
-          print_term f;
-          print_newline();
+          print_endline (" New clause: "^(termToString f));
           flush stdout
         end;
         NONE
@@ -317,9 +307,7 @@ clause:
   store clause "$infty";
 
   if !verbose then begin
-    print_string (" New clause: ");
-    print_term clause;
-    print_newline();
+    print_endline (" New clause: "^(termToString clause));
     flush stdout
   end;
   NONE
@@ -339,9 +327,7 @@ body DOT {
   (* TODO store this somewhere *)
  (* add_goals clause_goal;*)
   if !verbose then begin
-    print_string (" New goal: ");
-    print_term $1;
-    print_newline();
+    print_endline (" New goal: "^(termToString $1));
     flush stdout
   end;
   NONE

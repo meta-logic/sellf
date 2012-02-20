@@ -66,13 +66,13 @@ let dirName = ref "" ;;
 
 let checkDuality str (t1, t2) = 
   print_endline "Trying to prove duality of:";
-  print_term t1; print_newline ();
-  print_term t2; print_newline ();
+  print_endline (termToString t1);
+  print_endline (termToString t2);
   let nt1 = deMorgan (NOT(t1)) in
   let nt2 = deMorgan (NOT(t2)) in
   print_endline "After negation:";
-  print_term nt1; print_newline ();
-  print_term nt2; print_newline ();
+  print_endline (termToString nt1);
+  print_endline (termToString nt2);
   (* TODO: find free variables and quantify them universally *)
   prove (PARR(nt1, nt2)) 4 (fun () -> ()
           (* TODO: find a way to print the proof
@@ -91,6 +91,6 @@ let check sysName =
   dirName := sysName;
   Hashtbl.iter checkDuality !lr_hash; 
   if !coherent then print_string "\nThe system is coherent.\n"
-  else print_string "\nThe system in NOT coherent.\n"
+  else print_string "\nThe system is NOT coherent.\n"
 ;;
 

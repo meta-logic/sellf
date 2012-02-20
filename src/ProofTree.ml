@@ -87,34 +87,8 @@ module ProofTree =
       end
       else failwith "[ERROR] Masking trees with different root."
 *)
-
+(*
     (* G: Not printing the context. *)
-    (* TODO create a printing function on sequent module and fix all FIXME
-    let printSequent sq num = match sq with
-      | SEQM(k, [], _) ->
-      (*| SEQ(k, [], _) ->*)
-        print_string "Sequent "; 
-        print_int num; print_newline ();
-        Hashtbl.iter (fun key data -> print_string (key^(string_of_int data)^", ") ) k; 
-        print_newline ();
-        print_string "--> Open sequent";
-        print_newline ();
-        flush stdout;
-      | SEQM(_, t :: tl, _) -> 
-      (*| SEQ(_, t :: tl, _) ->*) 
-        print_string "Sequent "; 
-        print_int num; print_newline ();
-        (*print_hashtbl k; print_newline ();*)
-        print_string "--> Closed sequent with initial rule on: "; print_term t;
-        print_newline ();
-        flush stdout;
-      | _ -> print_string "Unexpected sequent."; flush stdout
-
-    let rec  printLeavesAux lvsLst n = match lvsLst with
-      | [] -> print_string "End of macro rule.\n\n"
-      | hd :: tl -> printSequent (getConclusion hd) n; printLeavesAux tl (n+1)
-
-    let printLeaves pt = printLeavesAux (getLeaves pt) 0
   
     (* Printing XML file (not implemented for macro rules) *)
     let rec printTreeChildren children out = match children with
@@ -143,65 +117,18 @@ module ProofTree =
 
       | EMPSEQ -> ()
     ;;
-
-    let rec printLatexChildren children out = match children with
-      | [] -> ()
-      | h::t -> printLatex h out; printLatexChildren t out
-
-    and printLatex pt out = match pt.conclusion with
-      (* Regular proof sequent - does not print context *)
-      | SEQ(_, terms, ASYN) -> 
-        Printf.fprintf out "\\;\\;\\infer{ \\mathcal{K} ; \\Gamma \\Uparrow "; 
-        print_list_terms_tex out terms; Printf.fprintf out "}\n{";
-        printLatexChildren pt.premisses out;
-        Printf.fprintf out "}\n"
-
-      | SEQ(_, terms, SYNC) ->
-        Printf.fprintf out "\\;\\;\\infer{ \\mathcal{K} ; \\Gamma \\Downarrow "; 
-        print_list_terms_tex out terms; Printf.fprintf out "}\n{";
-        printLatexChildren pt.premisses out;
-        Printf.fprintf out "}\n"
-
-      (* Macro rule - printing generic context *)
-      | SEQM(k, terms, ASYN) -> 
-        if pt.closed then Printf.fprintf out "\\;\\;\\infer{ ";
-        Hashtbl.iter (fun s i -> Printf.fprintf out "\\Gamma_{%s}^{%d}\\; "
-        (remSpecial s) i) k;
-        Printf.fprintf out " \\Uparrow "; 
-        print_list_terms_tex out terms; 
-        if pt.closed then Printf.fprintf out "}\n{";
-        printLatexChildren pt.premisses out;
-        if pt.closed then Printf.fprintf out "}\n"
-
-      | SEQM(k, terms, SYNC) ->
-        if pt.closed then Printf.fprintf out "\\;\\;\\infer{ ";
-        Hashtbl.iter (fun s i -> Printf.fprintf out "\\Gamma_{%s}^{%d}\\; "
-        (remSpecial s) i) k;
-        Printf.fprintf out " \\Downarrow "; 
-        print_list_terms_tex out terms; 
-        if pt.closed then Printf.fprintf out "}\n{";
-        printLatexChildren pt.premisses out;
-        if pt.closed then Printf.fprintf out "}\n"
-
-      | EMPSEQ -> ()
-    ;;
-
-    let printTex2Proofs pt1 pt2 out = 
-      Printf.fprintf out "\\documentclass[a4paper, 11pt]{article}\n"; 
-      Printf.fprintf out "\\usepackage[utf8]{inputenc}\n"; 
-      Printf.fprintf out "\\usepackage{amsmath}\n"; 
-      Printf.fprintf out "\\usepackage{amssymb}\n"; 
-      Printf.fprintf out "\\usepackage{stmaryrd}\n"; 
-      Printf.fprintf out "\\usepackage{proof}\n\n"; 
-      Printf.fprintf out "\\usepackage[landscape]{geometry}\n\n"; 
-      Printf.fprintf out "\\begin{document}\n{\\tiny\n$$\n";
-      printLatex pt1 out;
-      Printf.fprintf out "$$\n}\n";
-      Printf.fprintf out "\\vspace{1cm}\n";
-      Printf.fprintf out "{\\tiny\n$$\n";
-      printLatex pt2 out;
-      Printf.fprintf out "$$\n}\n\\end{document}"
- 
+*)
+    let rec toTexString pt = match pt.closed with
+      | true ->
+        let topproof = match pt.premisses with
+          | [] -> ""
+          | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> " & "^(toTexString el)) tl "") 
+        in
+        "\\infer{"^(Sequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"
+      (* An open proof has no premisses. *)
+      | false -> (Sequent.toTexString (getConclusion pt))
+      
+(*
     let printTexProof pt out = 
       Printf.fprintf out "\\documentclass[a4paper, 11pt]{article}\n"; 
       Printf.fprintf out "\\usepackage[utf8]{inputenc}\n"; 
