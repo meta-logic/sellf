@@ -13,6 +13,7 @@ open Prints
  * Auxiliary functions for lists.
  *)
 
+(* TODO: there must be a smarter way of doing this... *)
 (* Removes an element from a list *)
 let rec remove_element a lst acc = 
   match lst with 
@@ -44,16 +45,6 @@ let rec in_list l e = try match List.hd l with
 
 (* Get all the keys from a hash table, including duplicates *)
 let keys ht = Hashtbl.fold (fun key data accu -> key :: accu) ht [] ;;
-
-(* Transforms a hashtable into a list of pairs *)
-(* Note that the hashtable data is a list. *)
-let to_pairs ht = Hashtbl.fold (fun key data acc -> 
-  let rec pairs k lst = match lst with
-    | [] -> []
-    | elm :: tl -> (k, elm) :: pairs k tl
-  in
-  (pairs key data) @ acc
-  ) ht [] ;;
 
 let print_hashtbl h = print_string "\nHashTable:\n";
   let keylst = keys h in

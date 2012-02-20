@@ -182,3 +182,7 @@ let rec deep_norm t =
       | Term.DIV (t1,t2) -> Term.DIV (deep_norm t1, deep_norm t2)
       | Term.PTR _ 
       | Term.SUSP _ -> assert false
+
+
+
+

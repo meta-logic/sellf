@@ -14,12 +14,8 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 
 open Term
-open Structs
-open Common
 open Boundedproofsearch
-open Interpreter
 open Prints
-open ProofTree
 
 (* Indicates if this is the specification of a sequent calculus system *)
 let seqcalc = ref true ;;
@@ -78,17 +74,13 @@ let checkDuality str (t1, t2) =
   print_term nt1; print_newline ();
   print_term nt2; print_newline ();
   (* TODO: find free variables and quantify them universally *)
-  add_goals (PARR(nt1, nt2));
-  Boundedproofsearch.initProof [(PARR(nt1, nt2))];
-  prove 4 (fun () -> 
-          (*if (empty_nw ()) then begin*)
+  prove (PARR(nt1, nt2)) 4 (fun () -> ()
+          (* TODO: find a way to print the proof
           print_string ("Connective "^str^" has dual specification.\n");
-          (* FIXME: formula printing is not working *)
           let file = open_out ((!dirName)^"_"^str^"_duality.tex") in
           ProofTree.printTexProof Boundedproofsearch.proof file;
           close_out file;
-          (*end
-          else (Structs.last_fail ())*)
+          *)
         )  
         (fun () ->
           coherent := false;

@@ -25,8 +25,9 @@ let unify =
     end )
   in Unify.pattern_unify
 
-(* TODO: put this in terms? *)
+(* NOTE: moved to norm.ml *)
 (* Function to substitute a variable in a formula *)
+(*
 let rec apply_ptr f = match f with
   | ABS(s, i, t) ->
       varid := !varid + 1;
@@ -35,6 +36,7 @@ let rec apply_ptr f = match f with
       let newf = Norm.hnorm (APP(ABS(s, i, t), [ptr])) in
       apply_ptr newf
   | x -> x
+*)
 
 let unifies f1 f2 =
   let fp1 = apply_ptr f1 in
@@ -92,7 +94,13 @@ let condition_init f =
           try match unify t t1 with
             | () -> 
               let rest = not_weakenable () in
-              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then true
+              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then begin
+                (*(match type_of s with
+                  | LIN | AFF -> rmv_ctx f1 s
+                  | UNB | REL -> ()
+                );*)
+                true
+              end
               else init_aux f tl
             with _ -> init_aux f tl
           end
@@ -100,7 +108,13 @@ let condition_init f =
           try match unify t t1 with
             | () ->
               let rest = not_weakenable () in
-              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then true
+              if !flagTensor > 0 || !flagTop || rest = [] || rest = [f1] then begin
+                (*(match type_of s with
+                  | LIN | AFF -> rmv_ctx f1 s
+                  | UNB | REL -> ()
+                );*)
+                true
+              end
               else init_aux f tl
             with _ -> init_aux f tl
           end
@@ -109,7 +123,7 @@ let condition_init f =
   in
   init_aux f (to_pairs !context)
 
-
+(* NOTE: all the functions below were moved to term.ml
 (* Solves negation of formulas by applying DeMorgan rules until atomic level *)
 let rec deMorgan f = match f with
   | NOT(t) -> begin 
@@ -190,5 +204,5 @@ let solve_asgn e1 e2 =
     true
   with 
   | _ -> if !verbose then print_endline "Failed to assign a variable to an int in an assigment."; false;;
-
+*)
 

@@ -93,6 +93,86 @@ var = {
   lts : int
 }
 
+(* Solves negation of formulas by applying DeMorgan rules until atomic level *)
+let rec deMorgan f = match f with
+  | NOT(t) -> begin 
+    match t with
+      | NOT(t1) -> t1
+      | PRED(str, terms, p) -> NOT(t) 
+      | TENSOR(f1, f2) -> PARR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
+      | PARR(f1, f2) -> TENSOR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
+      | WITH(f1, f2) -> ADDOR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
+      | ADDOR(f1, f2) -> WITH(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
+      | EXISTS(s, i, f1) -> FORALL(s, i, deMorgan (NOT(f1)))
+      | FORALL(s, i, f1) -> EXISTS(s, i, deMorgan (NOT(f1)))
+      | QST(s, f1) -> BANG(s, deMorgan (NOT(f1)))
+      | BANG(s, f1) -> QST(s, deMorgan (NOT(f1)))
+      | LOLLI(s, f1, f2) -> TENSOR((QST(s, f2)), deMorgan (NOT(f1)))
+      | TOP -> ZERO
+      | ZERO -> TOP
+      | BOT -> ONE
+      | ONE -> BOT
+      | COMP(ct, t1, t2) -> begin
+        match ct with
+          | EQ -> COMP(NEQ, t1, t2)
+          | NEQ -> COMP(EQ, t1, t2)
+          | LESS -> COMP(GEQ, t1, t2)
+          | GEQ -> COMP(LESS, t1, t2)
+          | GRT -> COMP(LEQ, t1, t2)
+          | LEQ -> COMP(GRT, t1, t2)
+        end
+      | _ -> failwith "Error while applying deMorgan."
+    end
+  | t -> t (* Non-negated term *)
+
+(* Solves an arithmetic expression *)
+let rec solve_exp e = match e with
+  | INT (x) -> x
+  | VAR v -> 1(* Infer the variable value?? *)
+  | PLUS (x, y) -> (solve_exp x) + (solve_exp y)
+  | MINUS (x, y) -> (solve_exp x) - (solve_exp y)
+  | TIMES (x, y) -> (solve_exp x) * (solve_exp y)
+  | DIV (x, y) -> (solve_exp x) / (solve_exp y)
+  | PTR {contents = T t} -> solve_exp t
+  | PTR {contents = V t} when t.tag = LOG -> 
+      failwith "ERROR: Cannot handle comparisons with logical variables."
+  | bla -> failwith "ERROR: Unexpected term in a comparison."
+;;
+
+(* Solves an arithmetic comparison *)
+let solve_cmp c e1 e2 = 
+  let n1 = solve_exp e1 in 
+  let n2 = solve_exp e2 in
+    match c with
+      | EQ -> n1 = n2
+      | LESS -> n1 < n2
+      | GEQ -> n1 >= n2        
+      | GRT -> n1 > n2
+      | LEQ -> n1 <= n2
+      | NEQ -> n1 != n2
+;;
+
+(*Solves assignment *)
+(* TODO implement equality
+let solve_asgn e1 e2 = 
+  (*if !verbose then begin
+    print_string "****** Unifying (head of first with second): \n"; 
+    print_term e1; print_newline (); print_term e2;
+    print_newline ()
+  end;*)
+  let n2 = solve_exp e2 in
+  try 
+    unify e1 (INT(n2)); 
+    (*if !verbose then begin
+      print_string "******* After unification: \n"; 
+      print_term e1; print_newline (); print_int n2; 
+      print_newline ()
+    end;*)
+    true
+  with 
+  | _ -> if !verbose then print_endline "Failed to assign a variable to an int in an assigment."; false;;
+*)
+
 (* Four types of subexponentials described by a string *)
 type subexp = 
 | UNB (* unbounded: contraction and weakening *)
@@ -156,6 +236,36 @@ let rec equals t1 t2 = match (t1, t2) with
 | BRACKET of terms
 *)
 
+(******************* POINTERS ******************)
+(*
+ * Functions related to pointers
+ *)
+
+let bind_stack = Stack.create () ;;
+let bind_len = ref 0 ;;
+
+type subst = (ptr*in_ptr) list
+type unsubst = subst
+
+let rec deref t = match t with
+  | PTR {contents = T t1} -> deref t1
+  | t -> t
+;;
+
+let bind v t = 
+  let dv = match deref v with
+    | PTR t ->  t (* t is supposed to be a variable here *)
+    | _ -> assert false (* [v] should represent a variable *)
+  in
+  let dt = deref t in (* r is a variable equal to dv (binding X to X makes no sense) *)
+    if match dt with PTR r when r == dv -> false | _ -> true then begin
+      Stack.push (dv,!dv) bind_stack ;
+      dv := T dt ;
+      incr bind_len 
+    end
+;;
+
+(* TODO organize this and put in another file *)
 (****************** Signature ***********************)
 (*
  * Hashtables and functions to store the kinds and types declared in the .sig
@@ -175,6 +285,18 @@ without ever being used. *)
 NEG), ONE ) );;*)
 
 let addTypeTbl name entry = Hashtbl.add typeTbl name entry ;; 
+
+let initialize () =
+  Hashtbl.clear kindTbl;
+  Hashtbl.clear typeTbl;
+  (* Bult-in kind for formulas *)
+  Hashtbl.add kindTbl "o" (TPRED) ;
+  (* Built-in types and kinds for systems' specification *)
+  Hashtbl.add kindTbl "form" (TKIND("form")) ;
+  Hashtbl.add kindTbl "term" (TKIND("term")) ;
+  addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
+  addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *) 
+;;
 
 let notInTbl hash entry = 
 	let l = (Hashtbl.find_all hash entry) in

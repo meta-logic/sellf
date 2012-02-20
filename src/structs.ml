@@ -3,166 +3,7 @@
 open Basic
 open Term
 open Prints
-
-(* Integer to indicate how many tensors I am solving, 
- * so that I only check for context emptyness at the end *)
-(* TODO: these need to be removed. Declared as flagTop and flagTensor in
-common.ml*)
-let tensor = ref 0 ;;
-let is_top = ref (false);;
-
-type phase = 
-| ASYN
-| SYNC
-;;
-
-let print_phase p = match p with
-  | ASYN -> print_string "asyn"
-  | SYNC -> print_string "sync"
-;;
-
-(***************** SUBEXPONENTIALS ***************)
-
-(* Hashtable with subexponentials' types ($gamma is the linear context and
- * $infty holds specifications) 
- *)
-let subexTpTbl = Hashtbl.create 100 ;;
-
-(* Hashtable with subexponentials' parcial order *)
-(* Each subexponential holds those which are greater than it. *)
-let (subexOrdTbl : (string, string) Hashtbl.t ) = Hashtbl.create 100 ;;
-
-(* Returns the type of a subexponential *)
-let type_of s = try 
-  Hashtbl.find subexTpTbl s
-  with Not_found -> failwith ("[ERROR] Subexponential "^s^" has no type defined.")
-;;
-
-(* Gets all the unbounded subexponentials and make them greater then s 
- * (put in s' order list) *)
-let lt_unbounded s = let subexps = keys subexTpTbl in
-  let rec get_unbounded lst = match lst with
-    | [] -> ()
-    | u :: t -> (match Hashtbl.find subexTpTbl s with
-      | UNB -> Hashtbl.add subexOrdTbl s u; (get_unbounded t)
-      | _ -> get_unbounded t
-    )
-  in get_unbounded subexps
-;;
-
-(* Checks if a subexponential s1 > s2 *)
-let rec bfs root queue goal = match queue with
-  | [] -> false
-  | h :: t when h = root -> failwith "Circular dependency on subexponential order."
-  | h :: t when h = goal -> true
-  | h :: t -> bfs root (t @ Hashtbl.find_all subexOrdTbl h) goal
-;;
-let greater_than s1 s2 = bfs s2 (Hashtbl.find_all subexOrdTbl s2) s1 ;;
-
-(* Returns a list with all subexponentials from idxs that will have their 
- * formulas erased if !s is applied. *)
-let rec erased s idxs = match idxs with
-  | [] -> []
-  | i::t -> 
-    match type_of i with
-      | UNB | AFF -> 
-        if i = "$infty" || i = s || (greater_than i s) then erased s t
-        else i::(erased s t)
-      | _ -> erased s t
-;;
-let erased_bang s = erased s (keys subexTpTbl) ;;
-(* Returns a list with all subexponentials from idxs that will be checked 
- * for emptiness if !s is applied. *)
-let rec checked_empty s idxs = match idxs with
-  | [] -> []
-  | i::t -> 
-    match type_of i with
-      | REL | LIN -> 
-        if i = "$gamma" || i = s || (greater_than i s) then checked_empty s t
-        else i::(checked_empty s t)
-      | _ -> checked_empty s t
-;;
-let empty_bang s = checked_empty s (keys subexTpTbl) ;;
-
-(* Checks whether or not a subexponential can suffer weakening *)
-let weak i = match type_of i with
-  | UNB | AFF -> true
-  | REL | LIN -> false
-;;
-
-(******************** CONTEXT **********************)
-(*
- * A hashtable implements the context of a sequent. The key is the
- * name of the subexponential, and this is mapped to a list of formulas.
- * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
- * The formulas of specification of systems are stored with the key '$infty'
- *)
-
-(* Hashtable for the context *)
-let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
-
-let init_context : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
-
-(* Inserts a formula in a subexponential *)
-let add_ctx f s = try match Hashtbl.find !context s with
-  | forms -> 
-    Hashtbl.remove !context s; 
-    Hashtbl.add !context s (f :: forms)
-  with Not_found -> failwith ("Trying to add a formula to "^s^" but it was not
-  declared.\n")
-;;
-
-(* Removes a formula from a subexponential (only the first occurence) *)
-(* TODO: check if this is not supposed to remove only of the context is linear *)
-let rmv_ctx form subexp = 
-  let forms = Hashtbl.find !context subexp in
-  let new_list = remove form forms in
-    Hashtbl.remove !context subexp; Hashtbl.add !context subexp new_list
-;;
-
-(* Returns all the formulas in the subexponential s or an empty list if it's
- * empty *)
-let get_forms s = try match Hashtbl.find !context s with
-  | x -> x
-  with Not_found -> failwith ("Trying to get the formulas from "^s^" but it was
-  not declared.")
-    (*[]*)
-
-(* Checks whether a formula f is in subexponential s *)
-let in_subexp f s = in_list f (get_forms s) ;;
-
-(* Returns a list with all the formulas that cannot suffer weakening *)
-let not_weakenable () = Hashtbl.fold (fun s forms l -> 
-    if not (weak s) then 
-    begin
-      forms@l
-    end
-    else l) !context [] ;;
-
-(* Removes all formulas from a subexponential *)
-let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
-
-(* Operation k <l for K context *)
-(* NOTE: $infty is greater than everybody, no need to put this in the hash. *)
-let k_less_than s = Hashtbl.iter (fun idx forms -> 
-  if not (idx = "$gamma") && not (idx = "$infty") && not (idx = s) && not (greater_than idx s) then begin 
-    if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
-    remove_all idx 
-  end) 
-  !context;;
-
-(* Verifies if a subexponential is empty *)
-let empty s = List.length (Hashtbl.find !context s) == 0 ;;
-
-(* Creating a new subexponential *)
-let new_subexp s = 
-  try match Hashtbl.find subexTpTbl s with
-  | _ -> ()
-  with Not_found -> 
-    Hashtbl.add subexTpTbl s (AFF); 
-    Hashtbl.add !context s []; 
-    lt_unbounded s ;;
-
+open Subexponentials
 
 (******************* ATOMS ************************)
 (*
@@ -184,75 +25,6 @@ let getAtomPol s =
     with Not_found -> 
       (*print_string ("[WARNING] Atom "^s^" has no polarity defined, considering it negative.\n");*)
       NEG
-;;
-
-(***************** SUBEXPONENTIALS ***************)
-
-(* Hashtable with subexponentials' types ($gamma is the linear context and
- * $infty holds specifications) 
- *)
-let subexTpTbl = Hashtbl.create 100 ;;
-
-(* Hashtable with subexponentials' parcial order *)
-(* Each subexponential holds those which are greater than it. *)
-let (subexOrdTbl : (string, string) Hashtbl.t ) = Hashtbl.create 100 ;;
-
-(* Returns the type of a subexponential *)
-let type_of s = try 
-  Hashtbl.find subexTpTbl s
-  with Not_found -> failwith ("[ERROR] Subexponential "^s^" has no type defined.")
-;;
-
-(* Gets all the unbounded subexponentials and make them greater then s 
- * (put in s' order list) *)
-let lt_unbounded s = let subexps = keys subexTpTbl in
-  let rec get_unbounded lst = match lst with
-    | [] -> ()
-    | u :: t -> (match Hashtbl.find subexTpTbl s with
-      | UNB -> Hashtbl.add subexOrdTbl s u; (get_unbounded t)
-      | _ -> get_unbounded t
-    )
-  in get_unbounded subexps
-;;
-
-(* Checks if a subexponential s1 > s2 *)
-let rec bfs root queue goal = match queue with
-  | [] -> false
-  | h :: t when h = root -> failwith "Circular dependency on subexponential order."
-  | h :: t when h = goal -> true
-  | h :: t -> bfs root (t @ Hashtbl.find_all subexOrdTbl h) goal
-;;
-let greater_than s1 s2 = bfs s2 (Hashtbl.find_all subexOrdTbl s2) s1 ;;
-
-(* Returns a list with all subexponentials from idxs that will have their 
- * formulas erased if !s is applied. *)
-let rec erased s idxs = match idxs with
-  | [] -> []
-  | i::t -> 
-    match type_of i with
-      | UNB | AFF -> 
-        if i = "$infty" || i = s || (greater_than i s) then erased s t
-        else i::(erased s t)
-      | _ -> erased s t
-;;
-let erased_bang s = erased s (keys subexTpTbl) ;;
-(* Returns a list with all subexponentials from idxs that will be checked 
- * for emptiness if !s is applied. *)
-let rec checked_empty s idxs = match idxs with
-  | [] -> []
-  | i::t -> 
-    match type_of i with
-      | REL | LIN -> 
-        if i = "$gamma" || i = s || (greater_than i s) then checked_empty s t
-        else i::(checked_empty s t)
-      | _ -> checked_empty s t
-;;
-let empty_bang s = checked_empty s (keys subexTpTbl) ;;
-
-(* Checks whether or not a subexponential can suffer weakening *)
-let weak i = match type_of i with
-  | UNB | AFF -> true
-  | REL | LIN -> false
 ;;
 
 (*************** STRUCTURES FOR MACRO RULES *************************)
@@ -302,110 +74,6 @@ let add_pos form = positives := form :: !positives ;;
 let (atoms : (terms list) ref) = ref [] ;;
 (* Inserts a formula in the atoms' list *)
 let add_atm a = atoms := a :: !atoms ;;
-
-(******************** CONTEXT **********************)
-(*
- * A hashtable implements the context of a sequent. The key is the
- * name of the subexponential, and this is mapped to a list of formulas.
- * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
- * The formulas of specification of systems are stored with the key '$infty'
- *)
-
-(* Hashtable for the context *)
-let (context : ((string, terms list) Hashtbl.t) ref ) = ref (Hashtbl.create 100) ;;
-(*Hashtbl.add !context "$gamma" [] ;;*)
-
-let init_context : ((string, terms list) Hashtbl.t) ref = ref (Hashtbl.create 100) ;; 
-
-(* Inserts a formula in a subexponential *)
-let add_ctx f s = try match Hashtbl.find !context s with
-  | forms -> 
-    Hashtbl.remove !context s; 
-    Hashtbl.add !context s (f :: forms)
-  with Not_found -> failwith ("Trying to add a formula to "^s^" but it was not
-  declared.\n")
-    (*Hashtbl.add !context s (f :: [])*)
-;;
-
-(* Inserts a formula in Gamma (linear context) *)
-let add_lin form = add_ctx form "$gamma" ;;
-
-(* Removes a formula from a subexponential (only the first occurence) *)
-let rmv_ctx form subexp = 
-  let forms = Hashtbl.find !context subexp in
-  let new_list = remove form forms in
-    Hashtbl.remove !context subexp; Hashtbl.add !context subexp new_list
-;;
-
-(* Returns all the formulas in the subexponential s or an empty list if it's
- * empty *)
-let get_forms s = try match Hashtbl.find !context s with
-  | x -> x
-  with Not_found -> failwith ("Trying to get the formulas from "^s^" but it was
-  not declared.")
-    (*[]*)
-
-(* Checks whether a formula f is in subexponential s *)
-let in_subexp f s = in_list f (get_forms s) ;;
-
-(* Returns a list with all the formulas that cannot suffer weakening *)
-let not_weakenable () = Hashtbl.fold (fun s forms l -> 
-    if not (weak s) then 
-    begin
-      forms@l
-    end
-    else l) !context [] ;;
-
-(* Checks whether K context is empty on the subexponentials that cannot suffer weakening *)
-(* TODO: fix the TOP thing. *)
-(*let empty_nw () =
-  match (List.length (not_weakenable ())) with
-    | 0 -> if !verbose then print_string "Non-weakenable set is empty"; true
-    | n -> if !is_top then begin
-        if !verbose then (print_string "However, the proof has a top.\n");
-        true
-      end
-      else false
-;;
-*)
-
-(* Checks if bang rule can be applied with subexponential s *)
-let condition_bang s = 
-  let subsempt = empty_bang s in
-  let rec all_empty subs = match subs with
-    | [] -> true
-    | h::t -> match get_forms h with
-      | [] -> all_empty t
-      | _ -> 
-        if !verbose then 
-          print_string ("Failed in bang rule with subexponential: "^s^"\n"); 
-	      false
-  in all_empty subsempt
-;;
-
-(* Removes all formulas from a subexponential *)
-let remove_all s = Hashtbl.remove !context s; Hashtbl.add !context s [] ;;
-
-(* Operation k <l for K context *)
-(* NOTE: $infty is greater than everybody, no need to put this in the hash. *)
-let k_less_than s = Hashtbl.iter (fun idx forms -> 
-  if not (idx = "$gamma") && not (idx = "$infty") && not (idx = s) && not (greater_than idx s) then begin 
-    if !verbose then print_string ("Removing from "^idx^" in k_less_than "^s^"\n"); 
-    remove_all idx 
-  end) 
-  !context;;
-
-(* Verifies if a subexponential is empty *)
-let empty s = List.length (Hashtbl.find !context s) == 0 ;;
-
-(* Creating a new subexponential *)
-let new_subexp s = 
-  try match Hashtbl.find subexTpTbl s with
-  | _ -> ()
-  with Not_found -> 
-    Hashtbl.add subexTpTbl s (AFF); 
-    Hashtbl.add !context s []; 
-    lt_unbounded s ;;
 
 (******************** CLAUSES **********************)
 (* 
@@ -461,6 +129,7 @@ let rmv_cls clause = match (Term.remove_abs clause) with
   | _ -> print_term clause; failwith "Clause is not an implication."
 ;;
 
+(*
 (***************** BACKTRACKING **********************)
 (*
  * Gathered here are everything related with the storing of states used during
@@ -579,11 +248,15 @@ let print_stack s = print_string "STACK\n"; Stack.iter (print_state) s; print_st
 let last_fail () = match Stack.top !states with
   | STATE(_, _, _, _, f, _, _) -> f ()
 ;;
+*)
 
 (******************* POINTERS ******************)
 (*
  * Functions related to pointers
  *)
+
+let bind_stack = Stack.create () ;;
+let bind_len = ref 0 ;;
 
 type subst = (ptr*in_ptr) list
 type unsubst = subst
@@ -609,20 +282,20 @@ let bind v t =
 (************************ EXTRAS **********************)
 
 let initialize () = 
-  Hashtbl.clear !context; 
-  Hashtbl.clear !clausesTbl; 
+(*  Hashtbl.clear !context; 
+  Hashtbl.clear !clausesTbl; *)
   Hashtbl.clear subexTpTbl; 
   Hashtbl.clear subexOrdTbl; 
   Hashtbl.clear kindTbl;
   Hashtbl.clear typeTbl;
   (*Hashtbl.clear rTbl;*)
-  Stack.clear !states;
-  Stack.clear bind_stack;
-  goals := [];
+  (*Stack.clear !states;
+  Stack.clear bind_stack;*)
+  (*goals := [];
   positives := [];
   atoms := [];
   bind_len := 0;
-  nstates := 0;
+  nstates := 0;*)
   (* Bult-in kind for formulas *)
   Hashtbl.add kindTbl "o" (TPRED) ;
   (* Built-in types and kinds for systems' specification *)
@@ -631,11 +304,11 @@ let initialize () =
   addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
   addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *)
   (* \Gamma context (linear): stores the formulas that have no exponential *)
-  Hashtbl.add !context "$gamma" [];
+  (*Hashtbl.add !context "$gamma" [];
   Hashtbl.add subexTpTbl "$gamma" (LIN);
   (* \infty context (classical): stores specifications *)
   Hashtbl.add !context "$infty" [];
-  Hashtbl.add subexTpTbl "$infty" (UNB)
+  Hashtbl.add subexTpTbl "$infty" (UNB)*)
 ;;
 
 (*  Some examples on how things are inserted in the hashtables.
@@ -656,7 +329,7 @@ Hashtbl.add !context "$k" [] ;;
 Hashtbl.add !context "$l" [] ;;
 *)
 
-
+(*
 (*----------------------------------------------------------
 Code for implementing tabled deduction.
 -----------------------------------------------------------*)
@@ -741,4 +414,4 @@ in
 let hashlst = Hashtbl.find_all !fail_table h
 in 
 not_in_fail_table_aux hashlst
-                      
+*)                      

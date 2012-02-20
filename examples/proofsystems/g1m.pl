@@ -10,16 +10,16 @@ subexp l lin.
 subexp r lin.
 
 % Implication
-%lft (imp A B) := ([l]bang ([r]? (rght A))) ; ([l]? (lft B)).
-%rght (imp A B) := ([l]bang ([l]? (lft A))) | ([l]bang ([r]? (rght B))).
+%lft (imp A B) := ([l]bang ([r]? (rght A))) , ([l]? (lft B)).
+%rght (imp A B) := ([l]bang (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
 lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
-rght (and A B) := ([l]bang ([r]? (rght A))) ; ([l]bang ([r]? (rght B))).
+rght (and A B) := ([l]bang ([r]? (rght A))) , ([l]bang ([r]? (rght B))).
 
 % Disjunction
 %lft (or A B) := ([l]? (lft A)) & ([l]? (lft B)).
-%rght (or A B) := ([l]bang ([r]? (rght A))) , ([l]bang ([r]? (rght B))).
+%rght (or A B) := ([l]bang ([r]? (rght A))) ; ([l]bang ([r]? (rght B))).
 
 % Forall
 %lft (forall A) := [l]? (lft (A X)).
@@ -30,14 +30,14 @@ rght (and A B) := ([l]bang ([r]? (rght A))) ; ([l]bang ([r]? (rght B))).
 %rght (exists A) := [l]bang ([r]? (rght (A X))).
 
 % Axiom
-(not (lft A)) ; (not (rght A)).
+(not (lft A)) , (not (rght A)).
 
 % Cut rule
-([l]bang ([r]? (rght A))) ; ([l]? (lft A)).
+([l]bang ([r]? (rght A))) , ([l]? (lft A)).
 
 % Contraction left
-%not (lft A) ; ([l]? (lft A)) | ([l]? (lft A)).
+%not (lft A) , ([l]? (lft A)) | ([l]? (lft A)).
 
 % Weakening left
-%not (lft A) ; bot.
+%not (lft A) , bot.
 

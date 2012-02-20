@@ -2,9 +2,11 @@
 %{
 open Term
 open Prints
-open Structs
+(*open Structs*)
 open TypeChecker
 open Coherence
+open Context
+open Subexponentials
 
 let currentctx = ref "$gamma" 
 
@@ -143,23 +145,23 @@ clause:
     | NONE -> begin
       match $3 with 
         | "lin" ->
-          Hashtbl.add !context $2 [];
-          Hashtbl.add subexTpTbl $2 LIN; 
+          initSubexp $2;
+          addType $2 LIN;
           if !verbose then print_endline ("New linear subexponential: "^$2);
           NONE
         | "aff" -> 
-          Hashtbl.add !context $2 [];
-          Hashtbl.add subexTpTbl $2 AFF; 
+          initSubexp $2;
+          addType $2 AFF;
           if !verbose then print_endline ("New affine subexponential: "^$2);
           NONE
         | "rel" -> 
-          Hashtbl.add !context $2 [];
-          Hashtbl.add subexTpTbl $2 REL; 
+          initSubexp $2;
+          addType $2 REL;
           if !verbose then print_endline ("New relevant subexponential: "^$2);
           NONE
         | "unb" -> 
-          Hashtbl.add !context $2 [];
-          Hashtbl.add subexTpTbl $2 UNB; 
+          initSubexp $2;
+          addType $2 UNB;
           if !verbose then print_endline ("New unbounded subexponential: "^$2);
           NONE
         | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
@@ -186,13 +188,14 @@ clause:
     | _, NONE -> failwith ("ERROR: Subexponential name not declared: "^$4) 
 }
 
-/* Parsing atom's polarity */
+/* TODO Parsing atom's polarity
 | POS NAME DOT {
   addAtomPol $2 POS; NONE 
 }
 | NEG NAME DOT {
   addAtomPol $2 NEG; NONE
 }
+*/
 
 /* VN: Marks that all formulas appearing after a context keyword are to be stored in the subexponential NAME.*/
 | CONTEXT NAME DOT {  
@@ -201,6 +204,7 @@ clause:
     | SOME (_) ->  currentctx := $2; NONE
 }
 
+/* G: TODO: do not transform propositions in clauses */
 | prop DOT { 
   match $1 with
     | PRED (p,ts,pol) -> 
@@ -213,9 +217,9 @@ clause:
           | ABS (s, i, t) ->
             (*Hashtbl.add rTbl p clause;*)
             let lolli = cls_2_lolli (ABS(s, i, t)) (CONS(!currentctx)) in
-            add_cls lolli;
-            add_ctx lolli !currentctx;
-            rules := lolli :: !rules;
+            (*add_cls lolli;*)
+            store lolli !currentctx;
+            (*rules := lolli :: !rules;*)
             if !verbose then begin
               print_string (" New clause: ");
               print_term lolli;
@@ -225,8 +229,8 @@ clause:
             NONE
           | CLS(DEF, head, ONE) -> 
             (*Hashtbl.add rTbl p clause;*)
-            add_cls (LOLLI(CONS(!currentctx), head, ONE));
-            add_ctx (LOLLI(CONS(!currentctx), head, ONE)) !currentctx;
+            (*add_cls (LOLLI(CONS(!currentctx), head, ONE));*)
+            store (LOLLI(CONS(!currentctx), head, ONE)) !currentctx;
             (*rules := (LOLLI(CONS(!currentctx), head, ONE)) :: !rules;*)
             if !verbose then begin
               print_string " New clause: ";
@@ -255,8 +259,8 @@ clause:
           | CLS(DEF, _, _) -> (* Clause with no variables *) 
             (*Hashtbl.add rTbl p (clause); *)
             let lolli = cls_2_lolli clause (CONS(!currentctx)) in
-            add_cls lolli;
-            add_ctx lolli !currentctx;
+            (*add_cls lolli;*)
+            store lolli !currentctx;
             (* For macro-rules *)
             (*rules :=  lolli :: !rules;*)
             
@@ -286,7 +290,7 @@ clause:
         let f = spec_2_form clause in
         
         (* For macro-rules *)
-        rules :=  f :: !rules;
+        (*rules :=  f :: !rules;*)
         (* For coherence *)
         addSpec f;
 
@@ -308,9 +312,9 @@ clause:
   let clause = deBruijn true $1 in
   
   (* For macro-rules *)
-  rules := clause :: !rules;
+  (*rules := clause :: !rules;*)
   (* For coherence *)
-  add_ctx clause "$infty";
+  store clause "$infty";
 
   if !verbose then begin
     print_string (" New clause: ");
@@ -331,8 +335,9 @@ body DOT {
   let clause_typecheck = deBruijn false raw_clause in
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
-  let clause_goal = Common.apply_ptr clause in
-  add_goals clause_goal;
+  let clause_goal = Boundedproofsearch.apply_ptr clause in
+  (* TODO store this somewhere *)
+ (* add_goals clause_goal;*)
   if !verbose then begin
     print_string (" New goal: ");
     print_term $1;
@@ -353,17 +358,23 @@ prop:
   match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
-      PRED ($1, CONS($1), (getAtomPol $1) )
-    | SOME (k), _ -> PRED ($1, CONS($1), (getAtomPol $1) )
-    | _, SOME (k) -> PRED ($1, CONS($1), (getAtomPol $1) )
+      (*PRED ($1, CONS($1), (getAtomPol $1) )*)
+      PRED ($1, CONS($1), NEG )
+    | SOME (k), _ -> (*PRED ($1, CONS($1), (getAtomPol $1) )*) 
+      PRED ($1, CONS($1), NEG )
+    | _, SOME (k) -> (*PRED ($1, CONS($1), (getAtomPol $1) )*)
+      PRED ($1, CONS($1), NEG )
 }
 | NAME terms {
   match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
-      PRED ($1,CONS($1), (getAtomPol $1) )
-    | SOME (k), _ ->  PRED($1, APP(CONS($1), $2), (getAtomPol $1) )
-    | _, SOME (k) -> PRED ($1, CONS($1), (getAtomPol $1) )
+      (*PRED ($1,CONS($1), (getAtomPol $1) )*)
+      PRED ($1, CONS($1), NEG )
+    | SOME (k), _ ->  (*PRED($1, APP(CONS($1), $2), (getAtomPol $1) )*)
+      PRED ($1, APP(CONS($1), $2), NEG )
+    | _, SOME (k) -> (*PRED ($1, CONS($1), (getAtomPol $1) )*)
+      PRED ($1, CONS($1), NEG )
 }
 
 /* VN: Predicates can also be variables. */
@@ -399,7 +410,7 @@ body:
 | LPAREN body RPAREN    { $2 }
 | NEW body              { NEW ($1, $2) }
 | LCURLY body RCURLY    {BRACKET($2)}
-| NOT body              {Common.deMorgan (NOT($2)) }
+| NOT body              {Term.deMorgan (NOT($2)) }
 ;
 
 terms:
@@ -421,7 +432,8 @@ term:
 | NAME { match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
     | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; 
-      PRED ($1, CONS($1), (getAtomPol $1) ) 
+      (*PRED ($1, CONS($1), (getAtomPol $1) )*)
+      PRED ($1, CONS($1), NEG )
     | SOME (k), _ -> CONS ($1)
     | _, SOME (k) -> CONS ($1)
 }

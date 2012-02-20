@@ -1,7 +1,7 @@
 
 open Term 
 open Prints
-open Structs
+open Subexponentials
 
 
 (*VN: This function introduces deBruijn indices to a raw clause parsed. However, there are two 
@@ -215,7 +215,7 @@ match term with
        | TBASIC(TSUBEX) -> 
           begin
           try 
-            let _ = Hashtbl.find (Structs.subexTpTbl) x in (typ, sub, env, varC)
+            let _ = Hashtbl.find (Subexponentials.subexTpTbl) x in (typ, sub, env, varC)
             with
             | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
           end

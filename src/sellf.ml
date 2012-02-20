@@ -1,5 +1,6 @@
 open ProofTree
-open Constraints
+open Context
+open Subexponentials
 
 module TestUnify = 
   Unify.Make(struct
@@ -20,10 +21,12 @@ let position lexbuf =
 let samefile = ref true ;;
 let fileName = ref "" ;;
 
-let rec start () = 
-    Structs.initialize ();
+let rec start () =
+    Term.initialize ();
+    Context.initialize ();
+    (*Structs.initialize ();
     Coherence.initialize ();
-    Structs.rules := [];
+    Structs.rules := [];*)
     print_string ":> ";
     let command = read_line() in
     try 
@@ -56,10 +59,10 @@ let rec start () =
                         let _ = Parser.clause Lexer.token lexbuf in ();
                       done  
                     with 
-                      | Lexer.Eof -> samefile := true; Structs.saveInitState (); 
+                      | Lexer.Eof -> samefile := true; (*Structs.saveInitState ();*)
                         while !samefile do 
                           solve_query (); 
-                          Structs.recoverInitState () 
+                          (*Structs.recoverInitState () *)
                         done
                       | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); start ()
                       | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
@@ -78,6 +81,7 @@ solve_query () =
   if query_string = "#done" then samefile := false      
   else begin
   match query_string with
+    (*
     | "#macro" -> 
       print_endline "Generating macro rules...";
       let n = ref 1 in
@@ -155,7 +159,7 @@ solve_query () =
 
           in check_perm hd tl; every_pair tl
       in every_pair !Structs.rules;
-
+    *)
     | "#coherence" ->
       if !Coherence.seqcalc then
         Coherence.check !fileName
@@ -165,8 +169,8 @@ solve_query () =
     | "#scopebang" -> begin
       print_endline "Please type the subexponential:";
       let s = read_line() in
-      let ers = Structs.erased_bang s in
-      let ept = Structs.empty_bang s in
+      let ers = Subexponentials.erased_bang s in
+      let ept = Subexponentials.empty_bang s in
       print_endline ("!"^s^"  : ");
       print_endline "The following will have their formulas erased: ";
       List.iter (fun a -> print_string (a^", ")) ers; print_newline ();
@@ -174,6 +178,9 @@ solve_query () =
       List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
       end
 
+    | _ -> failwith "Function not implemented."
+
+    (*
     | _ -> begin
       let query = Lexing.from_string query_string in
       begin
@@ -228,8 +235,9 @@ solve_query () =
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
       end
+      *)
     end
-    end
+    (*end*)
 
 let _ = 
 print_endline "SELLF -- A linear logic framework for systems with locations.";

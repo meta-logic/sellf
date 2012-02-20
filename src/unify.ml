@@ -453,7 +453,7 @@ let makesubst h1 t2 a1 =
           let (changed,a1',a2') = raise_and_invert v1 v2 a1 [] lev in
             if changed || not (lts1 >= v2.lts && ((*isLeft ||*) ts1 >= v2.ts)) then
               let h'= fresh ~lts:(min lts1 v2.lts) ~ts:(min ts1 v2.ts) in
-                Structs.bind c (Term.app h' a2') ;
+                Term.bind c (Term.app h' a2') ;
                 Term.app h' a1'
             else
               Term.app c a1'
@@ -477,13 +477,13 @@ let makesubst h1 t2 a1 =
                 let changed,a1',a2' = raise_and_invert v1 v2 a1 a2 lev in
                   if changed then
                     let h' = fresh ~lts:(min lts1 v2.lts) ~ts:(min ts1 ts2) in
-                      Structs.bind h2
+                      Term.bind h2
                         (Term.lambda (List.length a2) (Term.app h' a2')) ;
                       Term.app h' a1'
                   else
                     if not (lts1 >= lts2 && ((*isLeft || *)ts1 >= ts2)) then
                       let h' = fresh ~lts:(min lts1 v2.lts) ~ts:ts1 in
-                        Structs.bind h2 h' ;
+                        Term.bind h2 h' ;
                         Term.app h' a1'
                     else 
                       Term.app h2 a1'
@@ -544,7 +544,7 @@ let makesubst h1 t2 a1 =
             if n=0 && lev=0 then h1 else raise TypesMismatch
           else begin
             if not (lts1 >= v2.lts && ((*isLeft ||*) (ts1 >= v2.ts))) then
-              Structs.bind t2
+              Term.bind t2
                 (fresh ~lts:(min lts1 v2.lts) ~ts:(min ts1 v2.ts)) ;
             Term.lambda (lev+n) t2
           end
@@ -654,7 +654,7 @@ and unify_nv_term n1 t1 t2 = match Term.observe t2 with
  * [t2] should be dereferenced and head-normalized, different from a var. *)
 and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
   | Term.VAR {tag=tag}, _ when variable tag ->
-      Structs.bind h1 (makesubst h1 t2 a1)
+      Term.bind h1 (makesubst h1 t2 a1)
   | Term.VAR {tag=tag}, Term.APP (h2,a2) when constant tag ->
       begin match Term.observe h2 with
         | Term.VAR {tag=tag} when constant tag ->
@@ -665,7 +665,7 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
         | DB _ (*| NB _*) ->
             raise (ConstClash (h1,h2))
         | Term.VAR {tag=tag} when variable tag ->
-            Structs.bind h2 (makesubst h2 t1 a2)
+            Term.bind h2 (makesubst h2 t1 a2)
         | Term.VAR {tag=t} ->
             failwith "logic variable on the left"
         | _ -> assert false
@@ -679,7 +679,7 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
             if constant v.tag then
               raise (ConstClash (h1,h2))
             else if variable v.tag then
-              Structs.bind h2 (makesubst h2 t1 a2)
+              Term.bind h2 (makesubst h2 t1 a2)
             else
               failwith "logic variable on the left"
         | _ -> assert false
@@ -693,7 +693,7 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
             if constant v.tag then
               raise (ConstClash (h1,h2))
             else if variable v.tag then
-              Structs.bind h2 (makesubst h2 t1 a2)
+              Term.bind h2 (makesubst h2 t1 a2)
             else
               failwith "logic variable on the left"
         | _ -> assert false
@@ -724,8 +724,8 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
   * lambdas or applications at the top level. Any necessary adjustment
   * of binders through the eta rule is done on the fly. *)
 and unify t1 t2 = match Term.observe t1,Term.observe t2 with
-  | Term.VAR {tag=t},_ when variable t -> Structs.bind t1 (makesubst t1 t2 [] )
-  | _,Term.VAR {tag=t} when variable t -> Structs.bind t2 (makesubst t2 t1 [])
+  | Term.VAR {tag=t},_ when variable t -> Term.bind t1 (makesubst t1 t2 [] )
+  | _,Term.VAR {tag=t} when variable t -> Term.bind t2 (makesubst t2 t1 [])
   | Term.APP (h1,a1),_                 -> unify_app_term h1 a1 t1 t2
   | _,Term.APP (h2,a2)                 -> unify_app_term h2 a2 t2 t1
   | Term.VAR {tag=t},_ when constant t -> unify_const_term t1 t2

@@ -1,23 +1,6 @@
 open Term 
 open Prints
-open Structs
-open Constraints
-
-type sequent = EMPSEQ 
-  | SEQ of (string, terms list) Hashtbl.t * (terms list) * phase 
-  | SEQM of (string, int) Hashtbl.t * (terms list) * phase  
-;;
-
-let isEqual s1 s2 = match s1, s2 with
-  | SEQ(ht1, tl1, ph1), SEQ(ht2, tl2, ph2) -> ht1 = ht2 && tl1 = tl2 && ph1 = ph2 
-  | SEQM(ht1, tl1, ph1), SEQM(ht2, tl2, ph2) -> ht1 = ht2 && tl1 = tl2 && ph1 = ph2 
-  | EMPSEQ, EMPSEQ -> true
-  | _, _ -> false
-
-let is_open seq = match seq with
-  | SEQ(_, [], _)
-  | SEQM(_, [], _) -> true
-  | _ -> false
+open Sequent
 
 let counter = ref 0 ;;
 
@@ -26,7 +9,7 @@ module ProofTree =
 
     (* Declare mutable so I can modify directly on the object *)
     type prooftree = {
-      mutable conclusion : sequent;
+      mutable conclusion : Sequent.sequent;
       mutable premisses : prooftree list;
       mutable closed : bool;
     }
@@ -42,6 +25,7 @@ module ProofTree =
     let getConclusion pt = pt.conclusion
 
     let setPremisses pt p = pt.premisses <- p
+    let getPremisses pt = pt.premisses
 
     let addPremisse pt p = let newc = create p in
       pt.premisses <- newc :: pt.premisses
@@ -71,18 +55,22 @@ module ProofTree =
         | _ -> getLeaves el @ acc
       ) pt.premisses []
 
-
+(*
     let rec getOpenLeaves pt = List.fold_right (fun el acc -> 
       match el.premisses with
         | [] -> if is_open el.conclusion then el :: acc else acc
         | _ -> getOpenLeaves el @ acc
       ) pt.premisses []
+*)
+
 (*
     let rec getOpenLeaves pt = List.fold_right (fun el acc ->
       if not el.closed then el :: acc
       else getOpenLeaves el @ acc
       ) pt.premisses []
 *)
+
+(* FIXME this was a very bad hack done for the permutation algorithm... try to fix it.
     let rec mask m pt = 
       let concm = m.conclusion in
       let concpt = pt.conclusion in
@@ -98,8 +86,10 @@ module ProofTree =
         setPremisses pt (filteredPrem pt.premisses)
       end
       else failwith "[ERROR] Masking trees with different root."
+*)
 
     (* G: Not printing the context. *)
+    (* TODO create a printing function on sequent module and fix all FIXME
     let printSequent sq num = match sq with
       | SEQM(k, [], _) ->
       (*| SEQ(k, [], _) ->*)
@@ -125,7 +115,7 @@ module ProofTree =
       | hd :: tl -> printSequent (getConclusion hd) n; printLeavesAux tl (n+1)
 
     let printLeaves pt = printLeavesAux (getLeaves pt) 0
-
+  
     (* Printing XML file (not implemented for macro rules) *)
     let rec printTreeChildren children out = match children with
       | [] -> ()
@@ -286,7 +276,7 @@ module ProofTree =
 
       | EMPSEQ -> ()
     ;;  
-
+*)
  end
 ;;
 
