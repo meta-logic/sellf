@@ -344,7 +344,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
               (* Get out context of second branch and propagate it to the conclusion *)
               match (ProofTree.getPremisses proof) with
                 | p1::p2::[] -> 
-                  let p = ProofTree.getConclusion p2 in
+                  let p = ProofTree.getConclusion p1 in
                   Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut p);
                   suc ()
                 | _ -> failwith "Tensor rule has wrong number of premisses."

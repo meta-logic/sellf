@@ -128,9 +128,13 @@ module Context =
   let merge ctx1 ctx2 = 
     let newctx = Hashtbl.copy ctx1.hash in
     Hashtbl.iter (fun idx forms ->
-      try match Hashtbl.find newctx idx with
-        | f -> Hashtbl.replace newctx idx (forms @ f)
-      with Not_found -> failwith "Trying to merge two contexts with different subexponentials"
+      match type_of idx with
+        | LIN | AFF -> (
+          try match Hashtbl.find newctx idx with
+            | f -> Hashtbl.replace newctx idx (forms @ f)
+          with Not_found -> failwith "Trying to merge two contexts with different subexponentials"
+          )
+        | UNB | REL -> ()
     ) ctx2.hash;
     create newctx
 
@@ -142,7 +146,7 @@ module Context =
     (pairs key data) @ acc
     ) ctx.hash []
 
-  let toString ctx = "CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "<"^k^">"^(termsListToString d)^"\n"^acc) ctx.hash "")
+  let toString ctx = "CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "<"^k^"> "^(termsListToString d)^"\n"^acc) ctx.hash "")
 
   end
 ;;
