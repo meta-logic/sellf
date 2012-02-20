@@ -17,6 +17,13 @@ let (subexOrdTbl : (string, string) Hashtbl.t ) = Hashtbl.create 100 ;;
 
 let addType s t = Hashtbl.add subexTpTbl s t ;;
 
+let initialize () = 
+  Hashtbl.clear subexTpTbl;
+  addType "$gamma" LIN;
+  addType "$infty" UNB;
+  Hashtbl.clear subexOrdTbl 
+;;
+
 (* Returns the type of a subexponential *)
 let type_of s = try 
   Hashtbl.find subexTpTbl s

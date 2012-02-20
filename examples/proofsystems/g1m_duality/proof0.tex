@@ -1,0 +1,53 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{proof}
+
+\usepackage[landscape]{geometry}
+
+\begin{document}
+{\tiny
+$$
+\infer{\mathcal{K} : \Gamma \Uparrow  !^{l} \neg lft (a)  \otimes  !^{l} \neg lft (b)  \bindnasrepma  ?^{l}  !^{r} \neg rght (a)  \bindnasrepma  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  !^{l} \neg lft (a)  \otimes  !^{l} \neg lft (b)  \bindnasrepma  ?^{l}  !^{r} \neg rght (a)  \bindnasrepma  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  !^{l} \neg lft (a)  \otimes  !^{l} \neg lft (b)  ::  ?^{l}  !^{r} \neg rght (a)  \bindnasrepma  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{l}  !^{r} \neg rght (a)  \bindnasrepma  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{l}  !^{r} \neg rght (a)  ::  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{l}  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{l} \neg lft (a)  \otimes  !^{l} \neg lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{l} \neg lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow \neg lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{l}  ?^{r} rght (b)  \otimes  ?^{l} lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Downarrow  ?^{l} lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{l} lft (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow \neg lft (b)  :: }
+{}}}} & \infer{\mathcal{K} : \Gamma \Downarrow  !^{l}  ?^{r} rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{r} rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{r} \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow \neg rght (b)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow \neg rght (b)  :: }
+{}}}}}}}}}}} & \infer{\mathcal{K} : \Gamma \Downarrow  !^{l} \neg lft (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow \neg lft (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{l}  ?^{r} rght (a)  \otimes  ?^{l} lft (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Downarrow  ?^{l} lft (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{l} lft (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow \neg lft (a)  :: }
+{}}}} & \infer{\mathcal{K} : \Gamma \Downarrow  !^{l}  ?^{r} rght (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow  ?^{r} rght (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow  !^{r} \neg rght (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow \neg rght (a)  :: }
+{\infer{\mathcal{K} : \Gamma \Uparrow }
+{\infer{\mathcal{K} : \Gamma \Downarrow \neg rght (a)  :: }
+{}}}}}}}}}}}}}}}}}}}$$
+}
+\end{document}

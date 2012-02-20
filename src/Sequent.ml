@@ -55,7 +55,7 @@ module Sequent =
   let setCtxIn seq ic = seq.ctxin <- ic
   let getCtxIn seq = seq.ctxin
 
-  let setCtxOut seq oc = print_string ("Setting ctx out: "^(Context.toString oc)); seq.ctxout <- oc
+  let setCtxOut seq oc = seq.ctxout <- oc
   let getCtxOut seq = seq.ctxout
 
   let addGoal seq f = seq.goals <- f::seq.goals

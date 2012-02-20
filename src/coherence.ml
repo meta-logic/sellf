@@ -74,13 +74,14 @@ let checkDuality str (t1, t2) =
   print_endline (termToString nt1);
   print_endline (termToString nt2);
   (* TODO: find free variables and quantify them universally *)
-  prove (PARR(nt1, nt2)) 4 (fun () -> ()
+  prove (PARR(nt1, nt2)) 4 (fun () ->
           (* TODO: find a way to print the proof
           print_string ("Connective "^str^" has dual specification.\n");
           let file = open_out ((!dirName)^"_"^str^"_duality.tex") in
           ProofTree.printTexProof Boundedproofsearch.proof file;
           close_out file;
           *)
+          print_string ("Connective "^str^" has dual specification.\n"); ()
         )  
         (fun () ->
           coherent := false;

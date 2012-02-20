@@ -50,10 +50,8 @@ module Context =
   let initialize () =
     (* \Gamma context (linear): stores the formulas that have no exponential *)
     initSubexp "$gamma";
-    addType "$gamma" (LIN);
     (* \infty context (classical): stores specifications *)
-    initSubexp "$infty";
-    addType "$infty" (UNB)
+    initSubexp "$infty"
 
   (* All methods that operate on the contextshould return a new context with the proper modifications *)
 
@@ -102,11 +100,10 @@ module Context =
       match idx with
         (* These will always go to the out context  *)
         | "$gamma" | "$infty" -> ()
-        | s when s = subexp -> ()
         | s -> match type_of s with
           (* Linear formulas that were in the input should not be available here. *)
           | LIN | AFF ->
-            if (greater_than idx s) then Hashtbl.replace newctx s []
+            if (greater_than idx s) || (s = subexp) then Hashtbl.replace newctx s []
           (* Classical formulas are always available *)
           | UNB | REL -> ()
     ) ctx.hash;
@@ -146,7 +143,7 @@ module Context =
     (pairs key data) @ acc
     ) ctx.hash []
 
-  let toString ctx = "CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "<"^k^"> "^(termsListToString d)^"\n"^acc) ctx.hash "")
+  let toString ctx = "CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "["^k^"] "^(termsListToString d)^"\n"^acc) ctx.hash "")
 
   end
 ;;

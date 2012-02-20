@@ -63,12 +63,6 @@ let rec prove formula h suc fail =
   prove_sync root h (fun () ->
     let sq = ProofTree.getConclusion root in
     let ctxout = Sequent.getCtxOut sq in
-    print_string (Context.toString ctxout);
-      let file = open_out ("proofsTex/proof"^(string_of_int !file_number)^".tex") in
-      Printf.fprintf file "%s" (texFileHeader ());
-      Printf.fprintf file "%s" (ProofTree.toTexString root);
-      Printf.fprintf file "%s" (texFileFooter ());
-      close_out file;
     if (Context.isLinearEmpty ctxout) then begin
       let file = open_out ("proofsTex/proof"^(string_of_int !file_number)^".tex") in
       Printf.fprintf file "%s" (texFileHeader ());
@@ -119,14 +113,14 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
           print_endline (termToString (WITH(f1, f2)));
           print_endline (Context.toString ctxin);
         end;
-        let sq = Sequent.create ctxin ctxout (f2::goals) ASYN in
-        prove_asyn (ProofTree.update proof sq) h (
+        let sq2 = Sequent.create ctxin ctxout (f2::goals) ASYN in
+        prove_asyn (ProofTree.update proof sq2) h (fun () ->
           match ProofTree.getPremisses proof with
             | p1::p2::[] -> 
               let ctxout1 = Sequent.getCtxOut (ProofTree.getConclusion p1) in
               let ctxout2 = Sequent.getCtxOut (ProofTree.getConclusion p2) in
-              if (Context.equals ctxout1 ctxout2) then suc
-              else fail
+              if (Context.equals ctxout1 ctxout2) then suc ()
+              else fail ()
             | _ -> failwith "With rule with wrong number of premisses."
           ) fail ()) fail
     end

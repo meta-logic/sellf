@@ -24,6 +24,7 @@ let fileName = ref "" ;;
 let rec start () =
     Term.initialize ();
     Context.initialize ();
+    Subexponentials.initialize ();
     (*Structs.initialize ();
     Coherence.initialize ();
     Structs.rules := [];*)

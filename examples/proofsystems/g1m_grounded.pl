@@ -9,17 +9,19 @@
 subexp l lin.
 subexp r lin.
 
+subexprel r <= l.
+
 % Implication
-%lft (imp a b) := ([l]bang ([r]? (rght a))) ,; ([l]? (lft b)).
-%rght (imp a b) := ([l]bang (([l]? (lft a)) | ([r]? (rght b)))).
+lft (imp a b) := ([l]bang ([r]? (rght a))) , ([l]? (lft b)).
+rght (imp a b) := ([l]bang (([l]? (lft a)) | ([r]? (rght b)))).
 
 % Conjunction
 lft (and a b) := ([l]? (lft a)) | ([l]? (lft b)).
 rght (and a b) := ([l]bang ([r]? (rght a))) , ([l]bang ([r]? (rght b))).
 
 % Disjunction
-%lft (or a b) := ([l]? (lft a)) & ([l]? (lft b)).
-%rght (or a b) := ([l]bang ([r]? (rght a))) ; ([l]bang ([r]? (rght b))).
+lft (or a b) := ([l]? (lft a)) & ([l]? (lft b)).
+rght (or a b) := ([l]bang ([r]? (rght a))) ; ([l]bang ([r]? (rght b))).
 
 % Forall
 %lft (forall a) := [l]? (lft (a X)).
