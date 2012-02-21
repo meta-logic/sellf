@@ -1,0 +1,158 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage{proof}
+
+\title{SELLF with resource management}
+\author{Giselle Machado Reis}
+
+\begin{document}
+\maketitle
+
+This is the SELLF system adapted with input and output contexts, following the
+same ideas of ``Efficient Resource Management for Linear Logic Proof Search'',
+by Cervesato, Hodas and Pfenning. This is the system that is currently
+implemented.
+
+\begin{figure}[t]
+$$
+\infer[\text{[$\binampersand$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I
+/ \Gamma^O \Uparrow L, F \binampersand G}{\vdash \mathcal{K}^I / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Uparrow L, F & \vdash \mathcal{K}^I / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Uparrow L, G}
+\qquad
+\infer[\text{[$\bindnasrepma$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I
+/ \Gamma^O \Uparrow L, F \bindnasrepma G}{\vdash \mathcal{K}^I / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Uparrow L, F, G}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$\top$]}]{\vdash \mathcal{K} \otimes \mathcal{K}^O / \mathcal{K}^O:
+\Gamma, \Gamma^O / \Gamma^O \Uparrow L, \top}{}
+\qquad
+\infer[\text{[$\bot$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow L, \bot}{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow L}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$\forall$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow L, \forall x.F}{\vdash \mathcal{K}^I / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Uparrow L, F\{c/x\}}
+\qquad 
+\infer[\text{[$?^l$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow L, ?^l F}{\vdash \mathcal{K}^I +_l F / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Uparrow L}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$\oplus_i$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Downarrow F_1 \oplus F_2}{\vdash \mathcal{K}^I / \mathcal{K}^O :
+\Gamma^I / \Gamma^O \Downarrow F_i}
+\qquad
+\infer[\text{[$\otimes$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Downarrow F \otimes G}{\vdash \mathcal{K}^I / \mathcal{K}' : \Gamma^I
+/ \Gamma' \Downarrow F & \vdash \mathcal{K}' / \mathcal{K}^O : \Gamma' /
+\Gamma^O \Downarrow G}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[1]}]{\vdash \mathcal{K}^I / \mathcal{K}^I : \Gamma^I / \Gamma^I
+\Downarrow 1}{}
+\qquad
+\infer[\text{[$\exists$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Downarrow \exists x.F}{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I
+/ \Gamma^O \Downarrow F\{t/x\}}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$!^l$]}]{\vdash \mathcal{K}^I / \mathcal{K}^I >_l, \mathcal{K}^O :
+\Gamma^I / \Gamma^I \Downarrow !^l F}{\vdash \mathcal{K}^I \leq_l /
+\mathcal{K}^O : \cdot \Uparrow F}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[I, given $A \in (\Gamma \cup
+\mathcal{K}^I)$]}]{\vdash \mathcal{K}^I / \mathcal{K}^I - \{A\} : \Gamma^I /
+\Gamma^I - \{A\} \Downarrow A^\bot}{}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$D_l$]}]{\vdash
+\mathcal{K}^I / \mathcal{K}^O: \Gamma^I / \Gamma^O \Uparrow \cdot}{\vdash
+\mathcal{K}^I - \{P\} / \mathcal{K}^O : \Gamma^I / \Gamma^O \Downarrow P}
+$$
+\vspace{-2.5mm}
+$$
+\infer[\text{[$D_1$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I, P /
+\Gamma^O \Uparrow \cdot}{\vdash \mathcal{K}^I / \mathcal{K}^O  : \Gamma^I /
+\Gamma^O \Downarrow P}
+\qquad
+\infer[\text{[$R\Downarrow$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Downarrow N}{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow N}
+\qquad
+\infer[\text{[$R\Uparrow$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I /
+\Gamma^O \Uparrow L, S}{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I, S /
+\Gamma^O \Uparrow L}
+$$
+\caption{Focused linear logic system with subexponentials with signature
+$\langle I, \preceq, \mathcal{W}, \mathcal{C} \rangle$. We assume that: $\mathcal{C} \subseteq
+\mathcal{W}$, $\mathcal{K}$ is an indexed context, $L$ is a list of formulas, $\Gamma$ is a multi-set of
+formulas and positive literals, $A^\bot$ is a positive polarity literal,
+$P$ is a non-negative literal, $S$ is a positive literal or formula and $N$
+is a negative formula.}
+\label{figure:sellf}
+\vspace{-5mm}
+\end{figure}
+
+\begin{figure}[t]
+% \vspace{-4mm}
+\[
+\begin{array}{l@{\qquad}l}
+\bullet~(\mathcal{K}_1 \otimes \mathcal{K}_2) [i] = \left\{
+\begin{array}{ll}
+ \mathcal{K}_1[i] \cup \mathcal{K}_2[i] & \hbox{ if }
+i \notin \mathcal{C}\\
+ \mathcal{K}_1[i]  & \hbox{ if } i \in \mathcal{C} \cap \mathcal{W}
+\end{array}
+\right.
+& 
+\bullet~\mathcal{K}[\mathcal{S}] =
+\bigcup\{\mathcal{K}[i]\;|\;i\in \mathcal{S}\}\\[15pt]
+\bullet~(\mathcal{K} +_l F) [i] = \left\{
+\begin{array}{ll}
+ \mathcal{K}[i] \cup \{F\} & \hbox{ if } i = l\\
+ \mathcal{K}[i]  & \hbox{ otherwise }
+\end{array}
+\right.
+&
+\bullet~ \mathcal{K} \leq_i[l] = \left\{
+\begin{array}{ll}
+ \mathcal{K}[l] & \hbox{ if } i \preceq l\\
+ \emptyset & \hbox{ if } i \npreceq l 
+\end{array}
+\right.
+\end{array}
+\]
+\[
+\bullet~ (\mathcal{K}_1 \star \mathcal{K}_2)\mid_\mathcal{S}
+\textrm{ is true if and only if }(\mathcal{K}_1[j]
+\star \mathcal{K}_2[j]) \textrm{ for all $j \in \mathcal{S}$.}
+\]
+\caption{Specification of operations on contexts. Here, 
+$i \in I$, $\mathcal{S} \subseteq I$, and the 
+binary connective $\star \in \{=, \subset, \subseteq\}$.}
+\label{Fig:Contexts}
+\vspace{-5mm}
+\end{figure}
+
+Axioms set the output context. This should be empty when the procedure returns
+to the initial sequent. In-contexts are set bottom up and out-contexts are set
+top down (when returned from the recursive call).
+Explain initial rule, top, one and bang and tensor.
+
+\end{document}
