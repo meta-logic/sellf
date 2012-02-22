@@ -1,12 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for LJ                %
+%                                           %
+% Giselle Machado Reis - 2011               %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% THIS IS NOT CORRECT NOR COMPLETE
+
 subexp l unb. % holds formulas of the left-hand side of the sequent
 subexp r lin. % holds formulas of the right-hand side of the sequent
 
-%% Specification of Intuitionistic Logic
+% Implication
+lft (imp A B) := ([l]bang ([r]? (rght mA))) , ([l]? (lft B)).
+rght (imp A B) := ([l]? (lft A)) | ([r]? (rght B)).
 
-rght (iand a b) :: ([r]? (rght a)) & ([r]? (rght b)).
-lft (iand c d) :: ([l]? (lft c)) | ([l]? (lft d)).
-rght (ior f g) :: ([r]? (rght f)) ; ([r]? (rght g)).
-lft (ior h i) :: ([l]? (lft h)) & ([l]? (lft i)).
-rght (iimp j k) :: ([l]? (lft j)) | ([r]? (rght k)).
-lft (iimp m n) :: ([l]bang ([r]? (rght m))) , ([l]? (lft n)).
+% Conjunction
+lft (and A B) := ([l]? (lft A)) ; ([l]? (lft B)).
+rght (and A B) := ([r]? (rght A)) & ([r]? (rght B)).
+
+% Disjunction
+lft (or A B) := ([l]? (lft A)) & ([l]? (lft B)).
+rght (or A B) := ([r]? (rght A)) ; ([r]? (rght B)).
+
 

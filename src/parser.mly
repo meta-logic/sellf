@@ -168,7 +168,7 @@ clause:
     | SOME (_) -> failwith ("Subexponential name previously declared: "^$2)
 }
 /*VN: Creates a new odering among subexponential names.*/
-| SUBEXPREL NAME LEQ NAME DOT { 
+| SUBEXPREL NAME LESS NAME DOT { 
   match (notInTbl subexTpTbl $2), (notInTbl subexTpTbl $4) with
     | SOME(_),SOME(_) -> 
       if check_val_subexp $2 $4 then

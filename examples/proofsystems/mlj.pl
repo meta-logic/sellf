@@ -1,35 +1,39 @@
-%subexp spec unb.
-%subexp init unb.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for mLJ               %
+%                                           %
+% Giselle Machado Reis - 2012               %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 subexp l unb.
 subexp r unb.
 
-%subexprel l <= init.
-%subexprel r <= init.
+% Implication
+lft (imp A B) := ([r]? (rght A)) , ([l]? (lft B)).
+rght (imp A B) := [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
 
-%context init.
+% Conjunction
+lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
+rght (and A B) := ([r]? (rght A)) , ([r]? (rght B)).
 
-% Init and cut rules are not part of the specification
+% Disjunction
+lft (or A B) := ([l]? (lft A)) , ([l]? (lft B)).
+rght (or A B) := ([r]? (rght A)) | ([r]? (rght B)).
 
-%Id1
-%lft (A) , rght (A).
-%Id2
-%[l]? lft (A) , [r]? rght (A).
+% Forall
+lft (forall A) := [l]? (lft (A X)).
+rght (forall A) := [l]bang (pi \X ([r]? (rght (A X)))).
 
-%context spec.
+% Exists
+lft (exists A) := pi \X ([l]? (lft (A X))).
+rght (exists A) := [r]? (rght (A X)).
 
-%lft (imp A B) :: ([r]? (rght A)) & ([l]? (lft B)).
-%rght (imp A B) :: [l]bang ( ([l]? (lft A)) ; ([r]? (rght B))).
+% Bottom
+%(not (lft bottom)).
 
-lft (and A B) :: ([l]? (lft A)) | ([l]? (lft B)).
-%rght (and A B) :: ([r]? (rght A)) & ([r]? (rght B)).
+% Axiom
+(not (lft (A))) , (not (rght (A))).
 
-%lft (or A B) :: ([l]? (lft A)) , ([l]? (lft B)).
-rght (or A B) :: ([r]? (rght A)) | ([r]? (rght B)).
-
-% Think about how to define quantifiers.
-%lft (forall A) :: [l]? (pi X\ (lft (A X))).
-%rght (forall A) :: [l]bang (pi x\ ([r]? (rght A x))).
-
-%lft (exists A) :: pi x\ ([l]? (lft A x)).
-%rght (exists A) :: [r]? (rght B X).
-
+% Cut rule
+%([l]? (lft A)) , ([r]? (rght A)).

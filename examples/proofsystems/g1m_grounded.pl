@@ -9,7 +9,7 @@
 subexp l lin.
 subexp r lin.
 
-subexprel r <= l.
+subexprel r < l.
 
 % Implication
 lft (imp a b) := ([l]bang ([r]? (rght a))) , ([l]? (lft b)).

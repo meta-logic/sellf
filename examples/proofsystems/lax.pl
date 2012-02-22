@@ -1,42 +1,40 @@
-subexp defs unb.
-subexp l unb.
-subexp r unb.
-subexp rr unb.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for Lax Logic         %
+%                                           %
+% Giselle Machado Reis - 2012               %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subexprel l <= defs.
-subexprel r <= defs.
-subexprel rr <= defs.
-subexprel r <= rr.
-subexprel rr <= l.
+subexp l  unb.
+subexp r  lin.
+subexp cr lin.
 
-context defs.
+subexprel r < cr.
+subexprel cr < l.
 
-% Not possible because there's no way to put the cut rule in the context.
+% Conjunction
+lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
+rght (and A B) := ([l]bang ([r]? (rght A))) , ([l]bang ([r]? (rght B))).
 
-%lft (bottom).
+% Disjunction
+lft (or A B) := ([l]? (lft A)) & ([l]? (lft B)).
+rght (or A B) := ([l]bang ([r]? (rght A))) ; ([l]bang ([r]? (rght B))).
 
-% Init and cut rules are not part of the specification
+% Implication
+lft (imp A B) := ([r]? (rght A)) , ([l]? (lft B)).
+rght (imp A B) := [l]bang (([l]? (lft A)) | ([r]? (rght B))).
 
-%lft (A) :: rght (A).
-% I think this question mark is not allowed on the left-hand side. Returns
-% syntax error.
-%[l]? lft (A) :: [r]? rght (A).
+% Circ
+lft (circ A) := [cr]bang ([l]? (lft A)).
+rght (circ A) := [l]bang ([r]? (rght A)).
 
-%% In Elaine's specification, & is substituted with oplus (;)
+% Initial
+(not (lft A)) , (not (rght A)).
 
-lft (imp A B) :: ([r]? (rght A)) & ([l]? (lft B)).
-rght (imp A B) :: [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
+% Cut
+([l]? (lft A)) , ([l]bang ([r]? (rght A))).
 
-lft (and A B) :: ([l]? (lft A)) | ([l]? (lft B)).
-rght (and A B) :: ([r]? (rght A)) & ([r]? (rght B)).
-
-lft (or A B) :: ([l]? (lft A)) & ([l]? (lft B)).
-rght (or A B) :: ([r]? (rght A)) | ([r]? (rght B)).
-
-% Think about how to define quantifiers.
-%lft (forall A) :: [l]? (pi X\ (lft (A X))).
-%rght (forall A) :: [l]bang (pi x\ ([r]? (rght A x))).
-
-%lft (exists A) :: pi x\ ([l]? (lft A x)).
-%rght (exists A) :: [r]? (rght B X).
+% Structural rule for circ
+(not (rght (circ A))) , ([cr]? (rght (circ A))).
 
