@@ -108,6 +108,7 @@ let rec deMorgan f = match f with
       | QST(s, f1) -> BANG(s, deMorgan (NOT(f1)))
       | BANG(s, f1) -> QST(s, deMorgan (NOT(f1)))
       | LOLLI(s, f1, f2) -> TENSOR((QST(s, f2)), deMorgan (NOT(f1)))
+      | ABS(s, i, f1) -> ABS(s, i, deMorgan (NOT(f1)))
       | TOP -> ZERO
       | ZERO -> TOP
       | BOT -> ONE
@@ -200,40 +201,61 @@ let rec getBody t = match t with
 
 let rec tCheckAuxList term = TINT
 
-(* Syntatic equality XXX: not working, do not use. *)
-let rec equals t1 t2 = match (t1, t2) with
-  | (VAR{str=s1; id=i1; tag=t1}, VAR{str=s2; id=i2; tag=t2}) 
-    when s1 = s2 && i1 = i2 && t1 = t2 -> true
-  | (PRED(str1, t1, _), PRED(str2, t2, _)) -> 
-    if str1 = str2 then equals t1 t2
-    else false
-  | (NOT(t1), NOT(t2)) -> equals t1 t2
-  | (TENSOR(t11, t12), TENSOR(t21, t22)) -> equals t11 t12 && equals t21 t22
-  | (ADDOR(t11, t12), ADDOR(t21, t22)) -> equals t11 t12 && equals t21 t22
-  | (PARR(t11, t12), PARR(t21, t22)) -> equals t11 t12 && equals t21 t22
-  | (WITH(t11, t12), WITH(t21, t22)) -> equals t11 t12 && equals t21 t22
-  | (BANG(s1, t1), BANG(s2, t2)) -> equals s1 s2 && equals t1 t2
-  | (HBANG(s1, t1), HBANG(s2, t2)) -> equals s1 s2 && equals t1 t2
-  | (QST(s1, t1), QST(s2, t2)) -> equals s1 s2 && equals t1 t2
-  | (LOLLI(s1, t11, t12), LOLLI(s2, t21, t22)) -> 
-    equals s1 s2 && equals t11 t12 && equals t21 t22
-  (* TODO forall exists*)
-  | (INT(i1), INT(i2)) -> i1 = i2
-  | (CONS(s1), CONS(s2)) -> s1 = s2
-  | (STRING(s1), STRING(s2)) -> s1 = s2
-  | (_, _) -> false
-(* G: Not sure if I need a case for these... *)
+(* Quantifies universally all variables of a term *)
+let quantUni t =
+  (* Collects a list with the name of all logical variables *)
+  let rec collectLogVars form = match form with
+    | VAR{str=s; id=i; tag=LOG} -> [s]
+    | VAR{str=s; id=i; tag=EIG}
+    | VAR{str=s; id=i; tag=CONST} -> []
+    | ABS(s, i, t) -> collectLogVars t
+    (* What should I do with pointers? *)
+    | PRED(_, t, _) -> collectLogVars t 
+    | NOT(t) -> collectLogVars t
+    | TENSOR(t1, t2)
+    | ADDOR(t1, t2)
+    | PARR(t1, t2)
+    | WITH(t1, t2) -> collectLogVars t1 @ collectLogVars t2
+    | BANG(s, t)
+    | HBANG(s, t)
+    | QST(s, t) -> collectLogVars t
+    | LOLLI(s, t1, t2) -> collectLogVars t1 @ collectLogVars t2 
+    | APP(t, tl) -> collectLogVars t @ (List.fold_right (fun e acc -> (collectLogVars e) @ acc) tl [])
+    | INT(i) -> []
+    | CONS(s) -> []
+    | STRING(s) -> []
+    | _ -> failwith "Collect logical variables of failed."
+ in
+ let names = collectLogVars t in
+ let nm = List.fold_right (fun el newlst -> if List.mem el newlst then newlst else el::newlst) names [] in
+ List.fold_right (fun n f -> FORALL(n, 0, f)) nm t
+
+(* Syntatic equality *)
+(* NOTE: does equality of abstractions, forall and exist make sense? *)
+let equals t1 t2 = false
 (*
-| APP of terms * terms list
-| ABS of string * int * terms
-| PLUS  of terms * terms
-| MINUS of terms * terms
-| TIMES of terms * terms 
-| DIV of terms * terms
-| SUSP of terms * int * int * env
-| PTR  of ptr
-| NEW of string * terms
-| BRACKET of terms
+let rec equals t1 t2 = match t1, t2 with
+  | PTR {contents = V v1}, PTR {contents = V v2} -> v1 == v2
+  | PTR {contents = T t}, _ -> equals t t2
+  | _, PTR {contents = T t} -> equals t2 t
+  | VAR{str=s1; id=i1; tag=t1}, VAR{str=s2; id=i2; tag=t2} 
+    when s1 = s2 && i1 = i2 && t1 = t2 -> true
+  | PRED(str1, t1, _), PRED(str2, t2, _) when str1 = str2 -> equals t1 t2 
+  | NOT(t1), NOT(t2) -> equals t1 t2
+  | TENSOR(t11, t12), TENSOR(t21, t22)
+  | ADDOR(t11, t12), ADDOR(t21, t22) 
+  | PARR(t11, t12), PARR(t21, t22) 
+  | WITH(t11, t12), WITH(t21, t22) -> equals t11 t12 && equals t21 t22
+  | BANG(s1, t1), BANG(s2, t2) -> equals s1 s2 && equals t1 t2
+  | HBANG(s1, t1), HBANG(s2, t2) -> equals s1 s2 && equals t1 t2
+  | QST(s1, t1), QST(s2, t2) -> equals s1 s2 && equals t1 t2
+  | LOLLI(s1, t11, t12), LOLLI(s2, t21, t22) -> 
+    equals s1 s2 && equals t11 t12 && equals t21 t22
+  | APP(t1, tl1), APP(t2, tl2) -> equals t1 t2 && List.fold_right2 (fun e1 e2 acc ->  (equals e1 e2) && acc) tl1 tl2 true
+  | INT(i1), INT(i2) -> i1 = i2
+  | CONS(s1), CONS(s2) -> s1 = s2
+  | STRING(s1), STRING(s2) -> s1 = s2
+  | _, _ -> false
 *)
 
 (******************* POINTERS ******************)
@@ -252,6 +274,8 @@ let rec deref t = match t with
   | t -> t
 ;;
 
+(* NOTE: this will not bind a variable with the same variable (only pointers are boundable) 
+  and it fails for two equal variables. *)
 let bind v t = 
   let dv = match deref v with
     | PTR t ->  t (* t is supposed to be a variable here *)
@@ -385,20 +409,19 @@ let rec deref = function
   | PTR {contents=T t} -> deref t
   | t -> t
 
+(* FIXME not working properly because of abstraction names *)
 let lambda n t =
   assert (n>=0) ;
   if n=0 then t else
     let rec aux n t =
-      match t with
+      match deref t with
         | ABS (_,n',t') -> aux (n+n') t'
         | _ -> ABS ("*",n,t)
     in
-      aux n t
+    aux n t
 
 
 let susp t ol nl e = SUSP (t,ol,nl,e)
-
-(*let rec app a b = list2term a b*)
 
 let app a b = if b = [] then a else match observe a with
   | APP(a,c) -> APP (a,c @ b)

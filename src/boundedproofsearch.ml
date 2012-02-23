@@ -27,7 +27,38 @@ let unify =
 ;;
 
 (* Function to substitute a variable in a formula *)
-(* TODO: decide a better place for this *)
+(* TODO: decide a better place for this and check if it's working *)
+let apply_ptr f = 
+  let level = ref 0 in
+  let rec db2ptr form lvl s = match form with
+    | DB i when i = lvl ->
+      varid := !varid + 1;
+      let newVar = V {str=s ; id = !varid; tag = Term.LOG; ts = 0; lts = 0} in
+      PTR {contents = newVar}
+    | PRED(s, t, p) -> PRED(s, db2ptr t, p)
+    | NOT(t) -> NOT(db2ptr t)
+    | COMP(ct, t1, t2) -> COMP(ct, db2ptr t1, db2ptr t2)
+    | TENSOR(t1, t2) -> TENSOR(db2ptr t1, db2ptr t2)
+    | ADDOR(t1, t2) -> ADDOR(db2ptr t1, db2ptr t2)
+    | PARR(t1, t2) -> PARR(db2ptr t1, db2ptr t2)
+    | WITH(t1, t2) -> WITH(db2ptr t1, db2ptr t2)
+    | LOLLI(sub, t1, t2) -> LOLLI(sub, db2ptr t1, db2ptr t2)
+    | BANG(sub t) -> BANG(sub, db2ptr t)
+    | HBANG(sub, t) -> HBANG(sub, db2ptr t)
+    | QST(sub, t) -> QST(sub, db2ptr t)
+    | FORALL(st, i, t) -> FORALL(st, i, db2ptr t)
+    | EXISTS(st, i, t) -> EXISTS(st, i, db2ptr t)
+    | APP(t, tlst) -> APP(db2ptr t, List.map db2ptr tlst)
+    | ABS(st, i, t) -> ABS(st, i, db2ptr t)
+    | x -> x
+  in
+  let rec aux form = match form with
+    | ABS(s, i, t) -> level := !level + 1;
+      aux db2ptr t level s
+    | _ -> form (* Not an abstraction anymore *)
+  in aux f
+
+(*
 let rec apply_ptr f = match f with
   | ABS(s, i, t) ->
       varid := !varid + 1;
@@ -37,6 +68,7 @@ let rec apply_ptr f = match f with
       apply_ptr newf
   | x -> x
 ;;
+*)
 
 let initProof formula =
   let ctx = Context.getInitial () in
@@ -87,7 +119,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
   (* Asynchronous phase *)
 
-  | (ctxin, ctxout, f::goals, ASYN) -> begin match Term.observe f with
+  | (ctxin, ctxout, f::goals, ASYN) -> begin match Term.observe (apply_ptr f) with
 
     | LOLLI (sub, f1, f2) -> 
       if !verbose then begin
@@ -263,7 +295,7 @@ let conc = ProofTree.getConclusion proof in
 match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Sequent.getPhase conc) with
   | (_, _, [], SYNC) -> failwith "Empty list of goals in synchronous phase."
 
-  | (ctxin, ctxout, [goal], _) -> begin match Term.observe goal with
+  | (ctxin, ctxout, [goal], _) -> begin match Term.observe (apply_ptr goal) with
 
     (* R arrow down rule *)
     (* If a negative formula was found, go back to async phase *)     
@@ -453,7 +485,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let pairs = Context.toPairs ctxin in
-      initial (PRED(str, terms, p)) pairs proof suc fail
+      initial (NOT(PRED(str, terms, p))) pairs proof suc fail
     | NOT(PRED (str, terms, p)) ->
       if !verbose then begin
         print_endline "-- Initial:"; 
@@ -521,6 +553,7 @@ and decide h ctx proof suc fail =
               print_endline "Failed, deciding again...";
               print_endline "Available options: ";
               List.iter (fun (s, f) -> print_string ((termToString f)^" :: ")) tl;
+              print_newline ()
             end;
             ProofTree.setPremisses proof [];
             decide h tl proof suc fail ())
@@ -530,26 +563,48 @@ and decide h ctx proof suc fail =
 and initial f ctx proof suc fail = match ctx with
   | [] -> fail (* No unifiable formulas that work *)
   | (s, f1) :: tl -> match (f, f1) with
-  (* FIXME it might be possible to try and unify the terms right away. *)
     | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
-      try match unify t t1 with
-        | () ->
+    (* FIXME do I really need this equality? *)
+      match equals t t1 with
+        | true ->
           let conc = ProofTree.getConclusion proof in
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
           suc
-        with _ -> initial f tl proof suc fail
+        | false -> begin
+          try match unify t t1 with
+            | () ->
+              let conc = ProofTree.getConclusion proof in
+              let ctxin = Sequent.getCtxIn conc in
+              let newctx = Context.remove ctxin f1 s in
+              Sequent.setCtxOut conc newctx;
+              suc
+            with _ ->
+              print_string "Did not unify: ";
+              print_string (termToString t); print_string " and "; 
+              print_endline (termToString t1);
+              initial f tl proof suc fail
+        end
       end
     |(NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
-      try match unify t t1 with
-        | () -> 
+      match equals t t1 with
+        | true ->
           let conc = ProofTree.getConclusion proof in
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
           suc
-        with _ -> initial f tl proof suc fail 
+        | false -> begin
+          try match unify t t1 with
+            | () -> 
+              let conc = ProofTree.getConclusion proof in
+              let ctxin = Sequent.getCtxIn conc in
+              let newctx = Context.remove ctxin f1 s in
+              Sequent.setCtxOut conc newctx;
+              suc
+            with _ -> initial f tl proof suc fail
+        end
       end
     | _, _ -> initial f tl proof suc fail
 

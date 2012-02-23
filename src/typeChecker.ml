@@ -43,7 +43,9 @@ let rec deBruijn_aux flag fVarC nABS body =
   | LOLLI (sub, body1, body2) -> LOLLI (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
   | BANG (sub, body1) -> BANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | HBANG (sub, body1) -> HBANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
+  | QST (sub, body1) -> QST (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | WITH (body1, body2) -> WITH (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
+  | PARR (body1, body2) -> PARR (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
   | BRACKET (body1) -> BRACKET (deBruijn_aux flag fVarC nABS body1)
   | FORALL (str, _, body1) -> 
      let fVarCNew x = 
@@ -125,7 +127,7 @@ modes according to flag. When flag is true then in the clause returned the varia
 by an abstraction are replaced by DBs. When flag is false, these variables are not replaced. 
 One should use flag = false when one wants to typecheck a term and use flag=true, when 
 one wants a term that normalizes. *)
-let deBruijn flag clause = 
+let deBruijn flag clause =
   let rec add_abstractions freeVar clause = 
    begin 
     match freeVar with

@@ -20,11 +20,15 @@ open Prints
 (* Indicates if this is the specification of a sequent calculus system *)
 let seqcalc = ref true ;;
 
+let coherent = ref true ;;
+
 (* The specifications of each connective are stored in a hash 
  * The key is the name of the predicate representing the connective *)
 let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 100) ;;
 
-let initialize () = Hashtbl.clear !lr_hash ;;
+let initialize () = 
+  coherent := true;
+  Hashtbl.clear !lr_hash ;;
 
 (* Operation for the case that there is more than one specification for one side *)
 let addLSpec str t = try match Hashtbl.find !lr_hash str with
@@ -48,12 +52,17 @@ let getFirstArgName p = match p with
   | _ -> failwith "Function is not an application."
 
 let addSpec t = 
-  let rec getTerms f = match f with 
-    | TENSOR(NOT(prd), spc) -> (prd, spc)
-    | ABS(s, i, t) -> getTerms t
+  let rec getPred f = match f with 
+    | TENSOR(NOT(prd), spc) -> prd
+    | ABS(s, i, t) -> getPred t
     | _ -> failwith "Not expected formula in specification."
   in
-  let (p, s) = getTerms t in
+  let rec getSpec f = match f with
+    | TENSOR(NOT(prd), spc) -> spc
+    | ABS(s, i, t) -> ABS(s, i, getSpec t)
+    | _ -> failwith "Not expected formula in specification."
+  in
+  let (p, s) = getPred t, getSpec t in
   match p with
     | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
     | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
@@ -61,8 +70,12 @@ let addSpec t =
 
 (* Procedure to actually check the coherence of a system *)
 
-let coherent = ref true ;;
 let dirName = ref "" ;;
+
+let rec parr f1 f2 = match f1, f2 with
+  | ABS(s1, i1, f1), ABS(s2, i2, f2) when s1 = s2 -> ABS(s1, i1, (parr f1 f2))
+  | ABS(s1, i1, f1), ABS(s2, i2, f2) -> ABS(s1, i1, ABS(s2, i2, (parr f1 f2)))
+  | a, b -> PARR(a, b)
 
 let checkDuality str (t1, t2) = 
   print_endline "Trying to prove duality of:";
@@ -74,13 +87,9 @@ let checkDuality str (t1, t2) =
   print_endline (termToString nt1);
   print_endline (termToString nt2);
   (* TODO: find free variables and quantify them universally *)
+  let f = parr nt1 nt2 in
+  print_endline ("After transformation: "^(termToString f));
   prove (PARR(nt1, nt2)) 4 (fun () ->
-          (* TODO: find a way to print the proof
-          print_string ("Connective "^str^" has dual specification.\n");
-          let file = open_out ((!dirName)^"_"^str^"_duality.tex") in
-          ProofTree.printTexProof Boundedproofsearch.proof file;
-          close_out file;
-          *)
           print_string ("Connective "^str^" has dual specification.\n"); ()
         )  
         (fun () ->

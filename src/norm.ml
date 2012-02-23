@@ -30,10 +30,14 @@ let rec add_dummies env n m =
     remaining lambda abstractions and arguments. (There can not be both
     abstractions and arguments left over). *)
 let make_env n args =
-  let rec aux n args e =
+  let rec aux n args e = match n, args with
+    | 0, _ | _, [] -> e, n, args
+    | _, hd::tl -> aux (n-1) tl (Term.Binding(hd, 0)::e)
+  (*
     if n = 0 || args = []
     then (e, n, args)
     else aux (n-1) (List.tl args) (Term.Binding(List.hd args, 0)::e)
+  *)
   in aux n args []
         
 (** Head normalization function.*)
@@ -80,7 +84,8 @@ let rec hnorm term =
                   then hnorm (Term.susp (Term.lambda n' t) ol 0 e)
                   else hnorm (Term.app (Term.susp t ol 0 e) args')
             (*| _ -> Term.app t args*)
-            | _ -> Term.app t (List.map hnorm args) (*VN: Replaced this code from the orginal one in Bedwyr. It seems to make more sense.*)
+            (*| _ -> Term.app t (List.map hnorm args)*) (*VN: Replaced this code from the orginal one in Bedwyr. It seems to make more sense.*)
+            | _ -> Term.app t args
           end
     | Term.SUSP(t,ol,nl,e) ->
         let t = hnorm t in
@@ -126,7 +131,7 @@ let rec hnorm term =
             | Term.WITH (t1,t2) -> Term.WITH(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.ADDOR (t1,t2) -> Term.ADDOR(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.PARR (t1,t2) -> Term.PARR(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
-	        | Term.BRACKET (f) -> Term.BRACKET(hnorm (Term.susp f ol nl e))
+	          | Term.BRACKET (f) -> Term.BRACKET(hnorm (Term.susp f ol nl e))
             | Term.NOT (f) -> Term.NOT(hnorm (Term.susp f ol nl e))
             | Term.CLS(typ,t1,t2) -> Term.CLS(typ,hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.PLUS (t1,t2) -> Term.PLUS(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
