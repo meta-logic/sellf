@@ -72,9 +72,10 @@ let addSpec t =
 
 let dirName = ref "" ;;
 
+(* TODO: really not sure if I can join the abstractions like this *)
 let rec parr f1 f2 = match f1, f2 with
-  | ABS(s1, i1, f1), ABS(s2, i2, f2) when s1 = s2 -> ABS(s1, i1, (parr f1 f2))
-  | ABS(s1, i1, f1), ABS(s2, i2, f2) -> ABS(s1, i1, ABS(s2, i2, (parr f1 f2)))
+  | ABS(s1, i1, f1), ABS(s2, i2, f2) when s1 = s2 -> FORALL(s1, i1, (parr f1 f2))
+  | ABS(s1, i1, f1), ABS(s2, i2, f2) -> FORALL(s1, i1, FORALL(s2, i2, (parr f1 f2)))
   | a, b -> PARR(a, b)
 
 let checkDuality str (t1, t2) = 
@@ -89,7 +90,7 @@ let checkDuality str (t1, t2) =
   (* TODO: find free variables and quantify them universally *)
   let f = parr nt1 nt2 in
   print_endline ("After transformation: "^(termToString f));
-  prove (PARR(nt1, nt2)) 4 (fun () ->
+  prove f 4 (fun () ->
           print_string ("Connective "^str^" has dual specification.\n"); ()
         )  
         (fun () ->

@@ -395,7 +395,8 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       varid := !varid + 1;
       let new_var = VAR ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
-      let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
+      let ptr = PTR {contents = V new_var} in
+      let newf = Norm.hnorm (APP (ABS (s, 1, f), [ptr])) in
       let sq = Sequent.create ctxin ctxout [newf] SYNC in
       prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
     

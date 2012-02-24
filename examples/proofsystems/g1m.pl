@@ -35,7 +35,7 @@ rght (and A B) := ([l]bang ([r]? (rght A))) , ([l]bang ([r]? (rght B))).
 %(not (lft A)) , (not (rght A)).
 
 % Cut rule
-([l]bang ([r]? (rght A))) , ([l]? (lft A)).
+sigma \A ([l]bang ([r]? (rght A))) , ([l]? (lft A)).
 
 % Contraction left
 %not (lft A) , ([l]? (lft A)) | ([l]? (lft A)).
