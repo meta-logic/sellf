@@ -28,33 +28,36 @@ let unify =
 
 (* Function to substitute a variable in a formula *)
 (* TODO: decide a better place for this and check if it's working *)
-let apply_ptr f = 
+let db2ptr f = 
   let level = ref 0 in
-  let rec db2ptr form lvl s = match form with
+  let rec db2ptr lvl s form = match form with
     | DB i when i = lvl ->
+      (* TODO: not sure why this varid is here... *)
       varid := !varid + 1;
       let newVar = V {str=s ; id = !varid; tag = Term.LOG; ts = 0; lts = 0} in
       PTR {contents = newVar}
-    | PRED(s, t, p) -> PRED(s, db2ptr t, p)
-    | NOT(t) -> NOT(db2ptr t)
-    | COMP(ct, t1, t2) -> COMP(ct, db2ptr t1, db2ptr t2)
-    | TENSOR(t1, t2) -> TENSOR(db2ptr t1, db2ptr t2)
-    | ADDOR(t1, t2) -> ADDOR(db2ptr t1, db2ptr t2)
-    | PARR(t1, t2) -> PARR(db2ptr t1, db2ptr t2)
-    | WITH(t1, t2) -> WITH(db2ptr t1, db2ptr t2)
-    | LOLLI(sub, t1, t2) -> LOLLI(sub, db2ptr t1, db2ptr t2)
-    | BANG(sub t) -> BANG(sub, db2ptr t)
-    | HBANG(sub, t) -> HBANG(sub, db2ptr t)
-    | QST(sub, t) -> QST(sub, db2ptr t)
-    | FORALL(st, i, t) -> FORALL(st, i, db2ptr t)
-    | EXISTS(st, i, t) -> EXISTS(st, i, db2ptr t)
-    | APP(t, tlst) -> APP(db2ptr t, List.map db2ptr tlst)
-    | ABS(st, i, t) -> ABS(st, i, db2ptr t)
+    | PRED(st, t, p) -> PRED(st, db2ptr lvl s t, p)
+    | NOT(t) -> NOT(db2ptr lvl s t)
+    | COMP(ct, t1, t2) -> COMP(ct, db2ptr lvl s t1, db2ptr lvl s t2)
+    | TENSOR(t1, t2) -> TENSOR(db2ptr lvl s t1, db2ptr lvl s t2)
+    | ADDOR(t1, t2) -> ADDOR(db2ptr lvl s t1, db2ptr lvl s t2)
+    | PARR(t1, t2) -> PARR(db2ptr lvl s t1, db2ptr lvl s t2)
+    | WITH(t1, t2) -> WITH(db2ptr lvl s t1, db2ptr lvl s t2)
+    | LOLLI(sub, t1, t2) -> LOLLI(sub, db2ptr lvl s t1, db2ptr lvl s t2)
+    | BANG(sub, t) -> BANG(sub, db2ptr lvl s t)
+    | HBANG(sub, t) -> HBANG(sub, db2ptr lvl s t)
+    | QST(sub, t) -> QST(sub, db2ptr lvl s t)
+    | FORALL(st, i, t) -> FORALL(st, i, db2ptr lvl s t)
+    | EXISTS(st, i, t) -> EXISTS(st, i, db2ptr lvl s t)
+    | APP(t, tlst) -> APP(db2ptr lvl s t, List.map (db2ptr lvl s) tlst)
+    | ABS(st, i, t) -> ABS(st, i, db2ptr lvl s t)
     | x -> x
   in
   let rec aux form = match form with
     | ABS(s, i, t) -> level := !level + 1;
-      aux db2ptr t level s
+    (* TODO: once the abstraction index is set correctly, we can use this
+    instead of this level variable. *)
+      aux (db2ptr !level s t)
     | _ -> form (* Not an abstraction anymore *)
   in aux f
 
@@ -119,7 +122,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
   (* Asynchronous phase *)
 
-  | (ctxin, ctxout, f::goals, ASYN) -> begin match Term.observe (apply_ptr f) with
+  | (ctxin, ctxout, f::goals, ASYN) -> let f = Term.observe f in begin match f with
 
     | LOLLI (sub, f1, f2) -> 
       if !verbose then begin
@@ -284,7 +287,12 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
  	     | _ -> failwith "Error on the normalisation of an application."
         )
       end
- 
+
+    | ABS(s, i, t) -> 
+      let newf = db2ptr f in
+      let sq = Sequent.create ctxin ctxout (newf::goals) ASYN in
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+
     | f -> print_endline (termToString f); failwith " Solving not implemented for this case."
  
   end
@@ -295,7 +303,7 @@ let conc = ProofTree.getConclusion proof in
 match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Sequent.getPhase conc) with
   | (_, _, [], SYNC) -> failwith "Empty list of goals in synchronous phase."
 
-  | (ctxin, ctxout, [goal], _) -> begin match Term.observe (apply_ptr goal) with
+  | (ctxin, ctxout, [goal], _) -> let goal = Term.observe goal in begin match goal with
 
     (* R arrow down rule *)
     (* If a negative formula was found, go back to async phase *)     
@@ -516,6 +524,11 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         | _ -> failwith "Error while normalizing lambda term."
       end
     
+    | ABS(s, i, t) -> 
+      let newf = db2ptr goal in
+      let sq = Sequent.create ctxin ctxout [newf] SYNC in
+      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+    
     | f -> print_string (termToString f); failwith " Solving not implemented for this case."
  
   end
@@ -538,7 +551,7 @@ and decide h ctx proof suc fail =
         let ctxin = Sequent.getCtxIn conc in
         let ctxout = Sequent.getCtxOut conc in
         let newctxin = Context.remove ctxin form s in
-        let goals = (Term.observe (apply_ptr form))::[] in
+        let goals = (Term.observe form)::[] in
         if !verbose then begin
           print_endline "-- Decide:";
           print_int h; print_newline();
