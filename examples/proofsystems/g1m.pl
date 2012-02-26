@@ -18,6 +18,8 @@ subexprel r < l.
 % Conjunction
 lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
 rght (and A B) := ([l]bang ([r]? (rght A))) , ([l]bang ([r]? (rght B))).
+%lft (and A B) := (lft A).
+%rght (and A B) := (rght B).
 
 % Disjunction
 %lft (or A B) := ([l]? (lft A)) & ([l]? (lft B)).

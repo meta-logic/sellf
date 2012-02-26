@@ -323,7 +323,9 @@ body DOT {
   let clause_typecheck = deBruijn false raw_clause in
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
-  let clause_goal = Boundedproofsearch.db2ptr clause in
+  (* TODO: I might need to transform the abstractions of a goal into existential
+  quentifiers *)
+  
   (* TODO store this somewhere *)
  (* add_goals clause_goal;*)
   if !verbose then begin

@@ -59,6 +59,13 @@ let rec deBruijn_aux flag fVarC nABS body =
        | x -> fVarC x)*)
   			(*in FORALL(str, idOld, deBruijn_aux flag fVarCNew nABS body1)*)
      in FORALL (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) body1)
+  | EXISTS (str, _, body1) -> 
+     let fVarCNew x = 
+     begin match x with
+       | x when x = str ->  (1, 0, 1)
+       | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
+     end
+     in EXISTS (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) body1)
   | NEW (str, body1) -> 
      let fVarCNew x = 
      begin match x with
@@ -403,6 +410,7 @@ let rec typeCheck clause =
       | WITH (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in
           tCheckBody body2 env2
       | FORALL (_, _, body1) -> tCheckBody body1 env
+      | EXISTS (_, _, body1) -> tCheckBody body1 env
       | NEW (_, t) -> tCheckBody t env 
       (*VN: The following two cases are for when variables are of type o.*) 
       | VAR v ->  tCheckBody (PRED("", VAR v, NEG)) env

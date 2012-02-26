@@ -250,35 +250,6 @@ let last_fail () = match Stack.top !states with
 ;;
 *)
 
-(******************* POINTERS ******************)
-(*
- * Functions related to pointers
- *)
-
-let bind_stack = Stack.create () ;;
-let bind_len = ref 0 ;;
-
-type subst = (ptr*in_ptr) list
-type unsubst = subst
-
-let rec deref t = match t with
-  | PTR {contents = T t1} -> deref t1
-  | t -> t
-;;
-
-let bind v t = 
-  let dv = match deref v with
-    | PTR t ->  t (* t is supposed to be a variable here *)
-    | _ -> assert false (* [v] should represent a variable *)
-  in
-  let dt = deref t in (* r is a variable equal to dv (binding X to X makes no sense) *)
-    if match dt with PTR r when r == dv -> false | _ -> true then begin
-      Stack.push (dv,!dv) bind_stack ;
-      dv := T dt ;
-      incr bind_len 
-    end
-;;
-
 (************************ EXTRAS **********************)
 
 let initialize () = 

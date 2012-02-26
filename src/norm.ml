@@ -84,8 +84,7 @@ let rec hnorm term =
                   then hnorm (Term.susp (Term.lambda n' t) ol 0 e)
                   else hnorm (Term.app (Term.susp t ol 0 e) args')
             (*| _ -> Term.app t args*)
-            (*| _ -> Term.app t (List.map hnorm args)*) (*VN: Replaced this code from the orginal one in Bedwyr. It seems to make more sense.*)
-            | _ -> Term.app t args
+            | _ -> Term.app t (List.map hnorm args) (*VN: Replaced this code from the orginal one in Bedwyr. It seems to make more sense.*)
           end
     | Term.SUSP(t,ol,nl,e) ->
         let t = hnorm t in
@@ -103,21 +102,21 @@ let rec hnorm term =
                     | Term.Dum l -> Term.db (nl - l)
                     | Term.Binding (t,l) -> hnorm (Term.susp t 0 (nl-l) [])
                   end
-            | Term.ABS(_,n,t) ->
-                Term.lambda n (hnorm (Term.susp t (ol+n) (nl+n)
+            | Term.ABS(_,n,t1) ->
+                Term.lambda n (hnorm (Term.susp t1 (ol+n) (nl+n)
                                        (add_dummies e n nl)))
-            | Term.FORALL(str,n,t) ->
-                Term.FORALL (str, n, hnorm (Term.susp t (ol+1) (nl+1)
+            | Term.FORALL(str,n,t1) ->
+                Term.FORALL (str, n, hnorm (Term.susp t1 (ol+1) (nl+1)
                                        (add_dummies e 1 nl)))
-            | Term.EXISTS(str,n,t) ->
-                Term.EXISTS (str, n, hnorm (Term.susp t (ol+1) (nl+1)
+            | Term.EXISTS(str,n,t1) ->
+                Term.EXISTS (str, n, hnorm (Term.susp t1 (ol+1) (nl+1)
                                        (add_dummies e 1 nl)))
-            | Term.NEW(str,t) ->
-                Term.NEW (str, hnorm (Term.susp t (ol+1) (nl+1)
+            | Term.NEW(str,t1) ->
+                Term.NEW (str, hnorm (Term.susp t1 (ol+1) (nl+1)
                                        (add_dummies e 1 nl)))
-            | Term.APP(t,args) ->
+            | Term.APP(t1,args) ->
                 let wrap x = Term.susp x ol nl e in
-                  hnorm (Term.app (wrap t) (List.map wrap args))
+                  hnorm (Term.app (wrap t1) (List.map wrap args))
             | Term.PRED (str, t1, p) -> Term.PRED(str, hnorm (Term.susp t1 ol nl e), p)
             | Term.COMP (cmp, t1,t2) -> Term.COMP(cmp, hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.ASGN (t1,t2) -> Term.ASGN(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
@@ -138,8 +137,8 @@ let rec hnorm term =
             | Term.MINUS (t1,t2) ->  Term.MINUS(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.TIMES (t1,t2) ->  Term.TIMES(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
             | Term.DIV (t1,t2) ->  Term.DIV(hnorm (Term.susp t1 ol nl e), hnorm (Term.susp t2 ol nl e))
-            | Term.SUSP _ -> hnorm (Term.susp (hnorm t) ol nl e)
-            | Term.PTR _ -> assert false
+            (*| Term.SUSP _ -> hnorm (Term.susp (hnorm t) ol nl e)*)
+            | Term.PTR _ | Term.SUSP _ -> assert false
           end
 
     | Term.PTR _-> print_string (Prints.termToString term); assert false

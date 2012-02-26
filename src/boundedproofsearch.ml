@@ -26,8 +26,20 @@ let unify =
   in Unify.pattern_unify
 ;;
 
+(*G: Really unhappy with this solution *)
+let existsInitialFail = ref false;;
+let initialFail = ref (fun () -> ());;
+
+let getFail proof fail = match !existsInitialFail with
+  | true -> (fun () ->  
+    ProofTree.setPremisses proof [(List.hd (ProofTree.getPremisses proof))]; 
+    !initialFail () )
+  | false -> fail
+;;
+
 (* Function to substitute a variable in a formula *)
 (* TODO: decide a better place for this and check if it's working *)
+(*
 let db2ptr f = 
   let level = ref 0 in
   let rec db2ptr lvl s form = match form with
@@ -55,12 +67,10 @@ let db2ptr f =
   in
   let rec aux form = match form with
     | ABS(s, i, t) -> level := !level + 1;
-    (* TODO: once the abstraction index is set correctly, we can use this
-    instead of this level variable. *)
       aux (db2ptr !level s t)
     | _ -> form (* Not an abstraction anymore *)
   in aux f
-
+*)
 (*
 let rec apply_ptr f = match f with
   | ABS(s, i, t) ->
@@ -155,9 +165,11 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
               let ctxout1 = Sequent.getCtxOut (ProofTree.getConclusion p1) in
               let ctxout2 = Sequent.getCtxOut (ProofTree.getConclusion p2) in
               if (Context.equals ctxout1 ctxout2) then suc ()
-              else fail ()
+              (*else fail ()*)
+              else (getFail proof fail) ()
             | _ -> failwith "With rule with wrong number of premisses."
-          ) fail ()) fail
+          ) (*fail ()*) (getFail proof fail) ()
+        ) fail
     end
  
     | PARR (f1, f2) -> 
@@ -288,10 +300,12 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         )
       end
 
+    (*
     | ABS(s, i, t) -> 
       let newf = db2ptr f in
       let sq = Sequent.create ctxin ctxout (newf::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+    *)
 
     | f -> print_endline (termToString f); failwith " Solving not implemented for this case."
  
@@ -365,7 +379,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       let sq = Sequent.create ctxin ctxout [f1] SYNC in
       prove_sync (ProofTree.update proof sq) h (fun () -> 
         if !verbose then begin
-          print_endline "-- Tensor 2st:"; 
+          print_endline "-- Tensor 2nd:"; 
           print_endline (termToString (Term.observe goal));
           print_endline (Context.toString ctxin);
         end;
@@ -382,7 +396,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
                   Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut p);
                   suc ()
                 | _ -> failwith "Tensor rule has wrong number of premisses."
-              ) fail ()
+              ) (*fail ()*) (getFail proof fail) ()
           | _ -> failwith "Tensor rule has wrong number of premisses."
         ) 
         fail
@@ -394,8 +408,8 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       varid := !varid + 1;
-      let new_var = VAR ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
-      let ptr = PTR {contents = V new_var} in
+      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      let ptr = PTR {contents = new_var} in
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [ptr])) in
       let sq = Sequent.create ctxin ctxout [newf] SYNC in
       prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
@@ -525,11 +539,13 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         | _ -> failwith "Error while normalizing lambda term."
       end
     
+    (*
     | ABS(s, i, t) -> 
       let newf = db2ptr goal in
       let sq = Sequent.create ctxin ctxout [newf] SYNC in
       prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
-    
+    *)
+
     | f -> print_string (termToString f); failwith " Solving not implemented for this case."
  
   end
@@ -576,50 +592,51 @@ and decide h ctx proof suc fail =
 (* Check if there is a unifiable atom in the ctx in. Remove this atom. Set this as the ctx out. *)
 and initial f ctx proof suc fail = match ctx with
   | [] -> fail (* No unifiable formulas that work *)
-  | (s, f1) :: tl -> match (f, f1) with
+  | (s, f1) :: tl -> 
+  print_endline ("Trying initial rule with "^(termToString f)^" and "^(termToString f1));
+  match (f, f1) with
     | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
-    (* FIXME do I really need this equality? *)
-      match equals t t1 with
-        | true ->
+      let bl = save_state () in
+      try match unify t t1 with
+        | () ->
           let conc = ProofTree.getConclusion proof in
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
+
+          existsInitialFail := true;
+          initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
+
           suc
-        | false -> begin
-          try match unify t t1 with
-            | () ->
-              let conc = ProofTree.getConclusion proof in
-              let ctxin = Sequent.getCtxIn conc in
-              let newctx = Context.remove ctxin f1 s in
-              Sequent.setCtxOut conc newctx;
-              suc
-            with _ ->
-              print_string "Did not unify: ";
-              print_string (termToString t); print_string " and "; 
-              print_endline (termToString t1);
-              initial f tl proof suc fail
+          (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
+          prove_sync (ProofTree.update proof dummy) h suc (fun () ->
+            ProofTree.setPremisses proof [];
+            initial h f tl proof suc fail ())*)
+        with _ ->
+          print_string "Did not unify: ";
+          print_string (termToString t); print_string " and "; 
+          print_endline (termToString t1);
+          initial f tl proof suc fail
         end
-      end
     |(NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
-      match equals t t1 with
-        | true ->
+      let bl = save_state () in
+      try match unify t t1 with
+        | () -> 
           let conc = ProofTree.getConclusion proof in
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
+
+          existsInitialFail := true;
+          initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
+
           suc
-        | false -> begin
-          try match unify t t1 with
-            | () -> 
-              let conc = ProofTree.getConclusion proof in
-              let ctxin = Sequent.getCtxIn conc in
-              let newctx = Context.remove ctxin f1 s in
-              Sequent.setCtxOut conc newctx;
-              suc
-            with _ -> initial f tl proof suc fail
+          (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
+          prove_sync (ProofTree.update proof dummy) h suc (fun () ->
+            ProofTree.setPremisses proof [];
+            initial h f tl proof suc fail ())*)
+        with _ -> initial f tl proof suc fail
         end
-      end
     | _, _ -> initial f tl proof suc fail
 
 ;;

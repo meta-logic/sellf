@@ -201,38 +201,14 @@ let rec getBody t = match t with
 
 let rec tCheckAuxList term = TINT
 
-(* Quantifies universally all variables of a term *)
-let quantUni t =
-  (* Collects a list with the name of all logical variables *)
-  let rec collectLogVars form = match form with
-    | VAR{str=s; id=i; tag=LOG} -> [s]
-    | VAR{str=s; id=i; tag=EIG}
-    | VAR{str=s; id=i; tag=CONST} -> []
-    | ABS(s, i, t) -> collectLogVars t
-    (* What should I do with pointers? *)
-    | PRED(_, t, _) -> collectLogVars t 
-    | NOT(t) -> collectLogVars t
-    | TENSOR(t1, t2)
-    | ADDOR(t1, t2)
-    | PARR(t1, t2)
-    | WITH(t1, t2) -> collectLogVars t1 @ collectLogVars t2
-    | BANG(s, t)
-    | HBANG(s, t)
-    | QST(s, t) -> collectLogVars t
-    | LOLLI(s, t1, t2) -> collectLogVars t1 @ collectLogVars t2 
-    | APP(t, tl) -> collectLogVars t @ (List.fold_right (fun e acc -> (collectLogVars e) @ acc) tl [])
-    | INT(i) -> []
-    | CONS(s) -> []
-    | STRING(s) -> []
-    | _ -> failwith "Collect logical variables of failed."
- in
- let names = collectLogVars t in
- let nm = List.fold_right (fun el newlst -> if List.mem el newlst then newlst else el::newlst) names [] in
- List.fold_right (fun n f -> FORALL(n, 0, f)) nm t
+let rec deref t = match t with
+  | PTR {contents = T t1} -> deref t1
+  | t -> t
+;;
+
 
 (* Syntatic equality *)
 (* NOTE: does equality of abstractions, forall and exist make sense? *)
-let equals t1 t2 = false
 (*
 let rec equals t1 t2 = match t1, t2 with
   | PTR {contents = V v1}, PTR {contents = V v2} -> v1 == v2
@@ -258,36 +234,42 @@ let rec equals t1 t2 = match t1, t2 with
   | _, _ -> false
 *)
 
-(******************* POINTERS ******************)
-(*
- * Functions related to pointers
- *)
+(* Binding variables *)
 
-let bind_stack = Stack.create () ;;
-let bind_len = ref 0 ;;
+(* Binding a variable to a term. The *contents* of the cell representing the
+ * variable is a reference which must be updated. Also the variable must
+ * not be made a reference to itself. This can be changed to mimic the
+ * Prolog representation of bound variables but then deref will have to
+ * work differently. This is the place to introduce trailing. *)
+
+type state = int
+let bind_stack = Stack.create ()
+let bind_len = ref 0
+
+let save_state () = !bind_len
+
+let restore_state n =
+  assert (n <= !bind_len) ;
+  for i = 1 to !bind_len-n do
+    let (v,contents) = Stack.pop bind_stack in
+    v := contents
+  done ;
+  bind_len := n
 
 type subst = (ptr*in_ptr) list
 type unsubst = subst
 
-let rec deref t = match t with
-  | PTR {contents = T t1} -> deref t1
-  | t -> t
-;;
-
-(* NOTE: this will not bind a variable with the same variable (only pointers are boundable) 
-  and it fails for two equal variables. *)
-let bind v t = 
+let bind v t =
   let dv = match deref v with
-    | PTR t ->  t (* t is supposed to be a variable here *)
+    | PTR t -> t
     | _ -> assert false (* [v] should represent a variable *)
   in
-  let dt = deref t in (* r is a variable equal to dv (binding X to X makes no sense) *)
-    if match dt with PTR r when r == dv -> false | _ -> true then begin
-      Stack.push (dv,!dv) bind_stack ;
-      dv := T dt ;
-      incr bind_len 
-    end
-;;
+  let dt = deref t in
+  if match dt with PTR r when r==dv -> false | _ -> true then begin
+    Stack.push (dv,!dv) bind_stack ;
+    dv := T dt ;
+    incr bind_len
+  end
 
 (* TODO organize this and put in another file *)
 (****************** Signature ***********************)
@@ -409,7 +391,6 @@ let rec deref = function
   | PTR {contents=T t} -> deref t
   | t -> t
 
-(* FIXME not working properly because of abstraction names *)
 let lambda n t =
   assert (n>=0) ;
   if n=0 then t else
