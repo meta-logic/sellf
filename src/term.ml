@@ -369,6 +369,8 @@ let rec eq t1 t2 =
           (fun test t1 t2 -> test && eq t1 t2)
           true (h1::l1) (h2::l2)
     | ABS (_,n,t1), ABS (_,m,t2) -> n = m && eq t1 t2
+    (*| VAR _, _ | _, VAR _ -> assert false*)
+    | VAR {tag=EIG; id=i1}, VAR {tag=EIG; id=i2} when i1 = i2 -> true
     | VAR _, _ | _, VAR _ -> assert false
     | SUSP (t,ol,nl,e), SUSP (tt,oll,nll,ee) ->
         ol = oll && nl = nll && eq t tt &&

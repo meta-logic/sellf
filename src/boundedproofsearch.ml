@@ -85,6 +85,8 @@ let rec apply_ptr f = match f with
 ;;
 *)
 
+let failStack : (unit -> unit) Stack.t = Stack.create () ;;
+
 let initProof formula =
   let ctx = Context.getInitial () in
   let empctx = Context.createEmpty () in
@@ -99,6 +101,17 @@ let copyCtxOutFromPremisseUn proof = match (ProofTree.getPremisses proof) with
   | _ -> failwith "Error: found unary rule with more than one or no premisse."
 ;;
 
+(*
+let apply_sync_suc suc = match suc () with
+  | (proof, h, suc1, fail) -> prove_sync proof h suc fail
+  | _ -> failwith "Error while recovering continuation."
+
+let apply_asyn_suc suc = match suc () with
+  | (proof, h, suc1, fail) -> prove_asyn proof h suc fail
+  | _ -> failwith "Error while recovering continuation."
+*)
+
+
 let file_number = ref 0 ;;
 
 (* Proves a LL formula *)
@@ -107,6 +120,7 @@ let file_number = ref 0 ;;
 
 let rec prove formula h suc fail = 
   let root = initProof formula in
+  Stack.push fail failStack;
   prove_sync root h (fun () ->
     let sq = ProofTree.getConclusion root in
     let ctxout = Sequent.getCtxOut sq in
@@ -119,18 +133,19 @@ let rec prove formula h suc fail =
       file_number := !file_number + 1;
       suc ()
     end
-    else fail ()
+    (*else fail ()*)
+    else (Stack.pop failStack) ()
   )
-  fail
+  (*fail*)
 
-and prove_asyn proof h suc fail =
+and prove_asyn proof h suc (*fail*) =
 let conc = ProofTree.getConclusion proof in
 match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Sequent.getPhase conc) with
 
   (* Decide *)
   | (inctx, _, [], ASYN) ->
     let ctx = Context.toPairs inctx in
-    decide h ctx proof (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+    decide h ctx proof (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
 
   (* Asynchronous phase *)
 
@@ -144,7 +159,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       let newctx = Context.add ctxin (deMorgan (NOT(f2))) (extract_str sub) in
       let sq = Sequent.create newctx ctxout (f1::goals) ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
     (* Solves f1 and f2 with the same context *)
     | WITH (f1, f2) -> begin
@@ -167,11 +182,11 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
               let ctxout1 = Sequent.getCtxOut (ProofTree.getConclusion p1) in
               let ctxout2 = Sequent.getCtxOut (ProofTree.getConclusion p2) in
               if (Context.equals ctxout1 ctxout2) then suc ()
-              else fail ()
-              (*else (getFail proof fail) ()*)
+              (*else fail ()*)
+              else (Stack.pop failStack) ()
             | _ -> failwith "With rule with wrong number of premisses."
-          ) fail () (*(getFail proof fail) ()*)
-        ) fail
+          ) (*fail ()*)
+        ) (*fail*)
     end
  
     | PARR (f1, f2) -> 
@@ -181,7 +196,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let sq = Sequent.create ctxin ctxout (f1::f2::goals) ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
     | QST (s, f) -> begin
       if !verbose then begin
@@ -193,7 +208,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         | CONS(sub) ->
           let newctx = Context.add ctxin f sub in
           let sq = Sequent.create newctx ctxout goals ASYN in
-          prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+          prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
         | _ -> failwith "Not an exponential in question mark."
       end
  
@@ -207,7 +222,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
       let sq = Sequent.create ctxin ctxout (newf::goals) ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
    
     | TOP -> 
       if !verbose then begin
@@ -219,7 +234,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       (* let newctx = mark_erasable ctxin *)
       Sequent.setCtxOut (ProofTree.getConclusion proof) ctxin;
       ProofTree.close proof;
-      suc
+      suc ()
  
     | BOT -> 
       if !verbose then begin
@@ -228,7 +243,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let sq = Sequent.create ctxin ctxout goals ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
 
 (*
     | NEW (s, t1) -> 
@@ -268,14 +283,14 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       let newctx = Context.add ctxin f "$gamma" in
       let sq = Sequent.create newctx ctxout goals ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
     (* Negated formulas *)
     (* Apply deMorgan and try to prove them. *)
     | NOT(f) ->
       let negf = deMorgan (NOT(f)) in
       let sq = Sequent.create ctxin ctxout (negf::goals) ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
     (* Things we are not yet solving *)
     (*
@@ -292,12 +307,12 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
             let p = (PRED (str, CONS(str), NEG)) in
             let newctx = Context.add ctxin p "$gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
-            prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+            prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
           | APP(CONS(str3), arg2) ->
             let p = (PRED(str3, APP(CONS(str3), arg2), NEG)) in
             let newctx = Context.add ctxin p "$gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
-            prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+            prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  	     | _ -> failwith "Error on the normalisation of an application."
         )
       end
@@ -314,7 +329,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
   end
   | _ -> failwith "Invalid sequent on asynschronous phase."
 
-and prove_sync proof h suc fail = 
+and prove_sync proof h suc (*fail*) = 
 let conc = ProofTree.getConclusion proof in
 match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Sequent.getPhase conc) with
   | (_, _, [], SYNC) -> failwith "Empty list of goals in synchronous phase."
@@ -333,7 +348,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       match Term.observe sub with
         | CONS(s) -> 
           let sq = Sequent.create ctxin ctxout [goal] ASYN in
-          prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+          prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
         | _ -> failwith "Unitialized subexponential while solving lolli."
       end
     | WITH (_, _)
@@ -349,7 +364,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let sq = Sequent.create ctxin ctxout [goal] ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
     (* Synchronous phase *)
  
@@ -361,7 +376,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       (* Updates the proof tree for one in which the conclusion is f1 *)
       let sq = Sequent.create ctxin ctxout [f1] SYNC in
-      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (fun () -> 
+      Stack.push (fun () -> (
         if !verbose then begin
           print_endline "-- O plus 2st:"; 
           print_endline (termToString (Term.observe goal));
@@ -369,7 +384,17 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         end; 
         ProofTree.setPremisses proof [];
         let sq = Sequent.create ctxin ctxout [f2] ASYN in
-        prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail ())
+        prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) ) ) failStack;
+
+      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*(fun () -> 
+        if !verbose then begin
+          print_endline "-- O plus 2st:"; 
+          print_endline (termToString (Term.observe goal));
+          print_endline (Context.toString ctxin);
+        end; 
+        ProofTree.setPremisses proof [];
+        let sq = Sequent.create ctxin ctxout [f2] ASYN in
+        prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail ())*)
     end
  
     | TENSOR (f1, f2) ->
@@ -398,10 +423,10 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
                   Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut p);
                   suc ()
                 | _ -> failwith "Tensor rule has wrong number of premisses."
-              ) fail () (*(getFail proof fail) ()*)
+              ) (*fail ()*)
           | _ -> failwith "Tensor rule has wrong number of premisses."
         ) 
-        fail
+        (*fail*)
  
     | EXISTS (s, i, f) ->
       if !verbose then begin
@@ -414,7 +439,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       let ptr = PTR {contents = new_var} in
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [ptr])) in
       let sq = Sequent.create ctxin ctxout [newf] SYNC in
-      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
     
     | BANG (sub, f) -> 
       begin
@@ -438,7 +463,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
                 Sequent.setCtxOut conclusion newctxout;
                 suc ()
               | _ -> failwith "Bang rule with none or more than one premisses."
-          ) fail
+          ) (*fail*)
         | _ -> failwith "Not expected subexponential while solving positive formulas."
       end
 
@@ -479,7 +504,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       Sequent.setCtxOut (ProofTree.getConclusion proof) ctxin;
       ProofTree.close proof;
-      suc
+      suc ()
 
 (* TODO: the proof should be closed when these are successful
     | COMP (ct, t1, t2) -> 
@@ -499,7 +524,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
     | PRINT (t1) -> print_endline ""; print_string (termToString t1); print_endline "";
       let sq = Sequent.create ctxin ctxout [] SYNC in
-      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+      prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
  
  
     (* Initial rules *)
@@ -510,7 +535,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let pairs = Context.toPairs ctxin in
-      initial (NOT(PRED(str, terms, p))) pairs proof suc fail
+      initial (NOT(PRED(str, terms, p))) pairs proof suc (*fail*)
     | NOT(PRED (str, terms, p)) ->
       if !verbose then begin
         print_endline "-- Initial:"; 
@@ -518,7 +543,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       let pairs = Context.toPairs ctxin in
-      initial (PRED(str, terms, p)) pairs proof suc fail
+      initial (PRED(str, terms, p)) pairs proof suc (*fail*)
  
     (* Things we are not solving *)
     (*
@@ -533,11 +558,11 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         | CONS(str) -> 
           let p = (PRED (str, CONS(str), NEG)) in
           let sq = Sequent.create ctxin ctxout [p] SYNC in
-          prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+          prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
         | APP(CONS(str3), arg2) -> 
           let p = (PRED (str3, APP(CONS(str3), arg2), NEG)) in 
           let sq = Sequent.create ctxin ctxout [p] SYNC in
-          prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
+          prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) (*fail*)
         | _ -> failwith "Error while normalizing lambda term."
       end
     
@@ -556,15 +581,16 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
   | _ -> failwith "Invalid sequent in synchronous phase."
 
 (* ctx is the context in the form of a list of pairs. *)
-and decide h ctx proof suc fail = 
+and decide h ctx proof suc (*fail*) = 
   if (h <= 0) then begin
     if !verbose then print_endline "Failed because it's bounded.";
     ProofTree.setPremisses proof [];
-    fail
+    (*fail*)
+    (Stack.pop failStack) ()
   end
   else begin
     match ctx with
-      | [] -> fail (* No more formulas available to pick from the context. *)
+      | [] -> (*fail*) (Stack.pop failStack) () (* No more formulas available to pick from the context. *)
       | (s, form) :: tl ->
         let conc = ProofTree.getConclusion proof in
         let ctxin = Sequent.getCtxIn conc in
@@ -579,8 +605,18 @@ and decide h ctx proof suc fail =
         end;
         let sq = Sequent.create newctxin ctxout goals SYNC in
         let h1 = h - 1 in
+        Stack.push (fun () -> 
+          if !verbose then begin
+            print_endline "Failed, deciding again...";
+            print_endline "Available options: ";
+            List.iter (fun (s, f) -> print_string ((termToString f)^" :: ")) tl;
+            print_newline ()
+          end;
+          ProofTree.setPremisses proof [];
+          decide h tl proof suc (*fail*)) failStack;
+
         prove_sync (ProofTree.update proof sq) h1 suc
-          (fun () -> 
+          (*(fun () -> 
             if !verbose then begin
               print_endline "Failed, deciding again...";
               print_endline "Available options: ";
@@ -588,14 +624,14 @@ and decide h ctx proof suc fail =
               print_newline ()
             end;
             ProofTree.setPremisses proof [];
-            decide h tl proof suc fail ())
+            decide h tl proof suc fail ())*)
   end
 
 (* Check if there is a unifiable atom in the ctx in. Remove this atom. Set this as the ctx out. *)
-and initial f ctx proof suc fail = match ctx with
-  | [] -> fail (* No unifiable formulas that work *)
+and initial f ctx proof suc (*fail*) = match ctx with
+  | [] -> (*fail*) (Stack.pop failStack) () (* No unifiable formulas that work *)
   | (s, f1) :: tl -> 
-  print_endline ("Trying initial rule with "^(termToString f)^" and "^(termToString f1));
+  (*print_endline ("Trying initial rule with "^(termToString f)^" and "^(termToString f1));*)
   match (f, f1) with
     | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
       let bl = save_state () in
@@ -609,16 +645,22 @@ and initial f ctx proof suc fail = match ctx with
           existsInitialFail := true;
           initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
           *)
-          suc
+          Stack.push (fun () -> restore_state bl; initial f tl proof suc) failStack;
+          suc ()
+          (*
+          match suc () with 
+            | (proof, h, s, f, ASYN) -> prove_asyn proof h s (fun () -> initial f tl proof suc fail)
+            | (proof, h, s, f, SYNC) -> prove_sync proof h s (fun () -> initial f tl proof suc fail)
+          *)
           (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
           prove_sync (ProofTree.update proof dummy) h suc (fun () ->
             ProofTree.setPremisses proof [];
             initial h f tl proof suc fail ())*)
         with _ ->
-          print_string "Did not unify: ";
+          (*print_string "Did not unify: ";
           print_string (termToString t); print_string " and "; 
-          print_endline (termToString t1);
-          initial f tl proof suc fail
+          print_endline (termToString t1);*)
+          initial f tl proof suc (*fail*)
         end
     |(NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
       let bl = save_state () in
@@ -632,14 +674,24 @@ and initial f ctx proof suc fail = match ctx with
           existsInitialFail := true;
           initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
           *)
-          suc
+          Stack.push (fun () -> restore_state bl; initial f tl proof suc) failStack;
+          suc ()
+          (*
+          match suc () with 
+            | (proof, h, s, f, ASYN) -> prove_asyn proof h s (fun () -> initial f tl proof suc fail)
+            | (proof, h, s, f, SYNC) -> prove_sync proof h s (fun () -> initial f tl proof suc fail)
+          *)
           (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
           prove_sync (ProofTree.update proof dummy) h suc (fun () ->
             ProofTree.setPremisses proof [];
             initial h f tl proof suc fail ())*)
-        with _ -> initial f tl proof suc fail
+        with _ -> initial f tl proof suc (*fail*)
         end
-    | _, _ -> initial f tl proof suc fail
+    | _, _ -> initial f tl proof suc (*fail*)
 
+(*
+and callSuc suc = match suc () with
+  | (proof, h, s, f, ASYN) -> prove_asyn proof h s f
+  | (proof, h, s, f, SYNC) -> prove_sync proof h s f
+*)
 ;;
-

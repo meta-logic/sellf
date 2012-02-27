@@ -96,7 +96,7 @@ let checkDuality str (t1, t2) =
         (fun () ->
           coherent := false;
           print_string ("Connective "^str^" does not have dual specifications.\n");
-        ) ()
+        )
 
 let check sysName =
   dirName := sysName;
