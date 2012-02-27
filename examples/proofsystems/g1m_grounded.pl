@@ -11,39 +11,34 @@ subexp r lin.
 
 subexprel r < l.
 
+rules introduction.
 % Implication
-lft (imp a b) := ([l]bang ([r]? (rght a))) , ([l]? (lft b)).
-rght (imp a b) := ([l]bang (([l]? (lft a)) | ([r]? (rght b)))).
+(not (lft (imp a b))) * ([l]bang ([r]? (rght a))) * ([l]? (lft b)).
+(not (rght (imp a b))) * ([l]bang (([l]? (lft a)) | ([r]? (rght b)))).
 
 % Conjunction
-lft (and a b) := ([l]? (lft a)) | ([l]? (lft b)).
-rght (and a b) := ([l]bang ([r]? (rght a))) , ([l]bang ([r]? (rght b))).
+(not (lft (and a b))) * ([l]? (lft a)) | ([l]? (lft b)).
+(not (rght (and a b))) * ([l]bang ([r]? (rght a))) * ([l]bang ([r]? (rght b))).
 
 % Disjunction
-lft (or a b) := ([l]? (lft a)) & ([l]? (lft b)).
-rght (or a b) := ([l]bang ([r]? (rght a))) ; ([l]bang ([r]? (rght b))).
+(not (lft (or a b))) * ([l]? (lft a)) & ([l]? (lft b)).
+(not (rght (or a b))) * ([l]bang ([r]? (rght a))) + ([l]bang ([r]? (rght b))).
 
-% Forall
-%lft (forall a) := [l]? (lft (a X)).
-%rght (forall a) := [l]bang (pi \X ([r]? (rght (a X)))).
+rules axiom.
+(not (lft a)) * (not (rght a)).
+(not (lft b)) * (not (rght b)).
 
-% Exists
-%lft (exists a) := pi \X ([l]? (lft (a X))).
-%rght (exists a) := [l]bang ([r]? (rght (a X))).
+rules cut.
+([l]bang ([r]? (rght a))) * ([l]? (lft a)).
+([l]bang ([r]? (rght b))) * ([l]? (lft b)).
 
-% axiom
-%(not (lft a)) , (not (rght a)).
-%(not (lft b)) , (not (rght b)).
-
-% Cut rule
-([l]bang ([r]? (rght a))) , ([l]? (lft a)).
-([l]bang ([r]? (rght b))) , ([l]? (lft b)).
+rules structural.
 
 % Contraction left
-%(not (lft a)) , ([l]? (lft a)) | ([l]? (lft a)).
-%(not (lft b)) , ([l]? (lft b)) | ([l]? (lft b)).
+(not (lft a)) * ([l]? (lft a)) | ([l]? (lft a)).
+(not (lft b)) * ([l]? (lft b)) | ([l]? (lft b)).
 
 % Weakening left
-%(not (lft a)) , bot.
-%(not (lft b)) , bot.
+(not (lft a)) * bot.
+(not (lft b)) * bot.
 

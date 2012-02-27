@@ -1,6 +1,7 @@
 (* File lexerTypes.mll *)
 {
-open Parser        (* The type token is defined in parser.mli *)
+(*open Parser*)        (* The type token is defined in parser.mli *)
+open Parser_systems
 exception Eof
 open Lexing 
 
@@ -30,6 +31,11 @@ rule token = parse
 | "subexprel"           {SUBEXPREL}
 | "pos"                 {POS}
 | "neg"                 {NEG}
+| "rules"               {RULES}
+| "axiom"               {AXIOM}
+| "cut"                 {CUTRULE}
+| "structural"          {STRUCTURAL}
+| "introduction"        {INTRODUCTION}
 | subtype as tsub {TSUB(tsub)}
 | ':'                   { DOTS }
 | "->"                  { TARR }

@@ -32,7 +32,7 @@ let rec start () =
     let command = read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
-      let action = Parser.top Lexer_top.token lexbuf_top in 
+      let action = Parser_systems.top Lexer_top.token lexbuf_top in 
       match action with
       | "help" -> start ()
       | "verbose-on" -> print_endline "Verbose is set to on."; Term.verbose := true; start ()
@@ -48,7 +48,7 @@ let rec start () =
           begin
             try 
               while true do
-                let _ = Parser.types Lexer.token lexbuf in ();
+                let _ = Parser_systems.types Lexer.token lexbuf in ();
               done
             with 
               |  Lexer.Eof -> 
@@ -57,7 +57,7 @@ let rec start () =
                     begin
                     try
                       while true do
-                        let _ = Parser.clause Lexer.token lexbuf in ();
+                        let _ = Parser_systems.clause Lexer.token lexbuf in ();
                       done  
                     with 
                       | Lexer.Eof -> samefile := true; (*Structs.saveInitState ();*)
@@ -178,6 +178,8 @@ solve_query () =
       print_endline "The following should be empty: ";
       List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
       end
+
+    | "#cutprincipal" -> () (* TODO: complete with call to Vivek's function *)
 
     | _ -> failwith "Function not implemented."
 

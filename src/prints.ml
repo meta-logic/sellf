@@ -74,8 +74,8 @@ let rec termToString term = match term with
   | ASGN ( i1, i2) -> (termToString i1)^" is "^(termToString i2)
   | PRINT (t1) -> "print "^(termToString t1)
   | CUT -> "fail(cut)"
-  | TENSOR (t1, t2) -> (termToString t1)^" , "^(termToString t2)
-  | ADDOR (t1, t2) -> (termToString t1)^" ; "^(termToString t2)
+  | TENSOR (t1, t2) -> (termToString t1)^" * "^(termToString t2)
+  | ADDOR (t1, t2) -> (termToString t1)^" + "^(termToString t2)
   | PARR (t1, t2) -> (termToString t1)^" | "^(termToString t2)
   | LOLLI (s, t1, t2) -> (termToString t2)^" ["^(termToString s)^"] o- "^(termToString t1)
   | BANG (s, t) -> " ["^(termToString s)^"]! "^(termToString t)

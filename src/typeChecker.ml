@@ -79,6 +79,7 @@ let rec deBruijn_aux flag fVarC nABS body =
         (*in FORALL(str, idOld, deBruijn_aux flag fVarCNew nABS body1)*)
      in NEW (str, deBruijn_aux flag fVarCNew (nABS + 1) body1)
   | PRED (srt, terms, p) ->  PRED (srt, deBruijn_aux flag fVarC nABS terms, p)
+  | NOT (body) -> NOT(deBruijn_aux flag fVarC nABS body)
   | EQU (str, _, terms) -> 
      let (id, nABS, tABS) =  fVarC str in 
      EQU (str, id, deBruijn_aux flag fVarC nABS terms)

@@ -18,6 +18,15 @@ open Subexponentials
     exists A. !a ?b lft{A} tensor !c ?d right{A}
 *)
 
+let structRules : terms list ref = ref [] ;;
+let cutRules : terms list ref = ref [] ;;
+
+let addStructRule r = 
+  structRules := r :: !structRules
+
+let addCutRule r = 
+  cutRules := r :: !cutRules
+
 let rec get_subexp_prefix rule =
 let rec get_subexp_from_monopole mono = 
   match mono with

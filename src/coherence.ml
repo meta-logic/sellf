@@ -16,6 +16,7 @@
 open Term
 open Boundedproofsearch
 open Prints
+open TypeChecker
 
 (* Indicates if this is the specification of a sequent calculus system *)
 let seqcalc = ref true ;;
@@ -51,7 +52,7 @@ let getFirstArgName p = match p with
   end
   | _ -> failwith "Function is not an application."
 
-let addSpec t = 
+let addIntrodRule t = 
   let rec getPred f = match f with 
     | TENSOR(NOT(prd), spc) -> prd
     | ABS(s, i, t) -> getPred t
@@ -72,11 +73,11 @@ let addSpec t =
 
 let dirName = ref "" ;;
 
-(* TODO: really not sure if I can join the abstractions like this *)
-let rec parr f1 f2 = match f1, f2 with
-  | ABS(s1, i1, f1), ABS(s2, i2, f2) when s1 = s2 -> FORALL(s1, i1, (parr f1 f2))
-  | ABS(s1, i1, f1), ABS(s2, i2, f2) -> FORALL(s1, i1, FORALL(s2, i2, (parr f1 f2)))
-  | a, b -> PARR(a, b)
+(* Transforms abstractions into universal quantifiers *)
+let rec abs2forall f = match f with
+  | ABS(s, i, t) -> FORALL(s, i, abs2forall t)
+  | t -> t
+;;
 
 let checkDuality str (t1, t2) = 
   print_endline "Trying to prove duality of:";
@@ -87,15 +88,17 @@ let checkDuality str (t1, t2) =
   print_endline "After negation:";
   print_endline (termToString nt1);
   print_endline (termToString nt2);
-  (* TODO: find free variables and quantify them universally *)
-  let f = parr nt1 nt2 in
+  (* Assign deBruijn indices correctly, after the two formulas are joined *)
+  let f0 = deBruijn true (PARR(nt1, nt2)) in
+  (* Replace abstractions by universal quantifiers *)
+  let f = abs2forall f0 in
   print_endline ("After transformation: "^(termToString f));
   prove f 4 (fun () ->
-          print_string ("Connective "^str^" has dual specification.\n"); ()
+          print_string ("====> Connective "^str^" has dual specification.\n"); ()
         )  
         (fun () ->
           coherent := false;
-          print_string ("Connective "^str^" does not have dual specifications.\n");
+          print_string ("====> Connective "^str^" does not have dual specifications.\n");
         )
 
 let check sysName =

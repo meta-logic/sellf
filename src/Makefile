@@ -18,7 +18,8 @@ SELLF_ML = sellf.ml
 # Using only what is needed for bounded proof search and coherence proof
 CORE_ML = term.ml prints.ml basic.ml Subexponentials.ml staticpermutationcheck.ml Context.ml Sequent.ml ProofTree.ml typeChecker.ml norm.ml unify.ml boundedproofsearch.ml coherence.ml
 TEST_ML    = oUnit.ml test.ml
-PARSER_ML = parser.ml lexer.ml lexer_top.ml
+#PARSER_ML = parser.ml lexer.ml lexer_top.ml
+PARSER_ML = parser_systems.ml lexer.ml lexer_top.ml
 PARSER_CMO = $(PARSER_ML:.ml=.$(cmo)) 
 CORE_CMO = $(CORE_ML:.ml=.$(cmo)) 
 TEST_CMO = $(TEST_ML:.ml=.$(cmo)) 
@@ -69,6 +70,8 @@ clean:
 	rm -f sellf
 	rm -f parser.mli
 	rm -f parser.ml
+	rm -f parser_systems.mli
+	rm -f parser_systems.ml
 
 test:  $(TEST_CMO)
 	$(OCAMLC) unix.$(cma) $(CORE_CMO)  $(TEST_CMO) -o test

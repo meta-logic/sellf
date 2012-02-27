@@ -9,31 +9,34 @@
 subexp l unb.
 subexp r unb.
 
+rules introduction.
 % Implication
-lft (imp A B) := ([r]? (rght A)) , ([l]? (lft B)).
-rght (imp A B) := [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
+(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (rght (imp A B))) * [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
-lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
-rght (and A B) := ([r]? (rght A)) , ([r]? (rght B)).
+(not (lft (and A B))) * ([l]? (lft A)) | ([l]? (lft B)).
+(not (rght (and A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % Disjunction
-lft (or A B) := ([l]? (lft A)) , ([l]? (lft B)).
-rght (or A B) := ([r]? (rght A)) | ([r]? (rght B)).
+(not (lft (or A B))) * (([l]? (lft A)) * ([l]? (lft B))).
+(not (rght (or A B))) * ([r]? (rght A)) | ([r]? (rght B)).
 
 % Forall
-lft (forall A) := [l]? (lft (A X)).
-rght (forall A) := [l]bang (pi \X ([r]? (rght (A X)))).
+(not (lft (forall A))) * [l]? (lft (A X)).
+(not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
 
 % Exists
-lft (exists A) := pi \X ([l]? (lft (A X))).
-rght (exists A) := [r]? (rght (A X)).
+(not (lft (exists A))) * pi \X ([l]? (lft (A X))).
+(not (rght (exists A))) * [r]? (rght (A X)).
 
+rules axiom.
 % Bottom
-%(not (lft bottom)).
+(not (lft bottom)).
 
 % Axiom
-(not (lft (A))) , (not (rght (A))).
+(not (lft (A))) * (not (rght (A))).
 
+rules cut.
 % Cut rule
-%([l]? (lft A)) , ([r]? (rght A)).
+([l]? (lft A)) * ([r]? (rght A)).

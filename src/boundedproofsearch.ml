@@ -26,65 +26,6 @@ let unify =
   in Unify.pattern_unify
 ;;
 
-(*G: Really unhappy with this solution *)
-(*
-let existsInitialFail = ref false;;
-let initialFail = ref (fun () -> ());;
-
-let getFail proof fail = match !existsInitialFail with
-  | true -> (fun () ->  
-    ProofTree.setPremisses proof [(List.hd (ProofTree.getPremisses proof))]; 
-    !initialFail () )
-  | false -> fail
-;;
-*)
-
-(* Function to substitute a variable in a formula *)
-(* TODO: decide a better place for this and check if it's working *)
-(*
-let db2ptr f = 
-  let level = ref 0 in
-  let rec db2ptr lvl s form = match form with
-    | DB i when i = lvl ->
-      (* TODO: not sure why this varid is here... *)
-      varid := !varid + 1;
-      let newVar = V {str=s ; id = !varid; tag = Term.LOG; ts = 0; lts = 0} in
-      PTR {contents = newVar}
-    | PRED(st, t, p) -> PRED(st, db2ptr lvl s t, p)
-    | NOT(t) -> NOT(db2ptr lvl s t)
-    | COMP(ct, t1, t2) -> COMP(ct, db2ptr lvl s t1, db2ptr lvl s t2)
-    | TENSOR(t1, t2) -> TENSOR(db2ptr lvl s t1, db2ptr lvl s t2)
-    | ADDOR(t1, t2) -> ADDOR(db2ptr lvl s t1, db2ptr lvl s t2)
-    | PARR(t1, t2) -> PARR(db2ptr lvl s t1, db2ptr lvl s t2)
-    | WITH(t1, t2) -> WITH(db2ptr lvl s t1, db2ptr lvl s t2)
-    | LOLLI(sub, t1, t2) -> LOLLI(sub, db2ptr lvl s t1, db2ptr lvl s t2)
-    | BANG(sub, t) -> BANG(sub, db2ptr lvl s t)
-    | HBANG(sub, t) -> HBANG(sub, db2ptr lvl s t)
-    | QST(sub, t) -> QST(sub, db2ptr lvl s t)
-    | FORALL(st, i, t) -> FORALL(st, i, db2ptr lvl s t)
-    | EXISTS(st, i, t) -> EXISTS(st, i, db2ptr lvl s t)
-    | APP(t, tlst) -> APP(db2ptr lvl s t, List.map (db2ptr lvl s) tlst)
-    | ABS(st, i, t) -> ABS(st, i, db2ptr lvl s t)
-    | x -> x
-  in
-  let rec aux form = match form with
-    | ABS(s, i, t) -> level := !level + 1;
-      aux (db2ptr !level s t)
-    | _ -> form (* Not an abstraction anymore *)
-  in aux f
-*)
-(*
-let rec apply_ptr f = match f with
-  | ABS(s, i, t) ->
-      varid := !varid + 1;
-      let newVar = V {str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0} in
-      let ptr = PTR {contents = newVar} in
-      let newf = Norm.hnorm (APP(ABS(s, i, t), [ptr])) in
-      apply_ptr newf
-  | x -> x
-;;
-*)
-
 let failStack : (unit -> unit) Stack.t = Stack.create () ;;
 
 let initProof formula =
@@ -100,17 +41,6 @@ let copyCtxOutFromPremisseUn proof = match (ProofTree.getPremisses proof) with
     Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut sqp)
   | _ -> failwith "Error: found unary rule with more than one or no premisse."
 ;;
-
-(*
-let apply_sync_suc suc = match suc () with
-  | (proof, h, suc1, fail) -> prove_sync proof h suc fail
-  | _ -> failwith "Error while recovering continuation."
-
-let apply_asyn_suc suc = match suc () with
-  | (proof, h, suc1, fail) -> prove_asyn proof h suc fail
-  | _ -> failwith "Error while recovering continuation."
-*)
-
 
 let file_number = ref 0 ;;
 
@@ -529,19 +459,9 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
  
     (* Initial rules *)
     | PRED (str, terms, p) ->
-      if !verbose then begin
-        print_endline "-- Initial:"; 
-        print_endline (termToString (Term.observe goal));
-        print_endline (Context.toString ctxin);
-      end;
       let pairs = Context.toPairs ctxin in
       initial (NOT(PRED(str, terms, p))) pairs proof suc (*fail*)
     | NOT(PRED (str, terms, p)) ->
-      if !verbose then begin
-        print_endline "-- Initial:"; 
-        print_endline (termToString (Term.observe goal));
-        print_endline (Context.toString ctxin);
-      end;
       let pairs = Context.toPairs ctxin in
       initial (PRED(str, terms, p)) pairs proof suc (*fail*)
  
@@ -631,8 +551,12 @@ and decide h ctx proof suc (*fail*) =
 and initial f ctx proof suc (*fail*) = match ctx with
   | [] -> (*fail*) (Stack.pop failStack) () (* No unifiable formulas that work *)
   | (s, f1) :: tl -> 
-  (*print_endline ("Trying initial rule with "^(termToString f)^" and "^(termToString f1));*)
-  match (f, f1) with
+    if !verbose then begin
+      print_endline "-- Initial:"; 
+      print_endline (termToString (Term.observe f));
+      print_endline (Context.toString (Sequent.getCtxIn (ProofTree.getConclusion proof)));
+    end;
+    match (f, f1) with
     | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
       let bl = save_state () in
       try match unify t t1 with
@@ -641,25 +565,9 @@ and initial f ctx proof suc (*fail*) = match ctx with
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
-          (*
-          existsInitialFail := true;
-          initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
-          *)
           Stack.push (fun () -> restore_state bl; initial f tl proof suc) failStack;
           suc ()
-          (*
-          match suc () with 
-            | (proof, h, s, f, ASYN) -> prove_asyn proof h s (fun () -> initial f tl proof suc fail)
-            | (proof, h, s, f, SYNC) -> prove_sync proof h s (fun () -> initial f tl proof suc fail)
-          *)
-          (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
-          prove_sync (ProofTree.update proof dummy) h suc (fun () ->
-            ProofTree.setPremisses proof [];
-            initial h f tl proof suc fail ())*)
         with _ ->
-          (*print_string "Did not unify: ";
-          print_string (termToString t); print_string " and "; 
-          print_endline (termToString t1);*)
           initial f tl proof suc (*fail*)
         end
     |(NOT(PRED(str, t, p)), NOT(PRED(str1, t1, p1))) when str = str1 -> begin
@@ -670,28 +578,10 @@ and initial f ctx proof suc (*fail*) = match ctx with
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
-          (*
-          existsInitialFail := true;
-          initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
-          *)
           Stack.push (fun () -> restore_state bl; initial f tl proof suc) failStack;
           suc ()
-          (*
-          match suc () with 
-            | (proof, h, s, f, ASYN) -> prove_asyn proof h s (fun () -> initial f tl proof suc fail)
-            | (proof, h, s, f, SYNC) -> prove_sync proof h s (fun () -> initial f tl proof suc fail)
-          *)
-          (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
-          prove_sync (ProofTree.update proof dummy) h suc (fun () ->
-            ProofTree.setPremisses proof [];
-            initial h f tl proof suc fail ())*)
         with _ -> initial f tl proof suc (*fail*)
         end
     | _, _ -> initial f tl proof suc (*fail*)
 
-(*
-and callSuc suc = match suc () with
-  | (proof, h, s, f, ASYN) -> prove_asyn proof h s f
-  | (proof, h, s, f, SYNC) -> prove_sync proof h s f
-*)
 ;;

@@ -17,29 +17,33 @@ subexprel l < nl.
 subexprel e < pr.
 subexprel e < nl.
 
+rules introduction.
 % Conjunction
-lft (and A B) := ([l]? (lft A)) | ([l]? (lft B)).
-rght (and A B) := ([r]? (rght A)) , ([r]? (rght B)).
+(not (lft (and A B))) * ([l]? (lft A)) | ([l]? (lft B)).
+(not (rght (and A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % Implication
-lft (imp A B) := ([r]? (rght A)) , ([l]? (lft B)).
-rght (imp A B) := ([l]? (lft A)) | ([r]? (rght B)).
+(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (rght (imp A B))) * ([l]? (lft A)) | ([r]? (rght B)).
 
 % Necessarily
-lft (nec A) := [l]? (lft A).
-rght (nec A) := [e]bang ([r]? (rght A)).
+(not (lft (nec A))) * [l]? (lft A).
+(not (rght (nec A))) * [e]bang ([r]? (rght A)).
 
 % Possibly
-lft (poss A) := [e]bang ([l]? (lft A)).
-rght (poss A) := [r]? (rght A).
+(not (lft (poss A))) * [e]bang ([l]? (lft A)).
+(not (rght (poss A))) * [r]? (rght A).
 
+rules axiom.
 % Init
-(not (lft A)) , (not (rght A)).
+(not (lft A)) * (not (rght A)).
 
+rules cut.
 % Cut
-([l]? (lft A)) , ([r]? (rght A)).
+([l]? (lft A)) * ([r]? (rght A)).
 
+rules structural.
 % Structural rules for modals
-(not (lft (poss A))) , ([nl]? (lft (poss A))).
-(not (rght (nec A))) , ([pr]? (rght (nec A))).
+(not (lft (poss A))) * ([nl]? (lft (poss A))).
+(not (rght (nec A))) * ([pr]? (rght (nec A))).
 

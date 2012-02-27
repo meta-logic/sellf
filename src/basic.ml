@@ -46,17 +46,4 @@ let rec in_list l e = try match List.hd l with
 (* Get all the keys from a hash table, including duplicates *)
 let keys ht = Hashtbl.fold (fun key data accu -> key :: accu) ht [] ;;
 
-(* TODO: move this to context.ml to print them
-let print_hashtbl h = print_string "\nHashTable:\n";
-  let keylst = keys h in
-  let rec print_h lst = 
-    match lst with
-      | [] -> print_string "\n"
-      | k :: t -> 
-        print_string ("["^k^"] "); 
-        print_list_terms (Hashtbl.find h k); 
-        print_newline (); print_h t
-  in print_h keylst
-;;
-*)
 
