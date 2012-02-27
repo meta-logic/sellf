@@ -64,6 +64,7 @@ let rec get_subexp_cut cut =
   | _ -> failwith "Wrong cut"
 in let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
 let rule_prefix = get_subexp_prefix rule in 
+let subexp = keys subexTpTbl in
 let check_one_monopole mono_prefix =
   match a,c with 
   | SOME(a1), SOME(c1) ->
@@ -93,8 +94,8 @@ let check_one_monopole mono_prefix =
      | NONE :: rest -> true
      | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
                             ((not (greater_than d s) && (not (weak d)))) -> true
-     (*| SOME(s) :: rest -> true : It remains to check whether s is the least
-element of the preorder.*)
+     | SOME(s) :: rest -> (true      
+        )
     )
 in 
 let rec check_rules_monopoles rule_prefix =
@@ -137,8 +138,8 @@ match rule with
   | _ -> failwith "Unexpected term in a rule."
 
 let rec rule_permutes rule1 rule2 = 
-(*Still need to check whether all subexponentials are unbounded.*)
-if (not (has_bang rule1)) && (not (has_bang rule2)) then true else
+if Hashtbl.fold (fun key data acc -> (data = UNB) & acc) subexTpTbl true then 
+(if (not (has_bang rule1)) && (not (has_bang rule2)) then true else
 let subRule1 = collect_bangs rule1 in
 let subRule2 = collect_quests rule2 in
 let rec greater_subexp sub1 sub2 = 
@@ -146,7 +147,8 @@ let rec greater_subexp sub1 sub2 =
   | [] -> true 
   | head :: tail -> (greater_than_lst head sub1) && (greater_subexp sub1 tail)
 in
-greater_subexp subRule1 subRule2
+greater_subexp subRule1 subRule2)
+else false
 
 (* Collects all the rules for which the cut rule does not permute. *)
 
