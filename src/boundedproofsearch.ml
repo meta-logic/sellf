@@ -27,6 +27,7 @@ let unify =
 ;;
 
 (*G: Really unhappy with this solution *)
+(*
 let existsInitialFail = ref false;;
 let initialFail = ref (fun () -> ());;
 
@@ -36,6 +37,7 @@ let getFail proof fail = match !existsInitialFail with
     !initialFail () )
   | false -> fail
 ;;
+*)
 
 (* Function to substitute a variable in a formula *)
 (* TODO: decide a better place for this and check if it's working *)
@@ -165,10 +167,10 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
               let ctxout1 = Sequent.getCtxOut (ProofTree.getConclusion p1) in
               let ctxout2 = Sequent.getCtxOut (ProofTree.getConclusion p2) in
               if (Context.equals ctxout1 ctxout2) then suc ()
-              (*else fail ()*)
-              else (getFail proof fail) ()
+              else fail ()
+              (*else (getFail proof fail) ()*)
             | _ -> failwith "With rule with wrong number of premisses."
-          ) (*fail ()*) (getFail proof fail) ()
+          ) fail () (*(getFail proof fail) ()*)
         ) fail
     end
  
@@ -396,7 +398,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
                   Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut p);
                   suc ()
                 | _ -> failwith "Tensor rule has wrong number of premisses."
-              ) (*fail ()*) (getFail proof fail) ()
+              ) fail () (*(getFail proof fail) ()*)
           | _ -> failwith "Tensor rule has wrong number of premisses."
         ) 
         fail
@@ -603,10 +605,10 @@ and initial f ctx proof suc fail = match ctx with
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
-
+          (*
           existsInitialFail := true;
           initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
-
+          *)
           suc
           (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
           prove_sync (ProofTree.update proof dummy) h suc (fun () ->
@@ -626,10 +628,10 @@ and initial f ctx proof suc fail = match ctx with
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
-
+          (*
           existsInitialFail := true;
           initialFail := (fun () -> restore_state bl; initial f tl proof suc fail ());
-
+          *)
           suc
           (*let dummy = Sequent.create newctx newctx [ONE] SYNC in
           prove_sync (ProofTree.update proof dummy) h suc (fun () ->
