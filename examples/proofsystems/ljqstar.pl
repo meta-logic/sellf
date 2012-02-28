@@ -14,10 +14,7 @@ subexprel r < l.
 
 rules axiom.
 % Init
-(not (lft A)) * (not (rght A)).
-
-% Bottom
-(not (lft bottom)).
+sigma \A ((not (lft A)) * (not (rght A))).
 
 rules introduction.
 % Implication
@@ -31,6 +28,9 @@ rules introduction.
 % Conjunction
 (not (lft (and A B))) * [r]bang (([l]? (lft A)) | ([l]? (lft B))).
 (not (rght (and A B))) * (([r]bang ([f]? (rght A))) * ([r]bang ([f]? (rght B)))).
+
+% Bottom
+%(not (lft bottom)).
 
 % TODO: implement all cut rules
 

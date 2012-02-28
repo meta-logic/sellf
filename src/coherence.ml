@@ -61,6 +61,7 @@ let processIntroRule t =
   let rec getPred f = match f with 
     | TENSOR(NOT(prd), spc) -> prd
     | ABS(s, i, t) -> getPred t
+    | NOT(prd) -> prd
     | _ -> failwith "Not expected formula in specification."
   in
   let rec getSpec f = match f with
@@ -74,8 +75,7 @@ let processIntroRule t =
     | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
     | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
     | _ -> failwith "Valid predicates are 'lft' and 'right'."
-
-let dirName = ref "" ;;
+;;
 
 (* Transforms abstractions into universal quantifiers *)
 let rec abs2forall f = match f with
@@ -140,8 +140,7 @@ let checkDuality str (t1, t2) =
 ;;
 
 let check sysName =
-  dirName := sysName;
-  (*Hashtbl.iter checkDuality !lr_hash; *)
+  Hashtbl.iter checkDuality !lr_hash;
   Hashtbl.iter checkInitCoher !lr_hash;
   if !cutcoherent then print_string "\nThe system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";

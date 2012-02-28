@@ -28,10 +28,10 @@ rules introduction.
 
 % Exists
 (not (lft (exists A))) * pi \X ([l]? (lft (A X))).
-(not (rght (exists A))) * [r]? (rght (A X)).
+(not (rght (exists A))) * sigma \X ([r]? (rght (A X))).
 
 % Bottom
-(not (lft bottom)).
+%(not (lft bottom)).
 
 rules axiom.
 % Axiom

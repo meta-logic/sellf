@@ -87,37 +87,7 @@ module ProofTree =
       end
       else failwith "[ERROR] Masking trees with different root."
 *)
-(*
-    (* G: Not printing the context. *)
-  
-    (* Printing XML file (not implemented for macro rules) *)
-    let rec printTreeChildren children out = match children with
-      | [] -> ()
-      | h::t -> printTree h out; printTreeChildren t out
 
-    and printTree pt out = match pt.conclusion with
-      | SEQ(_, terms, ASYN) -> 
-        Printf.fprintf out "<seq phase='neg' terms='"; 
-        printf_list_terms out terms; Printf.fprintf out "' closed='";
-        if pt.closed then Printf.fprintf out "true'>\n"
-        else Printf.fprintf out "false'>\n";
-        printTreeChildren pt.premisses out;
-        Printf.fprintf out "</seq>\n"
-
-      | SEQ(_, terms, SYNC) ->
-        Printf.fprintf out  "<seq phase='pos' terms='"; 
-        printf_list_terms out terms; Printf.fprintf out  "' closed='";
-        if pt.closed then Printf.fprintf out "true'>\n"
-        else Printf.fprintf out "false'>\n";
-        printTreeChildren pt.premisses out;
-        Printf.fprintf out "</seq>\n"
-     
-      | SEQM(_, _, _) -> failwith "Printing XML is not implemented for macro
-        rules."
-
-      | EMPSEQ -> ()
-    ;;
-*)
     let rec toTexString pt = match pt.closed with
       | true ->
         let topproof = match pt.premisses with

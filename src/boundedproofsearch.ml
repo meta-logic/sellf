@@ -335,17 +335,17 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end; 
       let sq = Sequent.create ctxin ctxout [f1] SYNC in
-      prove_sync (ProofTree.update proof sq) h (fun () -> 
-        if !verbose then begin
-          print_endline "-- Tensor 2nd:"; 
-          print_endline (termToString (Term.observe goal));
-          print_endline (Context.toString ctxin);
-        end;
+      prove_sync (ProofTree.update proof sq) h (fun () ->
         (* Get out context of first branch and copy to the second as input *)
         match (ProofTree.getPremisses proof) with
-          | [p] ->
+          | [p] -> begin
             let ctxin2 = Sequent.getCtxOut (ProofTree.getConclusion p) in
             let sq2 = Sequent.create ctxin2 ctxout [f2] SYNC in
+            if !verbose then begin
+              print_endline "-- Tensor 2nd:"; 
+              print_endline (termToString (Term.observe goal));
+              print_endline (Context.toString ctxin2);
+            end;
             prove_sync (ProofTree.update proof sq2) h ( fun () ->
               (* Get out context of second branch and propagate it to the conclusion *)
               match (ProofTree.getPremisses proof) with
@@ -355,7 +355,29 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
                   suc ()
                 | _ -> failwith "Tensor rule has wrong number of premisses."
               ) (*fail ()*)
-          | _ -> failwith "Tensor rule has wrong number of premisses."
+          end
+            (* This is for the case when the second part of the tensor was
+            tried, but failed already before. Just erase the failed branch *)
+          | pa::pb::[] -> begin
+            let ctxin2 = Sequent.getCtxOut (ProofTree.getConclusion pb) in
+            let sq2 = Sequent.create ctxin2 ctxout [f2] SYNC in
+            if !verbose then begin
+              print_endline "-- Tensor 2nd: another attempt"; 
+              print_endline (termToString (Term.observe goal));
+              print_endline (Context.toString ctxin2);
+            end;
+            ProofTree.setPremisses proof [pb];
+            prove_sync (ProofTree.update proof sq2) h ( fun () ->
+              (* Get out context of second branch and propagate it to the conclusion *)
+              match (ProofTree.getPremisses proof) with
+                | p1::p2::[] -> 
+                  let s = ProofTree.getConclusion p1 in
+                  Sequent.setCtxOut (ProofTree.getConclusion proof) (Sequent.getCtxOut s);
+                  suc ()
+                | _ -> failwith "Tensor rule has wrong number of premisses."
+              ) (*fail ()*)
+          end
+          | x -> failwith "Tensor rule has wrong number of premisses."
         ) 
         (*fail*)
  
