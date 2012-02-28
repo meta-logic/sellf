@@ -141,7 +141,7 @@ let checkDuality str (t1, t2) =
 
 let check sysName =
   dirName := sysName;
-  Hashtbl.iter checkDuality !lr_hash; 
+  (*Hashtbl.iter checkDuality !lr_hash; *)
   Hashtbl.iter checkInitCoher !lr_hash;
   if !cutcoherent then print_string "\nThe system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
