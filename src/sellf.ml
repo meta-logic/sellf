@@ -176,7 +176,10 @@ solve_query () =
       List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
       end
 
-    | "#cutprincipal" -> () (* TODO: complete with call to Vivek's function *)
+    | "#cutprincipal" -> begin
+        Staticpermutationcheck.test2 ()
+      end
+ (* TODO: complete with call to Vivek's function *)
 
     | _ -> failwith "Function not implemented."
 
