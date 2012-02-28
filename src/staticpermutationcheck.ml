@@ -8,7 +8,6 @@ can be transformed into a proof with principal cuts only.
 by Vivek Nigam, Elaine Pimentel, and Giselle Reis"
 
 *)
-
 open Basic
 open Term
 open Subexponentials
@@ -27,7 +26,13 @@ let addStructRule r =
 let addCutRule r = 
   cutRules := r :: !cutRules
 
+(*Simple auxiliary functions that collects the subexponentials appearing in the
+specification of rules. *)
+
 let rec get_subexp_prefix rule =
+(*Traverse a monopole and retrive a list of the form:
+[a,b,c,d,...] containing the subexponential question marks appearing in the monopole.
+*)
 let rec get_subexp_from_monopole mono = 
   match mono with
   | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> []
@@ -37,6 +42,7 @@ let rec get_subexp_from_monopole mono =
   | FORALL(_,_,b) -> (get_subexp_from_monopole b)
   | _ -> failwith "Unexpected term in a monopole."
   in
+(*This part adds to the output the bang that sourounds a monopole, if there is one.*)
   match rule with
   | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
@@ -47,11 +53,16 @@ let rec get_subexp_from_monopole mono =
   | EXISTS(str,i,b) -> get_subexp_prefix b
   | _ -> failwith "Unexpected term in a rule."
 
+(*Simple function that checks whether sub < s, for all s in lst.*)
 let rec greater_than_lst sub lst = 
   match lst with
   | [] -> true
   | SOME(s) :: lst1 when greater_than s sub -> greater_than_lst sub lst1
   | SOME(s) :: lst1 -> false
+
+
+(*This function implements the conditions detailed in the paper for when a cut-rule
+permutes over an introduction rule.*)
 
 let rec cut_permutes_over cut rule = 
 let rec get_subexp_cut cut = 
@@ -76,6 +87,7 @@ let rule_prefix = get_subexp_prefix rule in
 let subexp = keys subexTpTbl in
 let check_one_monopole mono_prefix =
   match a,c with 
+(*Case when the cut has two bangs.*)
   | SOME(a1), SOME(c1) ->
     ( match mono_prefix with
      | NONE :: rest -> true 
@@ -84,6 +96,7 @@ let check_one_monopole mono_prefix =
      | SOME(s) :: rest when (greater_than b s) && (greater_than c1 s) ->  
                               (greater_than_lst a1 rest)
     )
+(*Cases when the cut has a single bang.*)
   | SOME(a1), NONE ->
     ( match mono_prefix with
      | NONE :: rest -> true
@@ -98,13 +111,15 @@ let check_one_monopole mono_prefix =
                             ((not (greater_than d s) && (not (weak d)))) -> true
      | SOME(s) :: rest when (greater_than b s) && (greater_than c1 s) -> true
     )
+(*Case when the cut has no bangs.*)
   | NONE, NONE -> 
     ( match mono_prefix with
      | NONE :: rest -> true
      | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
                             ((not (greater_than d s) && (not (weak d)))) -> true
-     | SOME(s) :: rest -> (true      
-        )
+     | SOME(s) :: rest -> 
+        Hashtbl.fold (fun key data acc -> if (greater_than key s) then acc
+        else false) subexTpTbl true 
     )
 in 
 let rec check_rules_monopoles rule_prefix =
@@ -115,7 +130,7 @@ in
 check_rules_monopoles rule_prefix
     
 (* The next auxiliary functions used to check the conditions of the Lemma 5.4 of the
-paper above. *)
+paper mentioned above. *)
 
 let rec has_bang rule = 
 match rule with
@@ -146,6 +161,8 @@ match rule with
   | QST(CONS(sub),b2) -> []
   | _ -> failwith "Unexpected term in a rule."
 
+
+(*Still missing the case when there are structural rules.*)
 let rec rule_permutes rule1 rule2 = 
 if Hashtbl.fold (fun key data acc -> (data = UNB) & acc) subexTpTbl true then 
 (if (not (has_bang rule1)) && (not (has_bang rule2)) then true else
@@ -159,7 +176,8 @@ in
 greater_subexp subRule1 subRule2)
 else false
 
-(* Collects all the rules for which the cut rule does not permute. *)
+(* Collects all the rules for which the cut rule do not permute and then checks
+whether all rules permute over these rules. *)
 
 let rec check_permutation cut rules = 
 let rec not_permute cut rules = 
