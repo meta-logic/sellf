@@ -555,6 +555,8 @@ let makesubst h1 t2 a1 =
       | Term.APP (h2,a2) ->
           begin match Term.observe h2 with
             | Term.VAR {ts=ts2;lts=lts2} when Term.eq h1 h2 ->
+                (* FIXME: h1 is a pointer and h2 a variable. They are not equal.
+                What should be done?? *)
                 (* [h1] being instantiatable, no need to check it for [h2] *)
                 let a2 = List.map Norm.hnorm a2 in
                 check_flex_args a2 ts2 lts2 ;
