@@ -19,12 +19,16 @@ open Subexponentials
 
 let structRules : terms list ref = ref [] ;;
 let cutRules : terms list ref = ref [] ;;
+let introRules : terms list ref = ref [] ;;
 
 let addStructRule r = 
   structRules := r :: !structRules
 
 let addCutRule r = 
   cutRules := r :: !cutRules
+
+let addIntroRule r = 
+  introRules := r :: !introRules
 
 (*Simple auxiliary functions that collects the subexponentials appearing in the
 specification of rules. *)

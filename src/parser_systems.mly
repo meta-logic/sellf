@@ -190,7 +190,9 @@ clause:
       addCutRule clause
     | INTRO ->
       (* For coherence *)
-      addIntrodRule $1
+      addIntrodRule $1;
+      (* For principal cut *)
+      addIntroRule clause
     | STRUCT ->
       (* For principal cut *)
       addStructRule clause 
