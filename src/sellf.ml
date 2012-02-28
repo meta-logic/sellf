@@ -162,10 +162,7 @@ solve_query () =
       in every_pair !Structs.rules;
     *)
     | "#coherence" ->
-      if !Coherence.seqcalc then
-        Coherence.check !fileName
-      else
-        print_string "\nCannot prove coherence (please check the correct use of the predicates).\n";
+      Coherence.check !fileName
 
     | "#scopebang" -> begin
       print_endline "Please type the subexponential:";

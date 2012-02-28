@@ -22,6 +22,9 @@ let store form subexp = try match Hashtbl.find initial subexp with
   with Not_found -> failwith ("Subexponential "^subexp^" not in context.")
 ;;
 
+(* Clears all subexponentials *)
+let clearInitial () = Hashtbl.iter (fun k d -> Hashtbl.replace initial k []) initial;;
+
 module Context = 
   struct
   

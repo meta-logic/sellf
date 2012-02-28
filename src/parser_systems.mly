@@ -182,15 +182,15 @@ clause:
   let clause = deBruijn true $1 in
 
   (match !rules with
-    | AXIOM -> () (* Will we need the axiom?? *)
-    | CUT -> 
+    | AXIOM ->
       (* For coherence *)
-      store clause "$infty";
-      (* For principal cut *)
+      addIdRule clause
+    | CUT -> 
+      (* For principal cut and coherence *)
       addCutRule clause
     | INTRO ->
       (* For coherence *)
-      addIntrodRule $1;
+      processIntroRule $1;
       (* For principal cut *)
       addIntroRule clause
     | STRUCT ->

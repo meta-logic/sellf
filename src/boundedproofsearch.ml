@@ -55,6 +55,7 @@ let rec prove formula h suc fail =
     let sq = ProofTree.getConclusion root in
     let ctxout = Sequent.getCtxOut sq in
     if (Context.isLinearEmpty ctxout) then begin
+      (* TODO make this file name more informative *)
       let file = open_out ("proofsTex/proof"^(string_of_int !file_number)^".tex") in
       Printf.fprintf file "%s" (texFileHeader ());
       Printf.fprintf file "%s" (ProofTree.toTexString root);

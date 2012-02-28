@@ -36,14 +36,14 @@ rules introduction.
 
 rules axiom.
 % Init
-(not (lft A)) * (not (rght A)).
+sigma \A ((not (lft A)) * (not (rght A))).
 
 rules cut.
 % Cut
-([l]? (lft A)) * ([r]? (rght A)).
+sigma \A (([l]? (lft A)) * ([r]? (rght A))).
 
 rules structural.
 % Structural rules for modals
-(not (lft (poss A))) * ([nl]? (lft (poss A))).
-(not (rght (nec A))) * ([pr]? (rght (nec A))).
+sigma \A ((not (lft (poss A))) * ([nl]? (lft (poss A)))).
+sigma \A ((not (rght (nec A))) * ([pr]? (rght (nec A)))).
 

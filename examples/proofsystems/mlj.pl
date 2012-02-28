@@ -30,13 +30,13 @@ rules introduction.
 (not (lft (exists A))) * pi \X ([l]? (lft (A X))).
 (not (rght (exists A))) * [r]? (rght (A X)).
 
-rules axiom.
 % Bottom
 (not (lft bottom)).
 
+rules axiom.
 % Axiom
-(not (lft (A))) * (not (rght (A))).
+sigma \A ((not (lft (A))) * (not (rght (A)))).
 
 rules cut.
 % Cut rule
-([l]? (lft A)) * ([r]? (rght A)).
+sigma \A (([l]? (lft A)) * ([r]? (rght A))).
