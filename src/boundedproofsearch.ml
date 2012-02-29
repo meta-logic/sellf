@@ -82,6 +82,16 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
   | (ctxin, ctxout, f::goals, ASYN) -> let f = Term.observe f in begin match f with
 
+    (* No rule for zero. Put it at the end of the goals and hope for the best *)
+    | ZERO ->
+      if !verbose then begin
+        print_endline "-- Zero:";
+        print_endline (termToString ZERO);
+        print_endline (Context.toString ctxin);
+      end;
+      let sq = Sequent.create ctxin ctxout (goals @ [f]) ASYN in
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
+
     | LOLLI (sub, f1, f2) -> 
       if !verbose then begin
         print_endline "-- Lolli:"; 

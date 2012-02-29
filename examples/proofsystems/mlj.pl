@@ -23,7 +23,7 @@ rules introduction.
 (not (rght (or A B))) * ([r]? (rght A)) | ([r]? (rght B)).
 
 % Forall
-(not (lft (forall A))) * [l]? (lft (A X)).
+(not (lft (forall A))) * sigma \X ([l]? (lft (A X))).
 (not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
 
 % Exists
