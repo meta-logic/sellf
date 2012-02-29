@@ -152,12 +152,12 @@ paper mentioned above. *)
 
 let rec has_bang rule = 
 match rule with
-  | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> false
+  | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) | QST(_,_) -> false
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       has_bang b1 || has_bang b2
   | BANG(CONS(sub),b) -> true
   | ABS(_, _, b) | EXISTS(_,_,b) ->  has_bang b
-  | _ -> failwith "Unexpected term in a bipole."
+  | _ -> failwith "Unexpected term in a bipole, while checking whether there is a bang."
 
 let rec collect_quests rule = 
 match rule with
@@ -166,7 +166,7 @@ match rule with
       List.append (collect_quests b1) (collect_quests b2)
   | BANG(CONS(sub),b) -> (collect_quests b)
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests b)
-  | QST(CONS(sub),b2) -> [sub]
+  | QST(CONS(sub),b2) -> [SOME(sub)]
   | _ -> failwith "Unexpected term in a rule, while collecting quests."
 
 let rec collect_bangs rule = 
@@ -180,10 +180,10 @@ match rule with
   | _ -> failwith "Unexpected term in a rule, while collecting bangs."
 
 
-let rec findEquiv rule rules = 
+let rec findEquiv rule structRules = 
 let rec findHead rule = 
 match rule with 
-| NOT(b) -> b
+| NOT(PRED(_,b,_)) -> b
 | ABS(_, _, b) | EXISTS(_,_,b) -> findHead b
 | TENSOR(b1, b2) -> findHead b1
 | _ -> failwith "Unexpected term in a rule, while extracting the head."
@@ -197,19 +197,21 @@ match rule with
 in let hdRule = findHead rule in
 let rec findEquiv_Aux rules = 
 match rules with 
-| [] -> [NONE]
-| hd :: tail -> 
-  let hd1 = findHead hd in
-  if eq hd hd1 then SOME(findQST hd) :: (findEquiv_Aux tail) 
+| [] -> []
+| rl :: tail -> 
+  let hdStruct = findHead rl in
+  if eq hdRule hdStruct then SOME(findQST rl) :: (findEquiv_Aux tail) 
     else (findEquiv_Aux tail)
 in
-findEquiv_Aux rules  
+findEquiv_Aux structRules  
 
 
 (*Still missing the case when there are structural rules.*)
 let rec rule_permutes rule1 rule2 strRules = 
 (* Checking that all subexponentials are unbounded *)
-match Hashtbl.fold (fun key data acc -> (data = UNB) & acc) subexTpTbl true with
+match Hashtbl.fold (fun key data acc -> if key = "$gamma" then acc else
+                      (data = UNB) & acc) subexTpTbl true 
+with
 | true -> 
   (match (has_bang rule2) with
    | false ->
@@ -222,7 +224,7 @@ match Hashtbl.fold (fun key data acc -> (data = UNB) & acc) subexTpTbl true with
           let rec greater_subexp sub1 sub2 = 
             (match sub2 with
             | [] -> true 
-            | head :: tail when ((greater_than_lst_all head sub1)
+            | SOME(head) :: tail when ((greater_than_lst_all head sub1)
                 || (greater_than_lst_one head equiv)) 
                     (* Check whether there is an equivalence or the body is ok.*)
                   -> (greater_subexp sub1 tail)
@@ -266,11 +268,17 @@ let rec test1 () =
         else print_endline "Cut does not permute.") !introRules
 
 let rec test2 () = 
-    match !cutRules with
-    | [] -> ()
-    | cutHd :: cutTail -> 
-      List.iter (fun ele -> 
-        if (cut_permutes_over cutHd ele) then print_endline "Cut permutes with"      
-        else print_endline "Cut does not permute.") !introRules
+    match !introRules with
+    | [] -> print_endline "Should not come here!"
+    | rule1 :: rule2 :: lst -> 
+      if rule_permutes rule1 rule2 !structRules then 
+        print_endline "Rule permutes." else print_endline "Rule does not permute."
+
+let rec test3 () = 
+    match !introRules with
+    | [] -> print_endline "Should not come here!"
+    | rule1 :: lst -> let equiv = findEquiv rule1 !structRules in 
+        List.iter (fun (SOME(s)) -> print_endline s) equiv;
+        print_endline "Found equivalences"
 
 

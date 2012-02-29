@@ -177,7 +177,7 @@ solve_query () =
       end
 
     | "#cutprincipal" -> begin
-        Staticpermutationcheck.test2 ()
+        Staticpermutationcheck.test3 ()
       end
  (* TODO: complete with call to Vivek's function *)
 
