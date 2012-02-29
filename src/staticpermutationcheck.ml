@@ -59,19 +59,31 @@ from monopole."
   | _ -> failwith "Unexpected term in a rule, while getting subexponentials
 from bipoles."
 
-(*Simple function that checks whether sub < s, for all s in lst.*)
+(*Simple function that checks whether sub < s, for all s in lst.
 let rec greater_than_lst_all sub lst = 
   match lst with
   | [] -> true
-  | SOME(s) :: lst1 when greater_than s sub -> greater_than_lst_all sub lst1
+  | SOME(s) :: lst1 when greater_than sub s -> greater_than_lst_all sub lst1
   | SOME(s) :: lst1 -> false
+*)
 
-(*Simple function that checks whether sub < s, for some s in lst.*)
-let rec greater_than_lst_one sub lst = 
+(* Relation among subexponentials. s1 >= s2 *)
+let geq s1 s2 = greater_than s1 s2 || s1 = s2
+
+(*Simple function that checks whether sub <= s, for all s in lst.*)
+let rec less_than_lst_all sub lst = 
+  match lst with
+  | [] -> true
+  | SOME(s) :: lst1 when geq s sub -> less_than_lst_all sub lst1
+  | _ -> false
+
+
+(*Simple function that checks whether sub <= s, for some s in lst.*)
+let rec less_than_lst_one sub lst = 
   match lst with
   | [] -> false
-  | SOME(s) :: lst1 when greater_than s sub -> true
-  | SOME(s) :: lst1 -> greater_than_lst_one sub lst1
+  | SOME(s) :: lst1 when geq s sub  -> true
+  | SOME(s) :: lst1 -> less_than_lst_one sub lst1
 
 (*This function implements the conditions detailed in the paper for when a cut-rule
 permutes over an introduction rule.*)
@@ -102,41 +114,41 @@ let check_one_monopole mono_prefix =
 (*Case when the cut has two bangs.*)
   | SOME(a1), SOME(c1) ->
     ( match mono_prefix with
-     | NONE :: rest -> (greater_than_lst_all c1 rest) || (greater_than_lst_all a1
+     | NONE :: rest -> (less_than_lst_all c1 rest) || (less_than_lst_all a1
 rest)
-     | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
-                            ((not (greater_than d s) && (not (weak d)))) -> true 
-     | SOME(s) :: rest when (greater_than a1 s) && (greater_than d s) ->  
-                              (greater_than_lst_all c1 rest)
-     | SOME(s) :: rest when (greater_than b s) && (greater_than c1 s) ->  
-                              (greater_than_lst_all a1 rest)
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+                            ((not (geq d s) && (not (weak d)))) -> true 
+     | SOME(s) :: rest when (geq a1 s) && (geq d s) ->  
+                              (less_than_lst_all c1 rest)
+     | SOME(s) :: rest when (geq b s) && (geq c1 s) ->  
+                              (less_than_lst_all a1 rest)
      | _ -> false
     )
 (*Cases when the cut has a single bang.*)
   | SOME(a1), NONE ->
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
-                            ((not (greater_than d s) && (not (weak d)))) -> true
-     | SOME(s) :: rest when (greater_than d s) && (greater_than a1 s) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+                            ((not (geq d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (geq d s) && (geq a1 s) -> true
      | _ -> false
     )
   | NONE, SOME(c1) -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
-                            ((not (greater_than d s) && (not (weak d)))) -> true
-     | SOME(s) :: rest when (greater_than b s) && (greater_than c1 s) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+                            ((not (geq d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (geq b s) && (geq c1 s) -> true
      | _ -> false
     )
 (*Case when the cut has no bangs.*)
   | NONE, NONE -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (greater_than b s) && (not (weak b))) ||  
-                            ((not (greater_than d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+                            ((not (geq d s) && (not (weak d)))) -> true
      | SOME(s) :: rest -> 
-        Hashtbl.fold (fun key data acc -> if (greater_than key s) then acc
+        Hashtbl.fold (fun key data acc -> if (geq key s) then acc
         else false) subexTpTbl true 
     )
 in 
@@ -152,7 +164,8 @@ paper mentioned above. *)
 
 let rec has_bang rule = 
 match rule with
-  | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) | QST(_,_) -> false
+  | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP 
+  | EQU(_,_,_) | QST(_,_) | PARR(_,_) -> false
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       has_bang b1 || has_bang b2
   | BANG(CONS(sub),b) -> true
@@ -206,8 +219,22 @@ in
 findEquiv_Aux structRules  
 
 
-(*Still missing the case when there are structural rules.*)
 let rec rule_permutes rule1 rule2 strRules = 
+let rec condition_equiv sub bangs equiv = 
+  match bangs with
+  | [] -> true
+  | SOME(s) :: lst when  (geq sub s) || (less_than_lst_one s equiv)
+      -> condition_equiv sub lst equiv
+  | SOME(s) :: lst -> false
+in
+let rec greater_subexp bangs quests equiv = 
+  (match quests with
+  | [] -> true 
+  | SOME(sub) :: lst when (condition_equiv sub bangs equiv)
+  (* Check whether there is an equivalence or the body is ok.*)
+      -> (greater_subexp bangs lst equiv)
+  | _ -> false)
+in
 (* Checking that all subexponentials are unbounded *)
 match Hashtbl.fold (fun key data acc -> if key = "$gamma" then acc else
                       (data = UNB) & acc) subexTpTbl true 
@@ -218,27 +245,30 @@ with
       (match (has_bang rule1) with
        | false -> true (* If no rule has a bang, then ok*)
        | true -> 
-          let subRule1 = collect_bangs rule1 in
-          let subRule2 = collect_quests rule2 in
-          let equiv = findEquiv rule1 strRules in
-          let rec greater_subexp sub1 sub2 = 
-            (match sub2 with
-            | [] -> true 
-            | SOME(head) :: tail when ((greater_than_lst_all head sub1)
-                || (greater_than_lst_one head equiv)) 
-                    (* Check whether there is an equivalence or the body is ok.*)
-                  -> (greater_subexp sub1 tail)
-            | _ -> false)
-          in
-          greater_subexp subRule1 subRule2
+          let rule1Bang = collect_bangs rule1 in
+          let rule2Quest = collect_quests rule2 in
+          let equiv = findEquiv rule2 strRules in
+            greater_subexp rule1Bang rule2Quest equiv
       )
-   | true -> false (* Not yet implemented...*)
+   | true ->
+       (match (has_bang rule1) with
+       | false -> false (* If no rule has a bang, then ok*)
+       | true ->       
+          let rule1Bang = collect_bangs rule1 in 
+          let rule2Bang = collect_bangs rule2 in
+          (match rule1Bang with
+            | SOME(s) :: lst -> 
+                let all_bangs = List.append lst rule2Bang in
+                List.fold_left (fun acc (SOME(s1)) -> (s1 = s) & acc) true all_bangs
+          )
+        )
   )
 | false -> false (*There is some bounded subexponential.*)
 
+let print_rule rule = print_endline (Prints.termToString rule)
+
 (* Collects all the rules for which the cut rule do not permute and then checks
 whether all rules permute over these rules. *)
-
 let rec check_permutation cut rules strRules = 
 let rec not_permute cut rules = 
   match rules with
@@ -247,15 +277,29 @@ let rec not_permute cut rules =
   | head :: tail -> head :: (not_permute cut tail)
 in 
 let rec permute_single_aux rule rules = 
-match rules with
-| [] -> true
-| head :: tail -> (rule_permutes rule head strRules) && (permute_single_aux rule
-tail) in
+  match rules with
+  | [] -> true
+  | head :: tail -> (rule_permutes rule head strRules) && (permute_single_aux rule
+  tail) in
 let rec permute_all_aux rules_not_permute rules =
-match rules_not_permute with
-| [] -> true
-| head :: tail -> (permute_single_aux head rules) && (permute_all_aux tail rules) in
-permute_all_aux (not_permute cut rules) rules
+  match rules_not_permute with
+  | [] -> true
+  | head :: tail -> (permute_single_aux head rules) && (permute_all_aux tail rules) in
+let rulesCutNotPermute = not_permute cut rules in 
+  print_endline "The cut rule does not permute over the following rules:";
+  List.iter print_rule rulesCutNotPermute;
+  permute_all_aux rulesCutNotPermute rules
+
+
+let rec cut_principal () = 
+let rec cut_principal_aux cuts = 
+  match cuts with
+  | [] -> true
+  | cut :: lst when check_permutation cut !introRules !structRules -> 
+        cut_principal_aux lst 
+  | _ -> false
+in 
+cut_principal_aux !cutRules
 
 (* Some testing functions.*)
 
@@ -264,7 +308,7 @@ let rec test1 () =
     | [] -> ()
     | cutHd :: cutTail -> 
       List.iter (fun ele -> 
-        if (cut_permutes_over cutHd ele) then print_endline "Cut permutes with"      
+        if (cut_permutes_over cutHd ele) then print_endline "Cut permutes."      
         else print_endline "Cut does not permute.") !introRules
 
 let rec test2 () = 
