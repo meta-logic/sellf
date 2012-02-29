@@ -42,7 +42,7 @@ let copyCtxOutFromPremisseUn proof = match (ProofTree.getPremisses proof) with
   | _ -> failwith "Error: found unary rule with more than one or no premisse."
 ;;
 
-let file_number = ref 0 ;;
+let file_name = ref "noname"  ;;
 
 (* Proves a LL formula *)
 
@@ -55,13 +55,12 @@ let rec prove formula h suc fail =
     let sq = ProofTree.getConclusion root in
     let ctxout = Sequent.getCtxOut sq in
     if (Context.isLinearEmpty ctxout) then begin
-      (* TODO make this file name more informative *)
-      let file = open_out ("proofsTex/proof"^(string_of_int !file_number)^".tex") in
+      let file = open_out ((!file_name)^".tex") in
       Printf.fprintf file "%s" (texFileHeader ());
       Printf.fprintf file "%s" (ProofTree.toTexString root);
       Printf.fprintf file "%s" (texFileFooter ());
       close_out file;
-      file_number := !file_number + 1;
+      file_name := "noname"; (* Resets file name so it is not overwritten *)
       suc ()
     end
     (*else fail ()*)

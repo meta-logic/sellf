@@ -85,7 +85,10 @@ let rec abs2forall f = match f with
 
 (* Procedure to actually check the coherence of a system *)
 
+let system_name = ref "" ;;
+
 let checkInitCoher str (t1, t2) =
+  file_name := ((!system_name)^"_initCoh_"^str); 
   (* Put axiom formulas on the context *)
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !ids;
@@ -113,6 +116,7 @@ let checkInitCoher str (t1, t2) =
 ;;
 
 let checkDuality str (t1, t2) =
+  file_name := ((!system_name)^"_cutCoh_"^str); 
   (* Put cut formulas on the context *)
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !cutRules;
@@ -139,7 +143,9 @@ let checkDuality str (t1, t2) =
         )
 ;;
 
+(* FIXME this sysName is the relative path to the file... *)
 let check sysName =
+  system_name := sysName;
   Hashtbl.iter checkDuality !lr_hash;
   Hashtbl.iter checkInitCoher !lr_hash;
   if !cutcoherent then print_string "\nThe system is cut coherent.\n"
