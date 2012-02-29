@@ -310,7 +310,7 @@ top:
   possible combinations of 2 rules).";*)
   (*print_endline "#macro: generates the macro rules of each rule of the file
   loaded.";*)
-  print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
+  print_endline "#cutprincipal: checks if the rules can permute until the cut becomes principal.";
   print_endline "#coherence: checks is the system specified on the file loaded is coherent.";
   print_endline "#scopebang: prints which subexponentials will have their formulas erased and which should be empty when a !s formula is going to be used.";
   print_endline "#done: you must type this to indicate that you are done working with a file and before loading another one.";

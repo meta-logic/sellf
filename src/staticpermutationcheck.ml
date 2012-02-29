@@ -279,8 +279,8 @@ in
 let rec permute_single_aux rule rules = 
   match rules with
   | [] -> true
-  | head :: tail -> (rule_permutes rule head strRules) && (permute_single_aux rule
-  tail) in
+  | head :: tail -> (rule_permutes rule head strRules) && (permute_single_aux
+  rule tail) in
 let rec permute_all_aux rules_not_permute rules =
   match rules_not_permute with
   | [] -> true
