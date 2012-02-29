@@ -213,6 +213,7 @@ match rules with
 | [] -> []
 | rl :: tail -> 
   let hdStruct = findHead rl in
+  (* TODO not only term equality but unification. But we must normalize the term first. *)
   if eq hdRule hdStruct then SOME(findQST rl) :: (findEquiv_Aux tail) 
     else (findEquiv_Aux tail)
 in

@@ -44,6 +44,6 @@ sigma \A (([l]? (lft A)) * ([r]? (rght A))).
 
 rules structural.
 % Structural rules for modals
-sigma \A ((not (lft (poss A))) * ([nl]? (lft (poss A)))).
-sigma \A ((not (rght (nec A))) * ([pr]? (rght (nec A)))).
+sigma \A ((not (lft (nec A))) * ([nl]? (lft (nec A)))).
+sigma \A ((not (rght (poss A))) * ([pr]? (rght (poss A)))).
 

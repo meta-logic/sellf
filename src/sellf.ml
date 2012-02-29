@@ -182,9 +182,9 @@ solve_query () =
           print_endline "Reduction to principal cuts is possible." else
           print_endline "Could not reduce to principal cuts."
       end
- (* TODO: complete with call to Vivek's function *)
 
-    | _ -> failwith "Function not implemented."
+    (* TODO print a more informative message... *)
+    | _ -> print_endline "Function not implemented. Try again or type #done and #help."
 
     (*
     | _ -> begin
