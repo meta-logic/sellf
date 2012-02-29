@@ -176,7 +176,7 @@ solve_query () =
       List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
       end
 
-    | "#cutprincipal" -> (*Staticpermutationcheck.test2 ()*)
+    | "#principalcut" -> (*Staticpermutationcheck.test2 ()*)
       begin
         if Staticpermutationcheck.cut_principal () then 
           print_endline "Reduction to principal cuts is possible." else

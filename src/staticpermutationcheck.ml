@@ -279,14 +279,23 @@ in
 let rec permute_single_aux rule rules = 
   match rules with
   | [] -> true
-  | head :: tail -> (rule_permutes rule head strRules) && (permute_single_aux
-  rule tail) in
+  | head :: tail -> 
+    let p1 = rule_permutes rule head strRules in
+    let p2 = permute_single_aux rule tail in
+    if not p1 then print_rule rule;
+    p1 && p2
+in
 let rec permute_all_aux rules_not_permute rules =
   match rules_not_permute with
   | [] -> true
-  | head :: tail -> (permute_single_aux head rules) && (permute_all_aux tail rules) in
+  | head :: tail -> 
+    print_endline ("\nThe rule "^(Prints.termToString head)^" does not permute with:");
+    let b1 = (permute_single_aux head rules) in
+    let b2 = (permute_all_aux tail rules) in
+    b1 && b2
+in
 let rulesCutNotPermute = not_permute cut rules in 
-  print_endline "The cut rule does not permute over the following rules:";
+  print_endline "\nThe cut rule does not permute over the following rules:";
   List.iter print_rule rulesCutNotPermute;
   permute_all_aux rulesCutNotPermute rules
 
