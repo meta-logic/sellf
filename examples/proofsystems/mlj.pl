@@ -9,6 +9,7 @@
 subexp l unb.
 subexp r unb.
 
+
 rules introduction.
 % Implication
 (not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
@@ -42,5 +43,4 @@ rules cut.
 sigma \A (([l]? (lft A)) * ([r]? (rght A))).
 
 rules structural.
-sigma \A ((not (lft A)) * ([l]? (lft A))).
-sigma \A ((not (rght A)) * ([r]? (rght A))).
+sigma \B (sigma \A ((not (lft (imp A B))) * ([l]? (lft (imp A B))))).
