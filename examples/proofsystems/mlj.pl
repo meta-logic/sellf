@@ -40,3 +40,7 @@ sigma \A ((not (lft (A))) * (not (rght (A)))).
 rules cut.
 % Cut rule
 sigma \A (([l]? (lft A)) * ([r]? (rght A))).
+
+rules structural.
+sigma \A ((not (lft A)) * ([l]? (lft A))).
+sigma \A ((not (rght A)) * ([r]? (rght A))).

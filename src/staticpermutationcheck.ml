@@ -165,7 +165,7 @@ paper mentioned above. *)
 let rec has_bang rule = 
 match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP 
-  | EQU(_,_,_) | QST(_,_) | PARR(_,_) -> false
+  | EQU(_,_,_) | QST(_,_) | PARR(_,_) | FORALL(_,_,_) -> false
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       has_bang b1 || has_bang b2
   | BANG(CONS(sub),b) -> true
@@ -282,7 +282,7 @@ let rec permute_single_aux rule rules =
   | head :: tail -> 
     let p1 = rule_permutes rule head strRules in
     let p2 = permute_single_aux rule tail in
-    if not p1 then print_rule rule;
+    if not p1 then print_rule head;
     p1 && p2
 in
 let rec permute_all_aux rules_not_permute rules =
