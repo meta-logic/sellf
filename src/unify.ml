@@ -346,7 +346,6 @@ let raise_and_invert v1 v2 a1 a2 lev =
         end
     | _ -> assert false
   in
-
     if ts1<ts2 || lts1<lts2 then
       let raised,args_r1,args_r2 = raise_var a1 l1 in
       let pruned,args_p1,args_p2 = prune a2 (List.length a2) in
@@ -710,7 +709,7 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
   | _, Term.VAR {tag=t}
   | Term.VAR {tag=t}, _ when not (variable t || constant t) ->
       failwith "logic variable on the left"
-  | Term.CONS(head1), Term.APP(h1, a2) -> unify_list a1 a2
+  | Term.CONS(head1), Term.APP(h, a2) when h = h1 -> unify_list a1 a2
   | _ -> raise (ConstClash (h1,t2))
 
 (** The main unification procedure.

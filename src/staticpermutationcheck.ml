@@ -12,6 +12,15 @@ open Basic
 open Term
 open Subexponentials
 
+let unify = 
+  let module Unify = 
+    Unify.Make ( struct
+      let instantiatable = Term.LOG
+      let constant_like = Term.EIG
+    end )
+  in Unify.pattern_unify
+;;
+
 (* Assuming that the cut has the following shape:
 
     exists A. !a ?b lft{A} tensor !c ?d right{A}
@@ -197,7 +206,18 @@ let rec findEquiv rule structRules =
 let rec findHead rule = 
 match rule with 
 | NOT(PRED(_,b,_)) -> b
-| ABS(_, _, b) | EXISTS(_,_,b) -> findHead b
+| ABS(s, i, b) -> 
+      varid := !varid + 1;
+      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      let ptr = PTR {contents = new_var} in
+      let newf = Norm.hnorm (APP (rule, [ptr])) in
+        findHead newf
+| EXISTS(s,i,b) ->
+      varid := !varid + 1;
+      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      let ptr = PTR {contents = new_var} in
+      let newf = Norm.hnorm (APP (ABS (s, 1, b), [ptr])) in
+        findHead newf
 | TENSOR(b1, b2) -> findHead b1
 | _ -> failwith "Unexpected term in a rule, while extracting the head."
 in
@@ -213,9 +233,11 @@ match rules with
 | [] -> []
 | rl :: tail -> 
   let hdStruct = findHead rl in
-  (* TODO not only term equality but unification. But we must normalize the term first. *)
-  if eq hdRule hdStruct then SOME(findQST rl) :: (findEquiv_Aux tail) 
-    else (findEquiv_Aux tail)
+  begin
+    try match unify hdRule hdStruct with
+    | () -> SOME(findQST rl) :: (findEquiv_Aux tail) 
+    with _ -> findEquiv_Aux tail
+  end
 in
 findEquiv_Aux structRules  
 

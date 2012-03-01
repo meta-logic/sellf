@@ -381,7 +381,7 @@ let rec eq t1 t2 =
                  | Binding (t,i), Binding (tt,j) when i=j && eq t tt -> true
                  | _ -> false)
             true e ee
-    | CONS s1, CONS s2 -> s1 = s2
+    (*| CONS s1, CONS s2 -> s1 = s2*)
     | _ -> false
 
 
