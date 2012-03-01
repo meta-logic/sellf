@@ -43,4 +43,4 @@ rules cut.
 sigma \A (([l]? (lft A)) * ([r]? (rght A))).
 
 rules structural.
-sigma \B (sigma \A ((not (lft (imp A B))) * ([l]? (lft (imp A B))))).
+sigma \A ((not (lft A)) * ([l]? (lft A))).
