@@ -2,10 +2,10 @@ I) Requirements:
 
 These tools must be installed for 'sellf' to work.
 - ocaml (http://caml.inria.fr/)
-- dlv (http://www.dbai.tuwien.ac.at/proj/dlv/)
 
-NOTE: The system was implemented and tested in Linux/Ubuntu. Other operating
-systems were not yet tried.
+NOTE: The system was implemented and tested in Linux/Ubuntu. It was also
+installed and executed succesfully on MacOS. Other operating systems were not
+yet tried.
 
 II) Installation:
 
@@ -15,8 +15,8 @@ III) Syntax
 
 The operators of linear logic with subexponentials and its syntax are:
 
-tensor -> ,
-plus   -> ;
+tensor -> *
+plus   -> +
 with   -> &
 par    -> |
 !l     -> [l]bang
@@ -41,35 +41,38 @@ and press enter. A command line prompt will appear with the symbol ':>'. For a
 list of commands available, you can type '#help'. Here I will only go through a
 small example so that you can understand quickly how the system works.
 
-Some example specifications can be found inside the 'examples' folder. If you
-open the file 'll.pl' you can see the specification of linear logic (without
-subexponentials). A specification rule has the following form:
+Some example specifications can be found inside the 'examples/proofsystems'
+folder. If you open the file 'g1m.pl' you can see the specification of linear
+logic (without subexponentials). A specification rule has the following form:
 
-rght (tensor a b) :: ([slin]? (rght a)) , ([slin]? (rght b)).
+(not (lft (imp A B))) * (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
 
-On the left-hand side of :: is an atomic predicate ('rght' or 'lft') taking as
-argument a formula of the object logic. On the right-hand side of :: is
-the formula in linear logic with subexponentials (our meta logic) that specifies 
-the connective of the object logic. The rule above is the specification of the
-inference rule for the introduction of 'tensor' on the right hand side.
+This is exactly as it was specified in the paper "An Extended Framework for
+Specifying and Reasoning about Proof Systems" by Vivek Nigam, Elaine Pimentel
+and Giselle Reis. Some buit-in elements for the specification of systems are:
+
+- 'form' as the type of formulas of the object logic
+- 'term' as the type of terms of the object logic
+- atomic predicates 'rght' and 'lft' of type form -> o
 
 A specification can be built of formulas using these operators and the
-predicates 'rght' or 'lft' that atomizes formulas of the object logic. It is
-important to note that the system only deals with specifications using constants
-(lower case letters) so far.
+predicates 'rght' or 'lft' that atomizes formulas of the object logic. They are
+also divided in four sections which are identified by the keywords: 'rules
+introduction', 'rules axiom', 'rules cut' and 'rules structural'.
 
-To load the file 'll.pl' of the examples folder, run 'sellf' as expalined above
+To load the file 'g1m.pl' of the examples folder, run 'sellf' as expalined above
 and type:
 
-#load ../examples/ll
+#load ../examples/proofsystems/g1m
 
 Then, the system will display a '?>' symbol indicating that the file is loaded.
-Some commands are available in this state. To check if all the rules are
-permutable, just type:
+The commands available are:
 
-#perm
-
-The system checks all the possible combinations of two rules among those in the
-specification file and prints out on the screen if they are permutable or not.
-
+- '#coherence': checks if the system is cut-coherent (principal cuts can be
+  eliminated) and initial-coherent (axioms can be reduced to the atomic version).
+- '#principalcut': checks necessary conditions for permuting rules such that the
+  cut becomes principal.
+- '#scopebang': given a subexponential s, it will indicate which of the other
+  subexponentials should be empty or will have their formulas erased when a
+  !s rule is applied.
 
