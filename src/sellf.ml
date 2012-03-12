@@ -25,8 +25,9 @@ let rec start () =
     Term.initialize ();
     Context.initialize ();
     Subexponentials.initialize ();
-    (*Structs.initialize ();
     Coherence.initialize ();
+    Staticpermutationcheck.initialize ();
+    (*Structs.initialize ();
     Structs.rules := [];*)
     print_string ":> ";
     let command = read_line() in

@@ -39,6 +39,11 @@ let addCutRule r =
 let addIntroRule r = 
   introRules := r :: !introRules
 
+let initialize () =
+  structRules := [];
+  cutRules := [];
+  introRules := [] ;;
+
 (*Simple auxiliary functions that collects the subexponentials appearing in the
 specification of rules. *)
 

@@ -35,6 +35,7 @@ let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 10
 let initialize () = 
   cutcoherent := true;
   initcoherent := true;
+  ids := [];
   Hashtbl.clear !lr_hash ;;
 
 (* Operation for the case that there is more than one specification for one side *)
