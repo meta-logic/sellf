@@ -180,7 +180,8 @@ solve_query () =
       begin
         if Staticpermutationcheck.cut_principal () then 
           print_endline "Reduction to principal cuts is possible." else
-          print_endline "Could not reduce to principal cuts."
+          print_endline "\nCould not reduce to principal cuts.
+\nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
       end
 
     (* TODO print a more informative message... *)

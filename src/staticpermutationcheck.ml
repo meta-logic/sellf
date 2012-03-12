@@ -202,7 +202,6 @@ match rule with
   | _ -> failwith "Unexpected term in a rule, while collecting bangs."
 
 
-let rec findEquiv rule structRules = 
 let rec findHead rule = 
 match rule with 
 | NOT(PRED(_,b,_)) -> b
@@ -220,7 +219,9 @@ match rule with
         findHead newf
 | TENSOR(b1, b2) -> findHead b1
 | _ -> failwith "Unexpected term in a rule, while extracting the head."
-in
+
+
+let rec findEquiv rule structRules = 
 let rec findQST rule = 
 match rule with 
 | QST(CONS(sub),_) -> sub
@@ -288,7 +289,36 @@ with
   )
 | false -> false (*There is some bounded subexponential.*)
 
-let print_rule rule = print_endline (Prints.termToString rule)
+let termsListToString args = List.fold_right (fun el acc ->
+  (Prints.termToString el)^" "^acc) args ""
+
+
+(* Function to pretty print a rule according to its head. *)
+let rec print_rule rule = 
+let rec replace_Log term = 
+  match term with
+  | VAR _ -> CONS("_")
+  | PTR _ -> CONS("_")
+  | APP(b1, lb2) ->  
+      let t1 = replace_Log b1 in
+      let lt1 = List.map (fun ele -> replace_Log ele) lb2 in 
+        APP(t1, lt1)  
+  | t -> t
+in 
+let rec pretty_print hd = 
+  match hd with
+  | APP(CONS("lft"), b) -> 
+    let _ = print_string "Left Introduction rule for " in
+    print_string (termsListToString b)
+  | APP(CONS("rght"), b) -> 
+    let _ = print_string "Right Introduction rule for " in
+    print_string (termsListToString b)
+  | _ -> failwith "Unexpected term while printing the head of the rule."
+in 
+let hd = replace_Log (findHead rule) in
+pretty_print hd
+
+let print_rule_endline rule = print_rule rule; print_endline ""
 
 (* Collects all the rules for which the cut rule do not permute and then checks
 whether all rules permute over these rules. *)
@@ -305,21 +335,23 @@ let rec permute_single_aux rule rules =
   | head :: tail -> 
     let p1 = rule_permutes rule head strRules in
     let p2 = permute_single_aux rule tail in
-    if not p1 then print_rule head;
+    if not p1 then print_rule_endline head;  
     p1 && p2
 in
 let rec permute_all_aux rules_not_permute rules =
   match rules_not_permute with
   | [] -> true
   | head :: tail -> 
-    print_endline ("\nThe rule "^(Prints.termToString head)^" does not permute with:");
+    print_string "\nThe "; 
+    print_rule head; 
+    print_endline " does not permute with:";
     let b1 = (permute_single_aux head rules) in
     let b2 = (permute_all_aux tail rules) in
     b1 && b2
 in
 let rulesCutNotPermute = not_permute cut rules in 
   print_endline "\nThe cut rule does not permute over the following rules:";
-  List.iter print_rule rulesCutNotPermute;
+  List.iter (fun ele -> print_rule ele; print_endline "") rulesCutNotPermute;
   permute_all_aux rulesCutNotPermute rules
 
 
@@ -333,8 +365,9 @@ let rec cut_principal_aux cuts =
 in 
 cut_principal_aux !cutRules
 
-(* Some testing functions.*)
+(* Some testing functions, for debugging only.*)
 
+(*
 let rec test1 () = 
     match !cutRules with
     | [] -> ()
@@ -356,5 +389,6 @@ let rec test3 () =
     | rule1 :: lst -> let equiv = findEquiv rule1 !structRules in 
         List.iter (fun (SOME(s)) -> print_endline s) equiv;
         print_endline "Found equivalences"
+*)
 
 
