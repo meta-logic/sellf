@@ -24,7 +24,7 @@ rules introduction.
 
 % Implication
 (not (lft (imp A B))) * (([l]bang (([r]? (rght A)))) * ([l]? (lft B))).
-(not (rght (imp A B))) * [l]bang (([l]? (lft A)) | ([l]bang ([r]? (rght B)))).
+(not (rght (imp A B))) * [l]bang (([l]? (lft A)) | (([r]? (rght B)))).
 
 % Circ
 (not (lft (circ A))) * [cr]bang ([l]? (lft A)).
