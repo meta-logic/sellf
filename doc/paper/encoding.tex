@@ -1,4 +1,4 @@
-\Paragraph{Encoding Sequents}
+\paragraph{Encoding Sequents}
 Similar as in Church's simple type theory \cite{church40}, we assume that 
 linear logic propositions
 have type $o$ and  that the linear logic quantifiers
@@ -7,17 +7,17 @@ have type $(\tsl{term} \rightarrow \tsl{form}) \rightarrow o$, where
 object-logic term and for object-logic formulas. 
 Moreover, following \cite{pimentel05lpar,pimentel01phd,nigam10jar}, 
 we encode
-a sequent in \SELLF\ by using two meta-level atoms $\lft{\cdot}$ and 
+a sequent in \sellf\ by using two meta-level atoms $\lft{\cdot}$ and 
 $\rght{\cdot}$ of type $\tsl{form} \rightarrow o$. They denote 
 respectively an object logic formula appearing on the left and on the 
 right-hand-side of a sequent. For example, the sequent 
 $B_1, \ldots, B_n \vdash C_1, \ldots, C_m$ could be encoded by 
-the \SELLF\ sequent $\vdash \Theta : 
+the \sellf\ sequent $\vdash \Theta : 
 \lft{B_1}, \cdots, \lft{B_n} :_l \rght{C_1}, \cdots, \rght{C_m} :_r \cdot
 \Uparrow \cdot$, where $\Theta$ encodes the proof system's
 introduction rules. 
 
-Notice that in \SELLF\ we can specify the contexts
+Notice that in \sellf\ we can specify the contexts
 for the
 subexponentials \tsl{l} (for left) and \tsl{r} (for right) to either 
 behave like sets or multisets by changing the subexponential signature 
@@ -38,7 +38,7 @@ subexponentials as needed.
 % the (multi)set of meta-level atoms $\{\lft{F} \mid F \in \lft{\Gamma}\}$
 % (respectively, $\{\rght{F} \mid F \in \rght{\Gamma}\}$).
 
-\Paragraph{Encoding Inference Rules}
+\paragraph{Encoding Inference Rules}
 An inference rule is encoded by using \sellf\ monopoles and
 bipoles~\cite{miller.ep}. A \emph{monopole} is a formula constructed from
 atomic formulas, $\lft{\cdot}$ and $\rght{\cdot}$, and occurrences of
@@ -111,8 +111,8 @@ following form, where $F$  is in the theory $\Theta$:
 }
 The \bDer\ above corresponds exactly to the left implication
 introduction rule for intuitionistic logic with premises
-$\Gamma, A\iimp B \lra A$ and $\Gamma, A \iimp B, B \lra G$ and conclusion
-$\Gamma, A\iimp B \lra G$. 
+$\Gamma, A\iimp B \longrightarrow A$ and $\Gamma, A \iimp B, B \longrightarrow G$ and conclusion
+$\Gamma, A\iimp B \longrightarrow G$. 
 Nigam and Miller in \cite{nigam10jar} classify this adequacy as \emph{on
 the level of derivations}. Moreover \cite{nigam10jar,nigam11lsfa} provides
 a number of the encodings of proof systems for different logics that have

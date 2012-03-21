@@ -1,0 +1,53 @@
+\documentclass[a4paper, 11pt]{llncs}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{../mycommands}
+\usepackage{comment}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\newcommand{\etal}{\emph{et al.}}
+\newcommand\plus{\oplus}
+
+\title{Tentative paper: permutations}
+\author{Vivek Nigam and Giselle Reis}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+\section{Introduction}
+\input{intro}
+
+\section{SELLF}
+\input{llsubexp}
+\input{encoding}
+
+\section{Specifying derivations}
+
+\input{derivations}
+\input{provability}
+
+\section{Experiments}
+\input{experiments}
+
+\section{Related work}
+\input{related}
+
+\section{Conclusions}
+\input{conclusion}
+
+\appendix
+\input{appendix}
+
+\bibliography{permutation}
+
+\end{document}
