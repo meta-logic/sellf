@@ -10,9 +10,42 @@
 \usepackage{multirow}
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage[margin=2cm]{geometry}
 
 \newcommand{\etal}{\emph{et al.}}
 \newcommand\plus{\oplus}
+
+\newcommand\bDer{\textrm{bipole-derivation}}
+\newcommand\BDer{\textrm{Bipole-derivation}}
+\newcommand\bDers{\textrm{bipole-derivations}}
+\newcommand\BDers{\textrm{Bipole-derivations}}
+
+\newcommand{\lftQ}[1]{\nquest{l} \lfloor #1 \rfloor}
+\newcommand{\rghtQ}[1]{\nquest{r} \lceil #1 \rceil}
+
+% \newcommand{\fail}{\hbox{\tsl{false}}}
+\newcommand{\mctx}[2]{\ensuremath{{\tsl{mctx}(\ensuremath{#1},
+\ensuremath{#2}) } }}
+\newcommand{\elin}[2]{\ensuremath{{\tsl{unitctx}(\ensuremath{#1},
+\ensuremath{#2})}
+}}
+\newcommand{\emp}[1]{\ensuremath{{\tsl{emp}(\ensuremath{#1})}}}
+% \newcommand{\eqf}[2]{
+% \ensuremath{\hbox{\tsl{eqf}(\ensuremath{#1},\ensuremath{#2})}}}
+\newcommand{\addform}[3]{\ensuremath{{\tsl{addfm}(\ensuremath{#1},
+\ensuremath{#2},\ensuremath{
+#3})}}}
+\newcommand{\eqctx}[2]{\ensuremath{{\tsl{eqctx}(\ensuremath{#1},\ensuremath
+{#2})}}}
+\newcommand{\union}
+[3]{\ensuremath{{\tsl{union}(\ensuremath{#1},\ensuremath{#2},
+\ensuremath{ #3})}}}
+\newcommand{\In}
+[2]{\ensuremath{\tsl{in}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\Equ}
+[2]{\ensuremath{\tsl{Equ}(\ensuremath{#1},\ensuremath{#2})}}
+
+
 
 \title{Tentative paper: permutations}
 \author{Vivek Nigam and Giselle Reis}
@@ -28,7 +61,7 @@
 \input{intro}
 
 \section{SELLF}
-\input{llsubexp}
+%\input{llsubexp}
 \input{encoding}
 
 \section{Specifying derivations}
@@ -40,13 +73,13 @@
 \input{experiments}
 
 \section{Related work}
-\input{related}
+%\input{related}
 
 \section{Conclusions}
-\input{conclusion}
+%\input{conclusion}
 
 \appendix
-\input{appendix}
+%\input{appendix}
 
 \bibliography{permutation}
 
