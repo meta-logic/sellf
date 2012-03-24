@@ -20,16 +20,81 @@ let position lexbuf =
 
 let samefile = ref true ;;
 let fileName = ref "" ;;
+let check = ref "" ;;
 
+let usage = "Usage: " ^ Sys.argv.(0) ^ " [-v] [-i string] [-c string]"
+
+let argslst = [
+  ("-v", Arg.Unit (fun () -> Term.verbose := true), ": set verbose on.");
+  ("-i", Arg.String (fun s -> fileName := s), ": prefix of .pl and .sig file (with path)");
+  ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'coherence', 'atomicelim' or 'scopebang' (depending on what you want to check)");
+]
+
+let initAll () = 
+  Term.initialize ();
+  Context.initialize ();
+  Subexponentials.initialize ();
+  Coherence.initialize ();
+  Staticpermutationcheck.initialize ();
+;;
+
+let check_principalcut () = begin
+  if Staticpermutationcheck.cut_principal () then 
+    print_endline "Tatu could infer that reduction to principal cuts is possible." else
+    print_endline "\nCould not reduce to principal cuts.
+      \nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
+end ;;
+
+let check_atomicelim () = begin
+  if Staticpermutationcheck.weak_coherent () then 
+  print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." else
+  print_endline "\nCould not infer how to eliminate atomic cuts."  
+end ;;
+
+let check_coherence () = Coherence.check !fileName ;;
+
+let check_scopebang () = begin
+  print_endline "Please type the subexponential:";
+  let s = read_line() in
+  let ers = Subexponentials.erased_bang s in
+  let ept = Subexponentials.empty_bang s in
+  print_endline ("!"^s^"  : ");
+  print_endline "The following will have their formulas erased: ";
+  List.iter (fun a -> print_string (a^", ")) ers; print_newline ();
+  print_endline "The following should be empty: ";
+  List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
+end ;;
+
+let parse file_name = begin
+  let file_sig = open_in (file_name^".sig") in
+  let lexbuf = Lexing.from_channel file_sig in
+  begin
+    try 
+      while true do
+        let _ = Parser_systems.types Lexer.token lexbuf in ();
+      done; true
+    with 
+      |  Lexer.Eof -> 
+          let file_prog = open_in (file_name^".pl") in 
+          let lexbuf = Lexing.from_channel file_prog in
+            begin
+            try
+              while true do
+                let _ = Parser_systems.clause Lexer.token lexbuf in ();
+              done; true 
+            with
+              | Lexer.Eof -> true
+              | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
+              | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+            end
+      |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
+      |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
+    end
+end ;;
+ 
 let rec start () =
-    Term.initialize ();
-    Context.initialize ();
-    Subexponentials.initialize ();
-    Coherence.initialize ();
-    Staticpermutationcheck.initialize ();
-    (*Structs.initialize ();
-    Structs.rules := [];*)
-    print_string ":> ";
+  initAll ();
+  print_string ":> ";
     let command = read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
@@ -41,38 +106,14 @@ let rec start () =
       | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
       | "time-off" -> Term.time := false; print_endline "Time is set to off."; start ()
       | file_name -> 
-        begin
-          fileName := file_name;
-          print_endline ("Loading file "^file_name);
-          let file_sig = open_in (file_name^".sig") in
-          let lexbuf = Lexing.from_channel file_sig in
-          begin
-            try 
-              while true do
-                let _ = Parser_systems.types Lexer.token lexbuf in ();
-              done
-            with 
-              |  Lexer.Eof -> 
-                  let file_prog = open_in (file_name^".pl") in 
-                  let lexbuf = Lexing.from_channel file_prog in
-                    begin
-                    try
-                      while true do
-                        let _ = Parser_systems.clause Lexer.token lexbuf in ();
-                      done  
-                    with 
-                      | Lexer.Eof -> samefile := true; (*Structs.saveInitState ();*)
-                        while !samefile do 
-                          solve_query (); 
-                          (*Structs.recoverInitState () *)
-                        done
-                      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); start ()
-                      | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; start ()
-                    end
-              |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); start ()
-              |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); start ()
-            end
+        print_endline ("Loading file "^file_name);
+        if parse file_name then begin
+          samefile := true;
+          while !samefile do 
+            solve_query (); 
+          done
         end
+        else start ();
     with
     |  Parsing.Parse_error ->  print_endline "Invalid command. For more information type #help."; start  ()
     |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
@@ -162,37 +203,15 @@ solve_query () =
           in check_perm hd tl; every_pair tl
       in every_pair !Structs.rules;
     *)
-    | "#coherence" ->
-      Coherence.check !fileName
 
-    | "#scopebang" -> begin
-      print_endline "Please type the subexponential:";
-      let s = read_line() in
-      let ers = Subexponentials.erased_bang s in
-      let ept = Subexponentials.empty_bang s in
-      print_endline ("!"^s^"  : ");
-      print_endline "The following will have their formulas erased: ";
-      List.iter (fun a -> print_string (a^", ")) ers; print_newline ();
-      print_endline "The following should be empty: ";
-      List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
-      end
+    | "#coherence" -> check_coherence ()
 
-    | "#principalcut" -> (*Staticpermutationcheck.test2 ()*)
-      begin
-        if Staticpermutationcheck.cut_principal () then 
-          print_endline "Tatu could infer that reduction to principal cuts is possible." else
-          print_endline "\nCould not reduce to principal cuts.
-\nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
-       end
+    | "#scopebang" -> check_scopebang ()
 
-    | "#atomicelim" -> 
-      begin
-        if Staticpermutationcheck.weak_coherent () then 
-        print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." else
-        print_endline "\nCould not infer how to eliminate atomic cuts."  
-      end
+    | "#atomicelim" -> check_atomicelim () 
 
-    (* TODO print a more informative message... *)
+    | "#principalcut" -> check_principalcut ()
+
     | _ -> print_endline "Function not implemented. Try again or type #done and #help."
 
     (*
@@ -255,9 +274,26 @@ solve_query () =
     (*end*)
 
 let _ = 
-print_endline "SELLF -- A linear logic framework for systems with locations.";
-print_endline "Version 0.5.\n";
-while true do
-start ()
-done
+Arg.parse argslst (fun x -> raise (Arg.Bad ("Bad argument: "^x))) usage;
+match (!check, !fileName) with 
+  | ("", "") ->
+    print_endline "SELLF -- A linear logic framework for systems with locations.";
+    print_endline "Version 0.5.\n";
+    while true do
+      start ()
+    done
+  | ("principalcut", file) -> 
+    initAll ();
+    if parse file then check_principalcut ()
+  | ("coherence", file) -> 
+    initAll ();
+    if parse file then check_coherence ()
+  | ("atomicelim", file) -> 
+    initAll ();
+    if parse file then check_atomicelim ()
+  | ("scopebang", file) ->
+    initAll ();
+    if parse file then check_scopebang ()
+  | (x, y) -> failwith ("Invalid arguments.")
+;;
 
