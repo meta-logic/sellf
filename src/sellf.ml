@@ -180,9 +180,16 @@ solve_query () =
     | "#principalcut" -> (*Staticpermutationcheck.test2 ()*)
       begin
         if Staticpermutationcheck.cut_principal () then 
-          print_endline "Reduction to principal cuts is possible." else
+          print_endline "Tatu could infer that reduction to principal cuts is possible." else
           print_endline "\nCould not reduce to principal cuts.
 \nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
+       end
+
+    | "#atomicelim" -> 
+      begin
+        if Staticpermutationcheck.weak_coherent () then 
+        print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." else
+        print_endline "\nCould not infer how to eliminate atomic cuts."  
       end
 
     (* TODO print a more informative message... *)

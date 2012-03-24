@@ -99,28 +99,43 @@ let rec less_than_lst_one sub lst =
   | SOME(s) :: lst1 when geq s sub  -> true
   | SOME(s) :: lst1 -> less_than_lst_one sub lst1
 
-(*This function implements the conditions detailed in the paper for when a cut-rule
-permutes over an introduction rule.*)
+(* This function gets the subexponentials of a cut. 
+It returns the subexponentials in the following form:
+!a?b lft{A} tensor !c?d rght{B}
+ *)
 
-let rec cut_permutes_over cut rule = 
 let rec get_subexp_cut cut = 
   match cut with 
   | ABS(_, _, body) | EXISTS(_,_,body) -> 
     (match body with
     | TENSOR(a,b) ->       
       (match a,b with 
-      | QST(CONS(sub2),b1), QST(CONS(sub4),b2) -> [NONE, SOME(sub2),
-          NONE, SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),b1)), QST(CONS(sub4),b2) -> [SOME(sub1),
-          SOME(sub2),NONE, SOME(sub4)]
-      | QST(CONS(sub2),b1), BANG(CONS(sub3),QST(CONS(sub4),b2)) -> [NONE, SOME(sub2),
-          SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),b1)), BANG(CONS(sub3),QST(CONS(sub4),b2)) ->
+      | QST(CONS(sub2),PRED("lft",_ , _)), QST(CONS(sub4),PRED("rght", _, _)) -> 
+          [NONE, SOME(sub2), NONE, SOME(sub4)]
+      | QST(CONS(sub4),PRED("rght", _, _)), QST(CONS(sub2),PRED("lft",_, _))  -> 
+          [NONE, SOME(sub2), NONE, SOME(sub4)]
+      | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), QST(CONS(sub4),PRED("rght", _, _)) -> 
+          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+      | QST(CONS(sub4),PRED("rght", _, _)), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) -> 
+          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+      | QST(CONS(sub2),PRED("lft",_, _)), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) -> 
+          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), QST(CONS(sub2),PRED("lft",_, _)) -> 
+          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) ->
+          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
       | _ -> failwith "Wrong cut")
     | _ -> failwith "Wrong cut")
   | _ -> failwith "Wrong cut"
-in let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
+
+
+(*This function implements the conditions detailed in the paper for when a cut-rule
+permutes over an introduction rule.*)
+
+let rec cut_permutes_over cut rule = 
+let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
 let rule_prefix = get_subexp_prefix rule in 
 let subexp = keys subexTpTbl in
 let check_one_monopole mono_prefix =
@@ -362,6 +377,36 @@ let rulesCutNotPermute = not_permute cut rules in
   else 
     (print_endline "\nThe cut rule permutes over all rules."; true)
     
+(* This function check whether a rule is a bipole. If not it fails. *)
+let rec typecheck_rules rules = 
+let rec typecheck_bipole rule =
+let rec check_monopole mono = 
+  match mono with
+  | PRED("lft",_,_) | PRED("rght",_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
+  | PARR(b1,b2) | WITH(b1,b2) -> 
+    (check_monopole b1) && (check_monopole b2)
+  | QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
+  | FORALL(_,_,b) -> (check_monopole b)
+  | _ -> false
+  in
+match rule with
+| NOT(PRED("lft",_,_)) | NOT(PRED("rght",_,_)) | PRED("lft",_,_) | PRED("rght",_,_) 
+| ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
+| TENSOR(b1, b2) | ADDOR(b1,b2) -> 
+    (typecheck_bipole b1) && (typecheck_bipole b2)
+| WITH(b1, b2) | PARR(b1,b2) -> 
+    (check_monopole b1) && (check_monopole b2)
+| BANG(_,b) | FORALL(_,_,b) -> check_monopole b
+| ABS(_, _, b) | EXISTS(_,_,b) -> typecheck_bipole b
+| QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
+| _ -> false
+in
+match rules with 
+| [] -> true
+| rl :: lst when typecheck_bipole rl -> typecheck_rules lst
+| rl :: lst -> 
+    print_endline ("The following clause is NOT a bipole -> \n"^Prints.termToString rl); 
+    false
 
 let rec cut_principal () = 
 let rec cut_principal_aux cuts = 
@@ -371,7 +416,52 @@ let rec cut_principal_aux cuts =
         cut_principal_aux lst 
   | _ -> false
 in 
-cut_principal_aux !cutRules
+if typecheck_rules !introRules then 
+  cut_principal_aux !cutRules
+else false
+
+let rec weak_coherent () =
+let rec collect_quests_aux rule str = 
+match rule with
+  | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
+  | TENSOR(b1, b2) | ADDOR(b1,b2) | PARR(b1,b2) | WITH(b1,b2) -> 
+      List.append (collect_quests_aux b1 str) (collect_quests_aux b2 str)
+  | BANG(CONS(sub),b) -> (collect_quests_aux b str)
+  | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests_aux b str)
+  | QST(CONS(sub),PRED(str1,_,_)) when str = str1 -> [SOME(sub)]
+  | QST(CONS(sub),_) -> []
+  | _ -> failwith "Unexpected term in a rule, while collecting string quests."
+in
+let all_subs_lft = 
+  List.fold_left (fun acc ele -> 
+    List.append (collect_quests_aux ele "lft") acc) [] !introRules 
+in
+let all_subs_rght = 
+  List.fold_left (fun acc ele -> 
+    List.append (collect_quests_aux ele "rght") acc) [] !introRules 
+in
+let check_lft_subs b lft_subs = 
+  List.fold_left (fun acc (SOME(s)) -> 
+    if geq s b then acc else false) true lft_subs
+in
+let check_rght_subs d rght_subs = 
+  List.fold_left (fun acc (SOME(t)) -> 
+    if geq t d then acc else false) true rght_subs
+in
+let rec weak_cut_aux cut = 
+  let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
+  (check_lft_subs b all_subs_lft) &&  (check_rght_subs d all_subs_rght)
+in
+let rec weak_cut_aux_lst cuts =      
+match cuts with
+| [] -> true
+| cut :: lst when weak_cut_aux cut ->
+        weak_cut_aux_lst lst 
+| _ -> false
+in
+if typecheck_rules !introRules then 
+  weak_cut_aux_lst !cutRules
+else false
 
 (* Some testing functions, for debugging only.*)
 
