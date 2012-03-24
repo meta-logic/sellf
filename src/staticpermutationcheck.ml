@@ -354,11 +354,14 @@ let rec permute_all_aux rules_not_permute rules =
     let b2 = (permute_all_aux tail rules) in
     b1 && b2
 in
-let rulesCutNotPermute = not_permute cut rules in 
-  print_endline "\nThe cut rule does not permute over the following rules:";
-  List.iter (fun ele -> print_rule ele; print_endline "") rulesCutNotPermute;
-  permute_all_aux rulesCutNotPermute rules
-
+let rulesCutNotPermute = not_permute cut rules in
+  if List.length rulesCutNotPermute > 0 then
+    (print_endline "\nThe cut rule does not permute over the following rules:";
+    List.iter (fun ele -> print_rule ele; print_endline "") rulesCutNotPermute;
+    permute_all_aux rulesCutNotPermute rules)
+  else 
+    (print_endline "\nThe cut rule permutes over all rules."; true)
+    
 
 let rec cut_principal () = 
 let rec cut_principal_aux cuts = 
