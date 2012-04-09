@@ -94,19 +94,12 @@ let checkInitCoher str (t1, t2) =
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !ids;
 
-  (*print_endline "Trying to prove initial coherence of:";
-  print_endline (termToString t1);
-  print_endline (termToString t2);*)
   let bt1 = QST(CONS("$infty"), t1) in
   let bt2 = QST(CONS("$infty"), t2) in
-  (*print_endline "After applying question mark:";
-  print_endline (termToString bt1);
-  print_endline (termToString bt2);*)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(bt1, bt2)) in
   (* Replace abstractions by universal quantifiers *)
   let f = abs2forall f0 in
-  (*print_endline ("After transformation: "^(termToString f));*)
   prove f 4 (fun () ->
           print_string ("====> Connective "^str^" is initial-coherent.\n"); ()
         )  
@@ -122,19 +115,12 @@ let checkDuality str (t1, t2) =
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !cutRules;
 
-  (*print_endline "Trying to prove duality of:";
-  print_endline (termToString t1);
-  print_endline (termToString t2);*)
   let nt1 = deMorgan (NOT(t1)) in
   let nt2 = deMorgan (NOT(t2)) in
-  (*print_endline "After negation:";
-  print_endline (termToString nt1);
-  print_endline (termToString nt2);*)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(nt1, nt2)) in
   (* Replace abstractions by universal quantifiers *)
   let f = abs2forall f0 in
-  (*print_endline ("After transformation: "^(termToString f));*)
   prove f 4 (fun () ->
           print_string ("====> Connective "^str^" has dual specification.\n"); ()
         )  
@@ -144,15 +130,18 @@ let checkDuality str (t1, t2) =
         )
 ;;
 
-(* FIXME this sysName is the relative path to the file... *)
-let check sysName =
-  system_name := sysName;
+(* TODO: put proper system name *)
+let cutCoherence () =
+  system_name := "proofsTex/proof";
   Hashtbl.iter checkDuality !lr_hash;
-  Hashtbl.iter checkInitCoher !lr_hash;
-  if !cutcoherent then print_string "\nThe system is cut coherent.\n"
+  if !cutcoherent then print_string "\nTatu coud prove the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
-  if !initcoherent then print_string "\nThe system is initial coherent.\n"
+;;
+
+let initialCoherence () =
+  system_name := "proofsTex/proof";
+  Hashtbl.iter checkInitCoher !lr_hash;
+  if !initcoherent then print_string "\nTatu could prove the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
-    
 ;;
 

@@ -1,6 +1,3 @@
 - something's wrong with bang... check weak.pl example
-- find out what's going on with unification that it won't unify a pointer to a
-  variable and the variable itself.
 - manual
-- implement equality (syntatic)
 - nicer interaction (auto complete and history)

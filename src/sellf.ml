@@ -27,7 +27,8 @@ let usage = "Usage: " ^ Sys.argv.(0) ^ " [-v] [-i string] [-c string]"
 let argslst = [
   ("-v", Arg.Unit (fun () -> Term.verbose := true), ": set verbose on.");
   ("-i", Arg.String (fun s -> fileName := s), ": prefix of .pl and .sig file (with path)");
-  ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'coherence', 'atomicelim' or 'scopebang' (depending on what you want to check)");
+  ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'cutcoherence',
+    'initialcoherence', 'atomicelim' or 'scopebang' (depending on what you want to check)");
 ]
 
 let initAll () = 
@@ -51,7 +52,8 @@ let check_atomicelim () = begin
   print_endline "\nCould not infer how to eliminate atomic cuts."  
 end ;;
 
-let check_coherence () = Coherence.check !fileName ;;
+let check_cutcoherence () = Coherence.cutCoherence () ;;
+let check_initialcoherence () = Coherence.initialCoherence () ;;
 
 let check_scopebang () = begin
   print_endline "Please type the subexponential:";
@@ -204,7 +206,9 @@ solve_query () =
       in every_pair !Structs.rules;
     *)
 
-    | "#coherence" -> check_coherence ()
+    | "#cutcoherence" -> check_cutcoherence ()
+    
+    | "#initialcoherence" -> check_initialcoherence ()
 
     | "#scopebang" -> check_scopebang ()
 
@@ -285,9 +289,12 @@ match (!check, !fileName) with
   | ("principalcut", file) -> 
     initAll ();
     if parse file then check_principalcut ()
-  | ("coherence", file) -> 
+  | ("cutcoherence", file) -> 
     initAll ();
-    if parse file then check_coherence ()
+    if parse file then check_cutcoherence ()
+  | ("intialcoherence", file) -> 
+    initAll ();
+    if parse file then check_initialcoherence ()
   | ("atomicelim", file) -> 
     initAll ();
     if parse file then check_atomicelim ()

@@ -56,14 +56,12 @@ let rec prove formula h suc fail =
     let ctxout = Sequent.getCtxOut sq in
     if (Context.isLinearEmpty ctxout) then begin
       (* TODO fix the relative path of this file before uncommenting this *)
-      (*
       let file = open_out ((!file_name)^".tex") in
       Printf.fprintf file "%s" (texFileHeader ());
       Printf.fprintf file "%s" (ProofTree.toTexString root);
       Printf.fprintf file "%s" (texFileFooter ());
       close_out file;
       file_name := "noname"; (* Resets file name so it is not overwritten *)
-      *)
       suc ()
     end
     (*else fail ()*)
