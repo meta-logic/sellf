@@ -143,9 +143,9 @@ let check_one_monopole mono_prefix =
 (*Case when the cut has two bangs.*)
   | SOME(a1), SOME(c1) ->
     ( match mono_prefix with
-     | NONE :: rest -> (less_than_lst_all c1 rest) || (less_than_lst_all a1
+     | NONE :: rest -> (less_than_lst_all c1 rest) && (less_than_lst_all a1
 rest)
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
                             ((not (geq d s) && (not (weak d)))) -> true 
      | SOME(s) :: rest when (geq a1 s) && (geq d s) ->  
                               (less_than_lst_all c1 rest)
@@ -157,7 +157,7 @@ rest)
   | SOME(a1), NONE ->
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
                             ((not (geq d s) && (not (weak d)))) -> true
      | SOME(s) :: rest when (geq d s) && (geq a1 s) -> true
      | _ -> false
@@ -165,7 +165,7 @@ rest)
   | NONE, SOME(c1) -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
                             ((not (geq d s) && (not (weak d)))) -> true
      | SOME(s) :: rest when (geq b s) && (geq c1 s) -> true
      | _ -> false
@@ -174,7 +174,7 @@ rest)
   | NONE, NONE -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) ||  
+     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
                             ((not (geq d s) && (not (weak d)))) -> true
      | SOME(s) :: rest -> 
         Hashtbl.fold (fun key data acc -> if (geq key s) then acc
