@@ -292,7 +292,7 @@ match (!check, !fileName) with
   | ("cutcoherence", file) -> 
     initAll ();
     if parse file then check_cutcoherence ()
-  | ("intialcoherence", file) -> 
+  | ("initialcoherence", file) -> 
     initAll ();
     if parse file then check_initialcoherence ()
   | ("atomicelim", file) -> 
