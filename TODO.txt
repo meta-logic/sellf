@@ -1,3 +1,0 @@
-- something's wrong with bang... check weak.pl example
-- manual
-- nicer interaction (auto complete and history)
