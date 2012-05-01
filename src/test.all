@@ -1,0 +1,49 @@
+#!/bin/bash
+
+echo "------------------ Testing G1m ------------------------";
+./sellf -i ../examples/proofsystems/g1m -c cutcoherence
+./sellf -i ../examples/proofsystems/g1m -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing LAL ------------------------";
+./sellf -i ../examples/proofsystems/lal -c cutcoherence
+./sellf -i ../examples/proofsystems/lal -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing LAX ------------------------";
+./sellf -i ../examples/proofsystems/lax -c cutcoherence
+./sellf -i ../examples/proofsystems/lax -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing LJ -------------------------";
+./sellf -i ../examples/proofsystems/lj -c cutcoherence
+./sellf -i ../examples/proofsystems/lj -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing LK -------------------------";
+./sellf -i ../examples/proofsystems/lk -c cutcoherence
+./sellf -i ../examples/proofsystems/lk -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing LL -------------------------";
+./sellf -i ../examples/proofsystems/ll -c cutcoherence
+./sellf -i ../examples/proofsystems/ll -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing mLJ ------------------------";
+./sellf -i ../examples/proofsystems/mlj -c cutcoherence
+./sellf -i ../examples/proofsystems/mlj -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";
+
+echo "------------------ Testing S4 -------------------------";
+./sellf -i ../examples/proofsystems/s4 -c cutcoherence
+./sellf -i ../examples/proofsystems/s4 -c initialcoherence
+echo "-------------------------------------------------------";
+echo "";

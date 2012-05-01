@@ -21,6 +21,8 @@ with   -> &
 par    -> |
 !l     -> [l]bang
 ?l     -> [l]?
+!      -> bang (see IMPORTANT NOTE)
+?      -> ?    (see IMPORTANT NOTE)
 one    -> one
 zero   -> zero
 top    -> top
@@ -29,6 +31,11 @@ bottom -> bot
 To comment some line in your file, start it with the symbol '%'.
 Signature files have sufix '.sig' and the program file has sufix '.pl' (both
 must have the same name).
+
+IMPORTANT NOTE: The operators 'bang' and '?'  without an index are interpreted
+as if the index is the minimal one, i.e., infty, where the specification itself
+is stored. This is an unbounded subexponential. They can be used to simulate the
+exponential operators of Linear Logic.
 
 IV) Running:
 

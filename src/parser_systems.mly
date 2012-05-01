@@ -253,6 +253,9 @@ body:
 | LBRACKET term RBRACKET BANG body              {BANG ($2,$5)}
 | LBRACKET term RBRACKET HBANG body             {HBANG ($2,$5)}
 | LBRACKET term RBRACKET QST body               {QST ($2,$5)}
+| BANG body             {BANG (CONS("$infty"),$2)}
+| HBANG body            {HBANG (CONS("$infty"),$2)}
+| QST body              {QST (CONS("$infty"),$2)}
 | FORALL body           { FORALL ($1, 0, $2) } 
 | EXISTS body           { EXISTS ($1, 0, $2) } 
 | body TIMES body       { TENSOR ($1, $3)}

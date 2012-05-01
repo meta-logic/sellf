@@ -6,10 +6,7 @@
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subexp infty unb.
 subexp lr lin.
-
-subexprel lr < infty.
 
 rules introduction.
 
@@ -34,12 +31,12 @@ rules introduction.
 (not (rght (oplus A B))) * (([lr]? (rght A)) + ([lr]? (rght B))).
 
 % Bang
-(not (lft (lbang A))) * ([infty]? (lft A)).
-(not (rght (lbang A))) * ([infty]bang (rght A)).
+(not (lft (lbang A))) * (? (lft A)).
+(not (rght (lbang A))) * (bang (rght A)).
 
 % Quest
-(not (lft (lquest A))) * ([infty]bang (lft A)).
-(not (rght (lquest A))) * ([infty]? (rght A)).
+(not (lft (lquest A))) * (bang (lft A)).
+(not (rght (lquest A))) * (? (rght A)).
 
 % Forall
 (not (lft (forall A))) * (sigma \X ([lr]? (lft (A X)))).
