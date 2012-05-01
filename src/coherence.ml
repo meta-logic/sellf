@@ -96,6 +96,9 @@ let checkInitCoher str (t1, t2) =
 
   let bt1 = QST(CONS("$infty"), t1) in
   let bt2 = QST(CONS("$infty"), t2) in
+  (* print_endline "Proving initial coherence of:";
+  print_endline (termToString bt1);
+  print_endline (termToString bt2); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(bt1, bt2)) in
   (* Replace abstractions by universal quantifiers *)
@@ -117,6 +120,9 @@ let checkDuality str (t1, t2) =
 
   let nt1 = deMorgan (NOT(t1)) in
   let nt2 = deMorgan (NOT(t2)) in
+  (* print_endline "Proving cut coherence of:";
+  print_endline (termToString nt1);
+  print_endline (termToString nt2); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(nt1, nt2)) in
   (* Replace abstractions by universal quantifiers *)

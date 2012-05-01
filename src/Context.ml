@@ -92,7 +92,7 @@ module Context =
         | "$gamma" -> Hashtbl.replace newctx "$gamma" []
         (* These are deleted independently of being linear or classical *)
         | s -> 
-          if not (greater_than idx s) then Hashtbl.replace newctx s []
+          if not (greater_than s subexp) then Hashtbl.replace newctx s []
     ) ctx.hash;
     create newctx
 
@@ -106,7 +106,8 @@ module Context =
         | s -> match type_of s with
           (* Linear formulas that were in the input should not be available here. *)
           | LIN | AFF ->
-            if (greater_than idx s) || (s = subexp) then Hashtbl.replace newctx s []
+            if (greater_than s subexp) || (s = subexp) then 
+              Hashtbl.replace newctx s []
           (* Classical formulas are always available *)
           | UNB | REL -> ()
     ) ctx.hash;

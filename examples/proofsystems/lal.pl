@@ -93,3 +93,5 @@ sigma \A ((not (lft (has p2 A))) * ([h2]? (lft (has p2 A)))).
 
 sigma \A ((not (lft (knows p1 A))) * ([k1]? (lft (knows p1 A)))).
 sigma \A ((not (lft (knows p2 A))) * ([k2]? (lft (knows p2 A)))).
+
+
