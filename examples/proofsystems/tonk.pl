@@ -12,8 +12,8 @@ rules introduction.
 
 rules axiom.
 % Axiom
-sigma \A ((not (lft (A))) * (not (rght (A)))).
+((not (lft (A))) * (not (rght (A)))).
 
 rules cut.
 % Cut rule
-sigma \A ((lft A) * (rght A)).
+((lft A) * (rght A)).

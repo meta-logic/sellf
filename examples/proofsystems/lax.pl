@@ -32,13 +32,13 @@ rules introduction.
 
 rules axiom.
 % Initial
-sigma \A ((not (lft A)) * (not (rght A))).
+((not (lft A)) * (not (rght A))).
 
 rules cut.
 % Cut
-sigma \A (([l]? (lft A)) * ([l]bang ([r]? (rght A)))).
+(([l]? (lft A)) * ([l]bang ([r]? (rght A)))).
 
 rules structural.
 % Structural rule for circ
-sigma \A ((not (rght (circ A))) * ([cr]? (rght (circ A)))).
+((not (rght (circ A))) * ([cr]? (rght (circ A)))).
 

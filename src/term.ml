@@ -206,33 +206,39 @@ let rec deref t = match t with
   | t -> t
 ;;
 
+(* Structures used for system's specification reasoning *)
 
-(* Syntatic equality *)
-(* NOTE: does equality of abstractions, forall and exist make sense? *)
-(*
-let rec equals t1 t2 = match t1, t2 with
-  | PTR {contents = V v1}, PTR {contents = V v2} -> v1 == v2
-  | PTR {contents = T t}, _ -> equals t t2
-  | _, PTR {contents = T t} -> equals t2 t
-  | VAR{str=s1; id=i1; tag=t1}, VAR{str=s2; id=i2; tag=t2} 
-    when s1 = s2 && i1 = i2 && t1 = t2 -> true
-  | PRED(str1, t1, _), PRED(str2, t2, _) when str1 = str2 -> equals t1 t2 
-  | NOT(t1), NOT(t2) -> equals t1 t2
-  | TENSOR(t11, t12), TENSOR(t21, t22)
-  | ADDOR(t11, t12), ADDOR(t21, t22) 
-  | PARR(t11, t12), PARR(t21, t22) 
-  | WITH(t11, t12), WITH(t21, t22) -> equals t11 t12 && equals t21 t22
-  | BANG(s1, t1), BANG(s2, t2) -> equals s1 s2 && equals t1 t2
-  | HBANG(s1, t1), HBANG(s2, t2) -> equals s1 s2 && equals t1 t2
-  | QST(s1, t1), QST(s2, t2) -> equals s1 s2 && equals t1 t2
-  | LOLLI(s1, t11, t12), LOLLI(s2, t21, t22) -> 
-    equals s1 s2 && equals t11 t12 && equals t21 t22
-  | APP(t1, tl1), APP(t2, tl2) -> equals t1 t2 && List.fold_right2 (fun e1 e2 acc ->  (equals e1 e2) && acc) tl1 tl2 true
-  | INT(i1), INT(i2) -> i1 = i2
-  | CONS(s1), CONS(s2) -> s1 = s2
-  | STRING(s1), STRING(s2) -> s1 = s2
-  | _, _ -> false
-*)
+let structRules : terms list ref = ref [] ;;
+let cutRules : terms list ref = ref [] ;;
+let introRules : terms list ref = ref [] ;;
+let ids : terms list ref = ref [] ;;
+
+(* Transforms abstractions into universal quantifiers *)
+let rec abs2forall f = match f with
+  | ABS(s, i, t) -> FORALL(s, i, abs2forall t)
+  | t -> t
+;;
+
+(* Transforms abstractions into existential quantifiers *)
+let rec abs2exists f = match f with
+  | ABS(s, i, t) -> EXISTS(s, i, abs2exists t)
+  | t -> t
+;;
+
+let addStructRule r = 
+  let er = abs2exists r in
+  structRules := er :: !structRules
+
+let addCutRule r = 
+  let er = abs2exists r in
+  cutRules := er :: !cutRules
+
+let addIntroRule r =
+  introRules := r :: !introRules
+
+let addIdRule r =
+  let er = abs2exists r in
+  ids := er :: !ids
 
 (* Binding variables *)
 
@@ -293,6 +299,10 @@ NEG), ONE ) );;*)
 let addTypeTbl name entry = Hashtbl.add typeTbl name entry ;; 
 
 let initialize () =
+  structRules := [];
+  cutRules := [];
+  introRules := []; 
+  ids := [];
   Hashtbl.clear kindTbl;
   Hashtbl.clear typeTbl;
   (* Bult-in kind for formulas *)

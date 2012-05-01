@@ -35,7 +35,7 @@ rules introduction.
 (not (rght true)) * top.
 
 rules axiom.
-sigma \A ((not (lft A)) * (not (rght A))).
+((not (lft A)) * (not (rght A))).
 
 rules cut.
-sigma \A ((? (rght A)) * (? (lft A))).
+((? (rght A)) * (? (lft A))).

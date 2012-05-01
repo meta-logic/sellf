@@ -26,24 +26,6 @@ let unify =
     exists A. !a ?b lft{A} tensor !c ?d right{A}
 *)
 
-let structRules : terms list ref = ref [] ;;
-let cutRules : terms list ref = ref [] ;;
-let introRules : terms list ref = ref [] ;;
-
-let addStructRule r = 
-  structRules := r :: !structRules
-
-let addCutRule r = 
-  cutRules := r :: !cutRules
-
-let addIntroRule r = 
-  introRules := r :: !introRules
-
-let initialize () =
-  structRules := [];
-  cutRules := [];
-  introRules := [] ;;
-
 (*Simple auxiliary functions that collects the subexponentials appearing in the
 specification of rules. *)
 
@@ -98,6 +80,7 @@ let rec less_than_lst_one sub lst =
   | [] -> false
   | SOME(s) :: lst1 when geq s sub  -> true
   | SOME(s) :: lst1 -> less_than_lst_one sub lst1
+  | _ -> failwith "Unexpected case in less_than_lst_one function."
 
 (* This function gets the subexponentials of a cut. 
 It returns the subexponentials in the following form:
@@ -137,7 +120,7 @@ permutes over an introduction rule.*)
 let rec cut_permutes_over cut rule = 
 let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
 let rule_prefix = get_subexp_prefix rule in 
-let subexp = keys subexTpTbl in
+(*let subexp = keys subexTpTbl in*)
 let check_one_monopole mono_prefix =
   match a,c with 
 (*Case when the cut has two bangs.*)
@@ -178,7 +161,8 @@ rest)
                             ((not (geq d s) && (not (weak d)))) -> true
      | SOME(s) :: rest -> 
         Hashtbl.fold (fun key data acc -> if (geq key s) then acc
-        else false) subexTpTbl true 
+        else false) subexTpTbl true
+     | _ -> failwith "Unexpected case when cut has no bangs."
     )
 in 
 let rec check_rules_monopoles rule_prefix =
@@ -270,6 +254,7 @@ let rec condition_equiv sub bangs equiv =
   | SOME(s) :: lst when  (geq sub s) || (less_than_lst_one s equiv)
       -> condition_equiv sub lst equiv
   | SOME(s) :: lst -> false
+  | _ -> failwith "Unexpected case."
 in
 let rec greater_subexp bangs quests equiv = 
   (match quests with
@@ -304,6 +289,7 @@ with
             | SOME(s) :: lst -> 
                 let all_bangs = List.append lst rule2Bang in
                 List.fold_left (fun acc (SOME(s1)) -> (s1 = s) & acc) true all_bangs
+            | _ -> failwith "Unexpected case."
           )
         )
   )

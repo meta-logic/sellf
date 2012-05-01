@@ -36,7 +36,6 @@ let initAll () =
   Context.initialize ();
   Subexponentials.initialize ();
   Coherence.initialize ();
-  Staticpermutationcheck.initialize ();
 ;;
 
 let check_principalcut () = begin

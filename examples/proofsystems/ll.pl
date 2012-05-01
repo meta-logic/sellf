@@ -61,10 +61,10 @@ rules introduction.
 (not (rght ltop)) * top.
 
 rules axiom.
-sigma \A ((not (lft A)) * (not (rght A))).
+((not (lft A)) * (not (rght A))).
 
 rules cut.
-sigma \A (([lr]? (rght A)) * ([lr]? (lft A))).
+(([lr]? (rght A)) * ([lr]? (lft A))).
 
 
 

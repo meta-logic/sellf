@@ -34,15 +34,15 @@ rules introduction.
 (not (rght (exists A))) * sigma \X ([l]bang ([r]? (rght (A X)))).
 
 rules axiom.
-sigma \A ((not (lft A)) * (not (rght A))).
+((not (lft A)) * (not (rght A))).
 
 rules cut.
-sigma \A ([l]bang ([r]? (rght A))) * ([l]? (lft A)).
+([l]bang ([r]? (rght A))) * ([l]? (lft A)).
 
 rules structural.
 % Contraction left
-sigma \A (not (lft A) * ([l]? (lft A)) | ([l]? (lft A))).
+(not (lft A) * ([l]? (lft A)) | ([l]? (lft A))).
 
 % Weakening left
-sigma \A (not (lft A) * bot).
+(not (lft A) * bot).
 

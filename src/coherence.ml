@@ -18,15 +18,10 @@ open Term
 open Boundedproofsearch
 open Prints
 open TypeChecker
-open Staticpermutationcheck (* because I am reusing the list of cuts *)
+(*open Staticpermutationcheck (* because I am reusing the list of cuts *)*)
 
 let cutcoherent = ref true ;;
 let initcoherent = ref true ;;
-
-let ids : terms list ref = ref [] ;;
-
-let addIdRule r = 
-  ids := r :: !ids
 
 (* The specifications of each connective are stored in a hash 
  * The key is the name of the predicate representing the connective *)
@@ -35,7 +30,6 @@ let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 10
 let initialize () = 
   cutcoherent := true;
   initcoherent := true;
-  ids := [];
   Hashtbl.clear !lr_hash ;;
 
 (* Operation for the case that there is more than one specification for one side *)
@@ -76,12 +70,6 @@ let processIntroRule t =
     | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
     | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
     | _ -> failwith "Valid predicates are 'lft' and 'right'."
-;;
-
-(* Transforms abstractions into universal quantifiers *)
-let rec abs2forall f = match f with
-  | ABS(s, i, t) -> FORALL(s, i, abs2forall t)
-  | t -> t
 ;;
 
 (* Procedure to actually check the coherence of a system *)

@@ -36,11 +36,12 @@ rules introduction.
 
 rules axiom.
 % Axiom
-sigma \A ((not (lft (A))) * (not (rght (A)))).
+((not (lft (A))) * (not (rght (A)))).
 
 rules cut.
 % Cut rule
-sigma \A (([l]? (lft A)) * ([r]? (rght A))).
+(([l]? (lft A)) * ([r]? (rght A))).
 
 rules structural.
-sigma \A ((not (lft A)) * ([l]? (lft A))).
+((not (lft A)) * ([l]? (lft A))).
+
