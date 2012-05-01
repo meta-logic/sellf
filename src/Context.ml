@@ -15,6 +15,9 @@ open Prints
 (* This is to be used by the parser. Initially, all the formulas are stored here. *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
 
+(* This holds the formulas that could be consumed by a top rule *)
+let erasableByTop : (string, terms list) Hashtbl.t ref = ref (Hashtbl.create 100) ;;
+
 let initSubexp s = Hashtbl.add initial s [] ;;
 
 let store form subexp = try match Hashtbl.find initial subexp with
@@ -116,14 +119,31 @@ module Context =
   (* TODO: implement equality *)
   let equals ctx1 ctx2 = true 
 
-  (* Checks if all linear contexts are empty *)
+  (* Checks if all linear contexts are empty (ignoring the formulas that could
+  be erased by a top rule) *)
   let isLinearEmpty ctx = List.length ( 
     Hashtbl.fold (fun idx forms acc ->
       match type_of idx with
-        | LIN | AFF -> forms @ acc
+        | LIN | AFF -> begin 
+          (* Finds the formulas that could be erased by top *)
+          try match Hashtbl.find !erasableByTop idx with
+            | erasable ->
+              let newforms = List.filter (fun e -> not (List.mem e erasable)) forms in
+              newforms @ acc
+            with Not_found -> forms @ acc
+        end
         | UNB | REL -> acc
     ) ctx.hash [] 
   ) == 0
+
+  (* Marks the formulas of this context as erasable because a top rule was
+  applied. *)
+  let markErasable ctx = Hashtbl.iter (fun idx forms ->
+    try match Hashtbl.find !erasableByTop idx with
+      | formlst ->
+        Hashtbl.replace !erasableByTop idx (formlst @ forms); 
+      with Not_found -> Hashtbl.add !erasableByTop idx forms;
+  ) ctx.hash
 
   (* Merges two contexts *)
   let merge ctx1 ctx2 = 

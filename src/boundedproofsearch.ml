@@ -82,16 +82,6 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
   | (ctxin, ctxout, f::goals, ASYN) -> let f = Term.observe f in begin match f with
 
-    (* No rule for zero. Put it at the end of the goals and hope for the best *)
-    | ZERO ->
-      if !verbose then begin
-        print_endline "-- Zero:";
-        print_endline (termToString ZERO);
-        print_endline (Context.toString ctxin);
-      end;
-      let sq = Sequent.create ctxin ctxout (goals @ [f]) ASYN in
-      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
-
     | LOLLI (sub, f1, f2) -> 
       if !verbose then begin
         print_endline "-- Lolli:"; 
@@ -171,8 +161,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (termToString TOP);
         print_endline (Context.toString ctxin);
       end;
-      (* FIXME mark the linear formulas of ctxin as erasable *)
-      (* let newctx = mark_erasable ctxin *)
+      Context.markErasable ctxin;
       Sequent.setCtxOut (ProofTree.getConclusion proof) ctxin;
       ProofTree.close proof;
       suc ()
@@ -212,6 +201,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | BANG (_, _)
     | HBANG (_, _)
     | ONE
+    | ZERO
     | COMP (_, _, _)
     | ASGN (_, _)
     | PRINT (_)
@@ -309,6 +299,19 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
  
     (* Synchronous phase *)
  
+    (* No rule for zero. Top must be in the context, decide on it and finish. *)
+    | ZERO ->
+      if !verbose then begin
+        print_endline "-- Zero:";
+        print_endline (termToString ZERO);
+        print_endline (Context.toString ctxin);
+      end;
+      (Stack.pop failStack) ()
+      (*
+      let sq = Sequent.create ctxin ctxout (goals @ [f]) ASYN in
+      prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
+      *)
+
     | ADDOR (f1, f2) -> begin
       if !verbose then begin
         print_endline "-- O plus 1st:"; 
