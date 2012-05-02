@@ -49,7 +49,10 @@ let rec bfs root queue goal = match queue with
   | h :: t when h = goal -> true
   | h :: t -> bfs root (t @ Hashtbl.find_all subexOrdTbl h) goal
 ;;
-let greater_than s1 s2 = bfs s2 (Hashtbl.find_all subexOrdTbl s2) s1 ;;
+let greater_than s1 s2 = 
+  (* $infty should be greater than everyone *)
+  if s1 = "$infty" then true
+  else bfs s2 (Hashtbl.find_all subexOrdTbl s2) s1 ;;
 
 (* Returns a list with all subexponentials from idxs that will have their 
  * formulas erased if !s is applied. *)

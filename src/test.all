@@ -3,47 +3,63 @@
 echo "------------------ Testing G1m ------------------------";
 ./sellf -i ../examples/proofsystems/g1m -c cutcoherence
 ./sellf -i ../examples/proofsystems/g1m -c initialcoherence
+./sellf -i ../examples/proofsystems/g1m -c principalcut
+./sellf -i ../examples/proofsystems/g1m -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing LAL ------------------------";
 ./sellf -i ../examples/proofsystems/lal -c cutcoherence
 ./sellf -i ../examples/proofsystems/lal -c initialcoherence
+./sellf -i ../examples/proofsystems/lal -c principalcut
+./sellf -i ../examples/proofsystems/lal -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing LAX ------------------------";
 ./sellf -i ../examples/proofsystems/lax -c cutcoherence
 ./sellf -i ../examples/proofsystems/lax -c initialcoherence
+./sellf -i ../examples/proofsystems/lax -c principalcut
+./sellf -i ../examples/proofsystems/lax -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing LJ -------------------------";
 ./sellf -i ../examples/proofsystems/lj -c cutcoherence
 ./sellf -i ../examples/proofsystems/lj -c initialcoherence
+./sellf -i ../examples/proofsystems/lj -c principalcut
+./sellf -i ../examples/proofsystems/lj -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing LK -------------------------";
 ./sellf -i ../examples/proofsystems/lk -c cutcoherence
 ./sellf -i ../examples/proofsystems/lk -c initialcoherence
+./sellf -i ../examples/proofsystems/lk -c principalcut
+./sellf -i ../examples/proofsystems/lk -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing LL -------------------------";
 ./sellf -i ../examples/proofsystems/ll -c cutcoherence
 ./sellf -i ../examples/proofsystems/ll -c initialcoherence
+./sellf -i ../examples/proofsystems/ll -c principalcut
+./sellf -i ../examples/proofsystems/ll -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing mLJ ------------------------";
 ./sellf -i ../examples/proofsystems/mlj -c cutcoherence
 ./sellf -i ../examples/proofsystems/mlj -c initialcoherence
+./sellf -i ../examples/proofsystems/mlj -c principalcut
+./sellf -i ../examples/proofsystems/mlj -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
 
 echo "------------------ Testing S4 -------------------------";
 ./sellf -i ../examples/proofsystems/s4 -c cutcoherence
 ./sellf -i ../examples/proofsystems/s4 -c initialcoherence
+./sellf -i ../examples/proofsystems/s4 -c principalcut
+./sellf -i ../examples/proofsystems/s4 -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
