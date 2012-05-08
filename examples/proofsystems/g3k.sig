@@ -8,6 +8,6 @@ type imp  form -> form -> form.
 type nec  form -> form. % Box
 type poss form -> form. % Diamond
 
-type rel label -> label -> o.
+type relation label -> label -> o.
 type pair label -> form -> form.
 
