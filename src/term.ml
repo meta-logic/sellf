@@ -310,8 +310,11 @@ let initialize () =
   (* Built-in types and kinds for systems' specification *)
   Hashtbl.add kindTbl "form" (TKIND("form")) ;
   Hashtbl.add kindTbl "term" (TKIND("term")) ;
+  Hashtbl.add kindTbl "world" (TKIND("world")) ;
   addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
   addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *) 
+  addTypeTbl "mlft" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mlft form -> world -> o. *)
+  addTypeTbl "mrght" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mrght form -> world -> o. *)
 ;;
 
 let notInTbl hash entry = 

@@ -13,31 +13,31 @@ subexp rr unb.
 rules introduction.
 
 % Conjunction
-(not (lft (pair (X (and A B))))) * ([l]? (lft (pair X A))) | ([l]? (lft (pair X B))).
-(not (rght (pair (X (and A B))))) * ( ([r]? (rght (pair X A))) * ([r]? (rght (pair X B)))).
+(not (mlft (and A B) X)) * ([l]? (mlft A X)) | ([l]? (mlft B X)).
+(not (mrght (and A B) X)) * ( ([r]? (mrght A X)) * ([r]? (mrght B X))).
 
 % Disjunction
-(not (lft (pair (X (or A B))))) * (([l]? (lft (pair X A))) * ([l]? (lft (pair X B)))).
-(not (rght (pair (X (or A B))))) * ( ([r]? (rght (pair X A))) | ([r]? (rght (pair X B)))).
+(not (mlft (or A B) X)) * (([l]? (mlft A X)) * ([l]? (mlft B X))).
+(not (mrght (or A B) X)) * ( ([r]? (mrght A X)) | ([r]? (mrght B X))).
 
 % Implication
-(not (lft (pair (X (imp A B))))) * (([r]? (lft (pair X A))) * ([l]? (lft (pair X B)))).
-(not (rght (pair (X (imp A B))))) * ( ([l]? (rght (pair X A))) | ([r]? (rght (pair X B)))).
+(not (mlft (imp A B) X)) * (([r]? (mlft A X)) * ([l]? (mlft B X))).
+(not (mrght (imp A B) X)) * ( ([l]? (mrght A X)) | ([r]? (mrght B X))).
 
 % Necessarely
-(not (lft (pair (X (nec A))))) * sigma \Y ( ([rr]bang (not (relation X Y))) * ([l]? (lft (pair Y A)) ) ).
-(not (rght (pair (X (nec A))))) * pi \Y ( ([rr]? (relation X Y)) | ([r]? (rght (pair Y A)) ) ).
+(not (mlft (nec A) X)) * sigma \Y ( ([rr]bang (not (relation X Y))) * ([l]? (mlft A Y) ) ).
+(not (mrght (nec A) X)) * pi \Y ( ([rr]? (relation X Y)) | ([r]? (mrght A Y) ) ).
 
 % Possibly
-(not (lft (pair (X (poss A))))) * pi \Y ( ([rr]? (relation X Y)) | ([l]? (lft (pair Y A)) ) ).
-(not (rght (pair (X (poss A))))) * sigma \Y ( ([rr]bang (not (relation X Y))) * ([r]? (rght (pair Y A)) ) ).
+(not (mlft (poss A) X)) * pi \Y ( ([rr]? (relation X Y)) | ([l]? (mlft A Y) ) ).
+(not (mrght (poss A) X)) * sigma \Y ( ([rr]bang (not (relation X Y))) * ([r]? (mrght A Y) ) ).
 
 rules axiom.
-((not (lft (pair X A))) * (not (rght (pair X A)))).
+((not (mlft A X)) * (not (mrght A X))).
 
 rules cut.
 % What is cut??
-%([l]bang ([r]? (rght A))) * ([l]? (lft A)).
+%([l]bang ([r]? (mrght A))) * ([l]? (mlft A)).
 
 rules structural.
 % Reflexivity

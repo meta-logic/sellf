@@ -75,8 +75,10 @@ and type:
 Then, the system will display a '?>' symbol indicating that the file is loaded.
 The commands available are:
 
-- '#coherence': checks if the system is cut-coherent (principal cuts can be
-  eliminated) and initial-coherent (axioms can be reduced to the atomic version).
+- '#cutcoherence': checks if the system is cut-coherent (principal cuts can be
+  eliminated).
+- '#initialcoherence': checks if the system is initial-coherent (axioms can be
+  reduced to the atomic version).
 - '#principalcut': checks necessary conditions for permuting rules such that the
   cut becomes principal.
 - '#scopebang': given a subexponential s, it will indicate which of the other

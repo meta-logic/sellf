@@ -69,7 +69,9 @@ let processIntroRule t =
   match p with
     | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
     | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
-    | _ -> failwith "Valid predicates are 'lft' and 'right'."
+    | PRED("mlft", p, _) -> addLSpec (getFirstArgName p) s
+    | PRED("mrght", p, _) -> addRSpec (getFirstArgName p) s
+    | _ -> failwith "Valid predicates are 'lft' or 'right' or 'mlft' or 'mrght'."
 ;;
 
 (* Procedure to actually check the coherence of a system *)
@@ -128,14 +130,14 @@ let checkDuality str (t1, t2) =
 let cutCoherence () =
   system_name := "proofsTex/proof";
   Hashtbl.iter checkDuality !lr_hash;
-  if !cutcoherent then print_string "\nTatu coud prove the system is cut coherent.\n"
+  if !cutcoherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
 ;;
 
 let initialCoherence () =
   system_name := "proofsTex/proof";
   Hashtbl.iter checkInitCoher !lr_hash;
-  if !initcoherent then print_string "\nTatu could prove the system is initial coherent.\n"
+  if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
 ;;
 
