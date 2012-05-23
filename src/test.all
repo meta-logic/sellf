@@ -63,3 +63,11 @@ echo "------------------ Testing S4 -------------------------";
 ./sellf -i ../examples/proofsystems/s4 -c atomicelim
 echo "-------------------------------------------------------";
 echo "";
+
+echo "------------------ Testing G3k -------------------------";
+./sellf -i ../examples/proofsystems/g3k -c cutcoherence
+./sellf -i ../examples/proofsystems/g3k -c initialcoherence
+./sellf -i ../examples/proofsystems/g3k -c principalcut
+./sellf -i ../examples/proofsystems/g3k -c atomicelim
+echo "-------------------------------------------------------";
+echo "";
