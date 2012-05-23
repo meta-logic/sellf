@@ -25,7 +25,7 @@ let initcoherent = ref true ;;
 
 (* The specifications of each connective are stored in a hash 
  * The key is the name of the predicate representing the connective *)
-let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 100) ;;
+let lr_hash : ((string, (terms option * terms option)) Hashtbl.t) ref = ref (Hashtbl.create 100) ;;
 
 let initialize () = 
   cutcoherent := true;
@@ -34,14 +34,14 @@ let initialize () =
 
 (* Operation for the case that there is more than one specification for one side *)
 let addLSpec str t = try match Hashtbl.find !lr_hash str with
-  | (ZERO, r) -> Hashtbl.replace !lr_hash str (t, r)
-  | (l, r) -> Hashtbl.replace !lr_hash str (ADDOR(l, t), r) 
-  with Not_found -> Hashtbl.add !lr_hash str (t, ZERO)
+  | (NONE, SOME(r)) -> Hashtbl.replace !lr_hash str (SOME(t), SOME(r))
+  | (SOME(l), SOME(r)) -> Hashtbl.replace !lr_hash str (SOME(ADDOR(l, t)), SOME(r)) 
+  with Not_found -> Hashtbl.add !lr_hash str (SOME(t), NONE)
 
 let addRSpec str t = try match Hashtbl.find !lr_hash str with
-  | (l, ZERO) -> Hashtbl.replace !lr_hash str (l, t)
-  | (l, r) -> Hashtbl.replace !lr_hash str (l, ADDOR(r, t)) 
-  with Not_found -> Hashtbl.add !lr_hash str (ZERO, t)
+  | (SOME(l), NONE) -> Hashtbl.replace !lr_hash str (SOME(l), SOME(t))
+  | (SOME(l), SOME(r)) -> Hashtbl.replace !lr_hash str (SOME(l), SOME(ADDOR(r, t))) 
+  with Not_found -> Hashtbl.add !lr_hash str (NONE, SOME(t))
 
 let getFirstArgName p = match p with
   | APP(CONS(n), lst) -> begin match lst with
@@ -84,13 +84,22 @@ let checkInitCoher str (t1, t2) =
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !ids;
 
-  let bt1 = QST(CONS("$infty"), t1) in
-  let bt2 = QST(CONS("$infty"), t2) in
+  let f0 = match (t1, t2) with
+    | (SOME(tt1), NONE) ->
+      let bt1 = QST(CONS("$infty"), tt1) in
+      deBruijn true bt1
+    | (NONE, SOME(tt2)) ->
+      let bt2 = QST(CONS("$infty"), tt2) in
+      deBruijn true bt2
+    | (SOME(tt1), SOME(tt2)) ->
+      let bt1 = QST(CONS("$infty"), tt1) in
+      let bt2 = QST(CONS("$infty"), tt2) in
+      (* Assign deBruijn indices correctly, after the two formulas are joined *)
+      deBruijn true (PARR(bt1, bt2))
+  in
   (* print_endline "Proving initial coherence of:";
   print_endline (termToString bt1);
   print_endline (termToString bt2); *)
-  (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(bt1, bt2)) in
   (* Replace abstractions by universal quantifiers *)
   let f = abs2forall f0 in
   prove f 4 (fun () ->
@@ -108,13 +117,22 @@ let checkDuality str (t1, t2) =
   Context.clearInitial ();
   List.iter (fun e -> Context.store e "$infty") !cutRules;
 
-  let nt1 = deMorgan (NOT(t1)) in
-  let nt2 = deMorgan (NOT(t2)) in
+  let f0 = match (t1, t2) with
+    | (SOME(tt1), NONE) ->
+      let nt1 = deMorgan (NOT(tt1)) in
+      deBruijn true nt1
+    | (NONE, SOME(tt2)) ->
+      let nt2 = deMorgan (NOT(tt2)) in
+      deBruijn true nt2
+    | (SOME(tt1), SOME(tt2)) ->
+      let nt1 = deMorgan (NOT(tt1)) in
+      let nt2 = deMorgan (NOT(tt2)) in
+      (* Assign deBruijn indices correctly, after the two formulas are joined *)
+      deBruijn true (PARR(nt1, nt2))
+  in
   (* print_endline "Proving cut coherence of:";
   print_endline (termToString nt1);
   print_endline (termToString nt2); *)
-  (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(nt1, nt2)) in
   (* Replace abstractions by universal quantifiers *)
   let f = abs2forall f0 in
   prove f 4 (fun () ->

@@ -21,8 +21,8 @@ rules introduction.
 (not (mrght (or A B) X)) * ( ([r]? (mrght A X)) | ([r]? (mrght B X))).
 
 % Implication
-(not (mlft (imp A B) X)) * (([r]? (mlft A X)) * ([l]? (mlft B X))).
-(not (mrght (imp A B) X)) * ( ([l]? (mrght A X)) | ([r]? (mrght B X))).
+(not (mlft (imp A B) X)) * (([r]? (mrght A X)) * ([l]? (mlft B X))).
+(not (mrght (imp A B) X)) * ( ([l]? (mlft A X)) | ([r]? (mrght B X))).
 
 % Necessarely
 (not (mlft (nec A) X)) * sigma \Y ( ([rr]bang (not (relation X Y))) * ([l]? (mlft A Y) ) ).
@@ -37,7 +37,7 @@ rules axiom.
 
 rules cut.
 % What is cut??
-%([l]bang ([r]? (mrght A))) * ([l]? (mlft A)).
+([r]? (mrght A X)) * ([l]? (mlft A X)).
 
 rules structural.
 % Reflexivity
