@@ -1,0 +1,6 @@
+After checking out the tatu directory into some folder, you should create a
+folder called sellf with the directories 'src' and 'examples' from the
+repository. Then you create a symbolic link called 'sellf.bin' on the top level
+folder ponting to 'sellf/src/sellf'. Also, you need to create a folder called
+'proofsTex' on the top level and make this and 'files' readable, writable and
+executable for all.
