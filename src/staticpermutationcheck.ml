@@ -95,19 +95,35 @@ let rec get_subexp_cut cut =
       (match a,b with 
       | QST(CONS(sub2),PRED("lft",_ , _)), QST(CONS(sub4),PRED("rght", _, _)) -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
+      | QST(CONS(sub2),PRED("mlft",_ , _)), QST(CONS(sub4),PRED("mrght", _, _)) -> 
+          [NONE, SOME(sub2), NONE, SOME(sub4)]
       | QST(CONS(sub4),PRED("rght", _, _)), QST(CONS(sub2),PRED("lft",_, _))  -> 
+          [NONE, SOME(sub2), NONE, SOME(sub4)]
+      | QST(CONS(sub4),PRED("mrght", _, _)), QST(CONS(sub2),PRED("mlft",_, _))  -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
       | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), QST(CONS(sub4),PRED("rght", _, _)) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+      | BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))), QST(CONS(sub4),PRED("mrght", _, _)) -> 
+          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
       | QST(CONS(sub4),PRED("rght", _, _)), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) -> 
+          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+      | QST(CONS(sub4),PRED("mrght", _, _)), BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
       | QST(CONS(sub2),PRED("lft",_, _)), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+      | QST(CONS(sub2),PRED("mlft",_, _)), BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))) -> 
+          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
       | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), QST(CONS(sub2),PRED("lft",_, _)) -> 
+          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))), QST(CONS(sub2),PRED("mlft",_, _)) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
       | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))), BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))) ->
+          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
       | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) ->
+          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+      | BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))), BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
       | _ -> failwith "Wrong cut")
     | _ -> failwith "Wrong cut")
@@ -316,7 +332,13 @@ let rec pretty_print hd =
   | APP(CONS("lft"), b) -> 
     let _ = print_string "Left Introduction rule for " in
     print_string (termsListToString b)
+  | APP(CONS("mlft"), b) -> 
+    let _ = print_string "Left Introduction rule for " in
+    print_string (termsListToString b)
   | APP(CONS("rght"), b) -> 
+    let _ = print_string "Right Introduction rule for " in
+    print_string (termsListToString b)
+  | APP(CONS("mrght"), b) -> 
     let _ = print_string "Right Introduction rule for " in
     print_string (termsListToString b)
   | _ -> failwith "Unexpected term while printing the head of the rule."
@@ -368,15 +390,17 @@ let rec typecheck_rules rules =
 let rec typecheck_bipole rule =
 let rec check_monopole mono = 
   match mono with
-  | PRED("lft",_,_) | PRED("rght",_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
+  | PRED("lft",_,_) | PRED("rght",_,_) | PRED("mlft",_,_) | PRED("mrght",_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
   | PARR(b1,b2) | WITH(b1,b2) -> 
     (check_monopole b1) && (check_monopole b2)
   | QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
+  | QST(CONS(sub),PRED("mlft",_,_)) | QST(CONS(sub),PRED("mrght",_,_))  -> true
   | FORALL(_,_,b) -> (check_monopole b)
   | _ -> false
   in
 match rule with
 | NOT(PRED("lft",_,_)) | NOT(PRED("rght",_,_)) | PRED("lft",_,_) | PRED("rght",_,_) 
+| NOT(PRED("mlft",_,_)) | NOT(PRED("mrght",_,_)) | PRED("mlft",_,_) | PRED("mrght",_,_) 
 | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
 | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
     (typecheck_bipole b1) && (typecheck_bipole b2)
@@ -385,6 +409,7 @@ match rule with
 | BANG(_,b) | FORALL(_,_,b) -> check_monopole b
 | ABS(_, _, b) | EXISTS(_,_,b) -> typecheck_bipole b
 | QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
+| QST(CONS(sub),PRED("mlft",_,_)) | QST(CONS(sub),PRED("mrght",_,_))  -> true
 | _ -> false
 in
 match rules with 
@@ -420,11 +445,11 @@ match rule with
 in
 let all_subs_lft = 
   List.fold_left (fun acc ele -> 
-    List.append (collect_quests_aux ele "lft") acc) [] !introRules 
+    List.append ( (collect_quests_aux ele "lft") @ (collect_quests_aux ele "mlft") ) acc) [] !introRules 
 in
 let all_subs_rght = 
   List.fold_left (fun acc ele -> 
-    List.append (collect_quests_aux ele "rght") acc) [] !introRules 
+    List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] !introRules 
 in
 let check_lft_subs b lft_subs = 
   List.fold_left (fun acc (SOME(s)) -> 
