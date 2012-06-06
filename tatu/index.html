@@ -1,0 +1,413 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml401-transitional.dtd">
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<html>
+<head>
+
+<title> Tatu </title>
+
+<!-- Removing web server advertisement -->
+<script type="text/javascript">
+document.cookie = "cskeytech-overlay=shown; expires=Mo, 31 Dec 2012 00:00:00 UTC; path=/;";
+</script>
+
+<script type="text/javascript" src="dynamic.js"></script>
+<link type="text/css" href="jquery/css/custom-theme/jquery-ui-1.8.18.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="jquery/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript">
+
+  // Avoiding conflicts with other jQuery libraries that were eventually
+  // included my the server *without* my permission.
+  var myJQ = jQuery.noConflict();
+
+	myJQ(document).ready(function(){
+
+		// Accordion
+		myJQ("#accordion").accordion({ 
+      header: "h3",
+      collapsible: true,
+      active: false,
+      autoHeight: false
+    });
+
+		// Tabs
+		myJQ('#tabs').tabs();
+
+		// Dialog			
+		myJQ('#dialog').dialog({
+			autoOpen: false,
+			width: 600,
+			buttons: {
+				"Ok": function() { 
+					myJQ(this).dialog("close"); 
+				} 
+			}
+		});
+	
+    myJQ('#dialoghelp').dialog({
+			autoOpen: false,
+			width: 600,
+			buttons: {
+				"Ok": function() { 
+					myJQ(this).dialog("close"); 
+				} 
+			}
+		});
+
+		// Check buttons
+		myJQ('#checkCC').click(function(){
+			cutcoherence ();
+      myJQ('#dialog').dialog("open");
+			return false;
+		});
+		myJQ('#checkIC').click(function(){
+			initcoherence ();
+      myJQ('#dialog').dialog("open");
+			return false;
+		});
+		myJQ('#checkPC').click(function(){
+			principalcut ();
+      myJQ('#dialog').dialog("open");
+			return false;
+		});
+		myJQ('#checkAC').click(function(){
+			atomicelim ();
+      myJQ('#dialog').dialog("open");
+			return false;
+		});
+
+    // Reset button
+    myJQ('#reset').click(function() {
+      clearAll ()
+      return false;
+    });
+
+    // Help button
+    myJQ('#help').click(function() {
+      myJQ('#dialoghelp').dialog('open');
+      return false;
+    });
+
+// Combobox
+(function( $ ) {
+  myJQ.widget( "ui.combobox", {
+    _create: function() {
+      var self = this,
+        select = this.element.hide(),
+        selected = select.children( ":selected" ),
+        value = selected.val() ? selected.text() : "";
+      var input = this.input = myJQ( "<input>" )
+        .insertAfter( select )
+        .val( value )
+        .autocomplete({
+          delay: 0,
+          minLength: 0,
+          source: function( request, response ) {
+            var matcher = new RegExp( myJQ.ui.autocomplete.escapeRegex(request.term), "i" );
+            response( select.children( "option" ).map(function() {
+              var text = myJQ( this ).text();
+              if ( this.value && ( !request.term || matcher.test(text) ) )
+                return {
+                  label: text.replace(
+                    new RegExp(
+                      "(?![^&;]+;)(?!<[^<>]*)(" +
+                      myJQ.ui.autocomplete.escapeRegex(request.term) +
+                      ")(?![^<>]*>)(?![^&;]+;)", "gi"
+                    ), "<strong>$1</strong>" ),
+                  value: text,
+                  option: this
+                };
+            }) );
+          },
+          select: function( event, ui ) {
+            ui.item.option.selected = true;
+            self._trigger( "selected", event, {
+              item: ui.item.option
+            });
+            // NOTE: this will fetch the data and fill the text boxes
+            getExample();
+          },
+          change: function( event, ui ) {
+            if ( !ui.item ) {
+              var matcher = new RegExp( "^" + myJQ.ui.autocomplete.escapeRegex( myJQ(this).val() ) + "$", "i" ),
+                valid = false;
+              select.children( "option" ).each(function() {
+                if ( myJQ( this ).text().match( matcher ) ) {
+                  this.selected = valid = true;
+                  return false;
+                }
+              });
+              if ( !valid ) {
+                // remove invalid value, as it didn't match anything
+                myJQ( this ).val( "" );
+                select.val( "" );
+                input.data( "autocomplete" ).term = "";
+                return false;
+              }
+            }
+          }
+        })
+        .addClass( "ui0widget ui-widget-content ui-corner-left" );
+
+      input.data( "autocomplete" )._renderItem = function(ul, item) {
+        return myJQ("<li></li>")
+          .data( "item.autocomplete", item )
+          .append( "<a>" + item.label + "</a>" )
+          .appendTo( ul );
+      };
+
+      this.button = myJQ( "<button type='button'>&nbsp;</button>" )
+        .attr( "tabIndex", -1 )
+        .attr( "title", "Show All Items" )
+        .insertAfter( input )
+        .button({
+          icons: {
+            primary: "ui-icon-triangle-1-s"
+          },
+          text: false
+        })
+        .removeClass( "ui-corner-all" )
+        .addClass( "ui-corner-right ui-button-icon" )
+        .click(function() {
+          // close if already visible
+          if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+            input.autocomplete( "close" );
+            return;
+          }
+
+          // work around a bug (likely same cause as #5265)
+          myJQ(this).blur();
+
+          // pass empty string as value to search for, displaying all results
+          input.autocomplete( "search", "" );
+          input.focus();
+        });
+    },
+
+    destroy: function() {
+      this.input.remove();
+      this.button.remove();
+      this.element.show();
+      myJQ.Widget.prototype.destroy.call(this);
+    }
+  });
+})(jQuery);
+
+
+    // Dropdown menu
+    myJQ( "#combobox" ).combobox();
+
+		// Datepicker
+		myJQ('#datepicker').datepicker({
+			inline: true
+		});
+		
+		// Slider
+		myJQ('#slider').slider({
+			range: true,
+			values: [17, 67]
+		});
+		
+		// Progressbar
+		myJQ("#progressbar").progressbar({
+			value: 20 
+		});
+		
+		//hover states on the static widgets
+		myJQ('#checkCC, #checkIC, #checkPC, #checkAC, #reset, #help, ul#icons li').hover(
+			function() { myJQ(this).addClass('ui-state-hover'); }, 
+			function() { myJQ(this).removeClass('ui-state-hover'); }
+		);
+		
+	});
+</script>
+<style type="text/css">
+	/*demo page css*/
+	/*body{ font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;}*/
+	/*.demoHeaders { margin-top: 2em; }*/
+	/*#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}*/
+  /*#dialog_link span.ui-icon {margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}*/
+	ul#icons {margin: 0; padding: 0;}
+	ul#icons li {margin: 2px; position: relative; padding: 4px 0; cursor: pointer; float: left;  list-style: none;}
+	ul#icons span.ui-icon {float: left; margin: 0 4px;}
+  .ui-button { margin-left: -1px; }
+  .ui-button-icon-only .ui-button-text { padding: 0.35em; } 
+  .ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
+</style>	
+
+</head>
+<body>
+
+<div class="title"> <img src="tatu.png" alt="A cute tatu." height="100"/> </div>
+<hr>
+<p style="font-size: 12pt"> 
+Online system for reasoning about sequent calculus specifications in linear logic with subexponentials<br>
+Developed by: Giselle Reis and Vivek Nigam<br>
+Contact: giselle [at] logic [dot] at <br>
+Based on the theoretical work: <a href="references/paper.pdf">An Extended Framework for Specifying and Reasoning about Proof Systems</a> - Vivek Nigam, Elaine Pimentel and Giselle Reis <br>
+</p>
+
+<hr>
+
+<div class="editor" align="center">
+
+<div class="insideeditor">
+
+<div id="options" style="width: 30%; float: left">
+  <h2 class="header2">What property would you like to check?</h2>
+  <div id="accordion">
+  	<div>
+		<h3 class="desc_title"><a href="#">Transformation to principal cut</a></h3>
+			<div class="description">
+        Check if the rules permute in such a way that is possible to obtain
+        principal cuts.
+        <div class="check_btn">
+		    <p>
+          <a href="#" id="checkPC" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-check"></span>Check</a>
+        </p>
+        </div>
+      </div>
+		</div>
+		<div>
+		<div>
+		<h3 class="desc_title"><a href="#">Cut-coherence</a></h3>
+			<div class="description">
+        Check if principal cuts can be simplified using the rewritting rules of
+        cut-elimination until there are only cuts on atoms.
+        <!--The specification of a proof systems is called cut-coherent if, for every
+        proof with cuts, these can be simplified using the rewritting rules of
+        cut-elimination until there are only cuts on atoms.
+        -->
+        <div class="check_btn">
+		    <p>
+          <a href="#" id="checkCC" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-check"></span>Check</a>
+        </p>
+        </div>
+      </div>
+		</div>
+		<h3 class="desc_title"><a href="#">Elimination of atomic cuts</a></h3>
+			<div class="description">
+        Check if the atomic cuts can be eliminated.
+        <div class="check_btn">
+		    <p>
+          <a href="#" id="checkAC" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-check"></span>Check</a>
+        </p>
+        </div>
+      </div>
+		</div>
+	  <div>
+		<h3 class="desc_title"><a href="#">Initial-coherence</a></h3>
+			<div class="description">
+        Check if the proof systems is complete using only atomic axioms.
+        <!--
+        The specification of a proof systems is called initial-coherent if it is
+        complete when using only atomic axioms.
+        -->
+        <div class="check_btn">
+		    <p>
+          <a href="#" id="checkIC" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-check"></span>Check</a>
+        </p>
+        </div>
+      </div>
+		</div>
+  </div>
+
+  <h2 class="header2">You can type your own system or try one of our
+  examples:</h2>
+  <div>
+    <select id="combobox" style="margin-right: 50pt">
+      <option value="">Choose an example</option>
+      <option value="mlj"> mLJ </option>
+      <option value="g1m"> G1m </option>
+      <option value="s4"> S4 </option>
+      <option value="lax"> Lax Logic </option>
+      <option value="g3k"> G3k </option>
+      <option value="lal"> Linear Authorization Logic </option>
+      <option value="lk"> Classical Logic </option>
+      <option value="lj"> Intuitionistic Logic </option>
+      <option value="ll"> Linear Logic </option>
+      <option value="tonk"> Tonk </option>
+    </select>
+  </div>
+
+
+</div>
+    <textarea title="Type the specification of your system here." style="width: 33%" rows="25" id="specification">% SPECIFICATION</textarea>
+    <textarea title="Type the signature of your system's connectives here." style="width: 33%" rows="25" id="signature">% SIGNATURE</textarea>
+    <div class="buttons_rght">
+      <a href="#" id="help" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-info"></span>Help</a>
+      <a href="#" id="reset" class="ui-state-default ui-corner-all button"><span class="ui-icon ui-icon-trash"></span>Reset</a>
+    </div>
+</div>
+
+<div id="dialog" title="Results">
+  <p id="result_text"></p>
+</div>
+
+<div id="dialoghelp" title="Quick start guide:">
+<ul>
+    <li> Type your specification in the text box indicated. Here is a quick syntax reference:<br>
+    <div class="texttt">
+    &otimes; &rarr; * <br>
+    &oplus; &rarr; + <br>
+    &amp; &rarr; &amp; <br>
+    &#8523; &rarr; | <br>
+    !<sup>l</sup> &rarr; [l]bang <br>
+    ?<sup>l</sup> &rarr; [l]? <br>
+    !<sup>&infin;</sup> &rarr; bang <br>
+    ?<sup>&infin;</sup> &rarr; ? <br>
+    1 &rarr; one <br>
+    0 &rarr; zero <br>
+    &#8868; &rarr; top <br>
+    &perp; &rarr; bot <br>
+    &lceil;A&rceil; &rarr; rght A <br>
+    &lfloor;A&rfloor; &rarr; lft A <br>
+    &lceil;A:x&rceil; &rarr; mrght A X <br>
+    &lfloor;A:x&rfloor; &rarr; mlft A X <br>
+    </div>
+    Note that &infin; is the maximal subexponential (it is greater than every
+    other index) that holds the formulas of the specification. It is unbounded.
+    The operators <TT>bang</TT> and <TT>?</TT> can be used to simulate the 
+    exponential operators of Linear Logic.
+    </li><br>
+    <li> Type the signature in the text box indicated. You might want to use
+    the keywords <TT>form</TT> and <TT>term</TT> for types of object level
+    formulas and terms, respectively.</li><br>
+    <li> Lines beginning with <TT>%</TT> are comments.</li><br>
+    <li> Choose what you want to check on the left and click check.</li><br>
+</ul>
+PS: You can drag this window around and keep it open for a quick reference.
+</div>
+
+</div>
+
+<br>
+<hr>
+
+<p style="font-size: 12pt"> 
+Some of the examples here were implemented for the following papers:
+<ul style="font-size: 12pt">
+  <li>A formal framework for specifying sequent calculus proof systems [<a
+  href="reference/Llinda.pdf">pdf</a>] by Dale Miller and Elaine Pimentel,
+  submitted to Theoretical Computer Science (TCS), 2012. </li>
+  <li>On the Complexity of Linear Authorization Logics [<a
+  href="references/lics12-final.pdf">pdf</a>] by Vivek Nigam, to appear in Logic
+  in Computer Science (LICS), 2012</li>
+</ul>
+</p>
+
+<!-- Removing web server advertisement -->
+<script type="text/javascript">
+$(document).ready(function(){
+  $("#pageflip").remove();
+  $("#cskeytech-overlay-data").remove();
+  $("#cskeytech-overlay-overlay").remove();
+  $("#cskeytech-overlay-container").remove();
+  })
+</script>
+
+</body>
+</html>
+

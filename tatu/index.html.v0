@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml401-transitional.dtd">
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<html>
+<head>
+
+<title> Tatu </title>
+
+<script type="text/javascript" src="js/dynamic.js"></script>
+<link type="text/css" href="css/jquery-ui-1.8.18.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui-1.8.18.custom.min.js"></script>
+
+</head>
+<body>
+
+<div class="title"> <img src="tatu.png" alt="A cute tatu." height="100"/> </div>
+<hr>
+<div class="subtitle"> 
+Online system for reasoning about sequent calculus specifications in linear logic with subexponentials<br>
+Developed by: Giselle Reis and Vivek Nigam<br>
+Contact: giselle [at] logic [dot] at <br>
+Based on the theoretical work: <a href="paper.pdf">An Extended Framework for Specifying and Reasoning about Proof Systems</a> - Vivek Nigam, Elaine Pimentel and Giselle Reis <br>
+</div>
+
+<hr>
+
+<div class="editor" align="center">
+
+<div class="insideeditor">
+    <textarea title="Type the specification of your system here." style="width: 33%" rows="25" id="specification">% SPECIFICATION</textarea>
+    <textarea title="Type the signature of your system's connectives here." style="width: 33%" rows="25" id="signature">% SIGNATURE</textarea>
+    <textarea title="The results will be shown here." style="width: 30%" rows="25" id="result_text" readonly>Results</textarea>
+</div>
+
+<div class="buttons_lft">
+	<button type="button" onclick="cutcoherence()" title="Click here if you want to check coherence.">Check coherence</button>
+	<button type="button" onclick="principalcut()" title="Click here if you want to check principal cut.">Check principal cuts</button>
+	<button type="button" onclick="atomicelim()" title="Click here if you want to check if atomic cuts can be eliminated.">Check elimination of atomic cuts</button>
+	<button type="button" onclick="clearAll()">Reset</button>
+</div>
+<div class="buttons_rght">
+  <select id="example">
+    <option value="">Choose an example</option>
+    <option value="mlj"> mLJ </option>
+    <option value="g1m"> G1m </option>
+    <option value="s4"> S4 </option>
+    <option value="lax"> Lax Logic </option>
+  </select>
+  <button type="button" onclick="getExample()">Load</button>
+</div>
+
+
+</div>
+
+<br>
+<br>
+<hr><br>
+
+<div class="reference">
+<div class="text">
+Quick start guide:
+<ul>
+    <li> Type your specification on the text box of the left. Here is a quick syntax reference:<br>
+    <div class="texttt">
+    &otimes; &rarr; * <br>
+    &oplus; &rarr; + <br>
+    &amp; &rarr; &amp; <br>
+    &#8523; &rarr; | <br>
+    !<sup>l</sup> &rarr; [l]bang <br>
+    ?<sup>l</sup> &rarr; [l]? <br>
+    1 &rarr; one <br>
+    0 &rarr; zero <br>
+    &#8868; &rarr; top <br>
+    &perp; &rarr; bot <br>
+    &lceil;A&rceil; &rarr; rght A <br>
+    &lfloor;A&rfloor; &rarr; lft A <br>
+    </div>
+    </li><br>
+    <li> Type the signature on the text box on the right. You might want to use
+    the keywords <TT>form</TT> and <TT>term</TT> for types of object level
+    formulas and terms, respectively.</li><br>
+    <li> Lines beginning with <TT>%</TT> are comments.</li><br>
+    <li> Click check. </li><br>
+</ul>
+</div>
+
+</div> <br>
+
+<hr> <br>
+
+</body>
+</html>
+

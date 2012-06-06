@@ -1,0 +1,131 @@
+body {
+  font: 62.5% "Trebuchet MS", sans-serif; 
+  margin: 50px;
+}
+
+.header2 { 
+  margin-top: 2em; 
+}
+
+div.description {
+  text-align: left;
+  font-size: 10pt;
+}
+
+div.check_btn {
+ text-align: right;
+}
+
+span.ui-icon {
+  margin: 0 5px 0 0;
+  position: absolute;
+  left: .2em;
+  top: 50%;
+  margin-top: -8px;
+}
+
+a.button {
+  padding: .4em 1em .4em 20px;
+  text-decoration: none;
+  position: relative;
+  /*font-family: sans-serif;*/
+  font-size: 10pt;
+}
+
+h3.desc_title {
+  font-size: 10pt;
+}
+
+/*
+div.menu {
+  font-family: sans-serif;
+  padding-left: 10pt;
+  background-color: lightgreen;
+  width: 10%;
+  float: left;
+}
+
+div.menutitle {
+  font-weight: bold;
+  font-size: 12pt;
+  padding: 5pt;
+}
+
+div.menuitem {
+  padding: 5pt;
+}
+*/
+
+div.editor {
+  width: 98%;
+  /*background-color: #cc9; */
+  /*background-color: #ba9aad; */
+  background-color: #ba9aad;
+  border: 1px dotted #333;
+  padding: 10pt;
+  /*float: left*/
+}
+
+div.insideeditor {
+  width: 100%;
+  /*float: left;*/
+}
+
+div.buttons_lft {
+  float: left;
+}
+
+div.buttons_rght {
+  padding: 20pt;
+  float: right;
+}
+/*
+div.reference {
+  float: left;
+  width: 35%;
+  background-color: lightblue;
+}
+
+
+div.title
+{
+	font-family: sans-serif;
+	padding: 10pt;
+	font-weight: bold;
+  font-size: 20pt;
+	vertical-align: middle;
+  color: red;
+}
+
+div.subtitle
+{
+	font-family: sans-serif;
+	font-size: 12pt;
+	padding-left: 10pt;
+	padding-bottom: 5pt;
+}
+
+div.text {
+	font-family: sans-serif;
+	font-size: 12pt;
+	padding-left: 10pt;
+}
+
+div.texttt {
+	font-family: monospace;
+	font-size: 12pt;
+	padding-left: 10pt;
+}
+
+ul
+{
+	font-family: sans-serif;
+	font-size: 12pt;
+}
+
+hr
+{
+	width: 100%;
+	height: 2pt;	
+}
+*/
