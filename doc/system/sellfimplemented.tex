@@ -1,23 +1,6 @@
-\documentclass[a4paper, 11pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{amsmath}
-\usepackage{stmaryrd}
-\usepackage{proof}
-
-\title{SELLF with resource management}
-\author{Giselle Machado Reis}
-
-\begin{document}
-\maketitle
-
-This is the SELLF system adapted with input and output contexts, following the
-same ideas of ``Efficient Resource Management for Linear Logic Proof Search'',
-by Cervesato, Hodas and Pfenning. This is the system that is currently
-implemented.
 
 \begin{figure}[t]
+{\small
 $$
 \infer[\text{[$\binampersand$]}]{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I
 / \Gamma^O \Uparrow L, F \binampersand G}{\vdash \mathcal{K}^I / \mathcal{K}^O :
@@ -99,6 +82,7 @@ $$
 \Gamma^O \Uparrow L, S}{\vdash \mathcal{K}^I / \mathcal{K}^O : \Gamma^I, S /
 \Gamma^O \Uparrow L}
 $$
+}
 \caption{Focused linear logic system with subexponentials with signature
 $\langle I, \preceq, \mathcal{W}, \mathcal{C} \rangle$. We assume that: $\mathcal{C} \subseteq
 \mathcal{W}$, $\mathcal{K}$ is an indexed context, $L$ is a list of formulas, $\Gamma$ is a multi-set of
@@ -111,6 +95,7 @@ is a negative formula.}
 
 \begin{figure}[t]
 % \vspace{-4mm}
+{\small
 \[
 \begin{array}{l@{\qquad}l}
 \bullet~(\mathcal{K}_1 \otimes \mathcal{K}_2) [i] = \left\{
@@ -143,6 +128,7 @@ i \notin \mathcal{C}\\
 \textrm{ is true if and only if }(\mathcal{K}_1[j]
 \star \mathcal{K}_2[j]) \textrm{ for all $j \in \mathcal{S}$.}
 \]
+}
 \caption{Specification of operations on contexts. Here, 
 $i \in I$, $\mathcal{S} \subseteq I$, and the 
 binary connective $\star \in \{=, \subset, \subseteq\}$.}
@@ -150,9 +136,3 @@ binary connective $\star \in \{=, \subset, \subseteq\}$.}
 \vspace{-5mm}
 \end{figure}
 
-Axioms set the output context. This should be empty when the procedure returns
-to the initial sequent. In-contexts are set bottom up and out-contexts are set
-top down (when returned from the recursive call).
-Explain initial rule, top, one and bang and tensor.
-
-\end{document}

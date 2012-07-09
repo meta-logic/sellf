@@ -1,0 +1,134 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{color}
+\usepackage{url}
+
+\title{Informal system description}
+\author{Giselle Machado Reis}
+
+\begin{document}
+\maketitle
+
+A quick diagram of what is implemented so far (and available at
+\url{http://www.logic.at/people/giselle/tatu}) is the following:
+
+\vspace{1cm}
+
+\begin{tabular}{|p{1.7cm}|}
+\hline
+Sequent calculus\\
+\hline
+\end{tabular}
+$\overset{(a)}{\Longrightarrow}$
+\begin{tabular}{|p{2.3cm}|}
+\hline
+SELLF specification\\
+\hline
+\end{tabular}
+$\Longrightarrow$
+\begin{tabular}{|p{1.5cm}|}
+\hline
+\textsf{\textbf{TATU}}\\
+\hline
+\end{tabular}
+$
+\left\{
+  \begin{array}{l}
+  \text{\scriptsize{Principal cut (1)}}\\
+  \text{\scriptsize{Atomic cut elimination (2)}}\\
+  \text{\scriptsize{Cut-coherence (3)}}\\
+  \text{\scriptsize{Initial coherence (4)}}\\
+  \end{array}
+\right.
+$
+
+\vspace{1cm}
+
+Quick explanation of each functionality:
+
+\begin{enumerate}
+  \item \textbf{Principal cut}: Checks if cuts and rules can be permuted in such
+  a way that cuts become principals. This is done by checking which subexponential
+  indices are used in the specification of the rules (cut and introduction
+  rules).
+  
+  \item \textbf{Atomic cut elimination}: Checks whether atomic cuts can be
+  eliminated. This is also done by checking which subexponentials indices are
+  used in the specification of the rules (cut and introduction rules).
+  
+  \item \textbf{Cut-coherence}: Checks whether cuts on some formula with
+  $\diamond$ as its top-level connective can be replaced by simpler cuts. This
+  is done by checking the duality of the specifications for the introduction
+  rules of $\diamond$. Let $B_r$ and $B_l$ be the specification of the right and
+  left introduction rules for $\diamond$, respectively. Then we must prove: $\vdash Cut,
+  B_r^{\perp} \bindnasrepma B_l^{\perp}$.
+
+  \item \textbf{Initial coherence}: Checks wheter initial rules on some formula
+  with $\diamond$ as its top-level connective can be replaced by simpler initial
+  rules. Again, this is done by checking some kind of duality of the formulas.
+  Let $B_r$ and $B_l$ be the specification of the right and left introduction
+  rules for $\diamond$, respectively. Then we must prove $\vdash Init,
+  ?^{\infty} B_r \bindnasrepma ?^{\infty} B_l$.
+\end{enumerate}
+
+For numbers 3 and 4, a bounded proof seach procedure was implemented (the bound
+is set to 4 by default).
+
+In order to implement the proof search procedure, the SELLF system was adapted with
+input and output contexts, following the same ideas of ``Efficient Resource
+Management for Linear Logic Proof Search'', by Cervesato, Hodas and Pfenning.
+This is the system in Figure \ref{figure:sellf}. These contexts are used to
+avoid the non-determinism of splitting the contexts in the $\otimes$-rule.
+
+Axioms set the output context. This should be empty when the procedure returns
+to the end sequent. In-contexts are set bottom up and out-contexts are set
+top down (when returned from the recursive call).
+
+{\color{red}Explain initial rule, top, one and bang and tensor.}
+
+\input{sellfimplemented}
+
+\section*{Future work}
+
+\begin{itemize}
+  \item Part $(a)$ of the diagram is done completely by hand. Currently Vivek
+  and Ramyaa are developing an \textbf{algorithm to automatize the specification
+  process}.
+
+  \item A nice feature would be to \textbf{print a latex code of the system specified in
+  SELLF} (would be nice to validate the specification). This can be done using
+  the macro-rules of each specification formula and translating them to the object
+  logic rule. The generation of macro-rules was implemented at some point, and
+  the system actually printed this macro-rule in latex. I would have to check
+  again if this code still works and to translate the derivation into a single
+  rule.
+  
+  \item Considering that the specification has a high-level of adequacy, the
+  \textbf{proof search in SELLF can be used to do proof search on the object
+  logic}. This
+  is relatively straightforward to implement and I want to do this for Anna's
+  system for paraconsistent logic. We need to uncomment the querying part and
+  debug it.
+
+  \item Some time ago, I and Vivek had a project that \textbf{checked automatically
+  whether rules of the object logic permute} by making an exhaustive search and
+  using answer set programming. The code still exists but there are some bugs
+  that we noticed afterwards. This needs to be fixed, but I am afraid that it
+  will involve changing the data structure.
+
+  \item Given that there is a way of checking automatically which rules permute
+  over which, we could build a permutation graph and try to \textbf{deduce a focused
+  proof system for the object logic} from it. This is just an idea and the
+  theory behind it should be developed first.
+
+  \item Given that our system proves a lot of things, we think about having
+  \textbf{proof objects}. But this is a long term goal, and something that would
+  fit Dale Miller's ProofCert project.
+\end{itemize}
+
+\end{document}
