@@ -18,7 +18,6 @@ open Term
 open Boundedproofsearch
 open Prints
 open TypeChecker
-(*open Staticpermutationcheck (* because I am reusing the list of cuts *)*)
 
 let cutcoherent = ref true ;;
 let initcoherent = ref true ;;

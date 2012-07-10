@@ -4,6 +4,8 @@ let verbose = ref false ;;
 let tabling = ref false ;;
 (* Timer on/off *)
 let time = ref false ;;
+(* Bound for the proof search *)
+let psBound = ref 10 ;;
 
 type 'a option = NONE | SOME of 'a
 
@@ -153,27 +155,6 @@ let solve_cmp c e1 e2 =
       | NEQ -> n1 != n2
 ;;
 
-(*Solves assignment *)
-(* TODO implement equality
-let solve_asgn e1 e2 = 
-  (*if !verbose then begin
-    print_string "****** Unifying (head of first with second): \n"; 
-    print_term e1; print_newline (); print_term e2;
-    print_newline ()
-  end;*)
-  let n2 = solve_exp e2 in
-  try 
-    unify e1 (INT(n2)); 
-    (*if !verbose then begin
-      print_string "******* After unification: \n"; 
-      print_term e1; print_newline (); print_int n2; 
-      print_newline ()
-    end;*)
-    true
-  with 
-  | _ -> if !verbose then print_endline "Failed to assign a variable to an int in an assigment."; false;;
-*)
-
 (* Four types of subexponentials described by a string *)
 type subexp = 
 | UNB (* unbounded: contraction and weakening *)
@@ -212,6 +193,8 @@ let structRules : terms list ref = ref [] ;;
 let cutRules : terms list ref = ref [] ;;
 let introRules : terms list ref = ref [] ;;
 let ids : terms list ref = ref [] ;;
+
+let goal : terms ref = ref TOP ;;
 
 (* Transforms abstractions into universal quantifiers *)
 let rec abs2forall f = match f with

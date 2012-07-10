@@ -60,6 +60,8 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL
 %start clause            /* the entry point */
 %type <string Term.option> clause
 %type <Term.terms list> terms
+%start goal             /* the entry point */
+%type <string Term.option> goal
 %start top             /* the entry point */
 %type <string> top 
 %%  
@@ -207,10 +209,31 @@ clause:
 }
 ;
 
+/* G: goal is always a single formula (check if I can use body here). 
+ * Using types clause and goal so that it can typecheck the expression.
+ */
+goal:
+body DOT {
+  let raw_clause = (CLS (DEF,TOP, $1)) in 
+  let clause_typecheck = deBruijn false raw_clause in
+  let _ = typeCheck clause_typecheck in
+  let clause = deBruijn true $1 in
+  (* TODO: I might need to transform the abstractions of a goal into existential
+  quentifiers *)
+  
+  (* add_goals clause_goal;*)
+  goal := clause;
+  if !verbose then begin
+    print_endline (" New goal: "^(termToString $1));
+    flush stdout
+  end;
+  NONE
+}
+;
+
 /* G: parses the body of a clause.
  * The first option is for constants and the second 
  * one for functions.
- * TODO: change this so it accepts more complex expressions on the left-hand side
  */
 prop:
 | NAME { 

@@ -215,66 +215,25 @@ solve_query () =
 
     | "#principalcut" -> check_principalcut ()
 
-    | _ -> print_endline "Function not implemented. Try again or type #done and #help."
+    (*| _ -> print_endline "Function not implemented. Try again or type #done and #help."*)
 
-    (*
     | _ -> begin
       let query = Lexing.from_string query_string in
       begin
       try 
-        let _ = Parser.goal Lexer.token query in ();
-	      (*if !Structs.time then begin
-	        let start_time = Sys.time () in
-                Interpreter.solve (fun () -> 
-                  if (Interpreter.empty_nw ()) then 
-                    print_string "\nYes.\n"
-                  else (Structs.last_fail ()))  
-                  (fun () -> print_string "\nNo.\n");
-	        let end_time = Sys.time () in
-	        let total = end_time -. start_time in
-	        Printf.printf "Execution time: %f seconds.\n" total
-        end
-	      else*) 
+        (*let _ = Parser.goal Lexer.token query in ();*)
+        let _ = Parser_systems.goal Lexer.token query in 
           begin
-          (*let term = List.hd (!Structs.goals) in*)
-          Interpreter.initProof !Structs.goals;
-          let proof_file = open_out "viewer/proof.xml" in
-          let tex_file = open_out "viewer/proof.tex" in
-          (*let jit_file = open_out "viewer/proof.jit" in*)
-          let loop = ref true in
-          let fail = ref (
-            Interpreter.solve (fun () ->
-              (* TODO: this emtiness is checked on the condition_init function,
-              we should not deal with it here. Check interpreter functionality *)
-              (*if (Structs.empty_nw ()) then begin*) 
-                loop := false; 
-                print_string "\nYes.\n";
-                ProofTree.printTree Interpreter.proof proof_file; 
-                ProofTree.printTexProof Interpreter.proof tex_file;
-                (*ProofTree.printJitTree Interpreter.proof jit_file*)
-              (*end
-              else (Structs.last_fail ())*) )  
-              (fun () -> loop := false; print_string "\nNo.\n") )
-          in
-          while !loop do 
-            let res = !fail () in
-            fail := fun () -> res
-          done;
-          (*
-          Interpreter.solve (fun () -> 
-            if (Interpreter.empty_nw ()) then 
-              print_string "\nYes.\n"
-            else (Structs.last_fail ()))  
-            (fun () -> print_string "\nNo.\n");
-          *)
-        end
+            Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
+              print_string "\nYes.\n";
+            ) (fun () -> print_string "\nNo.\n")
+          end
       with
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
-      end
-      *)
+      end      
     end
-    (*end*)
+  end
 
 let _ = 
 Arg.parse argslst (fun x -> raise (Arg.Bad ("Bad argument: "^x))) usage;
@@ -285,6 +244,7 @@ match (!check, !fileName) with
     while true do
       start ()
     done
+  (* Running in batch mode *)
   | ("principalcut", file) -> 
     initAll ();
     if parse file then check_principalcut ()
