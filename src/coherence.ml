@@ -4,7 +4,7 @@
  *                                                                      *
  * NOTE:                                                                *
  * - the predicates that map object-level formulas to meta-level        *
- *   atoms are 'lft' and 'rght'                                         *
+ *   atoms are 'lft', 'rght', 'mlft' and 'mrght'                        *
  * - formulas from the object logic have type 'form'                    *
  * - terms from the object logic have type 'term'                       *
  * - specification formulas are saved on the context $infty             *

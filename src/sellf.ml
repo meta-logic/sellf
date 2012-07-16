@@ -215,8 +215,6 @@ solve_query () =
 
     | "#principalcut" -> check_principalcut ()
 
-    (*| _ -> print_endline "Function not implemented. Try again or type #done and #help."*)
-
     | _ -> begin
       let query = Lexing.from_string query_string in
       begin
@@ -224,6 +222,15 @@ solve_query () =
         (*let _ = Parser.goal Lexer.token query in ();*)
         let _ = Parser_systems.goal Lexer.token query in 
           begin
+            clearInitial ();
+            (* Putting axioms in the context *)
+            List.iter (fun e -> store e "$infty") !Term.ids;
+            (* Putting introduction rules in the context *)
+            List.iter (fun e -> store e "$infty") !Term.introRules;
+            (* Putting structural rules in the context *)
+            List.iter (fun e -> store e "$infty") !Term.structRules;
+            (* NOTE: cut-free proof search *)
+            
             Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
               print_string "\nYes.\n";
             ) (fun () -> print_string "\nNo.\n")
@@ -233,6 +240,10 @@ solve_query () =
         | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
       end      
     end
+
+    (*| _ -> print_endline "Function not implemented. Try again or type #done
+     * and #help."*)
+
   end
 
 let _ = 

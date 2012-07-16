@@ -217,7 +217,8 @@ let addCutRule r =
   cutRules := er :: !cutRules
 
 let addIntroRule r =
-  introRules := r :: !introRules
+  let er = abs2exists r in
+  introRules := er :: !introRules
 
 let addIdRule r =
   let er = abs2exists r in

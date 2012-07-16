@@ -30,11 +30,12 @@ TEST_CMX = $(TEST_ML:.ml=.$(cmx))
 
 # COMMANDS
 
-normal : $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
+normal : $(CORE_CMX) $(PARSER_CMX)  $(SELLF_ML) 
+	$(OCAMLL) -o sellf $(CORE_CMX) $(PARSER_CMX)  $(SELLF_ML) 
+
+ocaml : $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
 	$(OCAMLC) -o sellf $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
 
-native : $(CORE_CMX) $(PARSER_CMX)  $(SELLF_ML) 
-	$(OCAMLL) -o sellf $(CORE_CMX) $(PARSER_CMX)  $(SELLF_ML) 
 
 %.cmx:  %.ml
 	$(OCAMLL) -c $< 

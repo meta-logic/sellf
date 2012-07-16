@@ -288,6 +288,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | FORALL (_, _, _)
     | TOP
     | BOT
+    | PRED (_, _, _) (* All atoms are negative *)
     | NEW (_, _) ->
       if !verbose then begin
         print_endline "-- R arrow down:"; 
@@ -494,9 +495,11 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
  
  
     (* Initial rules *)
-    | PRED (str, terms, p) ->
+    (* NOTE: Since all atoms are considered negative, the initial rule can only
+     * be applied to *negated* atoms (which are positive)
+     * | PRED (str, terms, p) ->
       let pairs = Context.toPairs ctxin in
-      initial (NOT(PRED(str, terms, p))) pairs proof suc (*fail*)
+      initial (NOT(PRED(str, terms, p))) pairs proof suc (*fail*)*)
     | NOT(PRED (str, terms, p)) ->
       let pairs = Context.toPairs ctxin in
       initial (PRED(str, terms, p)) pairs proof suc (*fail*)
@@ -529,7 +532,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ()) fail
     *)
 
-    | f -> print_string (termToString f); failwith " Solving not implemented for this case."
+    | f -> print_endline (termToString f); failwith " Solving not implemented for this case."
  
   end
 

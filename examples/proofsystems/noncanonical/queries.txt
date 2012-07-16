@@ -1,0 +1,10 @@
+1. proof in BK + a_conj
+rght (imp (and (cons phi) (cons psi)) (cons (and phi psi))).
+
+2. Proof in BK + o_conj1
+rght (imp (cons phi) (cons (and phi psi))).
+
+3. proof in BK
+lft (imp (and (cons phi) (cons psi)) (cons (or phi psi))) |
+rght (imp (gkneg (or phi psi)) (or (gkneg phi) (gkneg psi))).
+
