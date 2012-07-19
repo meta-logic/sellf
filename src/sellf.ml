@@ -4,9 +4,9 @@ open Subexponentials
 
 module TestUnify = 
   Unify.Make(struct
-                      let instantiatable = Term.LOG
-                      let constant_like = Term.EIG
-                      end)
+    let instantiatable = Term.LOG
+    let constant_like = Term.EIG
+  end)
 
 let position lexbuf =
   let curr = lexbuf.Lexing.lex_curr_p in
@@ -222,15 +222,7 @@ solve_query () =
         (*let _ = Parser.goal Lexer.token query in ();*)
         let _ = Parser_systems.goal Lexer.token query in 
           begin
-            clearInitial ();
-            (* Putting axioms in the context *)
-            List.iter (fun e -> store e "$infty") !Term.ids;
-            (* Putting introduction rules in the context *)
-            List.iter (fun e -> store e "$infty") !Term.introRules;
-            (* Putting structural rules in the context *)
-            List.iter (fun e -> store e "$infty") !Term.structRules;
-            (* NOTE: cut-free proof search *)
-            
+            createProofSearchContext ();
             Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
               print_string "\nYes.\n";
             ) (fun () -> print_string "\nNo.\n")
@@ -252,6 +244,7 @@ match (!check, !fileName) with
   | ("", "") ->
     print_endline "SELLF -- A linear logic framework for systems with locations.";
     print_endline "Version 0.5.\n";
+    print_endline "Type #help for a list of available commands.\n";
     while true do
       start ()
     done

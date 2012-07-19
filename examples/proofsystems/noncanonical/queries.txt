@@ -1,10 +1,17 @@
-1. proof in BK + a_conj
-rght (imp (and (cons phi) (cons psi)) (cons (and phi psi))).
+1. proof in BK + a_conj  ===========> :)
+rght (imp (and (cons phi) (cons psi)) (cons (and phi psi))).     
 
-2. Proof in BK + o_conj1
+2. Proof in BK + o_conj1   ================> Segfault :(
 rght (imp (cons phi) (cons (and phi psi))).
 
-3. proof in BK
-lft (imp (and (cons phi) (cons psi)) (cons (or phi psi))) |
-rght (imp (gkneg (or phi psi)) (or (gkneg phi) (gkneg psi))).
+3. proof in BK    ===> NOT OK :(
+lft (imp (and (cons phi) (cons psi)) (cons (or phi psi))) | rght (imp (gkneg (or phi psi)) (or (gkneg phi) (gkneg psi))).
+
+4. not provable:
+A -> ((oA) -> B).
+rght (imp phi (imp (cons phi) psi)).   ---> Ok. The system replied "no".
+A -> ((gkneg A) -> B).
+rght (imp phi (imp (gkneg phi) psi)). --> OK. The system replied "no".
+oC -> o(A ^ B)
+rght (imp (cons theta) (cons (and phi psi))).  --> OK. The system replied "no".
 

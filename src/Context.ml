@@ -12,7 +12,7 @@ open Term
 open Subexponentials
 open Prints
 
-(* This is to be used by the parser. Initially, all the formulas are stored here. *)
+(* Initial context, will be set depending on what we want to prove *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
 
 (* This holds the formulas that could be consumed by a top rule *)
@@ -28,6 +28,22 @@ let store form subexp = try match Hashtbl.find initial subexp with
 (* Clears all subexponentials *)
 let clearInitial () = Hashtbl.iter (fun k d -> Hashtbl.replace initial k []) initial;;
 
+(* Create proper contexts for each functionality of the system *)
+
+let createCutCoherenceContext () = 
+  (* Adding cut rules' specifications *)
+  List.iter (fun e -> store e "$infty") !Term.cutRules ;;
+  
+let createInitialCoherenceContext () = 
+  (* Adding identity rules' specifications *)
+  List.iter (fun e -> store e "$infty") !Term.ids ;;
+  
+let createProofSearchContext () = 
+  (* Adding rules' specifications (proof search without cut) *)
+  List.iter (fun e -> store e "$infty") !Term.ids;
+  List.iter (fun e -> store e "$infty") !Term.introRules;
+  List.iter (fun e -> store e "$infty") !Term.structRules ;;
+ 
 module Context = 
   struct
   
@@ -49,17 +65,17 @@ module Context =
   let create h = {
     hash = h
   }
-  
+
   (* Initialize a context with the formulas parsed *)
   let getInitial () = create initial
-  
+
   let initialize () =
     (* \Gamma context (linear): stores the formulas that have no exponential *)
     initSubexp "$gamma";
     (* \infty context (classical): stores specifications *)
     initSubexp "$infty"
 
-  (* All methods that operate on the contextshould return a new context with the proper modifications *)
+  (* All methods that operate on the context should return a new context with the proper modifications *)
 
   (* Adds a formula to a context *)
   let add ctx form subexp = 
@@ -81,6 +97,19 @@ module Context =
         Hashtbl.replace newctx subexp newforms;
         create newctx
       | UNB | REL -> create (Hashtbl.copy ctx.hash)
+  
+  (* Delets a formula (unconditional) *)
+  let delete ctx form subexp = try 
+    let newctx = Hashtbl.copy ctx.hash in
+    let forms = Hashtbl.find newctx subexp in
+    (* Removes the first occurence of form on the list. This can be implemented better *)
+    let newforms = Basic.remove form forms in
+    Hashtbl.replace newctx subexp newforms;
+    create newctx
+    with _ -> 
+      print_endline ("Trying to delete "^(termToString form)^" from "^subexp^" in:");
+      print_endline ("CONTEXT\n"^(Hashtbl.fold (fun k d acc -> "["^k^"] "^(termsListToString d)^"\n"^acc) ctx.hash ""));
+      failwith "Exception on deletion of formula from the context. "
 
   (* Returns the input context for the application of bang *)
   let bangin ctx subexp = 

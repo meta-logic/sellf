@@ -44,7 +44,7 @@ rules introduction.
 %(not (lft (gkneg (cons A)))) * ([l]? (lft (gkneg A))).
 
 % (a_conj)
-(not (lft (gkneg (and A B)))) * (([l]? (lft (gkneg A))) * ([l]? (lft (gkneg B)))).
+%(not (lft (gkneg (and A B)))) * (([l]? (lft (gkneg A))) * ([l]? (lft (gkneg B)))).
 
 % (a_disj1)
 %(not (lft (gkneg (or A B)))) * (([l]? (lft (gkneg A))) * (([l]? (lft (gkneg B))) | ([l]? (lft B)))).

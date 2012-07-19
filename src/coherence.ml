@@ -80,8 +80,7 @@ let system_name = ref "" ;;
 let checkInitCoher str (t1, t2) =
   file_name := ((!system_name)^"_initCoh_"^str); 
   (* Put axiom formulas on the context *)
-  Context.clearInitial ();
-  List.iter (fun e -> Context.store e "$infty") !ids;
+  Context.createInitialCoherenceContext ();
   
   let bt1 = QST(CONS("$infty"), t1) in
   let bt2 = QST(CONS("$infty"), t2) in
@@ -104,8 +103,7 @@ let checkInitCoher str (t1, t2) =
 let checkDuality str (t1, t2) =
   file_name := ((!system_name)^"_cutCoh_"^str); 
   (* Put cut formulas on the context *)
-  Context.clearInitial ();
-  List.iter (fun e -> Context.store e "$infty") !cutRules;
+  Context.createCutCoherenceContext ();
   
   let nt1 = deMorgan (NOT(t1)) in
   let nt2 = deMorgan (NOT(t2)) in
