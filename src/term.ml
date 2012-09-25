@@ -95,6 +95,7 @@ var = {
   lts : int
 }
 
+(* TODO: this fails for formulas of the kind A ^ (not (B v C)) FIX!!*)
 (* Solves negation of formulas by applying DeMorgan rules until atomic level *)
 let rec deMorgan f = match f with
   | NOT(t) -> begin 
