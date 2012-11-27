@@ -11,6 +11,7 @@ open Basic
 open Term
 open Subexponentials
 open Prints
+open Constraints
 
 (* Initial context, will be set depending on what we want to prove *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
@@ -50,12 +51,6 @@ module Context =
   type context = {
     hash : (string, terms list) Hashtbl.t;
   }
-
-(* TODO create this type latter for derivations 
-  type context_schema = {
-    hash : (string, int) Hashtbl.t;
-  }
-*)
 
   (* Creates an empty context *)
   let createEmpty () = {
@@ -200,3 +195,46 @@ module Context =
 
   end
 ;;
+
+module ContextSchema = struct
+ 
+  let global : (string, int) Hashtbl.t = Hashtbl.create 100 ;;
+
+  type context = {
+    hash : (string, int) Hashtbl.t;
+  }
+
+  let create () = { 
+    hash = Hashtbl.create 100
+  }
+
+  let create h = {
+    hash = h
+  }
+
+  let initialize ctx = 
+    let subexps = keys subexTpTbl in
+    List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps
+  
+  (* Splits the linear contexts in two creating the necessary constraints *)
+  let split ctx constraints = 
+    let hashctx1 = Hashtbl.copy ctx.hash in
+    let hashctx2 = Hashtbl.copy ctx.hash in
+    let cstrlst = Hashtbl.fold (fun s i cl -> match type_of s with
+      | LIN | REL -> 
+        (* Global number for this subexponential *)
+        let n = Hashtbl.find global s in
+        (* Updating the global counter of s *)
+        Hashtbl.replace global s (n+2);
+        (* Configuring a new s context for each branch *)
+        Hashtbl.replace hashctx1 s (n+1);
+        Hashtbl.replace hashctx2 s (n+2);
+        (* Creating the union constraints *)
+        Constraints.UNION((s, n+1), (s, n+2), (s, i))::cl
+      | UNB | AFF -> cl
+    )  ctx.hash [] in
+    (create hashctx1, create hashctx2, cstrlst)
+      
+  end
+;;
+

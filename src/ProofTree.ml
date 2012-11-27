@@ -177,5 +177,33 @@ module ProofTree =
  end
 ;;
 
+(* TODO: check if it's worth to join these two modules parametrizing on the type
+of the sequent or making it an option *)
+module ProofTreeSchema = 
+  struct
+
+    type prooftree = {
+      conclusion : SequentSchema.sequent;
+      mutable premises : prooftree list;
+      closed : bool;
+    }
+    
+    let create sq = {
+      conclusion = sq;
+      premises = [];
+    }
+   
+    let getConclusion pt = pt.conclusion
+    
+    (* Updates the tree with a new premisse and returns a reference to this new
+    child *)
+    let update pt sq = let newc = create sq in
+      pt.premises <- newc :: pt.premises; newc
+
+    let clearPremises pt = pt.premises <- []
+
+  end
+;;
+
 
 

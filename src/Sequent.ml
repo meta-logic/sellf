@@ -79,18 +79,49 @@ module Sequent =
   end
 ;;
 
-(*
-module Sequent_Schema = 
-  struct
-  
-  type sequent_schema = {
-    ctx : context_schema;
+(* TODO: can I joint this with the module above? *)
+module SequentSchema = struct
+ 
+  (* Sequent has contexts in and out. This has only one generic context. *)
+  type sequent = {
+    mutable ctx : ContextSchema.context;
     goals : terms list;
-    pol : phase
+    pol : phase;
+    closed : bool
   }
 
-  (* TODO complete when needed *)
+  (* Initializes a sequent with an initial context and one goal *)
+  let create formula = {
+    ctx = ContextSchema.initialize (ContextSchema.create ());
+    goals = [formula];
+    pol = SYNC;
+    closed = false
+  }
+
+  (* Initializes a sequent with a specific context and one goal *)
+  let createSync context formula = {
+    ctx = context;
+    goals = [formula];
+    pol = SYNC;
+    closed = false
+  }
+  
+  (* Initializes a sequent with a specific context, one goal and a phase *)
+  let createAsyn context formulas = {
+    ctx = context;
+    goals = sformulas;
+    pol = ASYN;
+    closed = false
+  }
+ 
+  let close seq = seq.close <- true
+
+  let getPhase seq = seq.pol
+
+  let getGoals seq = seq.goals
+
+  let getContext seq = seq.ctx
 
   end
 ;;
-*)
+

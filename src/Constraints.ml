@@ -1,5 +1,4 @@
 open Term
-open Structs
 open Prints
 open SolverStr
 open Unix
@@ -8,26 +7,24 @@ let i = ref 0;;
 
 module Constraints =
   struct
+
     type ctx = string * int
     type cstr = 
-(*      | FAIL (* G: I believe this is not used and we can drop it. *)*)
       | MCTX of terms * ctx
       | ELIN of terms * ctx
       | EMP of ctx
-(*      | EQF of terms * terms (* G: I believe this is not used and we can drop
-it. *)*)
-(*      | EQCTX of ctx list * ctx list (* G: I believe this is not used and we
-can drop it. *)*)
       | UNION of ctx * ctx * ctx
       | ADDFORM of terms * ctx * ctx
      
     type constraints = {
       (* The constraints is a set of sets. *)
-      mutable lst : cstr list list;
+      (* TODO: shouldn't this be only a list???? *)
+      (*mutable lst : cstr list list;*)
+      mutable lst : cstr list;
     }
 
     let create () = {
-        lst = [[]]
+        lst = []
     }
 
     let setConstraints cst clst = cst.lst <- clst
