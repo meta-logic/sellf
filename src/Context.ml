@@ -208,13 +208,16 @@ module ContextSchema = struct
     hash = Hashtbl.create 100
   }
 
+(*
   let create h = {
     hash = h
   }
+*)
 
   let initialize ctx = 
     let subexps = keys subexTpTbl in
-    List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps
+    List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps;
+    ctx
   
   (* Splits the linear contexts in two creating the necessary constraints *)
   let split ctx constraints = 

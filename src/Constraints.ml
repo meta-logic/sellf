@@ -2,6 +2,7 @@ open Term
 open Prints
 open SolverStr
 open Unix
+open Subexponentials
 
 let i = ref 0;;
 
@@ -17,14 +18,11 @@ module Constraints =
       | ADDFORM of terms * ctx * ctx
      
     type constraints = {
-      (* The constraints is a set of sets. *)
-      (* TODO: shouldn't this be only a list???? *)
-      (*mutable lst : cstr list list;*)
-      mutable lst : cstr list;
+      mutable lst : cstr list list;
     }
 
     let create () = {
-        lst = []
+        lst = [[]]
     }
 
     let setConstraints cst clst = cst.lst <- clst
@@ -46,9 +44,6 @@ module Constraints =
 
     let clear cst = cst.lst <- [[]]
     
-    (* When a new constraint is added, it should be added in every set *)
-    (*let add csts c = csts.lst <- c :: csts.lst ;;*)
-
     (* Combine every previous set of constraints with each new set *)
     let rec add csts newlst = 
       let rec addaux a b = match b with
@@ -57,34 +52,25 @@ module Constraints =
       in csts.lst <- addaux csts newlst
     ;;
 
+    let ctxToTex (s, i) = 
+      let news = remSpecial s in
+      ("$\\Gamma_{"^news^"}^{"^(string_of_int i)^"}$")
+ 
+    let ctxToStr (s, i) = 
+      let news = remSpecial s in
+      ""^news^""^(string_of_int i)^""
+
     let printTexConstraint c out = match c with
-      (*| FAIL -> Printf.fprintf out "\\item Fail.\n\n"*)
       | MCTX (t, c) -> 
-        Printf.fprintf out "\\item mctx("; 
-        print_term_tex out t;
-        let cstr = ctxToTex c in
-        Printf.fprintf out ", %s)\n" cstr;
+        Printf.fprintf out "\\item mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c)
       | ELIN (t, c) ->
-        Printf.fprintf out "\\item elin("; 
-        print_term_tex out t;
-        let cstr = ctxToTex c in
-        Printf.fprintf out ", %s)\n" cstr;
+        Printf.fprintf out "\\item elin(%s, %s)\n" (termToTexString t) (ctxToTex c)
       | EMP (c) -> 
-        let cstr = ctxToTex c in
-        Printf.fprintf out "\\item emp(%s).\n" cstr
-      (*| EQF (t1, t2) -> Printf.fprintf out "\\item eqf.\n"
-      | EQCTX (l1, l2) -> Printf.fprintf out "\\item eqctx.\n"*)
+        Printf.fprintf out "\\item emp(%s).\n" (ctxToTex c)
       | UNION (c1, c2, c3) -> 
-        let c1str = ctxToTex c1 in
-        let c2str = ctxToTex c2 in
-        let c3str = ctxToTex c3 in
-        Printf.fprintf out "\\item union(%s, %s, %s).\n" c1str c2str c3str 
+        Printf.fprintf out "\\item union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
       | ADDFORM (t, c1, c2) -> 
-        Printf.fprintf out "\\item addform("; 
-        print_term_tex out t;
-        let c1str = ctxToTex c1 in
-        let c2str = ctxToTex c2 in
-        Printf.fprintf out ", %s, %s).\n" c1str c2str 
+        Printf.fprintf out "\\item addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
 
     let printTexConstraints csts out = 
       let rec printCstLst lst out = match lst with
@@ -93,39 +79,20 @@ module Constraints =
       in List.iter (fun l -> printCstLst l out) csts.lst
 
     let printConstraint c = match c with
-      (*| FAIL -> print_string "- Fail.\n"; flush stdout*)
       | MCTX (t, c) -> 
-        print_string "mctx( "; 
-        print_term t;
-        let cstr = ctxToStr c in
-        print_string (", "^cstr^" )\n");
+        Printf.printf "mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c);
         flush (out_channel_of_descr stdout)
       | ELIN (t, c) ->
-        print_string "elin( "; 
-        print_term t;
-        let cstr = ctxToStr c in
-        print_string (", "^cstr^" )\n");
+        Printf.printf "elin(%s, %s)\n" (termToTexString t) (ctxToTex c);
         flush (out_channel_of_descr stdout)
       | EMP (c) -> 
-        let cstr = ctxToStr c in
-        print_string ("emp( "^cstr^" ).\n");
+        Printf.printf "emp(%s).\n" (ctxToTex c);
         flush (out_channel_of_descr stdout)
-      (*| EQF (t1, t2)   -> print_string "- eqf.\n";
-        flush out_channel_of_descr stdout  
-      | EQCTX (l1, l2  ) -> print_string "- eqctx.\n";
-        flush out_channel_of_descr stdout  *)
       | UNION (c1, c2, c3) -> 
-        let c1str = ctxToStr c1 in
-        let c2str = ctxToStr c2 in
-        let c3str = ctxToStr c3 in
-        print_string ("union( "^c1str^", "^c2str^", "^c3str^" ).\n");
+        Printf.printf "union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3);
         flush (out_channel_of_descr stdout)
       | ADDFORM (t, c1, c2) -> 
-        print_string "addform( "; 
-        print_term t;
-        let c1str = ctxToStr c1 in
-        let c2str = ctxToStr c2 in
-        print_string (", "^c1str^", "^c2str^" ).\n");
+        Printf.printf "addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
         flush (out_channel_of_descr stdout)
 
     let printConstraints csts = 
@@ -141,29 +108,15 @@ module Constraints =
     (* Print constraints to a file *)
     let printfConstraint c out = match c with
       | MCTX (t, c) -> 
-        Printf.fprintf out "mctx(\""; 
-        printf_term out t;
-        let cstr = ctxToStr c in
-        Printf.fprintf out "\", %s).\n" cstr;
+        Printf.fprintf out "mctx(\"%s\", %s)\n"  (termToTexString t) (ctxToTex c)
       | ELIN (t, c) ->
-        Printf.fprintf out "elin(\""; 
-        printf_term out t;
-        let cstr = ctxToStr c in
-        Printf.fprintf out "\", %s).\n" cstr;
+        Printf.fprintf out "elin(\"%s\", %s)\n" (termToTexString t) (ctxToTex c)
       | EMP (c) -> 
-        let cstr = ctxToStr c in
-        Printf.fprintf out "emp(%s).\n" cstr
+        Printf.fprintf out "emp(%s).\n" (ctxToTex c)
       | UNION (c1, c2, c3) -> 
-        let c1str = ctxToStr c1 in
-        let c2str = ctxToStr c2 in
-        let c3str = ctxToStr c3 in
-        Printf.fprintf out "union(%s, %s, %s).\n" c1str c2str c3str 
+        Printf.fprintf out "union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
       | ADDFORM (t, c1, c2) -> 
-        Printf.fprintf out "addform(\""; 
-        printf_term out t;
-        let c1str = ctxToStr c1 in
-        let c2str = ctxToStr c2 in
-        Printf.fprintf out "\", %s, %s).\n" c1str c2str 
+        Printf.fprintf out "addform(\"%s\", %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
 
     let rec printConstrList lst out = match lst with
       | [] -> ()

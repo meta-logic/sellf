@@ -187,8 +187,6 @@ let texFileHeader () = (
 let texFileFooter () = "$$\n}\n\\end{document}"
     
 
-(* Aux FIXME remove from here later *)
-
 (* Removes special characters from a string *)
 (* TODO: naive function. Fix it. *)
 let remSpecial s = try match  (String.index s '$') with
@@ -196,15 +194,5 @@ let remSpecial s = try match  (String.index s '$') with
     String.set cp n ' '; cp
   with Not_found -> s
 ;;
-
-(*
-let ctxToTex (s, i) = 
-  let news = remSpecial s in
-  ("$\\Gamma_{"^news^"}^{"^(string_of_int i)^"}$")
-
-let ctxToStr (s, i) = 
-  let news = remSpecial s in
-  ""^news^""^(string_of_int i)^""
-*)
 
 
