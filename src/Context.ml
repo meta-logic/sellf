@@ -236,7 +236,7 @@ module ContextSchema = struct
         Constraints.UNION((s, n+1), (s, n+2), (s, i))::cl
       | UNB | AFF -> cl
     )  ctx.hash [] in
-    (create hashctx1, create hashctx2, cstrlst)
+    (hashctx1, hashctx2, cstrlst)
       
   end
 ;;

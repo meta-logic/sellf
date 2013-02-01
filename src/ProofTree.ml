@@ -191,6 +191,7 @@ module ProofTreeSchema =
     let create sq = {
       conclusion = sq;
       premises = [];
+      closed = false;
     }
    
     let getConclusion pt = pt.conclusion

@@ -102,8 +102,8 @@ module Macro = struct
         print_endline (termToString (Term.observe goal));
       end; 
       let ctx = SequentSchema.getContext sequent in
-      let (ctx1, ctx2, newconstraints) = ContextSchema.split ctx in
-(* TODO: continue from here *) ContextSchema.split ctx <--- implement this!
+      let (ctx1, ctx2, newconstraints) = ContextSchema.split ctx constraintSet in
+(* TODO: continue from here  ContextSchema.split ctx <--- implement this!*)
 
       let sq = SequentSchema.createSync ctx f1 in
       buildMacro (ProofTreeSchema.update proof sq) constraintSet (fun () ->

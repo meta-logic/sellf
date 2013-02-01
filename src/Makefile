@@ -3,10 +3,10 @@
 cmo = cmo
 cma = cma
 cmx = cmx
-OCAMLC = ocamlc -g -annot
+OCAMLC = ocamlc -g -annot unix.cma
 OCAMLRUN = ocamlrun -b
 OCAMLDEBUG = ocamldebug
-OCAMLL = ocamlopt
+OCAMLL = ocamlopt unix.cmxa
 OCAMLDEP = ocamldep -native -I ndcore
 OCAMLDOC = ocamldoc
 OCAMLYACC = ocamlyacc

@@ -87,7 +87,7 @@ module SequentSchema = struct
     mutable ctx : ContextSchema.context;
     goals : terms list;
     pol : phase;
-    closed : bool
+    mutable closed : bool
   }
 
   (* Initializes a sequent with an initial context and one goal *)
@@ -109,12 +109,12 @@ module SequentSchema = struct
   (* Initializes a sequent with a specific context, one goal and a phase *)
   let createAsyn context formulas = {
     ctx = context;
-    goals = sformulas;
+    goals = formulas;
     pol = ASYN;
     closed = false
   }
  
-  let close seq = seq.close <- true
+  let close seq = seq.closed <- true
 
   let getPhase seq = seq.pol
 
