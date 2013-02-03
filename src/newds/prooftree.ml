@@ -2,33 +2,30 @@ open Term
 open Prints
 open Sequent
 
+(* What is this for??? *)
 let counter = ref 0 ;;
 
-module ProofTree = 
-  struct
-
-    (* Declare mutable so I can modify directly on the object *)
-    type prooftree = {
-      mutable conclusion : Sequent.sequent;
-      mutable premisses : prooftree list;
-      mutable closed : bool;
-    }
+(* Declare mutable so I can modify directly on the object *)
+type prooftree = {
+  mutable conclusion : Sequent.sequent;
+  mutable premisses : prooftree list;
+  mutable rule : Llrule.rule;
+}
     
-    let create sq = {
-      conclusion = sq;
-      premisses = [];
-      closed = true (* for printing purposes... fixme later *)
-    }
+let create sq = {
+  conclusion = sq;
+  premisses = []
+}
 
-    let setConclusion pt c = pt.conclusion <- c
+let setConclusion pt c = pt.conclusion <- c
 
-    let getConclusion pt = pt.conclusion
+let getConclusion pt = pt.conclusion
 
-    let setPremisses pt p = pt.premisses <- p
-    let getPremisses pt = pt.premisses
+let setPremisses pt p = pt.premisses <- p
+let getPremisses pt = pt.premisses
 
-    let addPremisse pt p = let newc = create p in
-      pt.premisses <- newc :: pt.premisses
+let addPremisse pt p = let newc = create p in
+  pt.premisses <- newc :: pt.premisses
 
     let getLatestPremisse pt = try List.hd pt.premisses 
       with Failure "hd" -> failwith "[ERROR] This sequent has no premisses."
@@ -45,10 +42,6 @@ module ProofTree =
     let update pt sq = let newc = create sq in
       pt.premisses <- newc :: pt.premisses; newc
 
-    let close pt = pt.closed <- true
-    
-    let openproof pt = pt.closed <- false
-    
     let rec getLeaves pt = List.fold_right (fun el acc -> 
       match el.premisses with
         | [] -> el :: acc

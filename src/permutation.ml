@@ -16,6 +16,7 @@ open Prints
 ctx(Ctx, Sub, Lin/Unb, Leaf, Tree) -> Denotes that the context Ctx belongs to the 
                                  linear/unbounded subexponential of the open leaf Leaf of the 
                                  tree Tree. *)
+
 let rec genCtxFacts lvsLst treeNum lfNum = match lvsLst with
   | [] -> ""
   | lf :: tl ->

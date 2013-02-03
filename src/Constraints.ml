@@ -16,17 +16,19 @@ module Constraints =
       | EMP of ctx
       | UNION of ctx * ctx * ctx
       | ADDFORM of terms * ctx * ctx
+      | REQIN of terms * ctx
      
     type constraints = {
       mutable lst : cstr list list;
     }
 
     let create () = {
-        lst = [[]]
+      lst = [[]]
     }
 
     let setConstraints cst clst = cst.lst <- clst
 
+    (*
     let copy cst = let cp = create () in
       let rec copylist l = match l with
         | [] -> []
@@ -41,6 +43,7 @@ module Constraints =
           | ADDFORM (f, c1, c2) -> ADDFORM(f, c1, c2) :: copylist t
       in
       setConstraints cp (List.map (fun l -> copylist l) cst.lst); cp
+    *)
 
     let clear cst = cst.lst <- [[]]
     

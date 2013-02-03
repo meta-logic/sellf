@@ -125,15 +125,15 @@ solve_query () =
   if query_string = "#done" then samefile := false      
   else begin
   match query_string with
-    (*
-    | "#macro" -> 
-      print_endline "Generating macro rules...";
+   (* 
+    | "#rules" -> 
+      print_endline "Generating rules of the object logic...";
       let n = ref 1 in
       let rec gen_macros rls = match rls with
         | [] -> print_endline "\nDone."
         | hd :: tl ->
           Macro.initMacro hd;
-          print_string "\nMacro rule(s) for term: "; 
+          print_string "\nRule(s) for clause: "; 
           Prints.print_term hd; print_newline (); 
           Macro.rmacro (fun () ->
             ProofTree.printLeaves !Macro.macrorule;
@@ -146,7 +146,8 @@ solve_query () =
             Macro.save_macro ()
             );
           gen_macros tl
-          in gen_macros !Structs.rules;
+          in 
+          gen_macros !Structs.rules;
 		      (* Printing the results... *)
           (*let macro_file = open_out ("viewer/macro.xml") in*)
           print_endline ("Number of macro rules: "^(string_of_int (List.length !Macro.macrolst)));

@@ -18,10 +18,24 @@ module Macro = struct
   }
 
   (* Builds the macro-rule of a formula *)
-  let create formula context constraints = {
-    let sequent = SequentSchema.createSync context formula in
-    pt = ProofTreeSchema.create sequent
+  let derive formula context constraints = {
+    let sequent = SequentSchema.createAsync context [] in
+    pt = ProofTreeSchema.create sequent;
+    models = 
+  }
 
+  (* Decides on a specific formula, creating the requirement that this formula
+   * must be in the context *)
+  let decideOn formula = {
+    let sequent = ProofTreeSchema.getConclusion pt in
+    let ctx = SequentSchema.getContext sequent in
+    let goals = SequentSchema.getGoals sequent in
+    let phase = SequentSchema.getPhase sequent in
+    match (goals, phase) with
+      | ([], ASYN) =>
+        let sq = SequentSchema.createSync ctx formula in
+        pt = ProofTreeSchema.update pt sq
+      | _ => failwith "Cannot decide on this sequent."
   }
 
   (* Note to self: the suc function should copy and save the proof tree and
@@ -298,6 +312,8 @@ module Macro = struct
 
   end
 ;;
+
+(** OLD IMPLEMENTATION **)
 
 (******************** PROOF TREE **********************)
 
