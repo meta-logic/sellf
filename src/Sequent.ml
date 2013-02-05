@@ -79,7 +79,7 @@ module Sequent =
   end
 ;;
 
-(* TODO: can I joint this with the module above? *)
+(* TODO: can I join this with the module above? *)
 module SequentSchema = struct
  
   (* Sequent has contexts in and out. This has only one generic context. *)
@@ -87,7 +87,6 @@ module SequentSchema = struct
     mutable ctx : ContextSchema.context;
     goals : terms list;
     pol : phase;
-    mutable closed : bool
   }
 
   (* Initializes a sequent with an initial context and one goal *)
@@ -95,7 +94,6 @@ module SequentSchema = struct
     ctx = ContextSchema.initialize (ContextSchema.create ());
     goals = [formula];
     pol = SYNC;
-    closed = false
   }
 
   (* Initializes a sequent with a specific context and one goal *)
@@ -103,7 +101,6 @@ module SequentSchema = struct
     ctx = context;
     goals = [formula];
     pol = SYNC;
-    closed = false
   }
   
   (* Initializes a sequent with a specific context, one goal and a phase *)
@@ -111,11 +108,8 @@ module SequentSchema = struct
     ctx = context;
     goals = formulas;
     pol = ASYN;
-    closed = false
   }
  
-  let close seq = seq.closed <- true
-
   let getPhase seq = seq.pol
 
   let getGoals seq = seq.goals

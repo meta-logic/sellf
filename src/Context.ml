@@ -216,6 +216,8 @@ module ContextSchema = struct
     let subexps = keys subexTpTbl in
     List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps;
     ctx
+
+  let copy ctx = createWith (Hashtbl.copy ctx.hash)
   
   let getIndex ctx s = try match Hashtbl.find ctx.hash s with
     | i -> i

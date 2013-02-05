@@ -221,6 +221,17 @@ module ProofTreeSchema =
       pt.premises <- [newpt];
       (newpt, [reqconstr, remconstr]) 
 
+    let releaseDown pt = 
+      let conc = getConclusion pt in
+      let ctx = SequentSchema.getContext conc in
+      let goals = SequentSchema.getGoals conc in
+      let newctx = ContextSchema.copy ctx in
+      let premise = SequentSchema.createAsyn newctx goals in
+      let newpt = create premise in
+      pt.rule <- SOME(RELEASEDOWN);
+      pt.premises <- [newpt];
+      (newpt, [])
+
   end
 ;;
 

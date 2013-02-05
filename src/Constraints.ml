@@ -6,12 +6,12 @@ open Subexponentials
 open Context
 
 let i = ref 0;;
-
+(* TODO: rewrite the commented out methods to the current type *)
 (*module Constraints =
   struct*)
 
     type ctx = string * int
-    type cstr = 
+    type constraintpred = 
       | MCTX of terms * ctx
       | ELIN of terms * ctx
       | EMP of ctx
@@ -20,13 +20,15 @@ let i = ref 0;;
       | REQIN of terms * ctx
       | REMOVED of terms * ctx * ctx
      
-    type constraints = {
-      mutable lst : cstr list list;
+    type constraintset = {
+      mutable lst : constraintpred list;
     }
 
     let create () = {
-      lst = [[]]
+      lst = []
     }
+
+    let add cst newc = cst.lst < cst.lst @ newc
 
     let setConstraints cst clst = cst.lst <- clst
 
@@ -56,15 +58,17 @@ let i = ref 0;;
       setConstraints cp (List.map (fun l -> copylist l) cst.lst); cp
     *)
 
-    let clear cst = cst.lst <- [[]]
+    let clear cst = cst.lst <- []
     
     (* Combine every previous set of constraints with each new set *)
+    (*
     let rec add csts newlst = 
       let rec addaux a b = match b with
         | [] -> []
         | c :: tl -> (List.map (fun l -> c @ l) csts.lst) @ addaux a tl
       in csts.lst <- addaux csts newlst
     ;;
+    *)
 
     let ctxToTex (s, i) = 
       let news = remSpecial s in
@@ -86,11 +90,13 @@ let i = ref 0;;
       | ADDFORM (t, c1, c2) -> 
         Printf.fprintf out "\\item addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
 
+    (*
     let printTexConstraints csts out = 
       let rec printCstLst lst out = match lst with
         | [] -> Printf.fprintf out "\\item End of constraints.\n"
         | h::t -> printTexConstraint h out; printCstLst t out
       in List.iter (fun l -> printCstLst l out) csts.lst
+    *)
 
     let printConstraint c = match c with
       | MCTX (t, c) -> 
@@ -109,6 +115,7 @@ let i = ref 0;;
         Printf.printf "addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
         flush (out_channel_of_descr stdout)
 
+    (*
     let printConstraints csts = 
       let i = ref 1 in
       let rec printCstLst lst = match lst with
@@ -118,6 +125,7 @@ let i = ref 0;;
           print_string ("-- Constraint set "^(string_of_int !i)^":\n");
           i := !i + 1;
           printCstLst l) csts.lst
+    *)
 
     (* Print constraints to a file *)
     let printfConstraint c out = match c with
@@ -174,6 +182,7 @@ let i = ref 0;;
       close_out file
 
     (* One file for each set of constraints *)
+    (*
     let genSolverInput constraints n = 
       let i = ref 0 in
       List.iter (fun l ->
@@ -181,6 +190,7 @@ let i = ref 0;;
         let name = "const_set_"^(string_of_int n)^"_"^(string_of_int !i) in
         genFile l name
       ) constraints.lst
+    *)
 
     (* Get the models from one set of constraints *)
     (* This function will return a list of models. These models are represented
@@ -197,10 +207,13 @@ let i = ref 0;;
       readModel channel
       
     (* Get all the models from all the sets of constraints *)
+    (*
     let getAllModels c = List.flatten (List.fold_right (fun e acc -> getModels e :: acc) c.lst [])
-
+    *)
+    
     (* Checks if some set of constraints and the model m satisfy the
     permutability condition *)
+    (*
     let permCondition cstrs ctxStr okStr mdl =
       let lst = cstrs.lst in
       let rec condition mdl cList = match cList with
@@ -217,6 +230,7 @@ let i = ref 0;;
             with End_of_file -> let _ = Unix.close_process_in channel in condition mdl tl
       in
       condition mdl lst
+    *)
 
   (*end*)
 ;;
