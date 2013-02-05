@@ -11,7 +11,7 @@ open Basic
 open Term
 open Subexponentials
 open Prints
-open Constraints
+(*open Constraints*)
 
 (* Initial context, will be set depending on what we want to prove *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
@@ -208,18 +208,33 @@ module ContextSchema = struct
     hash = Hashtbl.create 100
   }
 
-(*
-  let create h = {
+  let createWith h = {
     hash = h
   }
-*)
 
   let initialize ctx = 
     let subexps = keys subexTpTbl in
     List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps;
     ctx
   
+  let getIndex ctx s = try match Hashtbl.find ctx.hash s with
+    | i -> i
+    with Not_found -> failwith ("Subexponential "^s^" not in context.")
+
+  (* Creates the next context where the index of subexp is updated *)
+  let next ctx subexp =
+    let index = Hashtbl.find global subexp in
+    let newctxhash = Hashtbl.copy ctx.hash in
+    Hashtbl.replace newctxhash subexp (index + 1);
+    Hashtbl.replace global subexp (index + 1);
+    createWith newctxhash
+
+  (* Not used so far *)
+  let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx []
+
   (* Splits the linear contexts in two creating the necessary constraints *)
+  (* TODO: devide the responsability. Create the constraints in the constraint
+  module.
   let split ctx constraints = 
     let hashctx1 = Hashtbl.copy ctx.hash in
     let hashctx2 = Hashtbl.copy ctx.hash in
@@ -237,7 +252,8 @@ module ContextSchema = struct
       | UNB | AFF -> cl
     )  ctx.hash [] in
     (hashctx1, hashctx2, cstrlst)
-      
+    *)
+
   end
 ;;
 

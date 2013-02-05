@@ -37,6 +37,11 @@ let addform_clauses_set =
 "mctx(F, G1) :- addform(F, G, G1).
 mctx(F1, G1) :- addform(F, G, G1), mctx(F1, G).\n\n"
 
+(* removed definition *)
+let removed_clauses_set =
+"% removed(F, G, G1): removing the formula F from context G yields the context G1\n
+in(F1, G1) :- removed(F, G, G1), in(F1, G), F != F1.\n\n"
+
 (* for consistency *)
 let aux_clauses_set = 
 "emp(G1) :- emp(G), union(G1, G2, G).

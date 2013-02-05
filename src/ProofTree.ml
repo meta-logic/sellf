@@ -1,6 +1,8 @@
 open Term 
 open Prints
 open Sequent
+open Llrules
+open Context
 
 let counter = ref 0 ;;
 
@@ -185,13 +187,13 @@ module ProofTreeSchema =
     type prooftree = {
       conclusion : SequentSchema.sequent;
       mutable premises : prooftree list;
-      closed : bool;
+      mutable rule : llrule option
     }
     
     let create sq = {
       conclusion = sq;
       premises = [];
-      closed = false;
+      rule = NONE
     }
    
     let getConclusion pt = pt.conclusion
@@ -202,6 +204,22 @@ module ProofTreeSchema =
       pt.premises <- newc :: pt.premises; newc
 
     let clearPremises pt = pt.premises <- []
+
+    (* Implement LL rules here! :) *)
+    (* Each rule returns one or two proof trees and a list of constraints *)
+  
+    let decide pt f subexp = 
+      let conc = getConclusion pt in
+      let ctx = SequentSchema.getContext conc in
+      let reqconstr = Constraints.requireIn f subexp in
+      let newctx = ContextSchema.next ctx subexp in
+      let remconstr = Constraints.remove f subexp ctx newctx in
+      (* Create a new sequent and add this as a premise to the prooftree *)
+      let premise = SequentSchema.createSync newctx f in
+      let newpt = create premise in
+      pt.rule <- SOME(DECIDE);
+      pt.premises <- [newpt];
+      (newpt, [reqconstr, remconstr]) 
 
   end
 ;;

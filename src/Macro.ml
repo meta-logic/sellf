@@ -4,7 +4,7 @@ open Structs
 open Prints
 open ProofTree
 open Constraints
-open Common
+open Common  
 
 module Macro = struct
 

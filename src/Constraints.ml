@@ -3,11 +3,12 @@ open Prints
 open SolverStr
 open Unix
 open Subexponentials
+open Context
 
 let i = ref 0;;
 
-module Constraints =
-  struct
+(*module Constraints =
+  struct*)
 
     type ctx = string * int
     type cstr = 
@@ -17,6 +18,7 @@ module Constraints =
       | UNION of ctx * ctx * ctx
       | ADDFORM of terms * ctx * ctx
       | REQIN of terms * ctx
+      | REMOVED of terms * ctx * ctx
      
     type constraints = {
       mutable lst : cstr list list;
@@ -27,6 +29,15 @@ module Constraints =
     }
 
     let setConstraints cst clst = cst.lst <- clst
+
+    let requireIn f subexp ctx =
+      let index = ContextSchema.getIndex ctx subexp in
+      REQIN(f, (subexp, index))
+
+    let remove f subexp oldctx newctx = 
+      let oldindex = ContextSchema.getIndex oldctx subexp in
+      let newindex = ContextSchema.getIndex newctx subexp in
+      REMOVED(f, (subexp, oldindex), (subexp, newindex))
 
     (*
     let copy cst = let cp = create () in
@@ -207,7 +218,7 @@ module Constraints =
       in
       condition mdl lst
 
-  end
+  (*end*)
 ;;
 
 
