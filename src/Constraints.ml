@@ -44,6 +44,8 @@ let setConstraints cst clst = cst.lst <- clst*)
 
 let clear cst = cst.lst <- []
 
+let copy cst = create cst.lst
+
 let requireIn f subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
   create [REQIN(f, (subexp, index))]
@@ -59,6 +61,10 @@ let insert f subexp oldctx newctx =
   let middleindex = newindex - 1 in
   create [ELIN(f, (subexp, middleindex));
   UNION((subexp, oldindex), (subexp, middleindex), (subexp, newindex))]
+
+let empty subexp ctx = 
+  let index = ContextSchema.getIndex ctx subexp in
+  create [EMP(subexp, index)]
 
 (*
 let copy cst = let cp = create () in

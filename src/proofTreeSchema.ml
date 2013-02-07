@@ -11,7 +11,6 @@
 open Sequent
 open Context
 open Term
-open Constraints
 open Llrules
 
 type prooftree = {
@@ -28,16 +27,29 @@ let create sq = {
 
 let getConclusion pt = pt.conclusion
 
+(* TODO: check if this actually copies a prooftree *)
+let rec copy pt = 
+  let cp = create pt.conclusion in
+  cp.rule <- pt.rule;
+  let rec cpPremises lst = match lst with
+    | [] -> []
+    | p::t -> (copy p) :: cpPremises t
+  in
+  cp.premises <- (cpPremises pt.premises);
+  cp
+
 (* Updates the tree with a new premisse and returns a reference to this new
 child *)
+(*
 let update pt sq = let newc = create sq in
   pt.premises <- newc :: pt.premises; newc
 
 let clearPremises pt = pt.premises <- []
+*)
 
 (* Implement LL rules here! :) *)
 (* Each rule returns one or two proof trees and a constraintset, except if they
-have no premises (initial and top) *)
+have no premises (initial, top and one) *)
 
 let decide pt f subexp = 
   let conc = getConclusion pt in
@@ -162,4 +174,39 @@ let applyBot pt f =
   pt.rule <- SOME(BOTRULE);
   pt.premises <- [newpt];
   (newpt, Constraints.create [])
+
+let applyOne pt =
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  pt.rule <- SOME(ONERULE);
+  Constraints.empty "$gamma" ctx
+
+let applyAddOr1 pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let newctx = ContextSchema.copy ctx in
+  let f1 = match Term.observe f with
+    | ADDOR(f1,_) -> f1
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let premise = SequentSchema.createSync newctx f1 in
+  let newpt = create premise in
+  pt.rule <- SOME(ADDOR1RULE);
+  pt.premises <- [newpt];
+  (newpt, Constraints.create [])
+
+let applyAddOr2 pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let newctx = ContextSchema.copy ctx in
+  let f2 = match Term.observe f with
+    | ADDOR(_,f2) -> f2
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let premise = SequentSchema.createSync newctx f2 in
+  let newpt = create premise in
+  pt.rule <- SOME(ADDOR2RULE);
+  pt.premises <- [newpt];
+  (newpt, Constraints.create [])
+
 

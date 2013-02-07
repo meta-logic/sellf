@@ -28,8 +28,11 @@ let deriveBipole seq form constr =
   (* Initial constraints *)
   let constraints : Constraints.constraintset list ref = ref [(Constraints.union decidecstr constr)] in
 
+  (* Resulting pairs of proofs and constraint sets *)
+  let results : (ProofTreeSchema.prooftree * Constraints.constraintset list) list ref = ref [] in
+
   (* Builds the derivation of f as a bipole (one positive and one negative
-  phase). 'acc' holds the resulting pairs (prooftree * constraints list)?? *)
+  phase). *)
   let rec derive prooftree cont = 
     let conclusion = ProofTreeSchema.getConclusion prooftree in
     match (SequentSchema.getPhase conclusion, SequentSchema.getGoals conclusion) with
@@ -45,21 +48,34 @@ let deriveBipole seq form constr =
         let (pt, c) = ProofTreeSchema.releaseDown prooftree in
         constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
-(*
+
       | ADDOR(f1, f2) ->
+        let (pt1, c1) = ProofTreeSchema.applyAddOr1 prooftree f in
+        let currentconstraints = !constraints in
+        constraints := List.map (fun cst -> Constraints.union cst c1) !constraints;
+        derive pt1 (fun () ->
+          cont (); (* save the tree and constraints *)
+          constraints := currentconstraints;
+          let (pt2, c2) = ProofTreeSchema.applyAddOr2 prooftree f in
+          constraints := List.map (fun cst -> Constraints.union cst c1) !constraints;
+          derive pt2 cont
+        )
 
-      | TENSOR(f1, f2) ->
+      (*| TENSOR(f1, f2) ->*)
 
-      | EXISTS(s, i, f1) ->
+      (*| EXISTS(s, i, f1) ->*)
 
       | ONE ->
+        let c = ProofTreeSchema.applyOne prooftree in
+        constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
+        cont ()
 
-      | BANG(f1) ->
+      (*| BANG(f1) ->*)
 
-      | PRED(str, terms, POS) ->
+      (*| PRED(str, terms, POS) ->*)
 
-      | NOT(PRED(str, terms, NEG)) ->
-*)
+      (*| NOT(PRED(str, terms, NEG)) ->*)
+
     end
     | ASYN, hd::tl -> begin match Term.observe hd with
       (* Release rule *)
@@ -108,6 +124,8 @@ let deriveBipole seq form constr =
     | _ -> failwith "Invalid sequent while building a bipole derivation."
 
   in
-  derive pt1 (fun () -> ()
-  (* TODO implement continuation function *))
+  derive pt1 (fun () -> 
+    (* Saves a copy of the proof and constraints *)
+    results := (ProofTreeSchema.copy pt0, (List.map (fun c -> Constraints.copy c) !constraints)) :: !results;
+  )
 
