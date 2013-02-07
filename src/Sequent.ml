@@ -79,7 +79,6 @@ module Sequent =
   end
 ;;
 
-(* TODO: can I join this with the module above? *)
 module SequentSchema = struct
  
   (* Sequent has contexts in and out. This has only one generic context. *)

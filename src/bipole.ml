@@ -8,6 +8,9 @@
 (**************************************)
 
 open ProofTreeSchema
+open Sequent
+open Term
+open Constraints
 
 (* Builds a bipole from a sequent and a formula and a set of constraints *)
 (* Generates the necessary constraints. *)
@@ -24,13 +27,16 @@ let deriveBipole seq form constr =
   others and bla bla bla. Leaving this for DLV. *)
   let (pt1, decidecstr) = ProofTreeSchema.decide pt0 form "$gamma" in
 
+  (* Initial constraints *)
+  let constraints : Constraints.constraintset list ref = ref [(Constraints.union decidecstr constr)] in
+
   (* Builds the derivation of f as a bipole (one positive and one negative
   phase). 'acc' holds the resulting pairs (prooftree * constraints list)?? *)
-  let rec derive (prooftree, constraintlst) suc = 
+  let rec derive prooftree cont = 
     let conclusion = ProofTreeSchema.getConclusion prooftree in
-    match (SequentSchema.getPhase conclusion, SequentSchema.getGoals) with
+    match (SequentSchema.getPhase conclusion, SequentSchema.getGoals conclusion) with
 
-    | SYNC, [f] -> match Term.observe f with
+    | SYNC, [f] -> begin match Term.observe f with
       (* Release rule *)
       | WITH(_,_)
       | PARR(_,_)
@@ -38,9 +44,10 @@ let deriveBipole seq form constr =
       | BOT
       | FORALL(_,_,_)
       | QST(_) ->
-        let (pt, c) = ProofTreeSchema.releaseDown pt in
-        derive (pt, constraintlst.map(fun cst -> Constraint.add cst c)) suc
-
+        let (pt, c) = ProofTreeSchema.releaseDown prooftree in
+        constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
+(*
       | ADDOR(f1, f2) ->
 
       | TENSOR(f1, f2) ->
@@ -54,8 +61,9 @@ let deriveBipole seq form constr =
       | PRED(str, terms, POS) ->
 
       | NOT(PRED(str, terms, NEG)) ->
-
-    | ASYN, hd::tl -> match Term.observe hd with
+*)
+    end
+    | ASYN, hd::tl -> begin match Term.observe hd with
       (* Release rule *)
       | ADDOR(_,_) 
       | TENSOR(_,_)
@@ -64,28 +72,38 @@ let deriveBipole seq form constr =
       | BANG(_)
       | PRED(_,_,POS)
       | NOT(PRED(_,_,NEG)) ->
-        (* TODO: implement releaseUp rule *)
-        let (pt, c) = ProofTreeSchema.releaseUp pt hd in
-        derive (pt, constraintlst.map(fun cst -> Constraint.add cst c)) suc
+        let (pt, c) = ProofTreeSchema.releaseUp prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
 
       | WITH(f1, f2) ->
+        let ((pt1, pt2), c) = ProofTreeSchema.applyWith prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt1 (fun () -> derive pt2 cont)
 
       | PARR(f1, f2) ->
+        let (pt, c) = ProofTreeSchema.applyParr prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
 
-      | TOP ->
+      (*| TOP ->*)
 
-      | BOT ->
+      (*| BOT ->*)
       
-      | FORALL(s, i, f1) ->
+      (*| FORALL(s, i, f1) ->*)
 
-      | QST(f1) ->
-
+      | QST(subexp, f1) ->
+        let (pt, c) = ProofTreeSchema.applyQst prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
+        
+    end
     (* Do not decide for a second time. The end of this phase means the end of
     the bipole. *)
-    | ASYN, [] -> suc
-
+    | ASYN, [] -> cont ()
+    | _ -> failwith "Invalid sequent while building a bipole derivation."
 
   in
-  derive (pt1, [(decidecstr @ constr)]) (fun -> (* TODO implement success
-  function *))
+  derive pt1 (fun () -> ()
+  (* TODO implement continuation function *))
 
