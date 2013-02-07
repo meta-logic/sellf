@@ -231,6 +231,14 @@ module ContextSchema = struct
     Hashtbl.replace global subexp (index + 1);
     createWith newctxhash
 
+  (* Creates the next context after inserting a formula in subexp *)
+  let insert ctx subexp = 
+    let index = Hashtbl.find global subexp in
+    let newctxhash = Hashtbl.copy ctx.hash in
+    Hashtbl.replace newctxhash subexp (index+2);
+    Hashtbl.replace global subexp (index+2);
+    createWith newctxhash
+
   (* Not used so far *)
   let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx []
 

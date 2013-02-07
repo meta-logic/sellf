@@ -41,6 +41,13 @@ let i = ref 0;;
       let newindex = ContextSchema.getIndex newctx subexp in
       REMOVED(f, (subexp, oldindex), (subexp, newindex))
 
+    let insert f subexp oldctx newctx = 
+      let oldindex = ContextSchema.getIndex oldctx subexp in
+      let newindex = ContextSchema.getIndex newctx subexp in
+      let middleindex = newindex - 1 in
+      [ELIN(f, (subexp, middleindex));
+      UNION((subexp, oldindex), (subexp, middleindex), (subexp, newindex))]
+
     (*
     let copy cst = let cp = create () in
       let rec copylist l = match l with

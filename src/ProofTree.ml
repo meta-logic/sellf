@@ -232,6 +232,16 @@ module ProofTreeSchema =
       pt.premises <- [newpt];
       (newpt, [])
 
+    (* TODO finish the method
+    let releaseUp pt f = 
+      let conc = getConclusion pt in
+      let ctx = SequentSchema.getContext conc in
+      let goals = SequentSchema.getGoals conc in
+      let newctx = ContextSchema.insert ctx subexp in
+      let insertcstr = Constraints.insert f subexp oldctx newctx in
+      let newgoals = List.filter (fun form -> form != f)
+    *)
+
   end
 ;;
 
