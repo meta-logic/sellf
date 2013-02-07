@@ -36,7 +36,8 @@ let update pt sq = let newc = create sq in
 let clearPremises pt = pt.premises <- []
 
 (* Implement LL rules here! :) *)
-(* Each rule returns one or two proof trees and a constraintset *)
+(* Each rule returns one or two proof trees and a constraintset, except if they
+have no premises (initial and top) *)
 
 let decide pt f subexp = 
   let conc = getConclusion pt in
@@ -128,5 +129,37 @@ let applyQst pt f =
   pt.premises <- [newpt];
   (newpt, insertcstr)
 
+let applyForall pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let goals = SequentSchema.getGoals conc in
+  let s, i, f1 = match Term.observe f with
+    | FORALL(s, i, f1) -> s, i, f1
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let newctx = ContextSchema.copy ctx in
+  Term.varid := !Term.varid + 1;
+  let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
+  let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
+  let newgoals = f1::(List.filter (fun form -> form != f) goals) in
+  let premise = SequentSchema.createAsyn newctx newgoals in
+  let newpt = create premise in
+  pt.rule <- SOME(FORALLRULE);
+  pt.premises <- [newpt];
+  (newpt, Constraints.create [])
 
+(* GR: Do we need to create any constraints for the T rule? *)
+let applyTop pt = pt.rule <- SOME(TOPRULE)
+
+let applyBot pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let goals = SequentSchema.getGoals conc in
+  let newctx = ContextSchema.copy ctx in
+  let newgoals = List.filter (fun form -> form != f) goals in
+  let premise = SequentSchema.createAsyn newctx newgoals in
+  let newpt = create premise in
+  pt.rule <- SOME(BOTRULE);
+  pt.premises <- [newpt];
+  (newpt, Constraints.create [])
 

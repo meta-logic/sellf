@@ -7,10 +7,8 @@
 (*                                    *)
 (**************************************)
 
-open ProofTreeSchema
 open Sequent
 open Term
-open Constraints
 
 (* Builds a bipole from a sequent and a formula and a set of constraints *)
 (* Generates the necessary constraints. *)
@@ -86,11 +84,17 @@ let deriveBipole seq form constr =
         constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
 
-      (*| TOP ->*)
+      | TOP -> ProofTreeSchema.applyTop prooftree; cont ()
 
-      (*| BOT ->*)
+      | BOT ->
+        let (pt, c) = ProofTreeSchema.applyBot prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
       
-      (*| FORALL(s, i, f1) ->*)
+      | FORALL(s, i, f1) ->
+        let (pt, c) = ProofTreeSchema.applyForall prooftree hd in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
 
       | QST(subexp, f1) ->
         let (pt, c) = ProofTreeSchema.applyQst prooftree hd in
