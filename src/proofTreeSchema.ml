@@ -33,19 +33,10 @@ let rec copy pt =
   cp.rule <- pt.rule;
   let rec cpPremises lst = match lst with
     | [] -> []
-    | p::t -> (copy p) :: cpPremises t
+    | p :: t -> (copy p) :: cpPremises t
   in
   cp.premises <- (cpPremises pt.premises);
   cp
-
-(* Updates the tree with a new premisse and returns a reference to this new
-child *)
-(*
-let update pt sq = let newc = create sq in
-  pt.premises <- newc :: pt.premises; newc
-
-let clearPremises pt = pt.premises <- []
-*)
 
 (* Implement LL rules here! :) *)
 (* Each rule returns one or two proof trees and a constraintset, except if they
@@ -98,8 +89,8 @@ let applyWith pt f =
     | WITH(f1, f2) -> f1, f2
     | _ -> failwith "Wrong formula in rule application."
   in
-  let newgoals1 = f1::(List.filter (fun form -> form != f) goals) in
-  let newgoals2 = f2::(List.filter (fun form -> form != f) goals) in
+  let newgoals1 = f1 :: (List.filter (fun form -> form != f) goals) in
+  let newgoals2 = f2 :: (List.filter (fun form -> form != f) goals) in
   let premise1 = SequentSchema.createAsyn newctx1 newgoals1 in
   let premise2 = SequentSchema.createAsyn newctx2 newgoals2 in
   let newpt1 = create premise1 in
@@ -117,7 +108,7 @@ let applyParr pt f =
     | PARR(f1, f2) -> f1, f2 
     | _ -> failwith "Wrong formula in rule application."
   in
-  let newgoals = f1::f2::(List.filter (fun form -> form != f) goals) in
+  let newgoals = f1 :: f2 :: (List.filter (fun form -> form != f) goals) in
   let premise = SequentSchema.createAsyn newctx newgoals in
   let newpt = create premise in
   pt.rule <- SOME(PARRRULE);
@@ -152,8 +143,8 @@ let applyForall pt f =
   let newctx = ContextSchema.copy ctx in
   Term.varid := !Term.varid + 1;
   let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
-  let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
-  let newgoals = f1::(List.filter (fun form -> form != f) goals) in
+  let newf = Norm.hnorm (APP (ABS (s, 1, f1), [new_var])) in
+  let newgoals = newf :: (List.filter (fun form -> form != f) goals) in
   let premise = SequentSchema.createAsyn newctx newgoals in
   let newpt = create premise in
   pt.rule <- SOME(FORALLRULE);
@@ -175,11 +166,21 @@ let applyBot pt f =
   pt.premises <- [newpt];
   (newpt, Constraints.create [])
 
+(* GR TODO assert that the main formulas are the only ones in the goals of
+synchronous phase?? *)
+
 let applyOne pt =
   let conc = getConclusion pt in
   let ctx = SequentSchema.getContext conc in
   pt.rule <- SOME(ONERULE);
   Constraints.empty "$gamma" ctx
+
+let applyInitial pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let initcstr = Constraints.initial ctx f in
+  pt.rule <- SOME(INIT);
+  initcstr
 
 let applyAddOr1 pt f = 
   let conc = getConclusion pt in
@@ -208,5 +209,55 @@ let applyAddOr2 pt f =
   pt.rule <- SOME(ADDOR2RULE);
   pt.premises <- [newpt];
   (newpt, Constraints.create [])
+
+let applyExists pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let s, i, f1 = match Term.observe f with
+    | EXISTS(s, i, f1) -> s, i, f1
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let newctx = ContextSchema.copy ctx in
+  Term.varid := !Term.varid + 1;
+  let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+  let ptr = PTR {contents = new_var} in
+  let newf = Norm.hnorm (APP (ABS (s, 1, f1), [ptr])) in
+  let premise = SequentSchema.createSync newctx newf in
+  let newpt = create premise in
+  pt.rule <- SOME(EXISTSRULE);
+  pt.premises <- [newpt];
+  (newpt, Constraints.create [])
+
+let applyTensor pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let f1, f2 = match Term.observe f with
+    | TENSOR(f1, f2) -> f1, f2
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let (newctx1, newctx2) = ContextSchema.split ctx in
+  let splitcstr = Constraints.split ctx newctx1 newctx2 in
+  let premise1 = SequentSchema.createSync newctx1 f1 in
+  let premise2 = SequentSchema.createSync newctx2 f2 in
+  let newpt1 = create premise1 in
+  let newpt2 = create premise2 in
+  pt.rule <- SOME(TENSORRULE);
+  pt.premises <- [newpt1; newpt2];
+  ((newpt1, newpt2), splitcstr)
+
+let applyBang pt f = 
+  let conc = getConclusion pt in
+  let ctx = SequentSchema.getContext conc in
+  let s, f1 = match Term.observe f with
+    | BANG(CONS(s), f1) -> s, f1
+    | _ -> failwith "Wrong formula in rule application."
+  in
+  let newctx = ContextSchema.bang ctx s in
+  let bangcstr = Constraints.bang newctx s in
+  let premise = SequentSchema.createAsyn newctx [f1] in
+  let newpt = create premise in
+  pt.rule <- SOME(BANGRULE);
+  pt.premises <- [newpt];
+  (newpt, bangcstr)
 
 

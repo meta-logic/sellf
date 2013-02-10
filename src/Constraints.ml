@@ -16,7 +16,6 @@ open Subexponentials
 open Context
 
 let i = ref 0;;
-(* TODO: rewrite the commented out methods to the current type *)
 
 type ctx = string * int
 type constraintpred = 
@@ -38,11 +37,10 @@ let create predlst = {
 
 let union set1 set2 = create (set1.lst @ set2.lst)
 
-(*let add cst newc = cst.lst < cst.lst @ newc
-
-let setConstraints cst clst = cst.lst <- clst*)
-
-let clear cst = cst.lst <- []
+(* Cross product between two sets of sets of constraints *)
+let times set1 set2 = List.concat (List.map (fun cst1 ->
+  List.map (fun cst2 -> union cst1 cst2) set2
+) set1)
 
 let copy cst = create cst.lst
 
@@ -66,33 +64,53 @@ let empty subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
   create [EMP(subexp, index)]
 
-(*
-let copy cst = let cp = create () in
-  let rec copylist l = match l with
-    | [] -> []
-    | h::t -> match h with
-      (*| FAIL -> FAIL :: copylist t*)
-      | MCTX (tm, c) -> MCTX(tm,c) :: copylist t
-      | ELIN (tm, c) -> ELIN(tm,c) :: copylist t
-      | EMP (c) -> EMP(c) :: copylist t
-      (*| EQF (t1, t2) -> EQF(t1,t2) :: copylist t*)
-      (*| EQCTX (cl1, cl2) -> EQCTX(cl1, cl2) :: copylist t*)
-      | UNION (c1, c2, c3) -> UNION(c1, c2, c3) :: copylist t
-      | ADDFORM (f, c1, c2) -> ADDFORM(f, c1, c2) :: copylist t
+(* Creates the union constraints of linear contexts of newctx1 and newctx2
+  resulting in contexts of ctx *)
+let split ctx newctx1 newctx2 =
+  let contexts = ContextSchema.getContexts ctx in
+  let cstrlst = List.fold_right (fun (s, i) acc -> 
+    let i1 = ContextSchema.getIndex newctx1 s in
+    let i2 = ContextSchema.getIndex newctx2 s in
+    if (i1 != i2) then
+      UNION((s, i1), (s, i2), (s, i)) :: acc
+    else acc
+  ) contexts [] in
+  create cstrlst
+
+(* Creates the emptiness constraints for the bang rule *)
+(* GR TODO: check if this creates the constraint that $gamma should be empty *)
+let bang ctx subexp = 
+  let contexts = ContextSchema.getContexts ctx in
+  let cstrlst = List.fold_right (fun (s, i) acc ->
+    if s = subexp || (greater_than s subexp) then acc
+    else EMP(s, i) :: acc
+  ) contexts [] in
+  create cstrlst
+
+(* Several sets of constraints are created and a list of constraint sets is
+returned *)
+let initial ctx f = 
+  let contexts = ContextSchema.getContexts ctx in
+  (* Suppose the dual of f is in s, generates all the constraints *)
+  let isHere (sub, i) dualf = 
+    let c1 = match type_of sub with
+    | LIN | AFF -> ELIN(dualf, (sub, i))
+    | UNB | REL -> MCTX(dualf, (sub, i))
+    in
+    let empty = List.fold_right (fun (s, i) acc ->
+      if s != sub then begin match type_of s with
+        | LIN | AFF -> EMP(s, i) :: acc
+        | UNB | REL -> acc
+      end else acc
+    ) contexts []
+    in
+    c1 :: empty
   in
-  setConstraints cp (List.map (fun l -> copylist l) cst.lst); cp
-*)
-
-(* Combine every previous set of constraints with each new set *)
-(*
-let rec add csts newlst = 
-  let rec addaux a b = match b with
-    | [] -> []
-    | c :: tl -> (List.map (fun l -> c @ l) csts.lst) @ addaux a tl
-  in csts.lst <- addaux csts newlst
-;;
-*)
-
+  let cstrs = List.fold_right (fun c acc ->
+    ( isHere c (deMorgan(NOT(f))) ) :: acc 
+  ) contexts [] in
+  List.map (fun set -> create set) cstrs
+  
 let ctxToTex (s, i) = 
   let news = remSpecial s in
   ("$\\Gamma_{"^news^"}^{"^(string_of_int i)^"}$")
@@ -101,6 +119,7 @@ let ctxToStr (s, i) =
   let news = remSpecial s in
   ""^news^""^(string_of_int i)^""
 
+(* GR TODO check if I cannot reduce the redundancy of these printing methods... *)
 let printTexConstraint c out = match c with
   | MCTX (t, c) -> 
     Printf.fprintf out "\\item mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c)
@@ -112,14 +131,15 @@ let printTexConstraint c out = match c with
     Printf.fprintf out "\\item union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
   | ADDFORM (t, c1, c2) -> 
     Printf.fprintf out "\\item addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
+  | REQIN (t, c) -> 
+    Printf.fprintf out "\\item requiredIn(%s, %s)\n" (termToTexString t) (ctxToTex c)
+  | REMOVED (t, c1, c2) -> 
+    Printf.fprintf out "\\item removed(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
 
-(*
-let printTexConstraints csts out = 
-  let rec printCstLst lst out = match lst with
-    | [] -> Printf.fprintf out "\\item End of constraints.\n"
-    | h::t -> printTexConstraint h out; printCstLst t out
-  in List.iter (fun l -> printCstLst l out) csts.lst
-*)
+let rec printTexConstraints csts out = 
+  Printf.fprintf out "\\begin{itemize}.\n";
+  List.iter (fun c -> printTexConstraint c out) csts.lst;
+  Printf.fprintf out "\\end{itemize}.\n"
 
 let printConstraint c = match c with
   | MCTX (t, c) -> 
@@ -137,18 +157,20 @@ let printConstraint c = match c with
   | ADDFORM (t, c1, c2) -> 
     Printf.printf "addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
     flush (out_channel_of_descr stdout)
+  | REQIN (t, c) -> 
+    Printf.printf "requiredIn(%s, %s)\n" (termToTexString t) (ctxToTex c);
+    flush (out_channel_of_descr stdout)
+  | REMOVED (t, c1, c2) -> 
+    Printf.printf "removed(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
+    flush (out_channel_of_descr stdout)
 
-(*
 let printConstraints csts = 
   let i = ref 1 in
-  let rec printCstLst lst = match lst with
-    | [] -> print_string "\n"
-    | h::t -> printConstraint h; printCstLst t
-  in List.iter (fun l -> 
-      print_string ("-- Constraint set "^(string_of_int !i)^":\n");
-      i := !i + 1;
-      printCstLst l) csts.lst
-*)
+  List.iter (fun c -> 
+    print_string ("-- Constraint set "^(string_of_int !i)^":\n");
+    i := !i + 1;
+    printConstraint c
+  ) csts.lst
 
 (* Print constraints to a file *)
 let printfConstraint c out = match c with
@@ -162,6 +184,10 @@ let printfConstraint c out = match c with
     Printf.fprintf out "union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
   | ADDFORM (t, c1, c2) -> 
     Printf.fprintf out "addform(\"%s\", %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
+  | REQIN (t, c) -> 
+    Printf.fprintf out "requiredIn(\"%s\", %s)\n" (termToTexString t) (ctxToTex c)
+  | REMOVED (t, c1, c2) -> 
+    Printf.fprintf out "removed(\"%s\", %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
 
 let rec printConstrList lst out = match lst with
   | [] -> ()
@@ -203,6 +229,8 @@ let genPermFile cList ctxStr okStr model name =
   Printf.fprintf file "%s\n" model;
   printConstrList cList file;
   close_out file
+
+(* GR TODO reorganize the file generation methods... *)
 
 (* One file for each set of constraints *)
 (*

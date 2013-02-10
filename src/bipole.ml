@@ -19,7 +19,7 @@ let deriveBipole seq form constr =
   let pt0 = ProofTreeSchema.create seq in
 
   (* decide on form and create the necessary constraints *)
-  (* Note to self: Why don't I just check if the formula is there? Because it
+  (* GR Note to self: Why don't I just check if the formula is there? Because it
   might be the case that I have to the the reasoning DLV does, namely, check if
   a context is the union of other and check if this formula is in any of the
   others and bla bla bla. Leaving this for DLV. *)
@@ -61,20 +61,32 @@ let deriveBipole seq form constr =
           derive pt2 cont
         )
 
-      (*| TENSOR(f1, f2) ->*)
+      | TENSOR(f1, f2) ->
+        let ((pt1, pt2), c) = ProofTreeSchema.applyTensor prooftree f in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt1 (fun () -> derive pt2 cont)
 
-      (*| EXISTS(s, i, f1) ->*)
+      | EXISTS(s, i, f1) ->
+        let (pt, c) = ProofTreeSchema.applyExists prooftree f in
+        constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
 
       | ONE ->
         let c = ProofTreeSchema.applyOne prooftree in
         constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
         cont ()
 
-      (*| BANG(f1) ->*)
+      | BANG(s, f1) ->
+        let (pt, c) = ProofTreeSchema.applyBang prooftree f in
+        constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
+        derive pt cont
 
-      (*| PRED(str, terms, POS) ->*)
-
-      (*| NOT(PRED(str, terms, NEG)) ->*)
+      | PRED(str, terms, POS) | NOT(PRED(str, terms, NEG)) ->
+        let c = ProofTreeSchema.applyInitial prooftree f in
+        constraints := Constraints.times !constraints c;
+        cont ()
+      
+      | _ -> failwith "Invalid principal formula in synchronous phase."
 
     end
     | ASYN, hd::tl -> begin match Term.observe hd with
@@ -116,6 +128,8 @@ let deriveBipole seq form constr =
         let (pt, c) = ProofTreeSchema.applyQst prooftree hd in
         constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
+
+      | _ -> failwith "Invalid principal formula in asynchronous phase."
         
     end
     (* Do not decide for a second time. The end of this phase means the end of

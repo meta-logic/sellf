@@ -1,10 +1,14 @@
-(* TODO: transform this into a module? *)
-(* Giselle Machado Reis - 2012 *)
+(**************************************)
+(*                                    *)
+(*         Subexponentials            *)
+(*                                    *)
+(*  Giselle Machado Reis              *)
+(*  2012                              *)
+(*                                    *)
+(**************************************)
 
 open Basic
 open Term
-
-(***************** SUBEXPONENTIALS ***************)
 
 (* Hashtable with subexponentials' types ($gamma is the linear context and
  * $infty holds specifications) 

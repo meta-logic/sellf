@@ -11,7 +11,6 @@ open Basic
 open Term
 open Subexponentials
 open Prints
-(*open Constraints*)
 
 (* Initial context, will be set depending on what we want to prove *)
 let initial : (string, terms list) Hashtbl.t = Hashtbl.create 100 ;;
@@ -223,6 +222,8 @@ module ContextSchema = struct
     | i -> i
     with Not_found -> failwith ("Subexponential "^s^" not in context.")
 
+  let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx.hash []
+
   (* Creates the next context where the index of subexp is updated *)
   let next ctx subexp =
     let index = Hashtbl.find global subexp in
@@ -239,16 +240,11 @@ module ContextSchema = struct
     Hashtbl.replace global subexp (index+2);
     createWith newctxhash
 
-  (* Not used so far *)
-  let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx []
-
-  (* Splits the linear contexts in two creating the necessary constraints *)
-  (* TODO: devide the responsability. Create the constraints in the constraint
-  module.
-  let split ctx constraints = 
+  (* Creates the two resulting contexts after a split *)
+  let split ctx = 
     let hashctx1 = Hashtbl.copy ctx.hash in
     let hashctx2 = Hashtbl.copy ctx.hash in
-    let cstrlst = Hashtbl.fold (fun s i cl -> match type_of s with
+    Hashtbl.iter (fun s i -> match type_of s with
       | LIN | REL -> 
         (* Global number for this subexponential *)
         let n = Hashtbl.find global s in
@@ -257,12 +253,25 @@ module ContextSchema = struct
         (* Configuring a new s context for each branch *)
         Hashtbl.replace hashctx1 s (n+1);
         Hashtbl.replace hashctx2 s (n+2);
-        (* Creating the union constraints *)
-        Constraints.UNION((s, n+1), (s, n+2), (s, i))::cl
-      | UNB | AFF -> cl
-    )  ctx.hash [] in
-    (hashctx1, hashctx2, cstrlst)
-    *)
+      | UNB | AFF -> ()
+    )  ctx.hash;
+    (createWith hashctx1, createWith hashctx2)
+
+  (* Creates the resulting context after a bang - increments the indices of
+  those contexts that have their formulas erased *)
+  let bang ctx subexp = 
+    let hashctx = Hashtbl.copy ctx.hash in
+    Hashtbl.iter (fun s i -> match type_of s with
+      | LIN | REL -> ()
+      | UNB | AFF -> 
+        if s = subexp || (greater_than s subexp) then ()
+        else begin
+          let n = Hashtbl.find global s in
+          Hashtbl.replace global s (n+1);
+          Hashtbl.replace hashctx s (n+1)
+        end
+    ) ctx.hash;
+    createWith hashctx
 
   end
 ;;
