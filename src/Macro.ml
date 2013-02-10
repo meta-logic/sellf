@@ -6,6 +6,8 @@ open ProofTree
 open Constraints
 open Common  
 
+(* TO BE DELETED *)
+
 module Macro = struct
 
   type macro = {
