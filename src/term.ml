@@ -95,23 +95,38 @@ var = {
   lts : int
 }
 
-(* TODO: this fails for formulas of the kind A ^ (not (B v C)) FIX!!*)
-(* Solves negation of formulas by applying DeMorgan rules until atomic level *)
-let rec deMorgan f = match f with
-  | NOT(t) -> begin 
+(* Transforms a formula to negated normal form *)
+let rec nnf f = match f with
+  | PRED(str, terms, p) -> f 
+  | TENSOR(f1, f2) -> TENSOR(nnf f1, nnf f2)
+  | PARR(f1, f2) -> PARR(nnf f1, nnf f2)
+  | WITH(f1, f2) -> WITH(nnf f1, nnf f2)
+  | ADDOR(f1, f2) -> ADDOR(nnf f1, nnf f2)
+  | EXISTS(s, i, f1) -> EXISTS(s, i, nnf f1)
+  | FORALL(s, i, f1) -> FORALL(s, i, nnf f1)
+  | QST(s, f1) -> QST(s, nnf f1)
+  | BANG(s, f1) -> BANG(s, nnf f1)
+  (* TODO: check this lolli transformation *)
+  | LOLLI(s, f1, f2) -> PARR(nnf (NOT(QST(s, f1))), nnf f2)
+  | ABS(s, i, f1) -> ABS(s, i, nnf f1)
+  | TOP -> TOP
+  | ZERO -> ZERO
+  | BOT -> BOT
+  | ONE -> ONE
+  | NOT(t) -> begin
     match t with
       | NOT(t1) -> t1
       | PRED(str, terms, p) -> NOT(t) 
-      | TENSOR(f1, f2) -> PARR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
-      | PARR(f1, f2) -> TENSOR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
-      | WITH(f1, f2) -> ADDOR(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
-      | ADDOR(f1, f2) -> WITH(deMorgan (NOT(f1)), deMorgan (NOT(f2)))
-      | EXISTS(s, i, f1) -> FORALL(s, i, deMorgan (NOT(f1)))
-      | FORALL(s, i, f1) -> EXISTS(s, i, deMorgan (NOT(f1)))
-      | QST(s, f1) -> BANG(s, deMorgan (NOT(f1)))
-      | BANG(s, f1) -> QST(s, deMorgan (NOT(f1)))
-      | LOLLI(s, f1, f2) -> TENSOR((QST(s, f2)), deMorgan (NOT(f1)))
-      | ABS(s, i, f1) -> ABS(s, i, deMorgan (NOT(f1)))
+      | TENSOR(f1, f2) -> PARR(nnf (NOT(f1)), nnf (NOT(f2)))
+      | PARR(f1, f2) -> TENSOR(nnf (NOT(f1)), nnf (NOT(f2)))
+      | WITH(f1, f2) -> ADDOR(nnf (NOT(f1)), nnf (NOT(f2)))
+      | ADDOR(f1, f2) -> WITH(nnf (NOT(f1)), nnf (NOT(f2)))
+      | EXISTS(s, i, f1) -> FORALL(s, i, nnf (NOT(f1)))
+      | FORALL(s, i, f1) -> EXISTS(s, i, nnf (NOT(f1)))
+      | QST(s, f1) -> BANG(s, nnf (NOT(f1)))
+      | BANG(s, f1) -> QST(s, nnf (NOT(f1)))
+      | LOLLI(s, f1, f2) -> TENSOR(nnf (QST(s, f2)), nnf (NOT(f1)))
+      | ABS(s, i, f1) -> ABS(s, i, nnf (NOT(f1)))
       | TOP -> ZERO
       | ZERO -> TOP
       | BOT -> ONE
@@ -125,10 +140,10 @@ let rec deMorgan f = match f with
           | GRT -> COMP(LEQ, t1, t2)
           | LEQ -> COMP(GRT, t1, t2)
         end
-      | _ -> failwith "Error while applying deMorgan."
+      | _ -> failwith "Error while transforming to negated normal form."
     end
-  | t -> t (* Non-negated term *)
-
+  | _ -> failwith "Error while transforming to negated normal form."
+ 
 (* Solves an arithmetic expression *)
 let rec solve_exp e = match e with
   | INT (x) -> x
@@ -156,7 +171,7 @@ let solve_cmp c e1 e2 =
       | NEQ -> n1 != n2
 ;;
 
-(* Four types of subexponentials described by a string *)
+(* GR TODO declare this in the subexponentials file *)
 type subexp = 
 | UNB (* unbounded: contraction and weakening *)
 | AFF (* affine: weakening *)
@@ -171,6 +186,7 @@ let varName x y = "$"^x^(string_of_int y);;
 
 (* Functions to get the elements of an implication *)
 (* TODO: check if this is used. *)
+(*
 let rec getHead t = match t with
   | LOLLI(s, t1, t2) -> t1
   | ABS(s, i, t1) -> getHead t1
@@ -180,6 +196,7 @@ let rec getBody t = match t with
   | LOLLI(s, t1, t2) -> t2
   | ABS(s, i, t1) -> getBody t1
   | _ -> failwith "Impossible to get body. Formula is not -o."
+*)
 
 let rec tCheckAuxList term = TINT
 
@@ -188,13 +205,7 @@ let rec deref t = match t with
   | t -> t
 ;;
 
-(* Structures used for system's specification reasoning *)
-
-let structRules : terms list ref = ref [] ;;
-let cutRules : terms list ref = ref [] ;;
-let introRules : terms list ref = ref [] ;;
-let ids : terms list ref = ref [] ;;
-
+(* ??? *)
 let goal : terms ref = ref TOP ;;
 
 (* Transforms abstractions into universal quantifiers *)
@@ -208,22 +219,6 @@ let rec abs2exists f = match f with
   | ABS(s, i, t) -> EXISTS(s, i, abs2exists t)
   | t -> t
 ;;
-
-let addStructRule r = 
-  let er = abs2exists r in
-  structRules := er :: !structRules
-
-let addCutRule r = 
-  let er = abs2exists r in
-  cutRules := er :: !cutRules
-
-let addIntroRule r =
-  let er = abs2exists r in
-  introRules := er :: !introRules
-
-let addIdRule r =
-  let er = abs2exists r in
-  ids := er :: !ids
 
 (* Binding variables *)
 
@@ -261,65 +256,6 @@ let bind v t =
     dv := T dt ;
     incr bind_len
   end
-
-(* TODO organize this and put in another file *)
-(****************** Signature ***********************)
-(*
- * Hashtables and functions to store the kinds and types declared in the .sig
- * file and the rules.
- *)
-
-(* Hashtable with the kind *)
-let kindTbl : (string, basicTypes) Hashtbl.t = Hashtbl.create 100 ;;
-(* Hashtable with the types*)
-let typeTbl : (string, types) Hashtbl.t = Hashtbl.create 100 ;;
-(* XXX: Commented every reference to this table. Things were only added to it
-without ever being used. *)
-(*let rTbl = Hashtbl.create 100 ;;*)
-
-(* Example of a rule: $example :- 1.   *)
-(*Hashtbl.add rTbl "$example" (CLS (DEF, PRED ("$example", CONS ("$example"),
-NEG), ONE ) );;*)
-
-let addTypeTbl name entry = Hashtbl.add typeTbl name entry ;; 
-
-let initialize () =
-  structRules := [];
-  cutRules := [];
-  introRules := []; 
-  ids := [];
-  Hashtbl.clear kindTbl;
-  Hashtbl.clear typeTbl;
-  (* Bult-in kind for formulas *)
-  Hashtbl.add kindTbl "o" (TPRED) ;
-  (* Built-in types and kinds for systems' specification *)
-  Hashtbl.add kindTbl "form" (TKIND("form")) ;
-  Hashtbl.add kindTbl "term" (TKIND("term")) ;
-  Hashtbl.add kindTbl "world" (TKIND("world")) ;
-  addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
-  addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *) 
-  addTypeTbl "mlft" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mlft form -> world -> o. *)
-  addTypeTbl "mrght" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mrght form -> world -> o. *)
-;;
-
-let notInTbl hash entry = 
-	let l = (Hashtbl.find_all hash entry) in
-	   if List.length l == 0 then NONE           (* kind not in table*)
-       else SOME (entry)       		             (* kind in table *)
-
-let addKindTbl entry = 
-	match entry with
-	| TINT -> NONE
-	| TPRED -> NONE
-	| TKIND (k) -> (
-    match (notInTbl kindTbl k) with
-	    | NONE -> Hashtbl.add kindTbl k (TKIND (k)); NONE
-			| SOME (k1) -> SOME (k1)
-    )
-	| _ -> NONE
-;;
-
-(******************************************************)
 
 (*Function that takes a term and returns a pair with the head of the term and the list of arguments.*)
 let rec term2list term = 
@@ -415,120 +351,6 @@ let rec remove_abs clause =
   match clause with
     | ABS (str, i, t) -> remove_abs t
     | _ -> clause
-
-(* G: This is also implemented in typeChecker.ml. What is it doing here??
-(*Function that assigns de Bruijn numbers to variables.*)
-let rec deBruijn_aux flag fVarC nABS body =   
-  match body with
-  | VAR v  ->
-    begin
-      match (fVarC v.str) with
-        | (id, _, 0) -> (*VN: Case when the variable is bounded by a FORALL*)
-             let (idNew, _, _ ) = fVarC v.str in
-             let v2 = {str = v.str; id = idNew; tag = v.tag; ts = v.ts; lts = v.lts} in VAR v2
-        | (id, nABS1, 1) -> (*VN: Case when the variable is bounded by an abstraction*) 
-           if flag then DB(id + nABS1) 
-           else let (idNew, _, _ ) = fVarC v.str in
-             let v2 = {str = v.str; id = idNew; tag = v.tag; ts = v.ts; lts = v.lts} in VAR v2
-        | _ -> failwith "Impossible case reached in the De Bruijn Auxiliary."
-    end
-   (*| LIST (lists) -> LIST (deBruijnList lists fVarC)*)
-  | APP (term1, term2) -> 
-     APP (deBruijn_aux flag fVarC nABS term1, List.map (deBruijn_aux flag fVarC nABS) term2)
-  | ABS (str, i, body1) -> 
-     let fVarCNew x = 
-     begin match x with
-       | x when x = str ->  (1, 0, 1)
-       | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
-     end
-     in ABS (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) body1)
-  | PLUS (int1, int2) -> PLUS (deBruijn_aux flag fVarC nABS int1, deBruijn_aux flag fVarC nABS int2)
-  | MINUS (int1, int2) -> MINUS (deBruijn_aux flag fVarC nABS int1, deBruijn_aux flag fVarC nABS int2)
-  | TIMES (int1, int2) -> TIMES (deBruijn_aux flag fVarC nABS int1, deBruijn_aux flag fVarC nABS int2) 
-  | DIV (int1, int2) -> DIV (deBruijn_aux flag fVarC nABS int1, deBruijn_aux flag fVarC nABS int2)
-  | TENSOR (body1, body2) -> TENSOR (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
-  | ADDOR (body1, body2) -> ADDOR (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
-  | LOLLI (sub, body1, body2) -> LOLLI (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
-  | BANG (sub, body1) -> BANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
-  | HBANG (sub, body1) -> HBANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
-  | WITH (body1, body2) -> WITH (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
-  | BRACKET (body1) -> BRACKET (deBruijn_aux flag fVarC nABS body1)
-  | FORALL (str, _, body1) -> 
-     let fVarCNew x = 
-     begin match x with
-       | x when x = str ->  (1, 0, 1)
-       | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
-     end
-     (*let (idOld, nABS, tABS) =  fVarC str in
-  			let fVarCNew x = (match x with
-       | x when x = str ->  (idOld + 1, nABS, 0)
-       | x -> fVarC x)*)
-  			(*in FORALL(str, idOld, deBruijn_aux flag fVarCNew nABS body1)*)
-     in FORALL (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) body1)
-  | NEW (str, body1) -> 
-     let fVarCNew x = 
-     begin match x with
-       | x when x = str ->  (1, 0, 1)
-       | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
-     end
-     (*let (idOld, nABS, tABS) =  fVarC str in
-        let fVarCNew x = (match x with
-       | x when x = str ->  (idOld + 1, nABS, 0)
-       | x -> fVarC x)*)
-        (*in FORALL(str, idOld, deBruijn_aux flag fVarCNew nABS body1)*)
-     in NEW (str, deBruijn_aux flag fVarCNew (nABS + 1) body1)
-  | PRED (srt, terms, p) ->  PRED (srt, deBruijn_aux flag fVarC nABS terms, p)
-  | EQU (str, _, terms) -> 
-     let (id, nABS, tABS) =  fVarC str in 
-     EQU (str, id, deBruijn_aux flag fVarC nABS terms)
-  | CLS(tp, t1, t2) -> CLS(tp, deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | COMP(comp, t1, t2) -> COMP(comp, deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | ASGN(t1, t2) -> ASGN(deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | PRINT(t1) -> PRINT(deBruijn_aux flag fVarC nABS t1)
-  | x -> x
-
-let rec collect_free_variables clause =
-  let rec collect_free_variables_list freeVar bVar lst = 
-    begin
-      match lst with
-      | [] -> failwith "[ERROR] Collecting free variables from an empty list. (term.ml collect_free_variables)"
-      | [t] -> collect_free_variables_aux freeVar bVar t
-      | t :: body ->  
-          let freeVar1 = collect_free_variables_aux freeVar bVar t in 
-          collect_free_variables_list freeVar1 bVar body
-    end
-  and
-  collect_free_variables_aux freeVar bVar clause = 
-    begin
-      match observe clause with
-        | VAR v  when List.mem v.str freeVar || List.mem v.str bVar-> freeVar
-        | VAR v  -> v.str :: freeVar
-        | PRED(_, t1, _) -> collect_free_variables_aux freeVar bVar t1
-        | TOP | ONE | BOT | ZERO | CUT | DB _ | INT _ | CONS _ | STRING _ | SUSP _ -> freeVar
-        | EQU(_, _, t1) | PRINT(t1) -> collect_free_variables_aux freeVar bVar t1
-        | FORALL(str, _, t1) | EXISTS(str, _, t1) 
-        | ABS(str, _, t1) | NEW (str, t1) -> collect_free_variables_aux freeVar (str :: bVar) t1
-        | APP(t1, t2) -> let freeVar1 = collect_free_variables_aux freeVar bVar t1 in
-                                collect_free_variables_list freeVar1 bVar t2 
-        | DIV (t1, t2)  | TIMES (t1, t2) | MINUS (t1, t2) | PLUS (t1, t2) 
-        | TENSOR(t1, t2) | ADDOR(t1, t2) | COMP(_, t1, t2) | ASGN (t1,t2) 
-        | WITH(t1,t2) | CLS(_, t1, t2) | BANG(t1, t2) | HBANG(t1, t2) 
-        | PARR(t1, t2) | QST(t1, t2) -> 
-          let freeVar1 = collect_free_variables_aux freeVar bVar t1 in 
-          let freeVar2 = collect_free_variables_aux freeVar1 bVar t2 in 
-          freeVar2
-        | LOLLI (subex, t1, t2)  -> 
-          let freeVar1 = collect_free_variables_aux freeVar bVar subex in 
-          let freeVar2 = collect_free_variables_aux freeVar1 bVar t1 in
-          let freeVar3 = collect_free_variables_aux freeVar2 bVar t2 in
-            freeVar3
-        | BRACKET (t) -> collect_free_variables_aux freeVar bVar t
-        | NOT (t) -> collect_free_variables_aux freeVar bVar t
-        | _ -> failwith "Not expected term in 'collect_free_variables_aux', term.ml"
-    end
-  in 
-  collect_free_variables_aux [] [] clause
-*)
 
 module Hint = struct
   module M = Map.Make(struct type t = int let compare = compare end)

@@ -16,7 +16,7 @@ OCAMLLEX = ocamllex
 SELLF_ML = sellf.ml
 #CORE_ML = lib.ml solverStr.ml term.ml prints.ml basic.ml structs.ml Constraints.ml ProofTree.ml typeChecker.ml norm.ml unify.ml common.ml boundedproofsearch.ml interpreter.ml macro.ml permutation.ml coherence.ml
 # Using only what is needed for bounded proof search and coherence proof
-CORE_ML = term.ml prints.ml basic.ml solverStr.ml Subexponentials.ml Context.ml Constraints.ml Sequent.ml llrules.ml norm.ml ProofTree.ml proofTreeSchema.ml bipole.ml typeChecker.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml
+CORE_ML = term.ml prints.ml basic.ml solverStr.ml subexponentials.ml specification.ml context.ml constraints.ml sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml bipole.ml typeChecker.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml
 TEST_ML    = oUnit.ml test.ml
 #PARSER_ML = parser.ml lexer.ml lexer_top.ml
 PARSER_ML = parser_systems.ml lexer.ml lexer_top.ml

@@ -38,6 +38,10 @@ let rec copy pt =
   cp.premises <- (cpPremises pt.premises);
   cp
 
+let rec printOpenLeaves pt = match pt.rule with
+  | SOME(r) -> List.iter (fun p -> printOpenLeaves p) pt.premises
+  | NONE -> print_endline( SequentSchema.toString pt.conclusion )
+
 (* Implement LL rules here! :) *)
 (* Each rule returns one or two proof trees and a constraintset, except if they
 have no premises (initial, top and one) *)

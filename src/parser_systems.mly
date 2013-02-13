@@ -12,6 +12,7 @@ open Coherence
 open Context
 open Subexponentials
 open Staticpermutationcheck
+open Specification
 
 type ruleType = 
   | AXIOM
@@ -79,9 +80,20 @@ KIND NAME TYPE DOT {
       flush stdout; SOME (k)
 }
 | TYPE NAME typeN DOT { 
-  let dupChk = notInTbl kindTbl $2 in 
-  match dupChk with
-    | NONE -> 
+  let dupChk = notInTbl kindTbl $2 in
+  let dupChk2 = notInTbl typeTbl $2 in
+  match dupChk, dupChk2 with
+    | NONE, NONE -> addTypeTbl $2 $3; 
+      if !verbose then begin
+        print_endline (" New type created: "^$2^" : "^(typeToString $3));
+        flush stdout;
+      end;
+      NONE
+    | SOME(k), _ -> print_string ("[ERROR] Type previously declared as a kind: "^$2);
+      print_newline(); flush stdout; SOME (k)
+    | _, SOME(t) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
+      print_newline(); flush stdout; SOME(t) 
+(*
       let dupChk2 =  notInTbl typeTbl $2 in 
       begin
         match dupChk2 with
@@ -97,6 +109,7 @@ KIND NAME TYPE DOT {
       end
     | SOME (k)-> print_string ("[ERROR] Type previously declared as a kind: "^$2);
       print_newline(); flush stdout; SOME (k)
+*)
 }
 ;
 
@@ -186,18 +199,18 @@ clause:
   (match !rules with
     | AXIOM ->
       (* For coherence *)
-      addIdRule clause
+      Specification.addAxiom clause
     | CUT -> 
       (* For principal cut and coherence *)
-      addCutRule clause
+      Specification.addCutRule clause
     | INTRO ->
       (* For coherence *)
-      processIntroRule $1;
+      Specification.processIntroRule $1;
       (* For principal cut *)
-      addIntroRule clause
+      Specification.addIntroRule clause
     | STRUCT ->
       (* For principal cut *)
-      addStructRule clause 
+      Specification.addStructRule clause 
     | NORULE -> failwith "Rule type not specified."
   );
 
@@ -290,7 +303,7 @@ body:
 | LPAREN body RPAREN    { $2 }
 | NEW body              { NEW ($1, $2) }
 | LCURLY body RCURLY    {BRACKET($2)}
-| NOT body              {Term.deMorgan (NOT($2)) }
+| NOT body              {nnf (NOT($2)) }
 ;
 
 terms:
@@ -341,6 +354,7 @@ top:
   print_endline "#initialcoherence: checks whether the system specified on the file loaded is initial-coherent.";
   print_endline "#atomicelim: checks whether the system specified on the file loaded is weak coherent.";
   print_endline "#scopebang: prints which subexponentials will have their formulas erased and which should be empty when a !s formula is going to be used.";
+  print_endline "#rules: generates the bipoles of all the introduction rules of the system loaded (currently prints the open leaves of the proof tree and the constraint sets)";
   print_endline "#done: you must type this to indicate that you are done working with a file and before loading another one.";
   "help"
 }

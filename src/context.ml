@@ -7,6 +7,8 @@
  * Giselle Machado Reis - 2012
  *)
 
+(* TODO organize the context module! *)
+
 open Basic
 open Term
 open Subexponentials
@@ -32,17 +34,17 @@ let clearInitial () = Hashtbl.iter (fun k d -> Hashtbl.replace initial k []) ini
 
 let createCutCoherenceContext () = 
   (* Adding cut rules' specifications *)
-  List.iter (fun e -> store e "$infty") !Term.cutRules ;;
+  List.iter (fun e -> store e "$infty") !Specification.cutRules ;;
   
 let createInitialCoherenceContext () = 
   (* Adding identity rules' specifications *)
-  List.iter (fun e -> store e "$infty") !Term.ids ;;
+  List.iter (fun e -> store e "$infty") !Specification.axioms ;;
   
 let createProofSearchContext () = 
   (* Adding rules' specifications (proof search without cut) *)
-  List.iter (fun e -> store e "$infty") !Term.ids;
-  List.iter (fun e -> store e "$infty") !Term.introRules;
-  List.iter (fun e -> store e "$infty") !Term.structRules ;;
+  List.iter (fun e -> store e "$infty") !Specification.axioms;
+  List.iter (fun e -> store e "$infty") !Specification.introRules;
+  List.iter (fun e -> store e "$infty") !Specification.structRules ;;
  
 module Context = 
   struct
@@ -223,6 +225,8 @@ module ContextSchema = struct
     with Not_found -> failwith ("Subexponential "^s^" not in context.")
 
   let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx.hash []
+
+  let toString ctx = Hashtbl.fold (fun n i acc -> n ^ "_" ^ (string_of_int i) ^ ", " ^ acc) ctx.hash ""
 
   (* Creates the next context where the index of subexp is updated *)
   let next ctx subexp =

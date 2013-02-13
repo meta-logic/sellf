@@ -32,11 +32,34 @@ let argslst = [
 ]
 
 let initAll () = 
-  Term.initialize ();
+  Specification.initialize ();
   Context.initialize ();
   Subexponentials.initialize ();
   Coherence.initialize ();
 ;;
+
+let generate_bipoles () = begin
+
+  let genBip r = 
+    print_endline("=======================================================");
+    print_endline("Bipoles for the formula: " ^ (Prints.termToString (Term.observe r)));
+    let bipoles = Bipole.bipole r in
+    List.iter ( fun (pt, clst) ->
+      print_endline("-------------------------------------------------------");
+      print_endline("Open leaves: ");
+      ProofTreeSchema.printOpenLeaves pt;
+      print_newline ();
+      List.iter (fun c -> 
+        print_endline("<<<<<< begin constraint set >>>>>>>");
+        Constraints.printConstraints c;
+        print_endline("<<<<<< end constraint set >>>>>>>\n")
+      ) clst;
+      print_endline("-------------------------------------------------------\n")
+    ) bipoles;
+    print_endline("=======================================================\n")
+  in
+  List.iter ( fun r -> genBip r ) !Specification.introRules
+end ;;
 
 let check_principalcut () = begin
   if Staticpermutationcheck.cut_principal () then 
@@ -124,40 +147,10 @@ solve_query () =
   let query_string = read_line() in
   if query_string = "#done" then samefile := false      
   else begin
-  match query_string with
-   (* 
-    | "#rules" -> 
-      print_endline "Generating rules of the object logic...";
-      let n = ref 1 in
-      let rec gen_macros rls = match rls with
-        | [] -> print_endline "\nDone."
-        | hd :: tl ->
-          Macro.initMacro hd;
-          print_string "\nRule(s) for clause: "; 
-          Prints.print_term hd; print_newline (); 
-          Macro.rmacro (fun () ->
-            ProofTree.printLeaves !Macro.macrorule;
-            flush stdout;
-            Constraints.printConstraints !Macro.constrs;
-            flush stdout;
-            Constraints.genSolverInput !Macro.constrs !n;
-            n := !n + 1;
-            print_string "End of Macro.\n";
-            Macro.save_macro ()
-            );
-          gen_macros tl
-          in 
-          gen_macros !Structs.rules;
-		      (* Printing the results... *)
-          (*let macro_file = open_out ("viewer/macro.xml") in*)
-          print_endline ("Number of macro rules: "^(string_of_int (List.length !Macro.macrolst)));
-		      let tex_file = open_out ("viewer/macro.tex") in
-		      (*let jit_file = open_out ("viewer/macro.jit") in*)
-          (*ProofTree.printTreesMacros !Structs_macro.macrolst macro_file; *)
-          ProofTree.printTexMacros !Macro.macrolst tex_file;
-          close_out tex_file;
-          (*ProofTree.printJitMacros !Structs_macro.macrolst jit_file;*)
+  match query_string with 
+    | "#rules" -> generate_bipoles ()
 
+(*
     | "#perm" ->
       let tryPermute a b = 
         print_endline "\nLet ";

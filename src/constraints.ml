@@ -19,6 +19,7 @@ let i = ref 0;;
 
 type ctx = string * int
 type constraintpred = 
+  | IN of terms * ctx
   | MCTX of terms * ctx
   | ELIN of terms * ctx
   | EMP of ctx
@@ -43,6 +44,10 @@ let times set1 set2 = List.concat (List.map (fun cst1 ->
 ) set1)
 
 let copy cst = create cst.lst
+
+let isIn f subexp ctx = 
+  let index = ContextSchema.getIndex ctx subexp in
+  create [IN(f, (subexp, index))]
 
 let requireIn f subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
@@ -107,10 +112,10 @@ let initial ctx f =
     c1 :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
-    ( isHere c (deMorgan(NOT(f))) ) :: acc 
+    ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs
-  
+
 let ctxToTex (s, i) = 
   let news = remSpecial s in
   ("$\\Gamma_{"^news^"}^{"^(string_of_int i)^"}$")
@@ -121,6 +126,8 @@ let ctxToStr (s, i) =
 
 (* GR TODO check if I cannot reduce the redundancy of these printing methods... *)
 let printTexConstraint c out = match c with
+  | IN (t, c) -> 
+    Printf.fprintf out "\\item in(%s, %s)\n"  (termToTexString t) (ctxToTex c)
   | MCTX (t, c) -> 
     Printf.fprintf out "\\item mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c)
   | ELIN (t, c) ->
@@ -142,38 +149,40 @@ let rec printTexConstraints csts out =
   Printf.fprintf out "\\end{itemize}.\n"
 
 let printConstraint c = match c with
+  | IN (t, c) -> 
+    Printf.printf "in(%s, %s)\n"  (termToString t) (ctxToStr c);
+    flush (out_channel_of_descr stdout)
   | MCTX (t, c) -> 
-    Printf.printf "mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c);
+    Printf.printf "mctx(%s, %s)\n"  (termToString t) (ctxToStr c);
     flush (out_channel_of_descr stdout)
   | ELIN (t, c) ->
-    Printf.printf "elin(%s, %s)\n" (termToTexString t) (ctxToTex c);
+    Printf.printf "elin(%s, %s)\n" (termToString t) (ctxToStr c);
     flush (out_channel_of_descr stdout)
   | EMP (c) -> 
-    Printf.printf "emp(%s).\n" (ctxToTex c);
+    Printf.printf "emp(%s).\n" (ctxToStr c);
     flush (out_channel_of_descr stdout)
   | UNION (c1, c2, c3) -> 
-    Printf.printf "union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3);
+    Printf.printf "union(%s, %s, %s).\n" (ctxToStr c1) (ctxToStr c2) (ctxToStr c3);
     flush (out_channel_of_descr stdout)
   | ADDFORM (t, c1, c2) -> 
-    Printf.printf "addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
+    Printf.printf "addform(%s, %s, %s)\n" (termToString t) (ctxToStr c1) (ctxToStr c2);
     flush (out_channel_of_descr stdout)
   | REQIN (t, c) -> 
-    Printf.printf "requiredIn(%s, %s)\n" (termToTexString t) (ctxToTex c);
+    Printf.printf "requiredIn(%s, %s)\n" (termToString t) (ctxToStr c);
     flush (out_channel_of_descr stdout)
   | REMOVED (t, c1, c2) -> 
-    Printf.printf "removed(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2);
+    Printf.printf "removed(%s, %s, %s)\n" (termToString t) (ctxToStr c1) (ctxToStr c2);
     flush (out_channel_of_descr stdout)
 
 let printConstraints csts = 
-  let i = ref 1 in
   List.iter (fun c -> 
-    print_string ("-- Constraint set "^(string_of_int !i)^":\n");
-    i := !i + 1;
     printConstraint c
   ) csts.lst
 
 (* Print constraints to a file *)
 let printfConstraint c out = match c with
+  | IN (t, c) -> 
+    Printf.fprintf out "in(\"%s\", %s)\n"  (termToTexString t) (ctxToTex c)
   | MCTX (t, c) -> 
     Printf.fprintf out "mctx(\"%s\", %s)\n"  (termToTexString t) (ctxToTex c)
   | ELIN (t, c) ->

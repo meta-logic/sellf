@@ -104,7 +104,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (termToString (LOLLI(sub, f1, f2)));
         print_endline (Context.toString ctxin);
       end;
-      let newctx = Context.add ctxin (deMorgan (NOT(f2))) (extract_str sub) in
+      let newctx = Context.add ctxin (nnf (NOT(f2))) (extract_str sub) in
       let sq = Sequent.create newctx ctxout (f1::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
  
@@ -236,9 +236,9 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
  
     (* Negated formulas *)
-    (* Apply deMorgan and try to prove them. *)
+    (* Transform to negated normal form and try to prove them. *)
     | NOT(f) ->
-      let negf = deMorgan (NOT(f)) in
+      let negf = nnf (NOT(f)) in
       let sq = Sequent.create ctxin ctxout (negf::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremisseUn proof; suc ())
  

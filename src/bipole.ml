@@ -8,10 +8,11 @@
 (**************************************)
 
 open Sequent
+open Context
 open Term
 
-(* Builds a bipole from a sequent and a formula and a set of constraints *)
-(* Generates the necessary constraints. *)
+(* Builds the possible bipoles from a formula in a sequent and a set of constraints *)
+(* Generates the necessary further constraints. *)
 
 let deriveBipole seq form constr = 
 
@@ -141,5 +142,15 @@ let deriveBipole seq form constr =
   derive pt1 (fun () -> 
     (* Saves a copy of the proof and constraints *)
     results := (ProofTreeSchema.copy pt0, (List.map (fun c -> Constraints.copy c) !constraints)) :: !results;
-  )
+  );
+  !results
+;;
 
+(* Generates the bipole of a formula from a generic initial sequent *)
+(* Considering the formula is chosen from gamma *)
+let bipole f = 
+  let context = ContextSchema.initialize (ContextSchema.create ()) in
+  let sequent = SequentSchema.createAsyn context [] in
+  let constraints = Constraints.isIn f "$gamma" context in
+  deriveBipole sequent f constraints
+;;

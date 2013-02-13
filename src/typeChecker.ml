@@ -232,7 +232,7 @@ match term with
       | _ -> 
           begin
             try 
-              let typC = Hashtbl.find typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
+              let typC = Hashtbl.find Specification.typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
             with
           | Not_found -> failwith ("ERROR: Constant not declared -> "^x)
           end

@@ -423,12 +423,12 @@ let rec cut_principal () =
 let rec cut_principal_aux cuts = 
   match cuts with
   | [] -> true
-  | cut :: lst when check_permutation cut !introRules !structRules -> 
+  | cut :: lst when check_permutation cut !Specification.introRules !Specification.structRules -> 
         cut_principal_aux lst 
   | _ -> false
 in 
-if typecheck_rules !introRules then 
-  cut_principal_aux !cutRules
+if typecheck_rules !Specification.introRules then 
+  cut_principal_aux !Specification.cutRules
 else false
 
 let rec weak_coherent () =
@@ -445,11 +445,11 @@ match rule with
 in
 let all_subs_lft = 
   List.fold_left (fun acc ele -> 
-    List.append ( (collect_quests_aux ele "lft") @ (collect_quests_aux ele "mlft") ) acc) [] !introRules 
+    List.append ( (collect_quests_aux ele "lft") @ (collect_quests_aux ele "mlft") ) acc) [] !Specification.introRules 
 in
 let all_subs_rght = 
   List.fold_left (fun acc ele -> 
-    List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] !introRules 
+    List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] !Specification.introRules 
 in
 let check_lft_subs b lft_subs = 
   List.fold_left (fun acc (SOME(s)) -> 
@@ -470,8 +470,8 @@ match cuts with
         weak_cut_aux_lst lst 
 | _ -> false
 in
-if typecheck_rules !introRules then 
-  weak_cut_aux_lst !cutRules
+if typecheck_rules !Specification.introRules then 
+  weak_cut_aux_lst !Specification.cutRules
 else false
 
 (* Some testing functions, for debugging only.*)

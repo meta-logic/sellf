@@ -22,55 +22,9 @@ open TypeChecker
 let cutcoherent = ref true ;;
 let initcoherent = ref true ;;
 
-(* The specifications of each connective are stored in a hash 
- * The key is the name of the predicate representing the connective *)
-let lr_hash : ((string, (terms * terms)) Hashtbl.t) ref = ref (Hashtbl.create 100) ;;
-
 let initialize () = 
   cutcoherent := true;
-  initcoherent := true;
-  Hashtbl.clear !lr_hash ;;
-
-(* Operation for the case that there is more than one specification for one side *)
-let addLSpec str t = try match Hashtbl.find !lr_hash str with
-  | (ZERO, r) -> Hashtbl.replace !lr_hash str (t, r)
-  | (l, r) -> Hashtbl.replace !lr_hash str (ADDOR(l, t), r) 
-  with Not_found -> Hashtbl.add !lr_hash str (t, ZERO)
-
-let addRSpec str t = try match Hashtbl.find !lr_hash str with
-  | (l, ZERO) -> Hashtbl.replace !lr_hash str (l, t)
-  | (l, r) -> Hashtbl.replace !lr_hash str (l, ADDOR(r, t)) 
-  with Not_found -> Hashtbl.add !lr_hash str (ZERO, t)
-
-let getFirstArgName p = match p with
-  | APP(CONS(n), lst) -> begin match lst with
-    | CONS(s) :: t -> s
-    | APP(CONS(s), _) :: t -> s
-    | _ -> failwith "Error while getting the name of a connective. Are you sure
-    this is a introduction rule specification?"
-  end
-  | _ -> failwith "Function is not an application."
-
-let processIntroRule t = 
-  let rec getPred f = match f with 
-    | TENSOR(NOT(prd), spc) -> prd
-    | ABS(s, i, t) -> getPred t
-    | NOT(prd) -> prd
-    | _ -> failwith "Not expected formula in specification."
-  in
-  let rec getSpec f = match f with
-    | TENSOR(NOT(prd), spc) -> spc
-    | ABS(s, i, t) -> ABS(s, i, getSpec t)
-    | NOT(prd) -> TOP (* Specification has no body. *)
-    | _ -> failwith "Not expected formula in specification."
-  in
-  let (p, s) = getPred t, getSpec t in
-  match p with
-    | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
-    | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
-    | PRED("mlft", p, _) -> addLSpec (getFirstArgName p) s
-    | PRED("mrght", p, _) -> addRSpec (getFirstArgName p) s
-    | _ -> failwith "Valid predicates are 'lft' or 'right' or 'mlft' or 'mrght'."
+  initcoherent := true
 ;;
 
 (* Procedure to actually check the coherence of a system *)
@@ -105,8 +59,8 @@ let checkDuality str (t1, t2) =
   (* Put cut formulas on the context *)
   Context.createCutCoherenceContext ();
   
-  let nt1 = deMorgan (NOT(t1)) in
-  let nt2 = deMorgan (NOT(t2)) in
+  let nt1 = nnf (NOT(t1)) in
+  let nt2 = nnf (NOT(t2)) in
   (* print_endline "Proving cut coherence of:";
   print_endline (termToString nt1);
   print_endline (termToString nt2); *)
@@ -126,14 +80,14 @@ let checkDuality str (t1, t2) =
 (* TODO: put proper system name *)
 let cutCoherence () =
   system_name := "proofsTex/proof";
-  Hashtbl.iter checkDuality !lr_hash;
+  Hashtbl.iter checkDuality Specification.lr_hash;
   if !cutcoherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
 ;;
 
 let initialCoherence () =
   system_name := "proofsTex/proof";
-  Hashtbl.iter checkInitCoher !lr_hash;
+  Hashtbl.iter checkInitCoher Specification.lr_hash;
   if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
 ;;

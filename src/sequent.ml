@@ -88,12 +88,13 @@ module SequentSchema = struct
     pol : phase;
   }
 
-  (* Initializes a sequent with an initial context and one goal *)
+  (* Initializes a sequent with an initial context and one goal 
   let create formula = {
     ctx = ContextSchema.initialize (ContextSchema.create ());
     goals = [formula];
     pol = SYNC;
   }
+  *)
 
   (* Initializes a sequent with a specific context and one goal *)
   let createSync context formula = {
@@ -114,6 +115,11 @@ module SequentSchema = struct
   let getGoals seq = seq.goals
 
   let getContext seq = seq.ctx
+
+  let toString seq = match seq.pol with
+    | ASYN -> ContextSchema.toString seq.ctx ^ " ⇑ " ^ (termsListToString seq.goals)
+    | SYNC -> ContextSchema.toString seq.ctx ^ " ⇓ " ^ (termsListToString seq.goals)
+
 
   end
 ;;
