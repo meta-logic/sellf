@@ -139,6 +139,34 @@ $\Gamma$.
 
 \input{constraints}
 
+\subsection{Implementation observations}
+\label{sec:implementation}
+
+Very roughly...
+
+An introduction rule for a connective of the object logic has the following
+form:
+
+$$a^\bot \otimes B$$
+
+All bipoles of this formula will have the structure:
+
+\[
+\infer[D]{ \Uparrow \cdot}{
+  \infer[\otimes]{ \Downarrow a^\bot \otimes B}{
+    \infer[I]{\Downarrow a^\bot}{}
+    &
+    \deduce{\Downarrow B}{\pi}
+  }
+}
+\]
+
+When translating this derivation to a derivation in the object logic one has to
+consider only the decide rules and open leaves of $\pi$. Adittionaly, one should
+use the constraints $in(\Gamma^i, F)$ where $\Gamma^i$ occurs on the conclusion
+of some decide rule or on some open leaf and $F$ is of the form
+$lft(F')$ ($\lfloor F' \rfloor$) or $rght(F')$ ($\lceil F' \rceil$).
+
 \subsection{Macro-rules}
 \label{sec:macro_def}
 

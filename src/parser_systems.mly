@@ -347,8 +347,6 @@ top:
   print_endline "There are the following commands available during state '?>':\n";
   (*print_endline "#perm: checks if the rules specified in the file permute (all
   possible combinations of 2 rules).";*)
-  (*print_endline "#macro: generates the macro rules of each rule of the file
-  loaded.";*)
   print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
   print_endline "#cutcoherence: checks whether the system specified on the file loaded is cut-coherent.";
   print_endline "#initialcoherence: checks whether the system specified on the file loaded is initial-coherent.";
