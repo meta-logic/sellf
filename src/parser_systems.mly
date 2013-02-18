@@ -55,6 +55,9 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL
 %left PIPE
 %left WITH 
 %left LOLLI
+%right NOT NEW
+%right FORALL EXISTS
+%right QST BANG HBANG
 
 %start types             /* the entry point */
 %type <string Term.option> types 
@@ -98,23 +101,6 @@ KIND NAME TYPE DOT {
       print_newline(); flush stdout; SOME (k)
     | _, SOME(t) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
       print_newline(); flush stdout; SOME(t) 
-(*
-      let dupChk2 =  notInTbl typeTbl $2 in 
-      begin
-        match dupChk2 with
-          | NONE -> addTypeTbl $2 $3; 
-            if !verbose then begin
-              print_endline (" New type created: "^$2^" : "^(typeToString $3));
-              flush stdout;
-            end;
-            NONE
-          | SOME (k) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
-            print_newline(); flush stdout; 
-            SOME (k) 
-      end
-    | SOME (k)-> print_string ("[ERROR] Type previously declared as a kind: "^$2);
-      print_newline(); flush stdout; SOME (k)
-*)
 }
 ;
 
@@ -294,9 +280,9 @@ body:
 | LBRACKET term RBRACKET BANG body              {BANG ($2,$5)}
 | LBRACKET term RBRACKET HBANG body             {HBANG ($2,$5)}
 | LBRACKET term RBRACKET QST body               {QST ($2,$5)}
-| BANG body             {BANG (CONS("$infty"),$2)}
-| HBANG body            {HBANG (CONS("$infty"),$2)}
-| QST body              {QST (CONS("$infty"),$2)}
+| BANG body             { BANG (CONS("$infty"),$2) }
+| HBANG body            { HBANG (CONS("$infty"),$2) }
+| QST body              { QST (CONS("$infty"),$2) }
 | FORALL body           { FORALL ($1, 0, $2) } 
 | EXISTS body           { EXISTS ($1, 0, $2) } 
 | body TIMES body       { TENSOR ($1, $3)}
@@ -314,7 +300,7 @@ body:
 terms:
 | term                        { [$1] }
 | term terms                  { $1 :: $2 }
-| ABS terms                   {[ABS($1, 0, (make_APP $2))]}
+| ABS terms                   { [ABS($1, 0, (make_APP $2))] } 
 | LPAREN terms RPAREN         { [make_APP $2] }
 | LPAREN terms RPAREN terms   { (make_APP $2) :: $4 } 
 ;

@@ -122,7 +122,7 @@ let ctxToTex (s, i) =
 
 let ctxToStr (s, i) = 
   let news = remSpecial s in
-  ""^news^"_"^(string_of_int i)^""
+  ""^news^"."^(string_of_int i)^""
 
 let predToTexString c = match c with
   | IN (t, c) -> 

@@ -36,7 +36,6 @@ normal : $(CORE_CMX) $(PARSER_CMX)  $(SELLF_ML)
 ocaml : $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
 	$(OCAMLC) -o sellf $(CORE_CMO) $(PARSER_CMO)  $(SELLF_ML) 
 
-
 %.cmx:  %.ml
 	$(OCAMLL) -c $< 
 
@@ -73,6 +72,8 @@ clean:
 	rm -f parser.ml
 	rm -f parser_systems.mli
 	rm -f parser_systems.ml
+	rm -f parser_models.mli
+	rm -f parser_models.ml
 
 test:  $(TEST_CMO)
 	$(OCAMLC) unix.$(cma) $(CORE_CMO)  $(TEST_CMO) -o test

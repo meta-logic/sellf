@@ -10,7 +10,13 @@
   open Parser_models
 }
 
+let cstName = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+let index = ['0' - '9']+
+
 rule token = parse
+  | [' ' '\t' '\r']  { token lexbuf }
+  (* Constraints predicates *)
   | "in"         { IN } 
   | "mctx"       { MCTX }
   | "elin"       { ELIN }
@@ -19,5 +25,34 @@ rule token = parse
   | "addform"    { ADDFORM }
   | "requiredIn" { REQIN }
   | "removed"    { REMOVED }
-  | "_"          { UNDERSCORE }
- 
+  | '('          { LPAREN }
+  | ')'          { RPAREN }
+  | '{'          { LCURLY }
+  | '}'          { RCURLY }
+  (* Names of contexts *)
+  | cstName as cn  { NAME(cn) }
+  | "."            { DOT }
+  | index as idx   { INDEX(int_of_string idx) }
+  (* Formulas *)
+  | "-o"                  { LOLLI }
+  | ','                   { COMMA }
+  | '*'                   { TIMES }
+  | '+'                   { PLUS }
+  | "|"                   { PIPE }
+  | '&'                   { WITH }
+  | "top"                 { TOP }
+  | "bot"                 { BOT }
+  | "one"                 { ONE }
+  | "zero"                { ZERO }
+  | "pi \\" (varName as vn)        { FORALL(vn) }     
+  | "sigma \\" (varName as vn)     { EXISTS(vn) }     
+  | "hbang"               { HBANG }
+  | "bang"                { BANG }
+  | "?"                   { QST }
+  | "not"                 { NOT }
+  | "nsub \\" (varName as vn) { NEW(vn) } 
+  | '\\' (varName as lxm) { ABS(lxm) }
+  | '['                   { LBRACKET }
+  | ']'                   { RBRACKET }
+  | '\n'                  { NEWLINE }
+  | eof          { raise End_of_file }
