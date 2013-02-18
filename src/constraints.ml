@@ -122,87 +122,60 @@ let ctxToTex (s, i) =
 
 let ctxToStr (s, i) = 
   let news = remSpecial s in
-  ""^news^""^(string_of_int i)^""
+  ""^news^"_"^(string_of_int i)^""
 
-(* GR TODO check if I cannot reduce the redundancy of these printing methods... *)
-let printTexConstraint c out = match c with
+let predToTexString c = match c with
   | IN (t, c) -> 
-    Printf.fprintf out "\\item in(%s, %s)\n"  (termToTexString t) (ctxToTex c)
+    "\\item in(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
   | MCTX (t, c) -> 
-    Printf.fprintf out "\\item mctx(%s, %s)\n"  (termToTexString t) (ctxToTex c)
+    "\\item mctx(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
   | ELIN (t, c) ->
-    Printf.fprintf out "\\item elin(%s, %s)\n" (termToTexString t) (ctxToTex c)
+    "\\item elin(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
   | EMP (c) -> 
-    Printf.fprintf out "\\item emp(%s).\n" (ctxToTex c)
+    "\\item emp(" ^ (ctxToTex c) ^ ").\n"
   | UNION (c1, c2, c3) -> 
-    Printf.fprintf out "\\item union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
+    "\\item union(" ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ", " ^ (ctxToTex c3) ^ ").\n"
   | ADDFORM (t, c1, c2) -> 
-    Printf.fprintf out "\\item addform(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
+    "\\item addform(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
   | REQIN (t, c) -> 
-    Printf.fprintf out "\\item requiredIn(%s, %s)\n" (termToTexString t) (ctxToTex c)
+    "\\item requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
   | REMOVED (t, c1, c2) -> 
-    Printf.fprintf out "\\item removed(%s, %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
+    "\\item removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
 
-let rec printTexConstraints csts out = 
-  Printf.fprintf out "\\begin{itemize}.\n";
-  List.iter (fun c -> printTexConstraint c out) csts.lst;
-  Printf.fprintf out "\\end{itemize}.\n"
+let rec toTexString csts out = 
+  "\\begin{itemize}.\n" ^ 
+  (List.fold_right (fun c str -> (predToTexString c) ^ str) csts.lst "") 
+  ^ "\\end{itemize}.\n"
 
-let printConstraint c = match c with
+let predToString c = match c with
   | IN (t, c) -> 
-    Printf.printf "in(%s, %s)\n"  (termToString t) (ctxToStr c);
-    flush (out_channel_of_descr stdout)
+    "in(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
   | MCTX (t, c) -> 
-    Printf.printf "mctx(%s, %s)\n"  (termToString t) (ctxToStr c);
-    flush (out_channel_of_descr stdout)
+    "mctx(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
   | ELIN (t, c) ->
-    Printf.printf "elin(%s, %s)\n" (termToString t) (ctxToStr c);
-    flush (out_channel_of_descr stdout)
-  | EMP (c) -> 
-    Printf.printf "emp(%s).\n" (ctxToStr c);
-    flush (out_channel_of_descr stdout)
+    "elin(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
+  | EMP (c) ->
+    "emp(" ^ (ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
-    Printf.printf "union(%s, %s, %s).\n" (ctxToStr c1) (ctxToStr c2) (ctxToStr c3);
-    flush (out_channel_of_descr stdout)
+    "union(" ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ", " ^ (ctxToStr c3) ^ ")."
   | ADDFORM (t, c1, c2) -> 
-    Printf.printf "addform(%s, %s, %s)\n" (termToString t) (ctxToStr c1) (ctxToStr c2);
-    flush (out_channel_of_descr stdout)
+    "addform(" ^ (termToString t) ^ ", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
   | REQIN (t, c) -> 
-    Printf.printf "requiredIn(%s, %s)\n" (termToString t) (ctxToStr c);
-    flush (out_channel_of_descr stdout)
+    "requiredIn(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
   | REMOVED (t, c1, c2) -> 
-    Printf.printf "removed(%s, %s, %s)\n" (termToString t) (ctxToStr c1) (ctxToStr c2);
-    flush (out_channel_of_descr stdout)
+    "removed(" ^ (termToString t) ^ ", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
 
-let printConstraints csts = 
-  List.iter (fun c -> 
-    printConstraint c
-  ) csts.lst
+let toString csts = 
+  List.fold_right (fun c str -> 
+    (predToString c) ^ "\n" ^ str
+  ) csts.lst ""
 
 (* Print constraints to a file *)
-let printfConstraint c out = match c with
-  | IN (t, c) -> 
-    Printf.fprintf out "in(\"%s\", %s)\n"  (termToTexString t) (ctxToTex c)
-  | MCTX (t, c) -> 
-    Printf.fprintf out "mctx(\"%s\", %s)\n"  (termToTexString t) (ctxToTex c)
-  | ELIN (t, c) ->
-    Printf.fprintf out "elin(\"%s\", %s)\n" (termToTexString t) (ctxToTex c)
-  | EMP (c) -> 
-    Printf.fprintf out "emp(%s).\n" (ctxToTex c)
-  | UNION (c1, c2, c3) -> 
-    Printf.fprintf out "union(%s, %s, %s).\n" (ctxToTex c1) (ctxToTex c2) (ctxToTex c3)
-  | ADDFORM (t, c1, c2) -> 
-    Printf.fprintf out "addform(\"%s\", %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
-  | REQIN (t, c) -> 
-    Printf.fprintf out "requiredIn(\"%s\", %s)\n" (termToTexString t) (ctxToTex c)
-  | REMOVED (t, c1, c2) -> 
-    Printf.fprintf out "removed(\"%s\", %s, %s)\n" (termToTexString t) (ctxToTex c1) (ctxToTex c2)
+let rec printToFile cst out = 
+  Printf.fprintf out "%s" (toString cst)
 
-let rec printConstrList lst out = match lst with
-  | [] -> ()
-  | hd::tl -> printfConstraint hd out; printConstrList tl out
-
-let genFile cList name = 
+(* Generates a file with the constraint set and the theory specification *)
+let genFile cstrSet name = 
   let file = open_out ("solver/"^name^".in") in
   Printf.fprintf file "%s" description;
   Printf.fprintf file "%s" union_clauses_set;
@@ -211,8 +184,24 @@ let genFile cList name =
   Printf.fprintf file "%s" mctx_clauses_set;
   Printf.fprintf file "%s" addform_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
-  printConstrList cList file;
+  printToFile cstrSet file;
   close_out file
+
+(* Get the models from one set of constraints *)
+(* This function will return a list of models. These models are represented
+as strings which are the true predicated in the format of facts (e.g.
+"pred(a). pred(b)." *)
+let getModels cstrSet = 
+  genFile cstrSet "temp";
+  let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
+  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in
+  let rec readModel input = try match input_line input with
+    | str -> str :: readModel input
+    with End_of_file -> let _ = Unix.close_process_in channel in []
+  in
+  readModel channel
+
+(* GR TODO: finding out if two rules permute. Move this to a place where it makes sense *)
 
 let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
   "geq("^(remSpecial data)^", "^(remSpecial key)^").\n"^acc
@@ -236,40 +225,8 @@ let genPermFile cList ctxStr okStr model name =
   Printf.fprintf file "%s" (subexpOrdStr ());
   Printf.fprintf file "%s" ctxStr;
   Printf.fprintf file "%s\n" model;
-  printConstrList cList file;
+  printToFile cList file;
   close_out file
-
-(* GR TODO reorganize the file generation methods... *)
-
-(* One file for each set of constraints *)
-(*
-let genSolverInput constraints n = 
-  let i = ref 0 in
-  List.iter (fun l ->
-    i := !i + 1;
-    let name = "const_set_"^(string_of_int n)^"_"^(string_of_int !i) in
-    genFile l name
-  ) constraints.lst
-*)
-
-(* Get the models from one set of constraints *)
-(* This function will return a list of models. These models are represented
-as strings which are the true predicated in the format of facts (e.g.
-"pred(a). pred(b)." *)
-let getModels cList = 
-  genFile cList "temp";
-  let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
-  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in
-  let rec readModel input = try match input_line input with
-    | str -> str :: readModel input
-    with End_of_file -> let _ = Unix.close_process_in channel in []
-  in
-  readModel channel
-  
-(* Get all the models from all the sets of constraints *)
-(*
-let getAllModels c = List.flatten (List.fold_right (fun e acc -> getModels e :: acc) c.lst [])
-*)
 
 (* Checks if some set of constraints and the model m satisfy the
 permutability condition *)

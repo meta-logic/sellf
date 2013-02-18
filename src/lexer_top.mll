@@ -1,4 +1,4 @@
-(* File lexerTypes.mll *)
+(* File lexer_types.mll *)
 {
 (*open Parser*)        (* The type token is defined in parser.mli *)
 open Parser_systems 

@@ -55,16 +55,21 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL
 %left PIPE
 %left WITH 
 %left LOLLI
+
 %start types             /* the entry point */
 %type <string Term.option> types 
 %type <Term.types> typeN
+
 %start clause            /* the entry point */
 %type <string Term.option> clause
 %type <Term.terms list> terms
+
 %start goal             /* the entry point */
 %type <string Term.option> goal
+
 %start top             /* the entry point */
 %type <string> top 
+
 %%  
 
 /* G: Saves the kinds and types declared in hash tables. */

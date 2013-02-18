@@ -51,7 +51,7 @@ let generate_bipoles () = begin
       print_newline ();
       List.iter (fun c -> 
         print_endline("<<<<<< begin constraint set >>>>>>>");
-        Constraints.printConstraints c;
+        print_endline(Constraints.toString c);
         print_endline("<<<<<< end constraint set >>>>>>>\n")
       ) clst;
       print_endline("-------------------------------------------------------\n")
