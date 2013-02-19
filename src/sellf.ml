@@ -1,5 +1,4 @@
 open ProofTree
-open Context
 open Subexponentials
 
 module TestUnify = 
@@ -49,10 +48,14 @@ let generate_bipoles () = begin
       print_endline("Open leaves: ");
       ProofTreeSchema.printOpenLeaves pt;
       print_newline ();
-      List.iter (fun c -> 
-        print_endline("<<<<<< begin constraint set >>>>>>>");
-        print_endline(Constraints.toString c);
-        print_endline("<<<<<< end constraint set >>>>>>>\n")
+      List.iter (fun c ->
+        let models = Dlv.getModels c in
+        print_endline("Models obtained: "^(string_of_int (List.length models)));
+        List.iter (fun m ->
+          print_endline("<<<<<< begin model >>>>>>>");
+          print_endline(Constraints.toString m);
+          print_endline("<<<<<< end model >>>>>>>\n")
+        ) models
       ) clst;
       print_endline("-------------------------------------------------------\n")
     ) bipoles;
@@ -216,7 +219,7 @@ solve_query () =
         (*let _ = Parser.goal Lexer.token query in ();*)
         let _ = Parser_systems.goal Lexer.token query in 
           begin
-            createProofSearchContext ();
+            Context.createProofSearchContext ();
             Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
               print_string "\nYes.\n";
             ) (fun () -> print_string "\nNo.\n")

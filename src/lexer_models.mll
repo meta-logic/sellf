@@ -10,7 +10,7 @@
   open Parser_models
 }
 
-let cstName = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+let cstName = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']*
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let index = ['0' - '9']+
 
@@ -30,10 +30,10 @@ rule token = parse
   | '{'          { LCURLY }
   | '}'          { RCURLY }
   (* Names of contexts *)
-  | cstName as cn  { NAME(cn) }
-  | "."            { DOT }
+  | "_"            { UNDERSCORE }
   | index as idx   { INDEX(int_of_string idx) }
   (* Formulas *)
+  | '"'                   { QUOTE }
   | "-o"                  { LOLLI }
   | ','                   { COMMA }
   | '*'                   { TIMES }
@@ -52,7 +52,9 @@ rule token = parse
   | "not"                 { NOT }
   | "nsub \\" (varName as vn) { NEW(vn) } 
   | '\\' (varName as lxm) { ABS(lxm) }
+  | varName as vn         { VAR(vn) }
   | '['                   { LBRACKET }
   | ']'                   { RBRACKET }
   | '\n'                  { NEWLINE }
+  | cstName as cn  { NAME(cn) }
   | eof          { raise End_of_file }

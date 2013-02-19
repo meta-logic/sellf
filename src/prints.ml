@@ -6,16 +6,16 @@ open Term
 (* Functions to transform formulas to string *)
 
 let compToString ct = match ct with
-    | EQ -> " = "
-    | LESS -> " < "
-    | GEQ -> " >= "
-    | GRT -> " > "
-    | LEQ -> " <= "
-    | NEQ -> " <> "
+  | EQ -> " = "
+  | LESS -> " < "
+  | GEQ -> " >= "
+  | GRT -> " > "
+  | LEQ -> " <= "
+  | NEQ -> " <> "
 
 let clsTypeToString ty = match ty with 
-    | DEF -> " := "
-    | LOL -> " :- "
+  | DEF -> " := "
+  | LOL -> " :- "
 
 let rec basicTypeToString btyp = match btyp with
 	| TKIND (x) -> x
@@ -37,7 +37,7 @@ let rec termToString term = match term with
 		if v.tag = EIG then 
 			( (v.str)^"EIG_"^(string_of_int v.id) ) 
 		else ( (v.str)^"LOG_"^(string_of_int v.id) )
-  | DB (i) -> ( "_DB"^(string_of_int i) )
+  | DB (i) -> ( "DB_"^(string_of_int i) )
   | INT (x) -> string_of_int x
   | CONS (x) -> x
   | STRING (x) -> x
@@ -82,8 +82,8 @@ let rec termToString term = match term with
   | HBANG (s, t) -> " ["^(termToString s)^"]^! "^(termToString t)
   | QST (s, t) -> " ["^(termToString s)^"]? "^(termToString t)
   | WITH (t1, t2) -> (termToString t1)^" & "^(termToString t2)
-  | FORALL (s, i, t) -> "forall "^s^(string_of_int i)^" "^(termToString t)
-  | EXISTS (s, i, t) -> "exists "^s^(string_of_int i)^" "^(termToString t)
+  | FORALL (s, i, t) -> "pi \\"^s^(string_of_int i)^" "^(termToString t)
+  | EXISTS (s, i, t) -> "sigma \\"^s^(string_of_int i)^" "^(termToString t)
   | CLS (ty, t1, t2) -> (termToString t1)^(clsTypeToString ty)^(termToString t2)
   | NEW (s, t) -> "new /lam "^s^(termToString t)
   | BRACKET (f) -> "{ "^(termToString f)^" }"
@@ -91,12 +91,12 @@ let rec termToString term = match term with
 let termsListToString args = List.fold_right (fun el acc ->
   (termToString el)^" :: "^acc) args ""
 
-let subexpTypeToString tp = match tp with
-  | LIN -> "lin"
-  | UNB -> "unb"
-  | REL -> "rel"
-  | AFF -> "aff"
-
+(*let subexpTypeToString tp = match tp with
+  | Subexponentials.LIN -> "lin"
+  | Subexponentials.UNB -> "unb"
+  | Subexponentials.REL -> "rel"
+  | Subexponentials.AFF -> "aff"
+*)
 
 (* Modified functions to transform formulas to LaTeX code *)
 

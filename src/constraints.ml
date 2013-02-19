@@ -10,10 +10,7 @@
 
 open Term
 open Prints
-open SolverStr
-open Unix
 open Subexponentials
-open Context
 
 let i = ref 0;;
 
@@ -122,7 +119,7 @@ let ctxToTex (s, i) =
 
 let ctxToStr (s, i) = 
   let news = remSpecial s in
-  ""^news^"."^(string_of_int i)^""
+  ""^news^"_"^(string_of_int i)^""
 
 let predToTexString c = match c with
   | IN (t, c) -> 
@@ -142,34 +139,35 @@ let predToTexString c = match c with
   | REMOVED (t, c1, c2) -> 
     "\\item removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
 
-let rec toTexString csts out = 
+let rec toTexString csts = 
   "\\begin{itemize}.\n" ^ 
   (List.fold_right (fun c str -> (predToTexString c) ^ str) csts.lst "") 
   ^ "\\end{itemize}.\n"
 
 let predToString c = match c with
   | IN (t, c) -> 
-    "in(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
+    "in(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
   | MCTX (t, c) -> 
-    "mctx(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
+    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
   | ELIN (t, c) ->
-    "elin(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
+    "elin(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
   | EMP (c) ->
     "emp(" ^ (ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ", " ^ (ctxToStr c3) ^ ")."
   | ADDFORM (t, c1, c2) -> 
-    "addform(" ^ (termToString t) ^ ", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
+    "addform(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
   | REQIN (t, c) -> 
-    "requiredIn(" ^ (termToString t) ^ ", " ^ (ctxToStr c) ^ ")."
+    "requiredIn(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
   | REMOVED (t, c1, c2) -> 
-    "removed(" ^ (termToString t) ^ ", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
+    "removed(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
 
 let toString csts = 
   List.fold_right (fun c str -> 
     (predToString c) ^ "\n" ^ str
   ) csts.lst ""
 
+(*
 (* Print constraints to a file *)
 let rec printToFile cst out = 
   Printf.fprintf out "%s" (toString cst)
@@ -193,59 +191,17 @@ as strings which are the true predicated in the format of facts (e.g.
 "pred(a). pred(b)." *)
 let getModels cstrSet = 
   genFile cstrSet "temp";
-  let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
-  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in
+  (*let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
+  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in*)
+  let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
   let rec readModel input = try match input_line input with
-    | str -> str :: readModel input
+    | str -> (*str :: readModel input*)
+      let lexbuf = Lexing.from_string str in
+      let model = Parser_models.model Lexer_models.token lexbuf in
+      (create model) :: readModel input
     with End_of_file -> let _ = Unix.close_process_in channel in []
   in
   readModel channel
-
-(* GR TODO: finding out if two rules permute. Move this to a place where it makes sense *)
-
-let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
-  "geq("^(remSpecial data)^", "^(remSpecial key)^").\n"^acc
-) subexOrdTbl ""
-let reflSubexpRel () = Hashtbl.fold (fun key data acc -> 
-  "geq("^(remSpecial key)^", "^(remSpecial key)^").\n"^acc
-) subexTpTbl ""
-
-let genPermFile cList ctxStr okStr model name =  
-  let file = open_out ("solver/"^name^".in") in
-  Printf.fprintf file "%s" description;
-  Printf.fprintf file "%s" union_clauses_set;
-  Printf.fprintf file "%s" elin_clauses_set;
-  Printf.fprintf file "%s" emp_clauses_set;
-  Printf.fprintf file "%s" mctx_clauses_set;
-  Printf.fprintf file "%s" addform_clauses_set;
-  Printf.fprintf file "%s" aux_clauses_set;
-  Printf.fprintf file "%s" proveIf_clauses;
-  Printf.fprintf file "%s\n" okStr;
-  Printf.fprintf file "%s" (reflSubexpRel ());
-  Printf.fprintf file "%s" (subexpOrdStr ());
-  Printf.fprintf file "%s" ctxStr;
-  Printf.fprintf file "%s\n" model;
-  printToFile cList file;
-  close_out file
-
-(* Checks if some set of constraints and the model m satisfy the
-permutability condition *)
-(*
-let permCondition cstrs ctxStr okStr mdl =
-  let lst = cstrs.lst in
-  let rec condition mdl cList = match cList with
-    | [] -> false
-    | c :: tl ->
-      genPermFile c ctxStr okStr mdl ("temp_perm"^(string_of_int !i));
-      let channel = Unix.open_process_in ("dlv -silent solver/temp_perm"^(string_of_int !i)^".in") in
-      i := !i + 1;
-      try match input_line channel with
-        | _ -> let _ = Unix.close_process_in channel in 
-          (*print_endline "Some model is satisfiable."; flush
-          (out_channel_of_descr stdout)*) (); 
-          true
-        with End_of_file -> let _ = Unix.close_process_in channel in condition mdl tl
-  in
-  condition mdl lst
 *)
+
 

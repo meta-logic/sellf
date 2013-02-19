@@ -12,7 +12,6 @@ open Coherence
 open Context
 open Subexponentials
 open Staticpermutationcheck
-open Specification
 
 type ruleType = 
   | AXIOM
@@ -30,7 +29,7 @@ let make_APP lst =
   | [] -> failwith "Cannot make application with empty list."
 
 let check_val_subexp sub1 sub2 = 
-  match (Hashtbl.find subexTpTbl sub1), (Hashtbl.find subexTpTbl sub2) with
+  match (Subexponentials.type_of sub1), (Subexponentials.type_of sub2) with
     | LIN, LIN -> true
     | LIN, AFF -> true
     | LIN, REL -> true
@@ -78,7 +77,7 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL
 /* G: Saves the kinds and types declared in hash tables. */
 types:
 KIND NAME TYPE DOT { 
-  let result = addKindTbl (TKIND ($2)) in
+  let result = Specification.addKindTbl (TKIND ($2)) in
   match result with
     | NONE -> if !verbose then begin 
       print_string (" New kind "^$2^" created.\n")
@@ -88,29 +87,29 @@ KIND NAME TYPE DOT {
       flush stdout; SOME (k)
 }
 | TYPE NAME typeN DOT { 
-  let dupChk = notInTbl kindTbl $2 in
-  let dupChk2 = notInTbl typeTbl $2 in
+  let dupChk = Specification.isKindDeclared $2 in
+  let dupChk2 = Specification.isTypeDeclared $2 in
   match dupChk, dupChk2 with
-    | NONE, NONE -> addTypeTbl $2 $3; 
+    | false, false -> Specification.addTypeTbl $2 $3; 
       if !verbose then begin
         print_endline (" New type created: "^$2^" : "^(typeToString $3));
         flush stdout;
       end;
       NONE
-    | SOME(k), _ -> print_string ("[ERROR] Type previously declared as a kind: "^$2);
-      print_newline(); flush stdout; SOME (k)
-    | _, SOME(t) -> print_string ("[ERROR] Type previously declared as a type: "^$2);
-      print_newline(); flush stdout; SOME(t) 
+    | true, _ -> print_string ("[ERROR] Type previously declared as a kind: "^$2);
+      print_newline(); flush stdout; SOME ($2)
+    | _, true -> print_string ("[ERROR] Type previously declared as a type: "^$2);
+      print_newline(); flush stdout; SOME($2) 
 }
 ;
 
 /* G: Checks whether the types declared are valid and of existing kinds. */
 typeN: 
-NAME { match  notInTbl kindTbl $1 with 
-  | NONE -> print_string ("[ERROR] Kind not declared: "^$1);
+NAME { match Specification.isKindDeclared $1 with 
+  | false -> print_string ("[ERROR] Kind not declared: "^$1);
     print_newline(); flush stdout; 
     assert false
-  | SOME (_) -> if $1 = "o" then TBASIC (TPRED)
+  | true -> if $1 = "o" then TBASIC (TPRED)
     else TBASIC (TKIND ($1)) 
 }
 | TINT                           { TBASIC (TINT) }
@@ -122,57 +121,55 @@ NAME { match  notInTbl kindTbl $1 with
 | LPAREN TLIST TSTRING RPAREN    { TBASIC (TLIST (TSTRING)) }
 ;
 
-
-/* G: Saves the clauses in a hash table */
 clause: 
-/*VN: Creates a new subexponential into the hast table with the subexponential types.*/
+/*VN: Creates a new subexponential into the hash table with the subexponential types.*/
 | SUBEX NAME TSUB DOT { 
-  match notInTbl subexTpTbl $2 with
-    | NONE -> begin
+  match Subexponentials.isSubexponentialDeclared $2 with
+    | false -> begin
       match $3 with 
         | "lin" ->
           initSubexp $2;
-          addType $2 LIN;
+          Subexponentials.addType $2 LIN;
           if !verbose then print_endline ("New linear subexponential: "^$2);
           NONE
         | "aff" -> 
           initSubexp $2;
-          addType $2 AFF;
+          Subexponentials.addType $2 AFF;
           if !verbose then print_endline ("New affine subexponential: "^$2);
           NONE
         | "rel" -> 
           initSubexp $2;
-          addType $2 REL;
+          Subexponentials.addType $2 REL;
           if !verbose then print_endline ("New relevant subexponential: "^$2);
           NONE
         | "unb" -> 
           initSubexp $2;
-          addType $2 UNB;
+          Subexponentials.addType $2 UNB;
           if !verbose then print_endline ("New unbounded subexponential: "^$2);
           NONE
         | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
     end
-    | SOME (_) -> failwith ("Subexponential name previously declared: "^$2)
+    | true -> failwith ("Subexponential name previously declared: "^$2)
 }
 
 /*VN: Creates a new odering among subexponential names.*/
 | SUBEXPREL NAME LESS NAME DOT { 
-  match (notInTbl subexTpTbl $2), (notInTbl subexTpTbl $4) with
-    | SOME(_),SOME(_) -> 
+  match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
+    | true, true -> 
       if check_val_subexp $2 $4 then
-        (Hashtbl.add subexOrdTbl $2 $4; NONE) 
+        (Hashtbl.add Subexponentials.orderTbl $2 $4; NONE) 
       else failwith ("ERROR: More powerful subexponential "^$2^" cannot be smaller than the less powerful subexponential "^$4)
-    | NONE,_ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
-    | _, NONE -> failwith ("ERROR: Subexponential name not declared: "^$4) 
+    | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
+    | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
 }
 | SUBEXPREL NAME GEQ NAME DOT {
-  match (notInTbl subexTpTbl $2), (notInTbl subexTpTbl $4) with
-    | SOME(_),SOME(_) -> 
+  match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
+    | true, true -> 
       if check_val_subexp $4 $2 then
-        (Hashtbl.add subexOrdTbl $4 $2; NONE) 
+        (Hashtbl.add Subexponentials.orderTbl $4 $2; NONE) 
       else failwith ("ERROR: More powerful subexponential "^$4^" cannot be smaller than the less powerful subexponential "^$2)
-    | NONE,_ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
-    | _, NONE -> failwith ("ERROR: Subexponential name not declared: "^$4) 
+    | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
+    | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
 }
 
 /* Defines which kind of rules we are specifying now */
@@ -241,26 +238,21 @@ body DOT {
  */
 prop:
 | NAME { 
-  match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
-    | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
-      print_newline(); flush stdout; 
-      (*PRED ($1, CONS($1), (getAtomPol $1) )*)
-      PRED ($1, CONS($1), NEG )
-    | SOME (k), _ -> (*PRED ($1, CONS($1), (getAtomPol $1) )*) 
-      PRED ($1, CONS($1), NEG )
-    | _, SOME (k) -> (*PRED ($1, CONS($1), (getAtomPol $1) )*)
-      PRED ($1, CONS($1), NEG )
+  match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
+    | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
+      print_newline(); flush stdout; assert false
+      (*PRED ($1, CONS($1), NEG )*)
+    | true, _ -> PRED ($1, CONS($1), NEG )
+    (* GR Parsing subexponentials as predicates? *)
+    | _, true -> PRED ($1, CONS($1), NEG )
 }
 | NAME terms {
-  match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
-    | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
-      print_newline(); flush stdout; 
-      (*PRED ($1,CONS($1), (getAtomPol $1) )*)
-      PRED ($1, CONS($1), NEG )
-    | SOME (k), _ ->  (*PRED($1, APP(CONS($1), $2), (getAtomPol $1) )*)
-      PRED ($1, APP(CONS($1), $2), NEG )
-    | _, SOME (k) -> (*PRED ($1, CONS($1), (getAtomPol $1) )*)
-      PRED ($1, CONS($1), NEG )
+  match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
+    | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
+      print_newline(); flush stdout; assert false
+      (*PRED ($1, CONS($1), NEG )*)
+    | true, _ -> PRED ($1, APP(CONS($1), $2), NEG )
+    | _, true -> PRED ($1, CONS($1), NEG )
 }
 
 /* VN: Predicates can also be variables. */
@@ -293,7 +285,7 @@ body:
 | body LBRACKET term RBRACKET LOLLI body       { LOLLI ($3, $6, $1)}
 | LPAREN body RPAREN    { $2 }
 | NEW body              { NEW ($1, $2) }
-| LCURLY body RCURLY    {BRACKET($2)}
+| LCURLY body RCURLY    { BRACKET($2) }
 | NOT body              {nnf (NOT($2)) }
 ;
 
@@ -307,12 +299,12 @@ terms:
 
 term:
 | NAME { 
-  match (notInTbl typeTbl $1), (notInTbl subexTpTbl $1) with
-    | NONE, NONE -> print_string ("[ERROR] Constant not declared -> "^$1);
-      print_newline(); flush stdout; 
-      PRED ($1, CONS($1), NEG )
-    | SOME (k), _ -> CONS ($1)
-    | _, SOME (k) -> CONS ($1)
+  match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
+    | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
+      print_newline(); flush stdout; assert false
+      (*PRED ($1, CONS($1), NEG )*)
+    | true, _ -> CONS ($1)
+    | _, true -> CONS ($1)
 }
 | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
 | INT               { INT ($1) } 

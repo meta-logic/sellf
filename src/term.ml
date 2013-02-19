@@ -171,13 +171,6 @@ let solve_cmp c e1 e2 =
       | NEQ -> n1 != n2
 ;;
 
-(* GR TODO declare this in the subexponentials file *)
-type subexp = 
-| UNB (* unbounded: contraction and weakening *)
-| AFF (* affine: weakening *)
-| REL (* relevant: contraction *)
-| LIN (* linear *)
-
 let fVarC x = match x with
 | "$test" -> 10
 | _ -> 0;;

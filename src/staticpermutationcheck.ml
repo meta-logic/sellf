@@ -10,7 +10,6 @@ by Vivek Nigam, Elaine Pimentel, and Giselle Reis"
 *)
 open Basic
 open Term
-open Subexponentials
 
 let unify = 
   let module Unify = 
@@ -64,7 +63,7 @@ let rec greater_than_lst_all sub lst =
 *)
 
 (* Relation among subexponentials. s1 >= s2 *)
-let geq s1 s2 = greater_than s1 s2 || s1 = s2
+let geq s1 s2 = Subexponentials.greater_than s1 s2 || s1 = s2
 
 (*Simple function that checks whether sub <= s, for all s in lst.*)
 let rec less_than_lst_all sub lst = 
@@ -136,7 +135,6 @@ permutes over an introduction rule.*)
 let rec cut_permutes_over cut rule = 
 let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
 let rule_prefix = get_subexp_prefix rule in 
-(*let subexp = keys subexTpTbl in*)
 let check_one_monopole mono_prefix =
   match a,c with 
 (*Case when the cut has two bangs.*)
@@ -144,8 +142,8 @@ let check_one_monopole mono_prefix =
     ( match mono_prefix with
      | NONE :: rest -> (less_than_lst_all c1 rest) && (less_than_lst_all a1
 rest)
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
-                            ((not (geq d s) && (not (weak d)))) -> true 
+     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+                            ((not (geq d s) && (not (Subexponentials.weak d)))) -> true 
      | SOME(s) :: rest when (geq a1 s) && (geq d s) ->  
                               (less_than_lst_all c1 rest)
      | SOME(s) :: rest when (geq b s) && (geq c1 s) ->  
@@ -156,16 +154,16 @@ rest)
   | SOME(a1), NONE ->
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
-                            ((not (geq d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+                            ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
      | SOME(s) :: rest when (geq d s) && (geq a1 s) -> true
      | _ -> false
     )
   | NONE, SOME(c1) -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
-                            ((not (geq d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+                            ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
      | SOME(s) :: rest when (geq b s) && (geq c1 s) -> true
      | _ -> false
     )
@@ -173,11 +171,11 @@ rest)
   | NONE, NONE -> 
     ( match mono_prefix with
      | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (weak b))) &&  
-                            ((not (geq d s) && (not (weak d)))) -> true
+     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+                            ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
      | SOME(s) :: rest -> 
         Hashtbl.fold (fun key data acc -> if (geq key s) then acc
-        else false) subexTpTbl true
+        else false) Subexponentials.typeTbl true
      | _ -> failwith "Unexpected case when cut has no bangs."
     )
 in 
@@ -282,7 +280,7 @@ let rec greater_subexp bangs quests equiv =
 in
 (* Checking that all subexponentials are unbounded *)
 match Hashtbl.fold (fun key data acc -> if key = "$gamma" then acc else
-                      (data = UNB) & acc) subexTpTbl true 
+                      (data = Subexponentials.UNB) & acc) Subexponentials.typeTbl true 
 with
 | true -> 
   (match (has_bang rule2) with

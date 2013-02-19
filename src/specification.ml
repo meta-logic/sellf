@@ -16,21 +16,24 @@ open Term
 let kindTbl : (string, basicTypes) Hashtbl.t = Hashtbl.create 100 ;;
 let typeTbl : (string, types) Hashtbl.t = Hashtbl.create 100 ;;
 
-let addTypeTbl name entry = Hashtbl.add typeTbl name entry ;; 
+let isKindDeclared name = try match Hashtbl.find kindTbl name with
+  | _ -> true
+  with Not_found -> false
 
-let notInTbl hash entry = 
-	let l = (Hashtbl.find_all hash entry) in
-	   if List.length l == 0 then NONE           (* kind not in table*)
-       else SOME (entry)       		             (* kind in table *)
+let isTypeDeclared name = try match Hashtbl.find typeTbl name with
+  | _ -> true
+  with Not_found -> false
+
+let addTypeTbl name entry = Hashtbl.add typeTbl name entry 
 
 let addKindTbl entry = 
 	match entry with
 	| TINT -> NONE
 	| TPRED -> NONE
 	| TKIND (k) -> (
-    match (notInTbl kindTbl k) with
-	    | NONE -> Hashtbl.add kindTbl k (TKIND (k)); NONE
-			| SOME (k1) -> SOME (k1)
+    match (isKindDeclared k) with
+	    | false -> Hashtbl.add kindTbl k (TKIND (k)); NONE
+			| true -> SOME (k)
     )
 	| _ -> NONE
 ;;

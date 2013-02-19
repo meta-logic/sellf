@@ -6,8 +6,6 @@
  *                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 
-open Prints
-
 (******************* LISTS ************************)
 (*
  * Auxiliary functions for lists.
@@ -37,13 +35,4 @@ let rec in_list l e = try match List.hd l with
     | _ -> in_list (List.tl l) e
     with Failure "hd" -> false
 ;;
-
-(******************* HASHTABLES ************************)
-(*
- * Auxiliary functions for hashtables.
- *)
-
-(* Get all the keys from a hash table, including duplicates *)
-let keys ht = Hashtbl.fold (fun key data accu -> key :: accu) ht [] ;;
-
 

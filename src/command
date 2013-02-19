@@ -1,2 +1,0 @@
-ocamlyacc parser_models.mly; ocamlc -c parser_models.mli; ocamllex lexer_models.mll; ocamlc -c lexer_models.ml; ocamlc -c parser_models.ml; ocamlc -c test_parser.ml; ocamlc -c term.ml; ocamlc -c prints.ml; ocamlc -c subexponentials.ml; ocamlc -c basic.ml; ocamlc -c context.ml; ocamlc -c constraints.ml; ocamlc -c specification.ml; ocamlc -c solverStr.ml; ocamlc -annot unix.cma -o parser_models term.cmo prints.cmo basic.cmo subexponentials.cmo specification.cmo context.cmo solverStr.cmo constraints.cmo lexer_models.cmo parser_models.cmo test_parser.cmo
-

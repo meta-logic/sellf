@@ -1,8 +1,6 @@
 
 open Term 
 open Prints
-open Subexponentials
-
 
 (*VN: This function introduces deBruijn indices to a raw clause parsed. However, there are two 
 modes according to flag. When flag is true then in the clause returned the variables binded
@@ -225,7 +223,7 @@ match term with
        | TBASIC(TSUBEX) -> 
           begin
           try 
-            let _ = Hashtbl.find (Subexponentials.subexTpTbl) x in (typ, sub, env, varC)
+            let _ = Hashtbl.find (Subexponentials.typeTbl) x in (typ, sub, env, varC)
             with
             | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
           end
