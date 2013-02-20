@@ -76,48 +76,48 @@ constraintPred:
   | MCTX LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                         { Constraints.MCTX($4, $7) }
   | ELIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                         { Constraints.ELIN($4, $7) }
   | EMP LPAREN contextVar RPAREN                                                    { Constraints.EMP($3) }
-  | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN                { print_endline("Found union"); Constraints.UNION($3, $5, $7) }
+  | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN                { Constraints.UNION($3, $5, $7) }
   | ADDFORM LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN     { Constraints.ADDFORM($4, $7, $9) }
-  | REQIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                        { print_endline("Found reqin"); Constraints.REQIN($4, $7) }
+  | REQIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                        { Constraints.REQIN($4, $7) }
   | REMOVED LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN     { Constraints.REMOVED($4, $7, $9) }
   ;
 
 contextVar: 
-  | NAME UNDERSCORE INDEX { print_endline ("the context is "^$1^"_"^(string_of_int $3)); ($1, $3) }
+  | NAME UNDERSCORE INDEX { ($1, $3) }
 ;
 
 formula:
-  | pred  { print_endline "Found pred"; $1 }
-  | TOP   { print_endline "Found top"; TOP }
-  | BOT   { print_endline "Found bot"; BOT }
-  | ONE   { print_endline "Found one"; ONE }
-  | ZERO  { print_endline "Found zero"; ZERO }
-  | LBRACKET subexp RBRACKET BANG formula   { print_endline "Found bang"; BANG ($2,$5) }
-  | LBRACKET subexp RBRACKET HBANG formula  { print_endline "Found hbang"; HBANG ($2,$5) }
-  | LBRACKET subexp RBRACKET QST formula    { print_endline "Found qst"; QST ($2,$5) }
-  | BANG formula             { print_endline "Found bang infty"; BANG (CONS("$infty"),$2) }
-  | HBANG formula            { print_endline "Found hbang infty"; HBANG (CONS("$infty"),$2) }
-  | QST formula              { print_endline "Found qst infty"; QST (CONS("$infty"),$2) }
-  | FORALL formula           { print_endline "Found forall"; FORALL ($1, 0, $2) } 
-  | EXISTS formula           { print_endline ("Found exists with variable "^$1); EXISTS ($1, 0, $2) } 
-  | formula TIMES formula    { print_endline "Found tensor"; TENSOR ($1, $3)}
-  | formula PLUS formula     { print_endline "Found addor"; ADDOR ($1, $3)}
-  | formula PIPE formula     { print_endline "Found parr"; PARR ($1, $3)}
-  | formula WITH formula     { print_endline "Found with"; WITH ($1, $3)}
+  | pred  { $1 }
+  | TOP   { TOP }
+  | BOT   { BOT }
+  | ONE   { ONE }
+  | ZERO  { ZERO }
+  | LBRACKET subexp RBRACKET BANG formula   { BANG ($2,$5) }
+  | LBRACKET subexp RBRACKET HBANG formula  { HBANG ($2,$5) }
+  | LBRACKET subexp RBRACKET QST formula    { QST ($2,$5) }
+  | BANG formula             { BANG (CONS("$infty"),$2) }
+  | HBANG formula            { HBANG (CONS("$infty"),$2) }
+  | QST formula              { QST (CONS("$infty"),$2) }
+  | FORALL formula           { FORALL ($1, 0, $2) } 
+  | EXISTS formula           { EXISTS ($1, 0, $2) } 
+  | formula TIMES formula    { TENSOR ($1, $3)}
+  | formula PLUS formula     { ADDOR ($1, $3)}
+  | formula PIPE formula     { PARR ($1, $3)}
+  | formula WITH formula     { WITH ($1, $3)}
   /* a [s]-o b is stored as LOLLI(s, b, a) */
-  | formula LBRACKET subexp RBRACKET LOLLI formula { print_endline "Found lolli"; LOLLI ($3, $6, $1)}
-  | LPAREN formula RPAREN    { print_endline "Found parenthesis"; $2 }
-  | NEW formula              { print_endline "Found new"; NEW ($1, $2) }
-  | NOT formula              { print_endline "Found not"; nnf (NOT($2)) }
+  | formula LBRACKET subexp RBRACKET LOLLI formula { LOLLI ($3, $6, $1)}
+  | LPAREN formula RPAREN    { $2 }
+  | NEW formula              { NEW ($1, $2) }
+  | NOT formula              { nnf (NOT($2)) }
 ;
 
 pred:
-  | NAME         { print_endline ("the formula is one predicate consisting of "^$1); PRED ($1, CONS($1), NEG) } 
-  | NAME terms   { print_endline ("the formula is a function symbol "^$1); PRED ($1, APP(CONS($1), $2), NEG ) }
-  | VAR          { print_endline ("the formula is the variable "^$1); VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }
+  | NAME         { PRED ($1, CONS($1), NEG) } 
+  | NAME terms   { PRED ($1, APP(CONS($1), $2), NEG ) }
+  | VAR          { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }
   | VAR terms { 
     let var_head =  VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} in
-    print_endline ("the formula is a variable function "^$1); APP(var_head, $2)
+    APP(var_head, $2)
   }
 ;
 

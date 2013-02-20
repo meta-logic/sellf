@@ -32,6 +32,10 @@ let rec typeToString typ = match typ with
       | TBASIC _ -> (typeToString x)^" -> "^(typeToString y)
       | _ -> "("^(typeToString x)^") -> "^(typeToString y)
 
+(* GR: this prints the formula in the system's syntax. It needs to be consistent
+so that the parser can parser terms that were printed by the system. *)
+(* TODO: fix the printing of variables (keep track of the bindings and use the
+binding name, and not some internal representation like LOG or DB) *)
 let rec termToString term = match term with 
   | VAR v -> 
 		if v.tag = EIG then 
@@ -42,9 +46,9 @@ let rec termToString term = match term with
   | CONS (x) -> x
   | STRING (x) -> x
   | APP (x, y) -> 
-    let args = List.fold_right (fun el acc -> "("^(termToString el)^") "^acc) y "" in
-    ( (termToString x)^" "^args )
-  | ABS (x, i, y) -> "(/lam"^x^(string_of_int i)^" "^(termToString y)^")" 
+    let args = List.fold_right (fun el acc -> (termToString el)^" "^acc) y "" in
+    ( "( "^(termToString x)^" "^args^" )" )
+  | ABS (x, i, y) -> "(\\"^x^(string_of_int i)^" "^(termToString y)^")" 
   | PLUS (ib1, ib2) -> (termToString ib1)^" + "^(termToString ib2)
   | MINUS (ib1, ib2) -> (termToString ib1)^" - "^(termToString ib2)
   | TIMES (ib1, ib2) -> (termToString ib1)^" * "^(termToString ib2)
@@ -69,7 +73,7 @@ let rec termToString term = match term with
   | ONE -> "one"
   | BOT -> "bot"
   | ZERO -> "zero"
-  | NOT (t) -> "not ("^(termToString t)^") "
+  | NOT (t) -> "(not "^(termToString t)^") "
   | COMP (c, i1, i2) -> (termToString i1)^(compToString c)^(termToString i2)
   | ASGN ( i1, i2) -> (termToString i1)^" is "^(termToString i2)
   | PRINT (t1) -> "print "^(termToString t1)
@@ -78,14 +82,14 @@ let rec termToString term = match term with
   | ADDOR (t1, t2) -> (termToString t1)^" + "^(termToString t2)
   | PARR (t1, t2) -> (termToString t1)^" | "^(termToString t2)
   | LOLLI (s, t1, t2) -> (termToString t2)^" ["^(termToString s)^"] o- "^(termToString t1)
-  | BANG (s, t) -> " ["^(termToString s)^"]! "^(termToString t)
-  | HBANG (s, t) -> " ["^(termToString s)^"]^! "^(termToString t)
-  | QST (s, t) -> " ["^(termToString s)^"]? "^(termToString t)
+  | BANG (s, t) -> "( ["^(termToString s)^"]bang "^(termToString t)^" )"
+  | HBANG (s, t) -> "( ["^(termToString s)^"]hbang "^(termToString t)^" )"
+  | QST (s, t) -> "( ["^(termToString s)^"]? "^(termToString t)^" )"
   | WITH (t1, t2) -> (termToString t1)^" & "^(termToString t2)
-  | FORALL (s, i, t) -> "pi \\"^s^(string_of_int i)^" "^(termToString t)
-  | EXISTS (s, i, t) -> "sigma \\"^s^(string_of_int i)^" "^(termToString t)
+  | FORALL (s, i, t) -> "(pi \\"^s^(string_of_int i)^" "^(termToString t)^")"
+  | EXISTS (s, i, t) -> "(sigma \\"^s^(string_of_int i)^" "^(termToString t)^")"
   | CLS (ty, t1, t2) -> (termToString t1)^(clsTypeToString ty)^(termToString t2)
-  | NEW (s, t) -> "new /lam "^s^(termToString t)
+  | NEW (s, t) -> "(nsub \\"^s^(termToString t)^")"
   | BRACKET (f) -> "{ "^(termToString f)^" }"
 
 let termsListToString args = List.fold_right (fun el acc ->
