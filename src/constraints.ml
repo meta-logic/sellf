@@ -42,6 +42,8 @@ let times set1 set2 = List.concat (List.map (fun cst1 ->
 
 let copy cst = create cst.lst
 
+let isEmpty cst = (List.length cst.lst) == 0
+
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
   create [IN(f, (subexp, index))]

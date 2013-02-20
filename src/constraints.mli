@@ -31,6 +31,8 @@ val times : constraintset list -> constraintset list -> constraintset list
 
 val copy : constraintset -> constraintset
 
+val isEmpty : constraintset -> bool
+
 val isIn : Term.terms -> string -> ContextSchema.context -> constraintset
 
 val requireIn : Term.terms -> string -> ContextSchema.context -> constraintset

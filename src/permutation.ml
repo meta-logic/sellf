@@ -1,14 +1,59 @@
-(* Code to check if two rules are permutable 
- *
- * Giselle Machado Reis 2011
- *
- *)
+(**************************************)
+(*                                    *)
+(*    Checking if two rules are       *)
+(*            permutable              *)
+(*                                    *)
+(*  Giselle Machado Reis              *)
+(*  2013                              *)
+(*                                    *)
+(**************************************)
+
+open Sequent
+
+(* Takes the output of the bipole computation: ((ProofTreeSchema * Constraints list) list) 
+   and transforms into a list of pairs consisting of a proof tree schema and a valid model *)
+let toPairsProofModel bipoles = List.fold_right (fun (pt, cstrlst) acc ->
+  List.fold_right (fun cs acc ->
+    List.map (fun model -> (pt, model)) (Dlv.getModels cs)
+  ) cstrlst acc
+) bipoles []
+;;
+
+(* receives the specification of 2 bipoles *)
+let permute spec1 spec2 =
+
+  (* Initial configuration *)
+  let context = ContextSchema.initialize (ContextSchema.create ()) in
+  let sequent = SequentSchema.createAsyn context [] in
+  let in1 = Constraints.isIn spec1 "$gamma" context in
+  let in2 = Constraints.isIn spec2 "$gamma" context in
+  let constraints = Constraints.union in1 in2 in
+
+  (* Compute the possible derivations of spec1/spec2 *)
+
+  (* Compute possible bipoles for spec1 *)
+  let bipoles1 = toPairsProofModel (Bipole.deriveBipole sequent spec1 constraints) in
+  (* Try to derive spec2 in each open leaf of each bipole of spec1 *)
+  let bipoles1then2 = List.fold_right (fun (pt, mdl) acc ->
+    List.fold_right (fun ol acc ->
+      let bipoles2 = toPairsProofModel (Bipole.deriveBipole ol spec2 mdl) in
+      let valid = List.filter (fun (p, m) -> not (Constraints.isEmpty m)) bipoles2 in
+      [] 
+    ) (ProofTreeSchema.getOpenLeaves pt) acc
+  ) bipoles1 []
+  in
+
+  print_endline "bla bla"
+  (* Compute the possible derivations of spec2/spec1 *)
+;;
+
+
+(**************** OLD CODE *******************
 
 open Term
 open Macro
 open Structs
 open ProofTree
-open Constraints
 open Lib
 open Prints
 
@@ -265,6 +310,8 @@ let permute r1 r2 =
   (* All macro rules from r1 should have a permutation *)
   List.fold_right (fun el acc -> findPermutation0 el && acc) macrosr1 true
 
+*)
+
 (*
 Para cada modelo M1 de r1/r2
 procurar uma macro-rule/constraints/modelo (M2 U M1) de r2/r1
@@ -302,5 +349,4 @@ For the introduction:
 Usar SAT solvers para fazer reasoning sobre derivacoes automaticamente.
 
 *)	
-
 

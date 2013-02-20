@@ -15,8 +15,7 @@ let print_phase p = match p with
   | SYNC -> print_string "sync"
 ;;
 
-module Sequent = 
-  struct
+module Sequent = struct
 
   type sequent = {
     mutable ctxin : Context.context;
@@ -87,14 +86,6 @@ module SequentSchema = struct
     goals : terms list;
     pol : phase;
   }
-
-  (* Initializes a sequent with an initial context and one goal 
-  let create formula = {
-    ctx = ContextSchema.initialize (ContextSchema.create ());
-    goals = [formula];
-    pol = SYNC;
-  }
-  *)
 
   (* Initializes a sequent with a specific context and one goal *)
   let createSync context formula = {

@@ -38,6 +38,10 @@ let rec copy pt =
   cp.premises <- (cpPremises pt.premises);
   cp
 
+let rec getOpenLeaves pt = match pt.rule with
+  | SOME(r) -> List.flatten (List.map (fun p -> getOpenLeaves p) pt.premises)
+  | NONE -> [pt.conclusion]
+
 let rec printOpenLeaves pt = match pt.rule with
   | SOME(r) -> List.iter (fun p -> printOpenLeaves p) pt.premises
   | NONE -> print_endline( SequentSchema.toString pt.conclusion )
