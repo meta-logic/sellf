@@ -199,7 +199,7 @@ clause:
     | STRUCT ->
       (* For principal cut *)
       Specification.addStructRule clause 
-    | NORULE -> failwith "Rule type not specified."
+    | NORULE -> Specification.addOthers clause
   );
 
   if !verbose then begin

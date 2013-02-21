@@ -3,7 +3,6 @@
 (************************** SEQUENTS ************************)
 
 open Term
-open Context
 open Prints
 
 type phase = 
@@ -111,6 +110,9 @@ module SequentSchema = struct
     | ASYN -> ContextSchema.toString seq.ctx ^ " ⇑ " ^ (termsListToString seq.goals)
     | SYNC -> ContextSchema.toString seq.ctx ^ " ⇓ " ^ (termsListToString seq.goals)
 
+  let toTexString seq = match seq.pol with
+    | ASYN -> ContextSchema.toTexString seq.ctx ^ " \\Uparrow " ^ (termsListToTexString seq.goals)
+    | SYNC -> ContextSchema.toTexString seq.ctx ^ " \\Downarrow " ^ (termsListToTexString seq.goals)
 
   end
 ;;

@@ -37,31 +37,28 @@ let initAll () =
   Coherence.initialize ();
 ;;
 
-let generate_bipoles () = begin
+let generate_bipoles formList = begin
 
   let genBip r = 
     print_endline("=======================================================");
     print_endline("Bipoles for the formula: " ^ (Prints.termToString (Term.observe r)));
     let bipoles = Bipole.bipole r in
-    List.iter ( fun (pt, clst) ->
-      print_endline("-------------------------------------------------------");
-      print_endline("Open leaves: ");
+    List.iter ( fun (pt, model) ->
+      print_endline "-------------------------------------------------------";
+      print_endline "Open leaves: ";
       ProofTreeSchema.printOpenLeaves pt;
+      print_endline "******************************************************";
+      print_endline (ProofTreeSchema.toTexString pt);
+      print_endline "******************************************************";
       print_newline ();
-      List.iter (fun c ->
-        let models = Dlv.getModels c in
-        print_endline("Models obtained: "^(string_of_int (List.length models)));
-        List.iter (fun m ->
-          print_endline("<<<<<< begin model >>>>>>>");
-          print_endline(Constraints.toString m);
-          print_endline("<<<<<< end model >>>>>>>\n")
-        ) models
-      ) clst;
-      print_endline("-------------------------------------------------------\n")
+      print_endline "<<<<<< begin model >>>>>>>";
+      print_endline (Constraints.toString model);
+      print_endline "<<<<<< end model >>>>>>>\n";
+      print_endline "-------------------------------------------------------\n"
     ) bipoles;
     print_endline("=======================================================\n")
   in
-  List.iter ( fun r -> genBip r ) !Specification.introRules
+  List.iter ( fun r -> genBip r ) formList
 end ;;
 
 let check_principalcut () = begin
@@ -151,7 +148,9 @@ solve_query () =
   if query_string = "#done" then samefile := false      
   else begin
   match query_string with 
-    | "#rules" -> generate_bipoles ()
+    | "#rules" -> generate_bipoles !Specification.introRules
+
+    | "#test_bipole" -> generate_bipoles !Specification.others
 
 (*
     | "#perm" ->

@@ -9,13 +9,13 @@ let counter = ref 0 ;;
 (* Declare mutable so I can modify directly on the object *)
 type prooftree = {
   mutable conclusion : Sequent.sequent;
-  mutable premisses : prooftree list;
+  mutable premises : prooftree list;
   mutable closed : bool;
 }
 
 let create sq = {
   conclusion = sq;
-  premisses = [];
+  premises = [];
   closed = true (* for printing purposes... fixme later *)
 }
 
@@ -23,36 +23,36 @@ let setConclusion pt c = pt.conclusion <- c
 
 let getConclusion pt = pt.conclusion
 
-let setPremisses pt p = pt.premisses <- p
-let getPremisses pt = pt.premisses
+let setPremises pt p = pt.premises <- p
+let getPremises pt = pt.premises
 
-let addPremisse pt p = let newc = create p in
-  pt.premisses <- newc :: pt.premisses
+let addPremise pt p = let newc = create p in
+  pt.premises <- newc :: pt.premises
 
-let getLatestPremisse pt = try List.hd pt.premisses 
+let getLatestPremise pt = try List.hd pt.premises 
   with Failure "hd" -> failwith "[ERROR] This sequent has no premisses."
 
 let rec copy pt = let cp = create pt.conclusion in
-  let rec cpPremisses lst = match lst with
+  let rec cpPremises lst = match lst with
     | [] -> []
-    | p::t -> (copy p) :: cpPremisses t
+    | p::t -> (copy p) :: cpPremises t
   in
-  setPremisses cp (cpPremisses pt.premisses); cp
+  setPremises cp (cpPremises pt.premises); cp
 
 (* Updates the tree with a new premisse and returns a reference to this new
 child *)
 let update pt sq = let newc = create sq in
-  pt.premisses <- newc :: pt.premisses; newc
+  pt.premises <- newc :: pt.premises; newc
 
 let close pt = pt.closed <- true
 
 let openproof pt = pt.closed <- false
 
 let rec getLeaves pt = List.fold_right (fun el acc -> 
-  match el.premisses with
+  match el.premises with
     | [] -> el :: acc
     | _ -> getLeaves el @ acc
-  ) pt.premisses []
+  ) pt.premises []
 
 (*
     let rec getOpenLeaves pt = List.fold_right (fun el acc -> 
@@ -89,7 +89,7 @@ let rec getLeaves pt = List.fold_right (fun el acc ->
 
     let rec toTexString pt = match pt.closed with
       | true ->
-        let topproof = match pt.premisses with
+        let topproof = match pt.premises with
           | [] -> ""
           | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
         in

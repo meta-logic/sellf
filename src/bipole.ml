@@ -13,6 +13,16 @@ open Term
 
 (* Builds the possible bipoles from a formula in a sequent and a set of constraints *)
 (* Generates the necessary further constraints. *)
+(* Returns a list of pairs (proof tree * model) *)
+
+(* Transforms a list ((ProofTreeSchema * Constraints list) list) into a list of *)
+(* pairs consisting of a proof tree schema and a valid model *)
+let toPairsProofModel bipoles = List.fold_right (fun (pt, cstrlst) acc ->
+  List.fold_right (fun cs acc ->
+    (List.map (fun model -> (pt, model)) (Dlv.getModels cs)) @ acc
+  ) cstrlst acc
+) bipoles []
+;;
 
 let deriveBipole seq form constr = 
 
@@ -45,7 +55,9 @@ let deriveBipole seq form constr =
       | TOP
       | BOT
       | FORALL(_,_,_)
-      | QST(_) ->
+      | QST(_)
+      | PRED(_,_,NEG) 
+      | NOT(PRED(_,_,POS)) ->
         let (pt, c) = ProofTreeSchema.releaseDown prooftree in
         constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
@@ -87,7 +99,7 @@ let deriveBipole seq form constr =
         constraints := Constraints.times !constraints c;
         cont ()
       
-      | _ -> failwith "Invalid principal formula in synchronous phase."
+      | _ -> failwith ("Invalid principal formula in synchronous phase: "^(Prints.termToString (Term.observe f)))
 
     end
     | ASYN, hd::tl -> begin match Term.observe hd with
@@ -97,8 +109,8 @@ let deriveBipole seq form constr =
       | EXISTS(_,_,_)
       | ONE
       | BANG(_)
-      | PRED(_,_,POS)
-      | NOT(PRED(_,_,NEG)) ->
+      | PRED(_,_,_)
+      | NOT(PRED(_,_,_)) ->
         let (pt, c) = ProofTreeSchema.releaseUp prooftree hd in
         constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
@@ -130,7 +142,7 @@ let deriveBipole seq form constr =
         constraints := List.map(fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
 
-      | _ -> failwith "Invalid principal formula in asynchronous phase."
+      | _ -> failwith ("Invalid principal formula in asynchronous phase: "^(Prints.termToString (Term.observe hd)))
         
     end
     (* Do not decide for a second time. The end of this phase means the end of
@@ -143,7 +155,7 @@ let deriveBipole seq form constr =
     (* Saves a copy of the proof and constraints *)
     results := (ProofTreeSchema.copy pt0, (List.map (fun c -> Constraints.copy c) !constraints)) :: !results;
   );
-  !results
+  toPairsProofModel !results
 ;;
 
 (* Generates the bipole of a formula from a generic initial sequent *)
@@ -154,3 +166,4 @@ let bipole f =
   let constraints = Constraints.isIn f "$gamma" context in
   deriveBipole sequent f constraints
 ;;
+

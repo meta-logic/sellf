@@ -7,6 +7,8 @@
 (*                                       *)
 (*****************************************)
 
+open Prints
+
 let global : (string, int) Hashtbl.t = Hashtbl.create 100 ;;
 
 type context = {
@@ -35,6 +37,8 @@ let getIndex ctx s = try match Hashtbl.find ctx.hash s with
 let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx.hash []
 
 let toString ctx = Hashtbl.fold (fun n i acc -> n ^ "_" ^ (string_of_int i) ^ ", " ^ acc) ctx.hash ""
+
+let toTexString ctx = Hashtbl.fold (fun n i acc -> "\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
 
 (* Creates the next context where the index of subexp is updated *)
 let next ctx subexp =
