@@ -36,3 +36,9 @@ let rec in_list l e = try match List.hd l with
     with Failure "hd" -> false
 ;;
 
+(* Cartesian product of a list of lists *)
+let rec cartesianProduct lst = match lst with
+  | [] -> [[]]
+  | hd :: tl -> List.concat ( List.map (fun l -> List.map (fun el -> el :: l) hd) (cartesianProduct tl) )
+;;
+

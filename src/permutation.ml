@@ -10,8 +10,8 @@
 
 open Sequent
 
-(* receives the specification of 2 bipoles *)
-let permute spec1 spec2 =
+(* Generates all possible derivations of spec1/spec2 (bottom-up) *)
+let derive2 spec1 spec2 =
 
   (* Initial configuration *)
   let context = ContextSchema.initialize (ContextSchema.create ()) in
@@ -20,42 +20,75 @@ let permute spec1 spec2 =
   let in2 = Constraints.isIn spec2 "$gamma" context in
   let constraints = Constraints.union in1 in2 in
 
-  (* Compute the possible derivations of spec1/spec2 *)
-
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
-  print_endline "Possible bipoles for rule 1: ";
+  
+  (*print_endline "Possible bipoles for rule 1: ";
   List.iter (fun (pt, model) ->
     print_endline "------------------------------------------------";
     print_endline (ProofTreeSchema.toTexString pt);
     print_endline " CONSTRAINTS ";
     print_endline (Constraints.toString model);
     print_endline "------------------------------------------------"
-  ) bipoles1;
+  ) bipoles1;*)
+
   (* Try to derive spec2 in each open leaf of each bipole of spec1 *)
-  let bipoles1then2 = List.fold_right (fun (pt, mdl) acc ->
-    List.fold_right (fun ol acc ->
-      let bipoles2 = Bipole.deriveBipole ol spec2 mdl in
-        print_endline "Possible bipoles for rule 2 on some leaf of 1: ";
-        List.iter (fun (pt, model) ->
-          print_endline "------------------------------------------------";
-          print_endline (ProofTreeSchema.toTexString pt);
-          print_endline " CONSTRAINTS ";
-          print_endline (Constraints.toString model);
-          print_endline "------------------------------------------------"
-        ) bipoles2;
-      [] 
-    ) (ProofTreeSchema.getOpenLeaves pt) acc
+  List.fold_right (fun (pt1, mdl) bp ->
+    (* This is a list of lists... each open leaf has a list of (proof tree *
+       model) and these lists are the elements of the resulting list. *)
+    let leafDerivations2over1 = List.fold_right (fun ol acc ->
+      match (Bipole.deriveBipole ol spec2 mdl) with
+        | [] -> acc
+        | lst -> lst :: acc
+    ) (ProofTreeSchema.getOpenLeaves pt1) []
+    in
+
+    let bipoles2over1 = List.fold_right (fun leaves bipoles ->
+      flush stdout;
+      let unionModels = List.fold_right (fun (proof, m) acc -> 
+        Constraints.union m acc
+      ) leaves (Constraints.create []) in
+      let models = Dlv.getModels unionModels in
+      List.fold_right (fun model accBp ->
+        match Constraints.isEmpty model with
+          | true -> bipoles
+          | false ->
+            let pt1copy = ProofTreeSchema.copy pt1 in
+            let bipole = List.fold_right (fun (leaf, _) pt ->
+              ProofTreeSchema.appendLeaf pt leaf
+            ) leaves pt1copy in
+            (bipole, model) :: accBp
+      ) models bipoles
+    ) (Basic.cartesianProduct leafDerivations2over1) [] in
+  
+    bipoles2over1 @ bp
+
   ) bipoles1 []
-  in
-(*  print_endline "Possible bipoles for rule 1 (after computing bipoles for 2): ";
+;;
+
+let permute spec1 spec2 = 
+  let bipoles12 = derive2 spec1 spec2 in
+  let bipoles21 = derive2 spec2 spec1 in
+  
+  print_endline "Possible bipoles for rule1/rule2: ";
   List.iter (fun (pt, model) ->
     print_endline "------------------------------------------------";
     print_endline (ProofTreeSchema.toTexString pt);
-    print_endline "------------------------------------------------"
-  ) bipoles1;*)
-  print_endline "bla bla"
-  (* Compute the possible derivations of spec2/spec1 *)
+    print_endline " CONSTRAINTS ";
+    print_endline (Constraints.toString model);
+    print_endline "------------------------------------------------";
+  ) bipoles12;
+
+  print_endline "Possible bipoles for rule2/rule1: ";
+  List.iter (fun (pt, model) ->
+    print_endline "------------------------------------------------";
+    print_endline (ProofTreeSchema.toTexString pt);
+    print_endline " CONSTRAINTS ";
+    print_endline (Constraints.toString model);
+    print_endline "------------------------------------------------";
+  ) bipoles21;
+
+  print_endline "Stay tuned for the next episodes!"
 ;;
 
 

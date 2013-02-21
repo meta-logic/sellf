@@ -38,7 +38,7 @@ let getContexts ctx = Hashtbl.fold (fun k v acc -> (k, v) :: acc) ctx.hash []
 
 let toString ctx = Hashtbl.fold (fun n i acc -> n ^ "_" ^ (string_of_int i) ^ ", " ^ acc) ctx.hash ""
 
-let toTexString ctx = Hashtbl.fold (fun n i acc -> "\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
+let toTexString ctx = Hashtbl.fold (fun n i acc -> "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
 
 (* Creates the next context where the index of subexp is updated *)
 let next ctx subexp =

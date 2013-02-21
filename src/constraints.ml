@@ -22,7 +22,7 @@ type constraintpred =
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | ADDFORM of terms * ctx * ctx
-  | REQIN of terms * ctx
+  | REQIN of terms * ctx (* printed as ":- not in(term, ctx)."*)
   | REMOVED of terms * ctx * ctx
  
 type constraintset = {

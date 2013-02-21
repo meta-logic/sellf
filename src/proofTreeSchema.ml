@@ -46,6 +46,24 @@ let rec printOpenLeaves pt = match pt.rule with
   | SOME(r) -> List.iter (fun p -> printOpenLeaves p) pt.premises
   | NONE -> print_endline( SequentSchema.toString pt.conclusion )
 
+(* Returns the sub-tree that has es as its end-sequent *)
+let rec getSubTree pt es = match (getConclusion pt) = es with
+  | true -> [pt]
+  | false -> List.concat (List.map (fun p -> getSubTree p es) pt.premises)
+
+(* If the end-sequent of leaf tree is the open sequent of pt, merge both proofs *)
+let appendLeaf pt leafTree = 
+  let leaf = getConclusion leafTree in
+  let open_leaves = getOpenLeaves pt in
+  List.iter ( fun l ->
+    if (l = leaf) then
+      (* GR TODO improve this method. Maybe search only at the leaves?? *)
+      match getSubTree pt leaf with
+       | hd::tl -> hd.premises <- leafTree.premises; hd.rule <- leafTree.rule
+       | [] -> failwith "Proof has no leaf matching the end-sequent of the sub-proof."
+  ) open_leaves;
+  pt
+
 (* Implement LL rules here! :) *)
 (* Each rule returns one or two proof trees and a constraintset, except if they
 have no premises (initial, top and one) *)

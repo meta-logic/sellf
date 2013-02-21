@@ -160,7 +160,7 @@ solve_query () =
         i := !i + 1
       ) !Specification.others;
       print_newline ();
-      print_endline "We will check the permutation of one formula F1 over\
+      print_endline "SELLF will check the permutation of one formula F1 over\
       another F2 (i.e., can a derivation where F1 is below F2 be transformed\
       into a derivation where F2 is below F1?) \n";
       print_endline "Please type the number of F1: ";
