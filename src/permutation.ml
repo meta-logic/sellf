@@ -24,16 +24,36 @@ let permute spec1 spec2 =
 
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
+  print_endline "Possible bipoles for rule 1: ";
+  List.iter (fun (pt, model) ->
+    print_endline "------------------------------------------------";
+    print_endline (ProofTreeSchema.toTexString pt);
+    print_endline " CONSTRAINTS ";
+    print_endline (Constraints.toString model);
+    print_endline "------------------------------------------------"
+  ) bipoles1;
   (* Try to derive spec2 in each open leaf of each bipole of spec1 *)
   let bipoles1then2 = List.fold_right (fun (pt, mdl) acc ->
     List.fold_right (fun ol acc ->
       let bipoles2 = Bipole.deriveBipole ol spec2 mdl in
-      let valid = List.filter (fun (p, m) -> not (Constraints.isEmpty m)) bipoles2 in
+        print_endline "Possible bipoles for rule 2 on some leaf of 1: ";
+        List.iter (fun (pt, model) ->
+          print_endline "------------------------------------------------";
+          print_endline (ProofTreeSchema.toTexString pt);
+          print_endline " CONSTRAINTS ";
+          print_endline (Constraints.toString model);
+          print_endline "------------------------------------------------"
+        ) bipoles2;
       [] 
     ) (ProofTreeSchema.getOpenLeaves pt) acc
   ) bipoles1 []
   in
-
+(*  print_endline "Possible bipoles for rule 1 (after computing bipoles for 2): ";
+  List.iter (fun (pt, model) ->
+    print_endline "------------------------------------------------";
+    print_endline (ProofTreeSchema.toTexString pt);
+    print_endline "------------------------------------------------"
+  ) bipoles1;*)
   print_endline "bla bla"
   (* Compute the possible derivations of spec2/spec1 *)
 ;;

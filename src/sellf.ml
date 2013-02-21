@@ -152,6 +152,23 @@ solve_query () =
 
     | "#test_bipole" -> generate_bipoles !Specification.others
 
+    | "#permute" -> 
+      let i = ref 0 in
+      print_endline "\nThese are the formulas available: ";
+      List.iter ( fun f ->
+        print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
+        i := !i + 1
+      ) !Specification.others;
+      print_newline ();
+      print_endline "We will check the permutation of one formula F1 over\
+      another F2 (i.e., can a derivation where F1 is below F2 be transformed\
+      into a derivation where F2 is below F1?) \n";
+      print_endline "Please type the number of F1: ";
+      let i1 = int_of_string (read_line ()) in
+      print_endline "Please type the number of F2: ";
+      let i2 = int_of_string (read_line ()) in
+      Permutation.permute (List.nth !Specification.others i1) (List.nth !Specification.others i2)
+
 (*
     | "#perm" ->
       let tryPermute a b = 

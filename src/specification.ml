@@ -49,23 +49,23 @@ let others : terms list ref = ref [] ;;
 
 let addStructRule r = 
   let er = abs2exists r in
-  structRules := er :: !structRules
+  structRules := !structRules @ [er]
 
 let addCutRule r = 
   let er = abs2exists r in
-  cutRules := er :: !cutRules
+  cutRules := !cutRules @ [er]
 
 let addIntroRule r =
   let er = abs2exists r in
-  introRules := er :: !introRules
+  introRules := !introRules @ [er]
 
 let addAxiom r =
   let er = abs2exists r in
-  axioms := er :: !axioms
+  axioms := !axioms @ [er]
 
 let addOthers f = 
   let ef = abs2exists f in
-  others := ef :: !others
+  others := !others @ [ef]
 
 (* The left and right specifications (bodies) of each introduction rule are stored as a
    pair in a hashtable, where the key is the predicate's name *)

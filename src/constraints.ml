@@ -137,7 +137,7 @@ let predToTexString c = match c with
   | ADDFORM (t, c1, c2) -> 
     "\\item addform(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
   | REQIN (t, c) -> 
-    "\\item requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
+    "\\item requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ") (:- not in())\n"
   | REMOVED (t, c1, c2) -> 
     "\\item removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
 
@@ -160,7 +160,7 @@ let predToString c = match c with
   | ADDFORM (t, c1, c2) -> 
     "addform(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
   | REQIN (t, c) -> 
-    "requiredIn(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
+    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
   | REMOVED (t, c1, c2) -> 
     "removed(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
 

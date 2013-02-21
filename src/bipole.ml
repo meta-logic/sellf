@@ -16,10 +16,11 @@ open Term
 (* Returns a list of pairs (proof tree * model) *)
 
 (* Transforms a list ((ProofTreeSchema * Constraints list) list) into a list of *)
-(* pairs consisting of a proof tree schema and a valid model *)
+(* pairs consisting of a proof tree schema and a valid non-empty model *)
 let toPairsProofModel bipoles = List.fold_right (fun (pt, cstrlst) acc ->
   List.fold_right (fun cs acc ->
-    (List.map (fun model -> (pt, model)) (Dlv.getModels cs)) @ acc
+    let nonemptymodels = List.filter (fun m -> not (Constraints.isEmpty m)) (Dlv.getModels cs) in
+    (List.map (fun model -> (pt, model)) nonemptymodels) @ acc
   ) cstrlst acc
 ) bipoles []
 ;;

@@ -100,6 +100,7 @@ let genFile cstrSet name =
   Printf.fprintf file "%s" emp_clauses_set;
   Printf.fprintf file "%s" mctx_clauses_set;
   Printf.fprintf file "%s" addform_clauses_set;
+  Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
   printToFile cstrSet file;
   close_out file
@@ -139,6 +140,7 @@ let genPermFile cList ctxStr okStr model name =
   Printf.fprintf file "%s" emp_clauses_set;
   Printf.fprintf file "%s" mctx_clauses_set;
   Printf.fprintf file "%s" addform_clauses_set;
+  Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
   Printf.fprintf file "%s" proveIf_clauses;
   Printf.fprintf file "%s\n" okStr;
