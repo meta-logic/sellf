@@ -22,15 +22,6 @@ let derive2 spec1 spec2 =
 
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
-  
-  (*print_endline "Possible bipoles for rule 1: ";
-  List.iter (fun (pt, model) ->
-    print_endline "------------------------------------------------";
-    print_endline (ProofTreeSchema.toTexString pt);
-    print_endline " CONSTRAINTS ";
-    print_endline (Constraints.toString model);
-    print_endline "------------------------------------------------"
-  ) bipoles1;*)
 
   (* Try to derive spec2 in each open leaf of each bipole of spec1 *)
   List.fold_right (fun (pt1, mdl) bp ->
@@ -69,24 +60,45 @@ let derive2 spec1 spec2 =
 let permute spec1 spec2 = 
   let bipoles12 = derive2 spec1 spec2 in
   let bipoles21 = derive2 spec2 spec1 in
-  
-  print_endline "Possible bipoles for rule1/rule2: ";
+
+(*
+  For every bipole12 there exists a bipole21 such that for all open leaves of
+  bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
+*)
+
+(*
+  List.forall (fun b12 ->
+    List.exists (fun b21 ->
+    
+    ) bipole21
+  ) bipoles12
+*)
+
+  print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
+  \\usepackage{amsmath}\n\
+  \\usepackage{stmaryrd}\n\
+  \\usepackage{proof}\n\n\
+  \\begin{document}\n\n";
+
+  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToString spec1) ^ "$ / $" ^ (Prints.termToString spec2) ^ "$:} \n");
   List.iter (fun (pt, model) ->
-    print_endline "------------------------------------------------";
+    print_endline "\\[";
     print_endline (ProofTreeSchema.toTexString pt);
-    print_endline " CONSTRAINTS ";
-    print_endline (Constraints.toString model);
-    print_endline "------------------------------------------------";
+    print_endline "\\]";
+    print_endline "CONSTRAINTS\n";
+    print_endline (Constraints.toTexString model);
   ) bipoles12;
 
-  print_endline "Possible bipoles for rule2/rule1: ";
+  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToString spec2) ^ "$ / $" ^ (Prints.termToString spec1) ^ "$:} \n");
   List.iter (fun (pt, model) ->
-    print_endline "------------------------------------------------";
+    print_endline "\\[";
     print_endline (ProofTreeSchema.toTexString pt);
-    print_endline " CONSTRAINTS ";
-    print_endline (Constraints.toString model);
-    print_endline "------------------------------------------------";
+    print_endline "\\]";
+    print_endline "CONSTRAINTS\n";
+    print_endline (Constraints.toTexString model);
   ) bipoles21;
+
+  print_endline "\\end{document}";
 
   print_endline "Stay tuned for the next episodes!"
 ;;

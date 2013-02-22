@@ -117,7 +117,7 @@ let initial ctx f =
 
 let ctxToTex (s, i) = 
   let news = remSpecial s in
-  ("$\\Gamma_{"^news^"}^{"^(string_of_int i)^"}$")
+  ("\\Gamma_{"^news^"}^{"^(string_of_int i)^"}")
 
 let ctxToStr (s, i) = 
   let news = remSpecial s in
@@ -125,26 +125,24 @@ let ctxToStr (s, i) =
 
 let predToTexString c = match c with
   | IN (t, c) -> 
-    "\\item in(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
+    "$in(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
   | MCTX (t, c) -> 
-    "\\item mctx(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
+    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
   | ELIN (t, c) ->
-    "\\item elin(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ")\n"
+    "$elin(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
   | EMP (c) -> 
-    "\\item emp(" ^ (ctxToTex c) ^ ").\n"
+    "$emp(" ^ (ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
-    "\\item union(" ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ", " ^ (ctxToTex c3) ^ ").\n"
+    "$union(" ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ", " ^ (ctxToTex c3) ^ ").$"
   | ADDFORM (t, c1, c2) -> 
-    "\\item addform(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
+    "$addform(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").$"
   | REQIN (t, c) -> 
-    "\\item requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ") (:- not in())\n"
+    "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ") (:- not in()).$"
   | REMOVED (t, c1, c2) -> 
-    "\\item removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").\n"
+    "$removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").$"
 
 let rec toTexString csts = 
-  "\\begin{itemize}.\n" ^ 
-  (List.fold_right (fun c str -> (predToTexString c) ^ str) csts.lst "") 
-  ^ "\\end{itemize}.\n"
+  (List.fold_right (fun c str -> (predToTexString c) ^ ", " ^ str) csts.lst "") 
 
 let predToString c = match c with
   | IN (t, c) -> 
