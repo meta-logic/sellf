@@ -115,52 +115,44 @@ let initial ctx f =
   ) contexts [] in
   List.map (fun set -> create set) cstrs
 
-let ctxToTex (s, i) = 
-  let news = remSpecial s in
-  ("\\Gamma_{"^news^"}^{"^(string_of_int i)^"}")
-
-let ctxToStr (s, i) = 
-  let news = remSpecial s in
-  ""^news^"_"^(string_of_int i)^""
-
 let predToTexString c = match c with
   | IN (t, c) -> 
-    "$in(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
+    "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
   | MCTX (t, c) -> 
-    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
+    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
   | ELIN (t, c) ->
-    "$elin(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ").$"
+    "$elin(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
   | EMP (c) -> 
-    "$emp(" ^ (ctxToTex c) ^ ").$"
+    "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
-    "$union(" ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ", " ^ (ctxToTex c3) ^ ").$"
+    "$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$"
   | ADDFORM (t, c1, c2) -> 
-    "$addform(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").$"
+    "$addform(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ").$"
   | REQIN (t, c) -> 
-    "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c) ^ ") (:- not in()).$"
+    "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in()).$"
   | REMOVED (t, c1, c2) -> 
-    "$removed(" ^ (termToTexString t) ^ ", " ^ (ctxToTex c1) ^ ", " ^ (ctxToTex c2) ^ ").$"
+    "$removed(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ").$"
 
 let rec toTexString csts = 
   (List.fold_right (fun c str -> (predToTexString c) ^ ", " ^ str) csts.lst "") 
 
 let predToString c = match c with
   | IN (t, c) -> 
-    "in(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
+    "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | MCTX (t, c) -> 
-    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
+    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | ELIN (t, c) ->
-    "elin(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
+    "elin(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | EMP (c) ->
-    "emp(" ^ (ctxToStr c) ^ ")."
+    "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
-    "union(" ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ", " ^ (ctxToStr c3) ^ ")."
+    "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
   | ADDFORM (t, c1, c2) -> 
-    "addform(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
+    "addform(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ")."
   | REQIN (t, c) -> 
-    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c) ^ ")."
+    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | REMOVED (t, c1, c2) -> 
-    "removed(\"" ^ (termToString t) ^ "\", " ^ (ctxToStr c1) ^ ", " ^ (ctxToStr c2) ^ ")."
+    "removed(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ")."
 
 let toString csts = 
   List.fold_right (fun c str -> 

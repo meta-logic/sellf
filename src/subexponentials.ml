@@ -99,4 +99,10 @@ let weak i = match type_of i with
   | REL | LIN -> false
 ;;
 
+let typeAsString s = match type_of s with
+  | LIN -> "lin"
+  | UNB -> "unb"
+  | REL -> "rel"
+  | AFF -> "aff"
+
 

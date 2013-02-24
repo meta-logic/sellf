@@ -61,19 +61,8 @@ let permute spec1 spec2 =
   let bipoles12 = derive2 spec1 spec2 in
   let bipoles21 = derive2 spec2 spec1 in
 
-(*
-  For every bipole12 there exists a bipole21 such that for all open leaves of
-  bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
-*)
-
-(*
-  List.forall (fun b12 ->
-    List.exists (fun b21 ->
-    
-    ) bipole21
-  ) bipoles12
-*)
-
+  (* GR: Prints all possible bipoles/models in a latex file. Make a separate
+  function out of this.
   print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
   \\usepackage{amsmath}\n\
   \\usepackage{stmaryrd}\n\
@@ -99,10 +88,19 @@ let permute spec1 spec2 =
   ) bipoles21;
 
   print_endline "\\end{document}";
+  *)
 
-  print_endline "Stay tuned for the next episodes!"
+(*
+  For every bipole12 there exists a bipole21 such that for all open leaves of
+  bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
+*)
+
+  List.for_all (fun b12 ->
+    List.exists (fun b21 ->
+      Dlv.proofImplies b12 b21 
+    ) bipoles21
+  ) bipoles12
 ;;
-
 
 (**************** OLD CODE *******************
 

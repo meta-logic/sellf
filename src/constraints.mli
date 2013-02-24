@@ -49,10 +49,6 @@ val bang : ContextSchema.context -> string -> constraintset
 
 val initial : ContextSchema.context -> Term.terms -> constraintset list
 
-val ctxToTex : string * int -> string
-
-val ctxToStr : string * int -> string
-
 val predToTexString : constraintpred -> string
 
 val toTexString : constraintset -> string

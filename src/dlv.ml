@@ -7,6 +7,7 @@
 (*                                       *)
 (*****************************************)
 
+open Sequent
 
 (* Definitions for the dlv file *)
 
@@ -124,6 +125,32 @@ let getModels cstrSet =
   readModel channel
 
 (* Deciding the permutation condition *)
+
+let ctxPredicates lvsLst treeName = 
+  let ctxForLeaf leaf leafIdx treeName = 
+    let ctx = SequentSchema.getContext leaf in
+    List.fold_right ( fun (subexp, index) acc ->
+      let ctxName = ContextSchema.ctxToStr (subexp, index) in
+      let subexpName = Prints.remSpecial subexp in
+      let subexpType = Subexponentials.typeAsString subexp in
+      let leafName = treeName ^ "_leaf" ^ (string_of_int leafIdx) in
+      ("ctx(" ^ ctxName ^ ", " ^ subexpName ^ ", " ^ subexpType ^ ", " ^ leafName ^ ", " ^ treeName ^ ").\n") ^ acc 
+    ) (ContextSchema.getContexts ctx) ""
+  in
+  let i = ref 0 in
+  List.fold_right (fun leaf acc ->
+    i := !i + 1;
+    (ctxForLeaf leaf !i treeName) ^ acc
+  ) lvsLst ""
+
+(* Decides whether a proof of der1 implies in a proof of der2 *)
+let proofImplies (der1, model1) (der2, model2) =
+  let openLeaves1 = ProofTreeSchema.getOpenLeaves der1 in
+  let openLeaves2 = ProofTreeSchema.getOpenLeaves der2 in
+  let str1 = ctxPredicates openLeaves1 "tree1" in
+  let str2 = ctxPredicates openLeaves2 "tree2" in
+  (* TODO: finish! Add also the models to the input file. *)
+  true
 
 let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
   "geq("^(Prints.remSpecial data)^", "^(Prints.remSpecial key)^").\n"^acc

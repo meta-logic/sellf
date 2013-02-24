@@ -40,6 +40,14 @@ let toString ctx = Hashtbl.fold (fun n i acc -> n ^ "_" ^ (string_of_int i) ^ ",
 
 let toTexString ctx = Hashtbl.fold (fun n i acc -> "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
 
+let ctxToTex (s, i) = 
+  let news = remSpecial s in
+  ("\\Gamma_{"^news^"}^{"^(string_of_int i)^"}")
+
+let ctxToStr (s, i) = 
+  let news = remSpecial s in
+  ""^news^"_"^(string_of_int i)^""
+
 (* Creates the next context where the index of subexp is updated *)
 let next ctx subexp =
   let index = Hashtbl.find global subexp in

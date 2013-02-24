@@ -167,7 +167,11 @@ solve_query () =
       let i1 = int_of_string (read_line ()) in
       print_endline "Please type the number of F2: ";
       let i2 = int_of_string (read_line ()) in
-      Permutation.permute (List.nth !Specification.others i1) (List.nth !Specification.others i2)
+      begin
+      match Permutation.permute (List.nth !Specification.others i1) (List.nth !Specification.others i2) with
+        | true -> print_endline "The rules permute."
+        | false -> print_endline "The rules do not permute."
+      end
 
 (*
     | "#perm" ->

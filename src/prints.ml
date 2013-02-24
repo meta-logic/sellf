@@ -95,13 +95,6 @@ let rec termToString term = match term with
 let termsListToString args = List.fold_right (fun el acc ->
   (termToString el)^" :: "^acc) args ""
 
-(*let subexpTypeToString tp = match tp with
-  | Subexponentials.LIN -> "lin"
-  | Subexponentials.UNB -> "unb"
-  | Subexponentials.REL -> "rel"
-  | Subexponentials.AFF -> "aff"
-*)
-
 (* Modified functions to transform formulas to LaTeX code *)
 
 let compToTexString ct = match ct with
