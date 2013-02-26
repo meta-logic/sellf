@@ -18,10 +18,43 @@ module Sequent = struct
 
   type sequent = {
     mutable ctxin : Context.context;
-    mutable ctxout : Context.context;
+    mutable ctxout : Context.context (*option NEW *);
     mutable goals : terms list;
     pol : phase
   }
+
+(* NEW 
+
+  let createAsyn ctxIn formulas = {
+    ctxin = ctxIn;
+    ctxout = NONE;
+    goals = formulas;
+    pol = ASYN
+  }
+
+  let createSync ctxIn formula = {
+    ctxin = ctxIn;
+    ctxout = NONE;
+    goals = [formula];
+    pol = SYNC
+  }
+*)
+
+  let getPhase seq = seq.pol
+
+  let getGoals seq = seq.goals
+
+  let getContextIn seq = seq.ctxin
+
+(* NEW
+  let setContextOut seq oc = seq.ctxout <- SOME(oc)
+
+  let getContextOut seq = match seq.ctxout with
+    | SOME(ctx) -> ctx
+    | NONE -> failwith "Out-context not set. Impossible to get."
+*)
+
+(*** OLD ****)
 
   let create () = {
     ctxin = Context.createEmpty ();
@@ -44,11 +77,11 @@ module Sequent = struct
     pol = ph
   }
 
-  let getPhase seq = seq.pol
-
+ 
+ 
+ 
   let setGoal seq f = seq.goals <- [f]
   let setGoals seq lf = seq.goals <- lf
-  let getGoals seq = seq.goals
 
   let setCtxIn seq ic = seq.ctxin <- ic
   let getCtxIn seq = seq.ctxin

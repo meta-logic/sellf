@@ -8,7 +8,6 @@
 (**************************************)
 
 open Sequent
-open Context
 open Term
 
 (* Builds the possible bipoles from a formula in a sequent and a set of constraints *)

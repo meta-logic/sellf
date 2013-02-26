@@ -13,7 +13,6 @@
 open Basic
 open Term
 open ProofTree
-open Context
 open Sequent
 open Prints
 
@@ -60,7 +59,8 @@ let file_name = ref "noname"  ;;
 
 (* h is the maximum height of the proof. Measured on the number of decide rules.  *)
 
-let rec prove formula h suc fail = 
+let rec prove formula h suc fail =
+
   let root = initProof formula in
   Stack.push fail failStack;
   prove_asyn root h (fun () ->
@@ -84,6 +84,147 @@ let rec prove formula h suc fail =
       (Stack.pop failStack) ()
     end
   )
+
+(* CODE FOR NEW CLEAN PROOF SEARCH. NOT FINISHED 
+
+  let propagateOutContext pt = match ProofTree.getPremises with
+    | [p] -> 
+      let ctxOutPremise = Sequent.getContextOut (ProofTree.getConclusion p) in
+      Sequent.setContextOut (ProofTree.getConclusion pt) ctxOutPremise
+    | _ -> failwith "Invalid premises to propagate out context."
+
+  (* This method should manage the in/out contexts and backtracking *)
+  let proofSearch prooftree height suc fail = 
+    let conclusion = ProofTree.getConclusion prooftree in 
+    match (Sequent.getPhase conclusion, Sequent.getGoals conclusion) with
+
+    | SYNC, [f] -> begin match Term.observe f with
+      (* Release rule *)
+      | WITH(_,_)
+      | PARR(_,_)
+      | TOP
+      | BOT
+      | FORALL(_,_,_)
+      | QST(_)
+      | PRED(_,_,NEG) 
+      | NOT(PRED(_,_,POS)) ->
+        let pt = ProofTree.releaseDown prooftree f in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+
+      | ADDOR(f1, f2) ->
+        let (pt1, sucFun) = ProofTree.applyAddOr1 prooftree f in
+        proofSearch pt1 height (fun () -> propagateOutContext prooftree; suc ()) (fun () ->
+          let (pt2, sucFun) = ProofTree.applyAddOr2 prooftree f in
+          proofSearch pt2 height (fun () -> propagateOutContext prooftree; suc ()) fail
+        )
+
+      | TENSOR(f1, f2) ->
+        let pt1 = ProofTree.applyTensor1 prooftree f in
+        proofSearch pt1 height (fun () -> 
+          let pt2 = ProofTree.applyTensor2 prooftree f in
+          proofSearch pt2 height (fun () ->
+            match ProofTree.getPremises prooftree with
+              | p1 :: p2 :: [] ->
+                let ctxOutPremise = Sequent.getContextOut (ProofTree.getConclusion p2) in
+                Sequent.setContextOut (ProofTree.getConclusion prooftree) ctxOutPremise
+              | _ -> failwith "Invalid premise setting for tensor rule."
+            ; suc ()
+          ) fail
+        ) fail
+
+
+      | EXISTS(s, i, f1) ->
+        let pt = ProofTree.applyExists prooftree f in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+
+      | ONE ->
+        ProofTree.applyOne prooftree; 
+        let ctx = Sequent.getContext (ProofTree.getConclusion prooftree) in
+        Sequent.setContextOut (ProofTree.getConclusion prooftree) ctx;
+        suc ()
+
+      | BANG(CONS(s), f1) ->
+        let pt = ProofTree.applyBang prooftree f in
+        proofSearch pt height (fun () ->
+            (* Changes the output context if bang returns successfully *)
+            match ProofTree.getPremises prooftree with
+              | [p] -> 
+                let conclusion = ProofTree.getConclusion prooftree in
+                let ctx = Sequent.getContextIn conclusion in
+                let bangctxout = Context.bangout ctx s in
+                let premisectxout = Sequent.getCtxOut (ProofTree.getConclusion p) in
+                let newctxout = Context.merge bangctxout premisectxout in
+                Sequent.setContextOut conclusion newctxout;
+                suc ()
+              | _ -> failwith "Invalid premise setting for bang rule."
+        ) fail
+
+      (* TODO: initial rule *)
+      | PRED(str, terms, POS) | NOT(PRED(str, terms, NEG)) ->
+        let c = ProofTree.applyInitial prooftree f in
+        constraints := Constraints.times !constraints c;
+        cont ()
+      
+      | _ -> failwith ("Invalid principal formula in synchronous phase: "^(Prints.termToString (Term.observe f)))
+    end
+
+    | ASYN, hd :: tl -> begin match Term.observe hd with
+      (* Release rule *)
+      | ADDOR(_,_) 
+      | TENSOR(_,_)
+      | EXISTS(_,_,_)
+      | ONE
+      | BANG(_)
+      | PRED(_,_,_)
+      | NOT(PRED(_,_,_)) ->
+        let pt = ProofTree.releaseUp prooftree hd in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+    
+      | WITH(f1, f2) ->
+        let pt1, pt2 = ProofTree.applyWith prooftree hd in
+        proofSearch pt1 height (fun () ->
+          proofSearch pt2 height (fun () -> 
+            match ProofTree.getPremises prooftree with
+              | p1 :: p2 :: [] ->
+                let ctxOutPremise = Sequent.getContextOut (ProofTree.getConclusion p2) in
+                Sequent.setContextOut (ProofTree.getConclusion prooftree) ctxOutPremise
+              | _ -> failwith "Invalid premise setting for with rule."
+            ; suc ()
+
+          ) fail
+        ) fail
+
+      | PARR(f1, f2) ->
+        let pt = ProofTree.applyParr prooftree hd in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+
+      | TOP -> 
+        ProofTree.applyTop prooftree; 
+        let ctx = Sequent.getContextIn (ProofTree.getConclusion prooftree) in
+        Sequent.setContextOut (ProofTree.getConclusion prooftree) ctx;
+        suc ()
+
+      | BOT ->
+        let pt = ProofTree.applyBot prooftree hd in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+      
+      | FORALL(s, i, f1) ->
+        let pt = ProofTree.applyForall prooftree hd in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+
+      | QST(subexp, f1) ->
+        let pt = ProofTree.applyQst prooftree hd in
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+
+      | _ -> failwith ("Invalid principal formula in asynchronous phase: "^(Prints.termToString (Term.observe hd)))
+    end
+
+    | ASYN, [] -> (* TODO decide *)
+
+    | _ -> failwith "Invalid sequent while searching for proofs."
+
+  in proofSearch root h suc fail
+*)
 
 and prove_asyn proof h suc =
 let conc = ProofTree.getConclusion proof in

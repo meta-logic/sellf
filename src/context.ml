@@ -61,6 +61,8 @@ let create h = {
   hash = h
 }
 
+let copy ctx = create (Hashtbl.copy ctx.hash)
+
 (* Initialize a context with the formulas parsed *)
 let getInitial () = create initial
 
