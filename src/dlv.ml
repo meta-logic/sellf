@@ -84,13 +84,18 @@ not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(
 
 % There is a formula in a linear context of S2 such that it is in S1 in a greater context.
 %not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), not geq(Sub2, Sub1). 
+
+% If all the leaves of the second tree are not provable, no models are generated
+:- not ok.
 "
 
 (* Generating models for a set of constraints *)
 
 (* Print constraints to a file *)
+(*
 let rec printToFile cst out = 
   Printf.fprintf out "%s" (Constraints.toString cst)
+*)
 
 (* Generates a file with the constraint set and the theory specification *)
 let genFile cstrSet name = 
@@ -103,7 +108,7 @@ let genFile cstrSet name =
   Printf.fprintf file "%s" addform_clauses_set;
   Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
-  printToFile cstrSet file;
+  Printf.fprintf file "%s" (Constraints.toString cstrSet);
   close_out file
 
 (* Get the models from one set of constraints *)
@@ -144,26 +149,20 @@ let ctxPredicates lvsLst treeName =
   ) lvsLst ""
 
 (* Generates the string "ok :- \forall l \in leafs. proveIf(lname, _)." *)
-(* TODO: finish this *)
-(*
-let rec okIfProve leafs treeName = 
+let okIfProve leafs treeName = 
   let i = ref 0 in
-  List.fold_right( fun _ acc ->
-    i := !i + 1;
-    let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
-    
-  ) leafs treeName
-*)
-
-(* Decides whether a proof of der1 implies in a proof of der2 *)
-let proofImplies (der1, model1) (der2, model2) =
-  let openLeaves1 = ProofTreeSchema.getOpenLeaves der1 in
-  let openLeaves2 = ProofTreeSchema.getOpenLeaves der2 in
-  let str1 = ctxPredicates openLeaves1 "tree1" in
-  let str2 = ctxPredicates openLeaves2 "tree2" in
-  (*let str3 = okIfProve openLeaves2 "tree2" in*)
-  (* TODO: finish! Add also the models to the input file. *)
-  true
+  let rec okIfProve_aux leafs = match leafs with
+    | [] -> ""
+    | [_] ->
+      i := !i + 1;
+      let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
+      "proveIf(" ^ leafName ^ ", _)."
+    | _ :: tl -> 
+      i := !i + 1;
+      let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
+      "proveIf(" ^ leafName ^ ", _), " ^ (okIfProve_aux tl)
+  in
+  "ok :- " ^ (okIfProve_aux leafs)
 
 let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
   "geq("^(Prints.remSpecial data)^", "^(Prints.remSpecial key)^").\n"^acc
@@ -172,8 +171,8 @@ let reflSubexpRel () = Hashtbl.fold (fun key data acc ->
   "geq("^(Prints.remSpecial key)^", "^(Prints.remSpecial key)^").\n"^acc
 ) Subexponentials.typeTbl ""
 
-let genPermFile cList ctxStr okStr model name =  
-  let file = open_out ("solver/"^name^".in") in
+let genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr name =  
+  let file = open_out (name) in
   Printf.fprintf file "%s" description;
   Printf.fprintf file "%s" union_clauses_set;
   Printf.fprintf file "%s" elin_clauses_set;
@@ -183,13 +182,36 @@ let genPermFile cList ctxStr okStr model name =
   Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
   Printf.fprintf file "%s" proveIf_clauses;
-  Printf.fprintf file "%s\n" okStr;
   Printf.fprintf file "%s" (reflSubexpRel ());
   Printf.fprintf file "%s" (subexpOrdStr ());
-  Printf.fprintf file "%s" ctxStr;
-  Printf.fprintf file "%s\n" model;
-  printToFile cList file;
+  Printf.fprintf file "%s\n" modelStr1;
+  Printf.fprintf file "%s\n" modelStr2;
+  Printf.fprintf file "%s\n" ctxStr1;
+  Printf.fprintf file "%s\n" ctxStr2;
+  Printf.fprintf file "%s\n" okStr;
   close_out file
+
+(* Decides whether a proof of der1 implies in a proof of der2 *)
+let proofImplies (der1, model1) (der2, model2) =
+  let openLeaves1 = ProofTreeSchema.getOpenLeaves der1 in
+  let openLeaves2 = ProofTreeSchema.getOpenLeaves der2 in
+  let ctxStr1 = ctxPredicates openLeaves1 "tree1" in
+  let ctxStr2 = ctxPredicates openLeaves2 "tree2" in
+  let modelStr1 = Constraints.toString model1 in
+  let modelStr2 = Constraints.toString model2 in
+  let okStr = okIfProve openLeaves2 "tree2" in
+  let fileName = "solver/permute.in" in
+  genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
+  let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
+  let rec hasModel input = try match input_line input with
+    | str -> 
+      let lexbuf = Lexing.from_string str in
+      match Parser_models.model Lexer_models.token lexbuf with
+        | [] -> false
+        | _ -> true
+    with End_of_file -> let _ = Unix.close_process_in channel in false
+  in
+  hasModel channel  
 
 (* Checks if some set of constraints and the model m satisfy the
 permutability condition *)

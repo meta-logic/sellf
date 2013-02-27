@@ -29,9 +29,13 @@ let createFresh () =
   let subexps = Subexponentials.getAll () in
   let fresh = Hashtbl.create 100 in
   List.iter ( fun s ->
-    let n = Hashtbl.find global s in
-    Hashtbl.replace global s (n+1);
-    Hashtbl.add fresh s n;
+    try match Hashtbl.find global s with
+      | n ->
+        Hashtbl.replace global s (n+1);
+        Hashtbl.add fresh s n
+      with Not_found ->
+        Hashtbl.add global s 1;
+        Hashtbl.add fresh s 0
   ) subexps;
   create fresh
 

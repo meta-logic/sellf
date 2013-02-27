@@ -64,8 +64,8 @@ let permute spec1 spec2 =
   let bipoles21 = derive2 spec2 spec1 in
 
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
-  function out of this.
-  print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
+  function out of this.*)
+(*  print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
   \\usepackage{amsmath}\n\
   \\usepackage{stmaryrd}\n\
   \\usepackage{proof}\n\n\
@@ -90,7 +90,7 @@ let permute spec1 spec2 =
   ) bipoles21;
 
   print_endline "\\end{document}";
-  *)
+*)
 
 (*
   For every bipole12 there exists a bipole21 such that for all open leaves of
