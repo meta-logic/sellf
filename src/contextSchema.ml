@@ -15,20 +15,34 @@ type context = {
   hash : (string, int) Hashtbl.t;
 }
 
+(*
 let create () = { 
   hash = Hashtbl.create 100
 }
+*)
 
-let createWith h = {
+let create h = {
   hash = h
 }
 
+let createFresh () = 
+  let subexps = Subexponentials.getAll () in
+  let fresh = Hashtbl.create 100 in
+  List.iter ( fun s ->
+    let n = Hashtbl.find global s in
+    Hashtbl.replace global s (n+1);
+    Hashtbl.add fresh s n;
+  ) subexps;
+  create fresh
+
+(*
 let initialize ctx = 
   let subexps = Subexponentials.getAll () in
   List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps;
   ctx
+*)
 
-let copy ctx = createWith (Hashtbl.copy ctx.hash)
+let copy ctx = create (Hashtbl.copy ctx.hash)
 
 let getIndex ctx s = try match Hashtbl.find ctx.hash s with
   | i -> i
@@ -54,7 +68,7 @@ let next ctx subexp =
   let newctxhash = Hashtbl.copy ctx.hash in
   Hashtbl.replace newctxhash subexp (index + 1);
   Hashtbl.replace global subexp (index + 1);
-  createWith newctxhash
+  create newctxhash
 
 (* Creates the next context after inserting a formula in subexp *)
 let insert ctx subexp = 
@@ -62,7 +76,7 @@ let insert ctx subexp =
   let newctxhash = Hashtbl.copy ctx.hash in
   Hashtbl.replace newctxhash subexp (index+2);
   Hashtbl.replace global subexp (index+2);
-  createWith newctxhash
+  create newctxhash
 
 (* Creates the two resulting contexts after a split *)
 let split ctx = 
@@ -79,7 +93,7 @@ let split ctx =
       Hashtbl.replace hashctx2 s (n+2);
     | Subexponentials.UNB | Subexponentials.AFF -> ()
   )  ctx.hash;
-  (createWith hashctx1, createWith hashctx2)
+  (create hashctx1, create hashctx2)
 
 (* Creates the resulting context after a bang - increments the indices of
 those contexts that have their formulas erased *)
@@ -95,6 +109,6 @@ let bang ctx subexp =
         Hashtbl.replace hashctx s (n+1)
       end
   ) ctx.hash;
-  createWith hashctx
+  create hashctx
 
 

@@ -14,7 +14,9 @@ open Sequent
 let derive2 spec1 spec2 =
 
   (* Initial configuration *)
-  let context = ContextSchema.initialize (ContextSchema.create ()) in
+  (* TODO the global indices should *not* be reseted *)
+  (*let context = ContextSchema.initialize (ContextSchema.create ()) in*)
+  let context = ContextSchema.createFresh () in
   let sequent = SequentSchema.createAsyn context [] in
   let in1 = Constraints.isIn spec1 "$gamma" context in
   let in2 = Constraints.isIn spec2 "$gamma" context in

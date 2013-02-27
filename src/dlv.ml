@@ -143,12 +143,25 @@ let ctxPredicates lvsLst treeName =
     (ctxForLeaf leaf !i treeName) ^ acc
   ) lvsLst ""
 
+(* Generates the string "ok :- \forall l \in leafs. proveIf(lname, _)." *)
+(* TODO: finish this *)
+(*
+let rec okIfProve leafs treeName = 
+  let i = ref 0 in
+  List.fold_right( fun _ acc ->
+    i := !i + 1;
+    let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
+    
+  ) leafs treeName
+*)
+
 (* Decides whether a proof of der1 implies in a proof of der2 *)
 let proofImplies (der1, model1) (der2, model2) =
   let openLeaves1 = ProofTreeSchema.getOpenLeaves der1 in
   let openLeaves2 = ProofTreeSchema.getOpenLeaves der2 in
   let str1 = ctxPredicates openLeaves1 "tree1" in
   let str2 = ctxPredicates openLeaves2 "tree2" in
+  (*let str3 = okIfProve openLeaves2 "tree2" in*)
   (* TODO: finish! Add also the models to the input file. *)
   true
 

@@ -161,7 +161,8 @@ let deriveBipole seq form constr =
 (* Generates the bipole of a formula from a generic initial sequent *)
 (* Considering the formula is chosen from gamma *)
 let bipole f = 
-  let context = ContextSchema.initialize (ContextSchema.create ()) in
+  (*let context = ContextSchema.initialize (ContextSchema.create ()) in*)
+  let context = ContextSchema.createFresh () in
   let sequent = SequentSchema.createAsyn context [] in
   let constraints = Constraints.isIn f "$gamma" context in
   deriveBipole sequent f constraints
