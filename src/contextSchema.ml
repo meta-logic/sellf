@@ -15,12 +15,6 @@ type context = {
   hash : (string, int) Hashtbl.t;
 }
 
-(*
-let create () = { 
-  hash = Hashtbl.create 100
-}
-*)
-
 let create h = {
   hash = h
 }
@@ -38,13 +32,6 @@ let createFresh () =
         Hashtbl.add fresh s 0
   ) subexps;
   create fresh
-
-(*
-let initialize ctx = 
-  let subexps = Subexponentials.getAll () in
-  List.iter (fun s -> Hashtbl.add ctx.hash s 0; Hashtbl.add global s 0) subexps;
-  ctx
-*)
 
 let copy ctx = create (Hashtbl.copy ctx.hash)
 

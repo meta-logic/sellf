@@ -90,12 +90,6 @@ not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(
 
 (* Generating models for a set of constraints *)
 
-(* Print constraints to a file *)
-(*
-let rec printToFile cst out = 
-  Printf.fprintf out "%s" (Constraints.toString cst)
-*)
-
 (* Generates a file with the constraint set and the theory specification *)
 let genFile cstrSet name = 
   let file = open_out ("solver/"^name^".in") in
@@ -116,8 +110,6 @@ as strings which are the true predicated in the format of facts (e.g.
 "pred(a). pred(b)." *)
 let getModels cstrSet = 
   genFile cstrSet "temp";
-  (*let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
-  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in*)
   let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
   let rec readModel input = try match input_line input with
     | str -> 
@@ -208,23 +200,3 @@ let proofImplies (der1, model1) (der2, model2) =
   in
   hasModel channel  
 
-(* Checks if some set of constraints and the model m satisfy the
-permutability condition *)
-(*
-let permCondition cstrs ctxStr okStr mdl =
-  let lst = cstrs.lst in
-  let rec condition mdl cList = match cList with
-    | [] -> false
-    | c :: tl ->
-      genPermFile c ctxStr okStr mdl ("temp_perm"^(string_of_int !i));
-      let channel = Unix.open_process_in ("dlv -silent solver/temp_perm"^(string_of_int !i)^".in") in
-      i := !i + 1;
-      try match input_line channel with
-        | _ -> let _ = Unix.close_process_in channel in 
-          (*print_endline "Some model is satisfiable."; flush
-          (out_channel_of_descr stdout)*) (); 
-          true
-        with End_of_file -> let _ = Unix.close_process_in channel in condition mdl tl
-  in
-  condition mdl lst
-*)

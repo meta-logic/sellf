@@ -159,41 +159,4 @@ let toString csts =
     (predToString c) ^ "\n" ^ str
   ) csts.lst ""
 
-(*
-(* Print constraints to a file *)
-let rec printToFile cst out = 
-  Printf.fprintf out "%s" (toString cst)
-
-(* Generates a file with the constraint set and the theory specification *)
-let genFile cstrSet name = 
-  let file = open_out ("solver/"^name^".in") in
-  Printf.fprintf file "%s" description;
-  Printf.fprintf file "%s" union_clauses_set;
-  Printf.fprintf file "%s" elin_clauses_set;
-  Printf.fprintf file "%s" emp_clauses_set;
-  Printf.fprintf file "%s" mctx_clauses_set;
-  Printf.fprintf file "%s" addform_clauses_set;
-  Printf.fprintf file "%s" aux_clauses_set;
-  printToFile cstrSet file;
-  close_out file
-
-(* Get the models from one set of constraints *)
-(* This function will return a list of models. These models are represented
-as strings which are the true predicated in the format of facts (e.g.
-"pred(a). pred(b)." *)
-let getModels cstrSet = 
-  genFile cstrSet "temp";
-  (*let sedStr = " | sed \"s/{//\" | sed \"s/}/./\" | sed \"s/[a-zA-Z]*\\(\\), /. /g\" " in
-  let channel = Unix.open_process_in ("dlv -silent solver/temp.in"^sedStr) in*)
-  let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
-  let rec readModel input = try match input_line input with
-    | str -> (*str :: readModel input*)
-      let lexbuf = Lexing.from_string str in
-      let model = Parser_models.model Lexer_models.token lexbuf in
-      (create model) :: readModel input
-    with End_of_file -> let _ = Unix.close_process_in channel in []
-  in
-  readModel channel
-*)
-
 

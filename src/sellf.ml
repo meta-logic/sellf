@@ -37,6 +37,7 @@ let initAll () =
   Coherence.initialize ();
 ;;
 
+(* TODO: improve this output *)
 let generate_bipoles formList = begin
 
   let genBip r = 
@@ -172,55 +173,6 @@ solve_query () =
         | true -> print_endline "The rules permute."
         | false -> print_endline "The rules do not permute."
       end
-
-(*
-    | "#perm" ->
-      let tryPermute a b = 
-        print_endline "\nLet ";
-        print_string "r1 = "; Prints.print_term a; print_string " and \n";
-        print_string "r2 = "; Prints.print_term b; print_string "\n";
-        flush stdout;
-	      let start_time = Sys.time () in
-        try match Permutation.permute a b with
-          | true -> 
-	          let end_time = Sys.time () in
-	          let total = end_time -. start_time in
-            print_endline "Then r1 permutes over r2.";
-	          Printf.printf "Execution time: %f seconds.\n" total
-          | false -> 
-	          let end_time = Sys.time () in
-	          let total = end_time -. start_time in
-            print_endline "Then, r1 does NOT permute over r2.";
-	          Printf.printf "Execution time: %f seconds.\n" total
-          with s -> 
-	          let end_time = Sys.time () in
-	          let total = end_time -. start_time in
-            (* TODO: give more information on this error. *)
-            print_endline ("Error: "^(Printexc.to_string s));
-	          Printf.printf "Execution time: %f seconds.\n" total
-      in
-
-      (* Checking permutation of every pair of rules in the file *)
-      let rec every_pair forms = match forms with
-        | [] -> print_endline "Done."
-        | hd :: tl ->
-          (* Checking the formula with itself *)
-          (* This makes no sense yet because both formulas use the same
-          constants *)
-          (* TODO: allow the specification to be done with variables and
-          instantiate fresh constants for each variable. *)
-          (*tryPermute hd hd;*)
-          
-          let rec check_perm f lst = match lst with
-            | [] -> ()
-            | h :: t -> 
-              tryPermute f h;
-              tryPermute h f;
-              check_perm f t    
-
-          in check_perm hd tl; every_pair tl
-      in every_pair !Structs.rules;
-    *)
 
     | "#cutcoherence" -> check_cutcoherence ()
     
