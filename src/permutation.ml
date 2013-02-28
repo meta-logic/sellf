@@ -65,32 +65,38 @@ let permute spec1 spec2 =
 
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
   function out of this.*)
-(*  print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
+  (*print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
   \\usepackage{amsmath}\n\
   \\usepackage{stmaryrd}\n\
+  \\usepackage[margin=1cm]{geometry}\n\
   \\usepackage{proof}\n\n\
   \\begin{document}\n\n";
-
-  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToString spec1) ^ "$ / $" ^ (Prints.termToString spec2) ^ "$:} \n");
+*)
+  (*print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec1) ^ "$ / $" ^ (Prints.termToTexString spec2) ^ "$:} \n");
   List.iter (fun (pt, model) ->
+    print_endline "{\\small";
     print_endline "\\[";
     print_endline (ProofTreeSchema.toTexString pt);
     print_endline "\\]";
+    print_endline "}";
     print_endline "CONSTRAINTS\n";
     print_endline (Constraints.toTexString model);
   ) bipoles12;
 
-  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToString spec2) ^ "$ / $" ^ (Prints.termToString spec1) ^ "$:} \n");
+  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec2) ^ "$ / $" ^ (Prints.termToTexString spec1) ^ "$:} \n");
   List.iter (fun (pt, model) ->
+    print_endline "{\\small";
     print_endline "\\[";
     print_endline (ProofTreeSchema.toTexString pt);
     print_endline "\\]";
+    print_endline "}";
     print_endline "CONSTRAINTS\n";
     print_endline (Constraints.toTexString model);
   ) bipoles21;
+  *)
 
-  print_endline "\\end{document}";
-*)
+  (*print_endline "\\end{document}";*)
+
 
 (*
   For every bipole12 there exists a bipole21 such that for all open leaves of

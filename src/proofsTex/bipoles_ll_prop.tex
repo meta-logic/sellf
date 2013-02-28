@@ -1,0 +1,748 @@
+\documentclass[a4paper, 11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{stmaryrd}
+\usepackage[margin=1cm]{geometry}
+\usepackage{proof}
+
+\begin{document}
+
+\section{Possible bipoles for $a \oplus b$ / $c \otimes d$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{0} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow b :: }
+{\infer{\Gamma_{ gamma}^{5} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{13} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{14} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{14} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{17} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{15} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{15} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{19} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{1}, \Gamma_{gamma}^{4}, \Gamma_{gamma}^{5}).$, $union(\Gamma_{gamma}^{14}, \Gamma_{gamma}^{15}, \Gamma_{gamma}^{13}).$, $union(\Gamma_{gamma}^{14}, \Gamma_{gamma}^{16}, \Gamma_{gamma}^{17}).$, $union(\Gamma_{gamma}^{15}, \Gamma_{gamma}^{18}, \Gamma_{gamma}^{19}).$, $removed(c \otimes d, \Gamma_{gamma}^{5}, \Gamma_{gamma}^{13}).$, $removed(a \oplus b, \Gamma_{gamma}^{0}, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{5}).$, $in(c \otimes d, \Gamma_{gamma}^{0}).$, $in(a \oplus b, \Gamma_{gamma}^{0}).$, $in(b, \Gamma_{gamma}^{4}).$, $in(b, \Gamma_{gamma}^{5}).$, $in(b, \Gamma_{gamma}^{14}).$, $in(b, \Gamma_{gamma}^{13}).$, $in(b, \Gamma_{gamma}^{17}).$, $in(c, \Gamma_{gamma}^{16}).$, $in(c, \Gamma_{gamma}^{17}).$, $in(d, \Gamma_{gamma}^{18}).$, $in(d, \Gamma_{gamma}^{19}).$, $elin(b, \Gamma_{gamma}^{4}).$, $elin(c, \Gamma_{gamma}^{16}).$, $elin(d, \Gamma_{gamma}^{18}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{0} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow b :: }
+{\infer{\Gamma_{ gamma}^{5} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{13} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{14} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{14} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{17} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{15} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{15} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{19} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{1}, \Gamma_{gamma}^{4}, \Gamma_{gamma}^{5}).$, $union(\Gamma_{gamma}^{14}, \Gamma_{gamma}^{15}, \Gamma_{gamma}^{13}).$, $union(\Gamma_{gamma}^{14}, \Gamma_{gamma}^{16}, \Gamma_{gamma}^{17}).$, $union(\Gamma_{gamma}^{15}, \Gamma_{gamma}^{18}, \Gamma_{gamma}^{19}).$, $removed(c \otimes d, \Gamma_{gamma}^{5}, \Gamma_{gamma}^{13}).$, $removed(a \oplus b, \Gamma_{gamma}^{0}, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{5}).$, $in(c \otimes d, \Gamma_{gamma}^{0}).$, $in(a \oplus b, \Gamma_{gamma}^{0}).$, $in(b, \Gamma_{gamma}^{4}).$, $in(b, \Gamma_{gamma}^{5}).$, $in(b, \Gamma_{gamma}^{15}).$, $in(b, \Gamma_{gamma}^{13}).$, $in(b, \Gamma_{gamma}^{19}).$, $in(c, \Gamma_{gamma}^{16}).$, $in(c, \Gamma_{gamma}^{17}).$, $in(d, \Gamma_{gamma}^{18}).$, $in(d, \Gamma_{gamma}^{19}).$, $elin(b, \Gamma_{gamma}^{4}).$, $elin(c, \Gamma_{gamma}^{16}).$, $elin(d, \Gamma_{gamma}^{18}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{0} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow a :: }
+{\infer{\Gamma_{ gamma}^{3} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{6} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{7} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{7} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{10} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{8} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{8} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{12} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{1}, \Gamma_{gamma}^{2}, \Gamma_{gamma}^{3}).$, $union(\Gamma_{gamma}^{7}, \Gamma_{gamma}^{8}, \Gamma_{gamma}^{6}).$, $union(\Gamma_{gamma}^{7}, \Gamma_{gamma}^{9}, \Gamma_{gamma}^{10}).$, $union(\Gamma_{gamma}^{8}, \Gamma_{gamma}^{11}, \Gamma_{gamma}^{12}).$, $removed(c \otimes d, \Gamma_{gamma}^{3}, \Gamma_{gamma}^{6}).$, $removed(a \oplus b, \Gamma_{gamma}^{0}, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{3}).$, $in(c \otimes d, \Gamma_{gamma}^{0}).$, $in(a \oplus b, \Gamma_{gamma}^{0}).$, $in(a, \Gamma_{gamma}^{2}).$, $in(a, \Gamma_{gamma}^{3}).$, $in(a, \Gamma_{gamma}^{7}).$, $in(a, \Gamma_{gamma}^{6}).$, $in(a, \Gamma_{gamma}^{10}).$, $in(c, \Gamma_{gamma}^{9}).$, $in(c, \Gamma_{gamma}^{10}).$, $in(d, \Gamma_{gamma}^{11}).$, $in(d, \Gamma_{gamma}^{12}).$, $elin(a, \Gamma_{gamma}^{2}).$, $elin(c, \Gamma_{gamma}^{9}).$, $elin(d, \Gamma_{gamma}^{11}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{0} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{1} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow a :: }
+{\infer{\Gamma_{ gamma}^{3} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{6} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{7} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{7} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{10} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{8} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{8} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{12} ; \Gamma_{un}^{0} ; \Gamma_{ infty}^{0} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{1}, \Gamma_{gamma}^{2}, \Gamma_{gamma}^{3}).$, $union(\Gamma_{gamma}^{7}, \Gamma_{gamma}^{8}, \Gamma_{gamma}^{6}).$, $union(\Gamma_{gamma}^{7}, \Gamma_{gamma}^{9}, \Gamma_{gamma}^{10}).$, $union(\Gamma_{gamma}^{8}, \Gamma_{gamma}^{11}, \Gamma_{gamma}^{12}).$, $removed(c \otimes d, \Gamma_{gamma}^{3}, \Gamma_{gamma}^{6}).$, $removed(a \oplus b, \Gamma_{gamma}^{0}, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{1}).$, $in(c \otimes d, \Gamma_{gamma}^{3}).$, $in(c \otimes d, \Gamma_{gamma}^{0}).$, $in(a \oplus b, \Gamma_{gamma}^{0}).$, $in(a, \Gamma_{gamma}^{2}).$, $in(a, \Gamma_{gamma}^{3}).$, $in(a, \Gamma_{gamma}^{8}).$, $in(a, \Gamma_{gamma}^{6}).$, $in(a, \Gamma_{gamma}^{12}).$, $in(c, \Gamma_{gamma}^{9}).$, $in(c, \Gamma_{gamma}^{10}).$, $in(d, \Gamma_{gamma}^{11}).$, $in(d, \Gamma_{gamma}^{12}).$, $elin(a, \Gamma_{gamma}^{2}).$, $elin(c, \Gamma_{gamma}^{9}).$, $elin(d, \Gamma_{gamma}^{11}).$, 
+\section{Possible bipoles for $c \otimes d$ / $a \oplus b$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{20} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{21} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow c :: }
+{\infer{\Gamma_{ gamma}^{25} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{47} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}}}
+&
+\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{27} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{43}, \Gamma_{gamma}^{46}, \Gamma_{gamma}^{47}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{23}, \Gamma_{gamma}^{21}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{24}, \Gamma_{gamma}^{25}).$, $union(\Gamma_{gamma}^{23}, \Gamma_{gamma}^{26}, \Gamma_{gamma}^{27}).$, $removed(a \oplus b, \Gamma_{gamma}^{25}, \Gamma_{gamma}^{43}).$, $removed(c \otimes d, \Gamma_{gamma}^{20}, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{22}).$, $in(a \oplus b, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{25}).$, $in(a \oplus b, \Gamma_{gamma}^{20}).$, $in(c \otimes d, \Gamma_{gamma}^{20}).$, $in(c, \Gamma_{gamma}^{43}).$, $in(c, \Gamma_{gamma}^{47}).$, $in(c, \Gamma_{gamma}^{24}).$, $in(c, \Gamma_{gamma}^{25}).$, $in(d, \Gamma_{gamma}^{26}).$, $in(d, \Gamma_{gamma}^{27}).$, $in(b, \Gamma_{gamma}^{46}).$, $in(b, \Gamma_{gamma}^{47}).$, $elin(c, \Gamma_{gamma}^{24}).$, $elin(d, \Gamma_{gamma}^{26}).$, $elin(b, \Gamma_{gamma}^{46}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{20} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{21} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow c :: }
+{\infer{\Gamma_{ gamma}^{25} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{43} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{45} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}}}
+&
+\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{27} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{43}, \Gamma_{gamma}^{44}, \Gamma_{gamma}^{45}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{23}, \Gamma_{gamma}^{21}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{24}, \Gamma_{gamma}^{25}).$, $union(\Gamma_{gamma}^{23}, \Gamma_{gamma}^{26}, \Gamma_{gamma}^{27}).$, $removed(a \oplus b, \Gamma_{gamma}^{25}, \Gamma_{gamma}^{43}).$, $removed(c \otimes d, \Gamma_{gamma}^{20}, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{22}).$, $in(a \oplus b, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{25}).$, $in(a \oplus b, \Gamma_{gamma}^{20}).$, $in(c \otimes d, \Gamma_{gamma}^{20}).$, $in(c, \Gamma_{gamma}^{43}).$, $in(c, \Gamma_{gamma}^{45}).$, $in(c, \Gamma_{gamma}^{24}).$, $in(c, \Gamma_{gamma}^{25}).$, $in(d, \Gamma_{gamma}^{26}).$, $in(d, \Gamma_{gamma}^{27}).$, $in(a, \Gamma_{gamma}^{44}).$, $in(a, \Gamma_{gamma}^{45}).$, $elin(c, \Gamma_{gamma}^{24}).$, $elin(d, \Gamma_{gamma}^{26}).$, $elin(a, \Gamma_{gamma}^{44}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{20} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{21} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{25} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow d :: }
+{\infer{\Gamma_{ gamma}^{27} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{32} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{28}, \Gamma_{gamma}^{31}, \Gamma_{gamma}^{32}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{23}, \Gamma_{gamma}^{21}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{24}, \Gamma_{gamma}^{25}).$, $union(\Gamma_{gamma}^{23}, \Gamma_{gamma}^{26}, \Gamma_{gamma}^{27}).$, $removed(a \oplus b, \Gamma_{gamma}^{27}, \Gamma_{gamma}^{28}).$, $removed(c \otimes d, \Gamma_{gamma}^{20}, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{23}).$, $in(a \oplus b, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{27}).$, $in(a \oplus b, \Gamma_{gamma}^{20}).$, $in(c \otimes d, \Gamma_{gamma}^{20}).$, $in(c, \Gamma_{gamma}^{24}).$, $in(c, \Gamma_{gamma}^{25}).$, $in(d, \Gamma_{gamma}^{28}).$, $in(d, \Gamma_{gamma}^{32}).$, $in(d, \Gamma_{gamma}^{26}).$, $in(d, \Gamma_{gamma}^{27}).$, $in(b, \Gamma_{gamma}^{31}).$, $in(b, \Gamma_{gamma}^{32}).$, $elin(c, \Gamma_{gamma}^{24}).$, $elin(d, \Gamma_{gamma}^{26}).$, $elin(b, \Gamma_{gamma}^{31}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{20} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{21} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{22} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{25} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{23} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow d :: }
+{\infer{\Gamma_{ gamma}^{27} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{28} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{30} ; \Gamma_{un}^{1} ; \Gamma_{ infty}^{1} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{28}, \Gamma_{gamma}^{29}, \Gamma_{gamma}^{30}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{23}, \Gamma_{gamma}^{21}).$, $union(\Gamma_{gamma}^{22}, \Gamma_{gamma}^{24}, \Gamma_{gamma}^{25}).$, $union(\Gamma_{gamma}^{23}, \Gamma_{gamma}^{26}, \Gamma_{gamma}^{27}).$, $removed(a \oplus b, \Gamma_{gamma}^{27}, \Gamma_{gamma}^{28}).$, $removed(c \otimes d, \Gamma_{gamma}^{20}, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{23}).$, $in(a \oplus b, \Gamma_{gamma}^{21}).$, $in(a \oplus b, \Gamma_{gamma}^{27}).$, $in(a \oplus b, \Gamma_{gamma}^{20}).$, $in(c \otimes d, \Gamma_{gamma}^{20}).$, $in(c, \Gamma_{gamma}^{24}).$, $in(c, \Gamma_{gamma}^{25}).$, $in(d, \Gamma_{gamma}^{28}).$, $in(d, \Gamma_{gamma}^{30}).$, $in(d, \Gamma_{gamma}^{26}).$, $in(d, \Gamma_{gamma}^{27}).$, $in(a, \Gamma_{gamma}^{29}).$, $in(a, \Gamma_{gamma}^{30}).$, $elin(c, \Gamma_{gamma}^{24}).$, $elin(d, \Gamma_{gamma}^{26}).$, $elin(a, \Gamma_{gamma}^{29}).$,
+
+
+\section{Possible bipoles for $a \oplus b$ / $e \bindnasrepma f$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{48} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow b :: }
+{\infer{\Gamma_{ gamma}^{53} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{59} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{59} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{59} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{61} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{63} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{59}, \Gamma_{gamma}^{60}, \Gamma_{gamma}^{61}).$, $union(\Gamma_{gamma}^{61}, \Gamma_{gamma}^{62}, \Gamma_{gamma}^{63}).$, $union(\Gamma_{gamma}^{49}, \Gamma_{gamma}^{52}, \Gamma_{gamma}^{53}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{53}, \Gamma_{gamma}^{59}).$, $removed(a \oplus b, \Gamma_{gamma}^{48}, \Gamma_{gamma}^{49}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{49}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{53}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{48}).$, $in(a \oplus b, \Gamma_{gamma}^{48}).$, $in(b, \Gamma_{gamma}^{59}).$, $in(b, \Gamma_{gamma}^{61}).$, $in(b, \Gamma_{gamma}^{52}).$, $in(b, \Gamma_{gamma}^{53}).$, $in(b, \Gamma_{gamma}^{63}).$, $in(e, \Gamma_{gamma}^{60}).$, $in(e, \Gamma_{gamma}^{61}).$, $in(e, \Gamma_{gamma}^{63}).$, $in(f, \Gamma_{gamma}^{62}).$, $in(f, \Gamma_{gamma}^{63}).$, $elin(b, \Gamma_{gamma}^{52}).$, $elin(e, \Gamma_{gamma}^{60}).$, $elin(f, \Gamma_{gamma}^{62}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{48} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{49} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow a :: }
+{\infer{\Gamma_{ gamma}^{51} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{54} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{54} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{54} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{56} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{58} ; \Gamma_{un}^{2} ; \Gamma_{ infty}^{2} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{54}, \Gamma_{gamma}^{55}, \Gamma_{gamma}^{56}).$, $union(\Gamma_{gamma}^{56}, \Gamma_{gamma}^{57}, \Gamma_{gamma}^{58}).$, $union(\Gamma_{gamma}^{49}, \Gamma_{gamma}^{50}, \Gamma_{gamma}^{51}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{51}, \Gamma_{gamma}^{54}).$, $removed(a \oplus b, \Gamma_{gamma}^{48}, \Gamma_{gamma}^{49}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{49}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{51}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{48}).$, $in(a \oplus b, \Gamma_{gamma}^{48}).$, $in(a, \Gamma_{gamma}^{54}).$, $in(a, \Gamma_{gamma}^{56}).$, $in(a, \Gamma_{gamma}^{50}).$, $in(a, \Gamma_{gamma}^{51}).$, $in(a, \Gamma_{gamma}^{58}).$, $in(e, \Gamma_{gamma}^{55}).$, $in(e, \Gamma_{gamma}^{56}).$, $in(e, \Gamma_{gamma}^{58}).$, $in(f, \Gamma_{gamma}^{57}).$, $in(f, \Gamma_{gamma}^{58}).$, $elin(a, \Gamma_{gamma}^{50}).$, $elin(e, \Gamma_{gamma}^{55}).$, $elin(f, \Gamma_{gamma}^{57}).$, 
+\section{Possible bipoles for $e \bindnasrepma f$ / $a \oplus b$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{64} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{67} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{69} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{74} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{70}, \Gamma_{gamma}^{73}, \Gamma_{gamma}^{74}).$, $union(\Gamma_{gamma}^{65}, \Gamma_{gamma}^{66}, \Gamma_{gamma}^{67}).$, $union(\Gamma_{gamma}^{67}, \Gamma_{gamma}^{68}, \Gamma_{gamma}^{69}).$, $removed(a \oplus b, \Gamma_{gamma}^{69}, \Gamma_{gamma}^{70}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{64}, \Gamma_{gamma}^{65}).$, $in(a \oplus b, \Gamma_{gamma}^{65}).$, $in(a \oplus b, \Gamma_{gamma}^{67}).$, $in(a \oplus b, \Gamma_{gamma}^{69}).$, $in(a \oplus b, \Gamma_{gamma}^{64}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{64}).$, $in(e, \Gamma_{gamma}^{70}).$, $in(e, \Gamma_{gamma}^{74}).$, $in(e, \Gamma_{gamma}^{66}).$, $in(e, \Gamma_{gamma}^{67}).$, $in(e, \Gamma_{gamma}^{69}).$, $in(f, \Gamma_{gamma}^{70}).$, $in(f, \Gamma_{gamma}^{74}).$, $in(f, \Gamma_{gamma}^{68}).$, $in(f, \Gamma_{gamma}^{69}).$, $in(b, \Gamma_{gamma}^{73}).$, $in(b, \Gamma_{gamma}^{74}).$, $elin(e, \Gamma_{gamma}^{66}).$, $elin(f, \Gamma_{gamma}^{68}).$, $elin(b, \Gamma_{gamma}^{73}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{64} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{65} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{67} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{69} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{70} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{72} ; \Gamma_{un}^{3} ; \Gamma_{ infty}^{3} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{70}, \Gamma_{gamma}^{71}, \Gamma_{gamma}^{72}).$, $union(\Gamma_{gamma}^{65}, \Gamma_{gamma}^{66}, \Gamma_{gamma}^{67}).$, $union(\Gamma_{gamma}^{67}, \Gamma_{gamma}^{68}, \Gamma_{gamma}^{69}).$, $removed(a \oplus b, \Gamma_{gamma}^{69}, \Gamma_{gamma}^{70}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{64}, \Gamma_{gamma}^{65}).$, $in(a \oplus b, \Gamma_{gamma}^{65}).$, $in(a \oplus b, \Gamma_{gamma}^{67}).$, $in(a \oplus b, \Gamma_{gamma}^{69}).$, $in(a \oplus b, \Gamma_{gamma}^{64}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{64}).$, $in(e, \Gamma_{gamma}^{70}).$, $in(e, \Gamma_{gamma}^{72}).$, $in(e, \Gamma_{gamma}^{66}).$, $in(e, \Gamma_{gamma}^{67}).$, $in(e, \Gamma_{gamma}^{69}).$, $in(f, \Gamma_{gamma}^{70}).$, $in(f, \Gamma_{gamma}^{72}).$, $in(f, \Gamma_{gamma}^{68}).$, $in(f, \Gamma_{gamma}^{69}).$, $in(a, \Gamma_{gamma}^{71}).$, $in(a, \Gamma_{gamma}^{72}).$, $elin(e, \Gamma_{gamma}^{66}).$, $elin(f, \Gamma_{gamma}^{68}).$, $elin(a, \Gamma_{gamma}^{71}).$,
+
+
+\section{Possible bipoles for $a \oplus b$ / $g \binampersand h$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{75} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow b :: }
+{\infer{\Gamma_{ gamma}^{80} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{86} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{86} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{86} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow g :: }
+{\Gamma_{ gamma}^{88} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+&
+\infer{\Gamma_{ gamma}^{86} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow h :: }
+{\Gamma_{ gamma}^{90} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{86}, \Gamma_{gamma}^{87}, \Gamma_{gamma}^{88}).$, $union(\Gamma_{gamma}^{86}, \Gamma_{gamma}^{89}, \Gamma_{gamma}^{90}).$, $union(\Gamma_{gamma}^{76}, \Gamma_{gamma}^{79}, \Gamma_{gamma}^{80}).$, $removed(g \binampersand h, \Gamma_{gamma}^{80}, \Gamma_{gamma}^{86}).$, $removed(a \oplus b, \Gamma_{gamma}^{75}, \Gamma_{gamma}^{76}).$, $in(g \binampersand h, \Gamma_{gamma}^{76}).$, $in(g \binampersand h, \Gamma_{gamma}^{80}).$, $in(g \binampersand h, \Gamma_{gamma}^{75}).$, $in(a \oplus b, \Gamma_{gamma}^{75}).$, $in(b, \Gamma_{gamma}^{86}).$, $in(b, \Gamma_{gamma}^{88}).$, $in(b, \Gamma_{gamma}^{90}).$, $in(b, \Gamma_{gamma}^{79}).$, $in(b, \Gamma_{gamma}^{80}).$, $in(g, \Gamma_{gamma}^{87}).$, $in(g, \Gamma_{gamma}^{88}).$, $in(h, \Gamma_{gamma}^{89}).$, $in(h, \Gamma_{gamma}^{90}).$, $elin(b, \Gamma_{gamma}^{79}).$, $elin(g, \Gamma_{gamma}^{87}).$, $elin(h, \Gamma_{gamma}^{89}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{75} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{76} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow a :: }
+{\infer{\Gamma_{ gamma}^{78} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{81} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{81} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{81} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow g :: }
+{\Gamma_{ gamma}^{83} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }
+&
+\infer{\Gamma_{ gamma}^{81} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow h :: }
+{\Gamma_{ gamma}^{85} ; \Gamma_{un}^{4} ; \Gamma_{ infty}^{4} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{81}, \Gamma_{gamma}^{82}, \Gamma_{gamma}^{83}).$, $union(\Gamma_{gamma}^{81}, \Gamma_{gamma}^{84}, \Gamma_{gamma}^{85}).$, $union(\Gamma_{gamma}^{76}, \Gamma_{gamma}^{77}, \Gamma_{gamma}^{78}).$, $removed(g \binampersand h, \Gamma_{gamma}^{78}, \Gamma_{gamma}^{81}).$, $removed(a \oplus b, \Gamma_{gamma}^{75}, \Gamma_{gamma}^{76}).$, $in(g \binampersand h, \Gamma_{gamma}^{76}).$, $in(g \binampersand h, \Gamma_{gamma}^{78}).$, $in(g \binampersand h, \Gamma_{gamma}^{75}).$, $in(a \oplus b, \Gamma_{gamma}^{75}).$, $in(a, \Gamma_{gamma}^{81}).$, $in(a, \Gamma_{gamma}^{83}).$, $in(a, \Gamma_{gamma}^{85}).$, $in(a, \Gamma_{gamma}^{77}).$, $in(a, \Gamma_{gamma}^{78}).$, $in(g, \Gamma_{gamma}^{82}).$, $in(g, \Gamma_{gamma}^{83}).$, $in(h, \Gamma_{gamma}^{84}).$, $in(h, \Gamma_{gamma}^{85}).$, $elin(a, \Gamma_{gamma}^{77}).$, $elin(g, \Gamma_{gamma}^{82}).$, $elin(h, \Gamma_{gamma}^{84}).$, 
+\section{Possible bipoles for $g \binampersand h$ / $a \oplus b$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{91} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{94} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{106} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{96} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{101} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{102}, \Gamma_{gamma}^{105}, \Gamma_{gamma}^{106}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{93}, \Gamma_{gamma}^{94}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{95}, \Gamma_{gamma}^{96}).$, $union(\Gamma_{gamma}^{97}, \Gamma_{gamma}^{100}, \Gamma_{gamma}^{101}).$, $removed(a \oplus b, \Gamma_{gamma}^{94}, \Gamma_{gamma}^{102}).$, $removed(a \oplus b, \Gamma_{gamma}^{96}, \Gamma_{gamma}^{97}).$, $removed(g \binampersand h, \Gamma_{gamma}^{91}, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{94}).$, $in(a \oplus b, \Gamma_{gamma}^{96}).$, $in(a \oplus b, \Gamma_{gamma}^{91}).$, $in(g \binampersand h, \Gamma_{gamma}^{91}).$, $in(g, \Gamma_{gamma}^{102}).$, $in(g, \Gamma_{gamma}^{106}).$, $in(g, \Gamma_{gamma}^{93}).$, $in(g, \Gamma_{gamma}^{94}).$, $in(h, \Gamma_{gamma}^{95}).$, $in(h, \Gamma_{gamma}^{96}).$, $in(h, \Gamma_{gamma}^{97}).$, $in(h, \Gamma_{gamma}^{101}).$, $in(b, \Gamma_{gamma}^{105}).$, $in(b, \Gamma_{gamma}^{106}).$, $in(b, \Gamma_{gamma}^{100}).$, $in(b, \Gamma_{gamma}^{101}).$, $elin(g, \Gamma_{gamma}^{93}).$, $elin(h, \Gamma_{gamma}^{95}).$, $elin(b, \Gamma_{gamma}^{105}).$, $elin(b, \Gamma_{gamma}^{100}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{91} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{94} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{104} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{96} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{101} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{102}, \Gamma_{gamma}^{103}, \Gamma_{gamma}^{104}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{93}, \Gamma_{gamma}^{94}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{95}, \Gamma_{gamma}^{96}).$, $union(\Gamma_{gamma}^{97}, \Gamma_{gamma}^{100}, \Gamma_{gamma}^{101}).$, $removed(a \oplus b, \Gamma_{gamma}^{94}, \Gamma_{gamma}^{102}).$, $removed(a \oplus b, \Gamma_{gamma}^{96}, \Gamma_{gamma}^{97}).$, $removed(g \binampersand h, \Gamma_{gamma}^{91}, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{94}).$, $in(a \oplus b, \Gamma_{gamma}^{96}).$, $in(a \oplus b, \Gamma_{gamma}^{91}).$, $in(g \binampersand h, \Gamma_{gamma}^{91}).$, $in(g, \Gamma_{gamma}^{102}).$, $in(g, \Gamma_{gamma}^{104}).$, $in(g, \Gamma_{gamma}^{93}).$, $in(g, \Gamma_{gamma}^{94}).$, $in(h, \Gamma_{gamma}^{95}).$, $in(h, \Gamma_{gamma}^{96}).$, $in(h, \Gamma_{gamma}^{97}).$, $in(h, \Gamma_{gamma}^{101}).$, $in(a, \Gamma_{gamma}^{103}).$, $in(a, \Gamma_{gamma}^{104}).$, $in(b, \Gamma_{gamma}^{100}).$, $in(b, \Gamma_{gamma}^{101}).$, $elin(g, \Gamma_{gamma}^{93}).$, $elin(h, \Gamma_{gamma}^{95}).$, $elin(a, \Gamma_{gamma}^{103}).$, $elin(b, \Gamma_{gamma}^{100}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{91} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{94} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow b :: }
+{\Gamma_{ gamma}^{106} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{96} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{99} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{102}, \Gamma_{gamma}^{105}, \Gamma_{gamma}^{106}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{93}, \Gamma_{gamma}^{94}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{95}, \Gamma_{gamma}^{96}).$, $union(\Gamma_{gamma}^{97}, \Gamma_{gamma}^{98}, \Gamma_{gamma}^{99}).$, $removed(a \oplus b, \Gamma_{gamma}^{94}, \Gamma_{gamma}^{102}).$, $removed(a \oplus b, \Gamma_{gamma}^{96}, \Gamma_{gamma}^{97}).$, $removed(g \binampersand h, \Gamma_{gamma}^{91}, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{94}).$, $in(a \oplus b, \Gamma_{gamma}^{96}).$, $in(a \oplus b, \Gamma_{gamma}^{91}).$, $in(g \binampersand h, \Gamma_{gamma}^{91}).$, $in(g, \Gamma_{gamma}^{102}).$, $in(g, \Gamma_{gamma}^{106}).$, $in(g, \Gamma_{gamma}^{93}).$, $in(g, \Gamma_{gamma}^{94}).$, $in(h, \Gamma_{gamma}^{95}).$, $in(h, \Gamma_{gamma}^{96}).$, $in(h, \Gamma_{gamma}^{97}).$, $in(h, \Gamma_{gamma}^{99}).$, $in(b, \Gamma_{gamma}^{105}).$, $in(b, \Gamma_{gamma}^{106}).$, $in(a, \Gamma_{gamma}^{98}).$, $in(a, \Gamma_{gamma}^{99}).$, $elin(g, \Gamma_{gamma}^{93}).$, $elin(h, \Gamma_{gamma}^{95}).$, $elin(b, \Gamma_{gamma}^{105}).$, $elin(a, \Gamma_{gamma}^{98}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{91} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{94} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{102} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{104} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{92} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{96} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a \oplus b :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Downarrow a :: }
+{\infer{\Gamma_{ gamma}^{97} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow a :: }
+{\Gamma_{ gamma}^{99} ; \Gamma_{un}^{5} ; \Gamma_{ infty}^{5} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{102}, \Gamma_{gamma}^{103}, \Gamma_{gamma}^{104}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{93}, \Gamma_{gamma}^{94}).$, $union(\Gamma_{gamma}^{92}, \Gamma_{gamma}^{95}, \Gamma_{gamma}^{96}).$, $union(\Gamma_{gamma}^{97}, \Gamma_{gamma}^{98}, \Gamma_{gamma}^{99}).$, $removed(a \oplus b, \Gamma_{gamma}^{94}, \Gamma_{gamma}^{102}).$, $removed(a \oplus b, \Gamma_{gamma}^{96}, \Gamma_{gamma}^{97}).$, $removed(g \binampersand h, \Gamma_{gamma}^{91}, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{92}).$, $in(a \oplus b, \Gamma_{gamma}^{94}).$, $in(a \oplus b, \Gamma_{gamma}^{96}).$, $in(a \oplus b, \Gamma_{gamma}^{91}).$, $in(g \binampersand h, \Gamma_{gamma}^{91}).$, $in(g, \Gamma_{gamma}^{102}).$, $in(g, \Gamma_{gamma}^{104}).$, $in(g, \Gamma_{gamma}^{93}).$, $in(g, \Gamma_{gamma}^{94}).$, $in(h, \Gamma_{gamma}^{95}).$, $in(h, \Gamma_{gamma}^{96}).$, $in(h, \Gamma_{gamma}^{97}).$, $in(h, \Gamma_{gamma}^{99}).$, $in(a, \Gamma_{gamma}^{103}).$, $in(a, \Gamma_{gamma}^{104}).$, $in(a, \Gamma_{gamma}^{98}).$, $in(a, \Gamma_{gamma}^{99}).$, $elin(g, \Gamma_{gamma}^{93}).$, $elin(h, \Gamma_{gamma}^{95}).$, $elin(a, \Gamma_{gamma}^{103}).$, $elin(a, \Gamma_{gamma}^{98}).$,
+
+
+\section{Possible bipoles for $c \otimes d$ / $e \bindnasrepma f$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{107} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{108} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{109} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{109} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow c :: }
+{\infer{\Gamma_{ gamma}^{112} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{130} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{130} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{130} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{132} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{134} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }}}}}}}
+&
+\infer{\Gamma_{ gamma}^{110} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{110} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{114} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{130}, \Gamma_{gamma}^{131}, \Gamma_{gamma}^{132}).$, $union(\Gamma_{gamma}^{132}, \Gamma_{gamma}^{133}, \Gamma_{gamma}^{134}).$, $union(\Gamma_{gamma}^{109}, \Gamma_{gamma}^{110}, \Gamma_{gamma}^{108}).$, $union(\Gamma_{gamma}^{109}, \Gamma_{gamma}^{111}, \Gamma_{gamma}^{112}).$, $union(\Gamma_{gamma}^{110}, \Gamma_{gamma}^{113}, \Gamma_{gamma}^{114}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{112}, \Gamma_{gamma}^{130}).$, $removed(c \otimes d, \Gamma_{gamma}^{107}, \Gamma_{gamma}^{108}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{109}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{108}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{112}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{107}).$, $in(c \otimes d, \Gamma_{gamma}^{107}).$, $in(c, \Gamma_{gamma}^{130}).$, $in(c, \Gamma_{gamma}^{132}).$, $in(c, \Gamma_{gamma}^{111}).$, $in(c, \Gamma_{gamma}^{112}).$, $in(c, \Gamma_{gamma}^{134}).$, $in(d, \Gamma_{gamma}^{113}).$, $in(d, \Gamma_{gamma}^{114}).$, $in(e, \Gamma_{gamma}^{131}).$, $in(e, \Gamma_{gamma}^{132}).$, $in(e, \Gamma_{gamma}^{134}).$, $in(f, \Gamma_{gamma}^{133}).$, $in(f, \Gamma_{gamma}^{134}).$, $elin(c, \Gamma_{gamma}^{111}).$, $elin(d, \Gamma_{gamma}^{113}).$, $elin(e, \Gamma_{gamma}^{131}).$, $elin(f, \Gamma_{gamma}^{133}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{107} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{108} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{109} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{109} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{112} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{110} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{110} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow d :: }
+{\infer{\Gamma_{ gamma}^{114} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{115} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{115} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{115} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{117} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{119} ; \Gamma_{un}^{6} ; \Gamma_{ infty}^{6} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{115}, \Gamma_{gamma}^{116}, \Gamma_{gamma}^{117}).$, $union(\Gamma_{gamma}^{117}, \Gamma_{gamma}^{118}, \Gamma_{gamma}^{119}).$, $union(\Gamma_{gamma}^{109}, \Gamma_{gamma}^{110}, \Gamma_{gamma}^{108}).$, $union(\Gamma_{gamma}^{109}, \Gamma_{gamma}^{111}, \Gamma_{gamma}^{112}).$, $union(\Gamma_{gamma}^{110}, \Gamma_{gamma}^{113}, \Gamma_{gamma}^{114}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{114}, \Gamma_{gamma}^{115}).$, $removed(c \otimes d, \Gamma_{gamma}^{107}, \Gamma_{gamma}^{108}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{110}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{108}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{114}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{107}).$, $in(c \otimes d, \Gamma_{gamma}^{107}).$, $in(c, \Gamma_{gamma}^{111}).$, $in(c, \Gamma_{gamma}^{112}).$, $in(d, \Gamma_{gamma}^{115}).$, $in(d, \Gamma_{gamma}^{117}).$, $in(d, \Gamma_{gamma}^{113}).$, $in(d, \Gamma_{gamma}^{114}).$, $in(d, \Gamma_{gamma}^{119}).$, $in(e, \Gamma_{gamma}^{116}).$, $in(e, \Gamma_{gamma}^{117}).$, $in(e, \Gamma_{gamma}^{119}).$, $in(f, \Gamma_{gamma}^{118}).$, $in(f, \Gamma_{gamma}^{119}).$, $elin(c, \Gamma_{gamma}^{111}).$, $elin(d, \Gamma_{gamma}^{113}).$, $elin(e, \Gamma_{gamma}^{116}).$, $elin(f, \Gamma_{gamma}^{118}).$, 
+\section{Possible bipoles for $e \bindnasrepma f$ / $c \otimes d$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{135} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{138} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{140} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{141} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{145} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{147} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{136}, \Gamma_{gamma}^{137}, \Gamma_{gamma}^{138}).$, $union(\Gamma_{gamma}^{138}, \Gamma_{gamma}^{139}, \Gamma_{gamma}^{140}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{143}, \Gamma_{gamma}^{141}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{144}, \Gamma_{gamma}^{145}).$, $union(\Gamma_{gamma}^{143}, \Gamma_{gamma}^{146}, \Gamma_{gamma}^{147}).$, $removed(c \otimes d, \Gamma_{gamma}^{140}, \Gamma_{gamma}^{141}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{135}, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{138}).$, $in(c \otimes d, \Gamma_{gamma}^{140}).$, $in(c \otimes d, \Gamma_{gamma}^{135}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{135}).$, $in(e, \Gamma_{gamma}^{137}).$, $in(e, \Gamma_{gamma}^{138}).$, $in(e, \Gamma_{gamma}^{140}).$, $in(e, \Gamma_{gamma}^{143}).$, $in(e, \Gamma_{gamma}^{141}).$, $in(e, \Gamma_{gamma}^{147}).$, $in(f, \Gamma_{gamma}^{139}).$, $in(f, \Gamma_{gamma}^{140}).$, $in(f, \Gamma_{gamma}^{142}).$, $in(f, \Gamma_{gamma}^{141}).$, $in(f, \Gamma_{gamma}^{145}).$, $in(c, \Gamma_{gamma}^{144}).$, $in(c, \Gamma_{gamma}^{145}).$, $in(d, \Gamma_{gamma}^{146}).$, $in(d, \Gamma_{gamma}^{147}).$, $elin(e, \Gamma_{gamma}^{137}).$, $elin(f, \Gamma_{gamma}^{139}).$, $elin(c, \Gamma_{gamma}^{144}).$, $elin(d, \Gamma_{gamma}^{146}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{135} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{138} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{140} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{141} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{145} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{147} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{136}, \Gamma_{gamma}^{137}, \Gamma_{gamma}^{138}).$, $union(\Gamma_{gamma}^{138}, \Gamma_{gamma}^{139}, \Gamma_{gamma}^{140}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{143}, \Gamma_{gamma}^{141}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{144}, \Gamma_{gamma}^{145}).$, $union(\Gamma_{gamma}^{143}, \Gamma_{gamma}^{146}, \Gamma_{gamma}^{147}).$, $removed(c \otimes d, \Gamma_{gamma}^{140}, \Gamma_{gamma}^{141}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{135}, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{138}).$, $in(c \otimes d, \Gamma_{gamma}^{140}).$, $in(c \otimes d, \Gamma_{gamma}^{135}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{135}).$, $in(e, \Gamma_{gamma}^{137}).$, $in(e, \Gamma_{gamma}^{138}).$, $in(e, \Gamma_{gamma}^{140}).$, $in(e, \Gamma_{gamma}^{142}).$, $in(e, \Gamma_{gamma}^{141}).$, $in(e, \Gamma_{gamma}^{145}).$, $in(f, \Gamma_{gamma}^{139}).$, $in(f, \Gamma_{gamma}^{140}).$, $in(f, \Gamma_{gamma}^{142}).$, $in(f, \Gamma_{gamma}^{141}).$, $in(f, \Gamma_{gamma}^{145}).$, $in(c, \Gamma_{gamma}^{144}).$, $in(c, \Gamma_{gamma}^{145}).$, $in(d, \Gamma_{gamma}^{146}).$, $in(d, \Gamma_{gamma}^{147}).$, $elin(e, \Gamma_{gamma}^{137}).$, $elin(f, \Gamma_{gamma}^{139}).$, $elin(c, \Gamma_{gamma}^{144}).$, $elin(d, \Gamma_{gamma}^{146}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{135} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{138} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{140} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{141} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{145} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{147} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{136}, \Gamma_{gamma}^{137}, \Gamma_{gamma}^{138}).$, $union(\Gamma_{gamma}^{138}, \Gamma_{gamma}^{139}, \Gamma_{gamma}^{140}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{143}, \Gamma_{gamma}^{141}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{144}, \Gamma_{gamma}^{145}).$, $union(\Gamma_{gamma}^{143}, \Gamma_{gamma}^{146}, \Gamma_{gamma}^{147}).$, $removed(c \otimes d, \Gamma_{gamma}^{140}, \Gamma_{gamma}^{141}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{135}, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{138}).$, $in(c \otimes d, \Gamma_{gamma}^{140}).$, $in(c \otimes d, \Gamma_{gamma}^{135}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{135}).$, $in(e, \Gamma_{gamma}^{137}).$, $in(e, \Gamma_{gamma}^{138}).$, $in(e, \Gamma_{gamma}^{140}).$, $in(e, \Gamma_{gamma}^{142}).$, $in(e, \Gamma_{gamma}^{141}).$, $in(e, \Gamma_{gamma}^{145}).$, $in(f, \Gamma_{gamma}^{139}).$, $in(f, \Gamma_{gamma}^{140}).$, $in(f, \Gamma_{gamma}^{143}).$, $in(f, \Gamma_{gamma}^{141}).$, $in(f, \Gamma_{gamma}^{147}).$, $in(c, \Gamma_{gamma}^{144}).$, $in(c, \Gamma_{gamma}^{145}).$, $in(d, \Gamma_{gamma}^{146}).$, $in(d, \Gamma_{gamma}^{147}).$, $elin(e, \Gamma_{gamma}^{137}).$, $elin(f, \Gamma_{gamma}^{139}).$, $elin(c, \Gamma_{gamma}^{144}).$, $elin(d, \Gamma_{gamma}^{146}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{135} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{136} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{138} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{140} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{141} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{142} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{145} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{143} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{147} ; \Gamma_{un}^{7} ; \Gamma_{ infty}^{7} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{136}, \Gamma_{gamma}^{137}, \Gamma_{gamma}^{138}).$, $union(\Gamma_{gamma}^{138}, \Gamma_{gamma}^{139}, \Gamma_{gamma}^{140}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{143}, \Gamma_{gamma}^{141}).$, $union(\Gamma_{gamma}^{142}, \Gamma_{gamma}^{144}, \Gamma_{gamma}^{145}).$, $union(\Gamma_{gamma}^{143}, \Gamma_{gamma}^{146}, \Gamma_{gamma}^{147}).$, $removed(c \otimes d, \Gamma_{gamma}^{140}, \Gamma_{gamma}^{141}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{135}, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{136}).$, $in(c \otimes d, \Gamma_{gamma}^{138}).$, $in(c \otimes d, \Gamma_{gamma}^{140}).$, $in(c \otimes d, \Gamma_{gamma}^{135}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{135}).$, $in(e, \Gamma_{gamma}^{137}).$, $in(e, \Gamma_{gamma}^{138}).$, $in(e, \Gamma_{gamma}^{140}).$, $in(e, \Gamma_{gamma}^{143}).$, $in(e, \Gamma_{gamma}^{141}).$, $in(e, \Gamma_{gamma}^{147}).$, $in(f, \Gamma_{gamma}^{139}).$, $in(f, \Gamma_{gamma}^{140}).$, $in(f, \Gamma_{gamma}^{143}).$, $in(f, \Gamma_{gamma}^{141}).$, $in(f, \Gamma_{gamma}^{147}).$, $in(c, \Gamma_{gamma}^{144}).$, $in(c, \Gamma_{gamma}^{145}).$, $in(d, \Gamma_{gamma}^{146}).$, $in(d, \Gamma_{gamma}^{147}).$, $elin(e, \Gamma_{gamma}^{137}).$, $elin(f, \Gamma_{gamma}^{139}).$, $elin(c, \Gamma_{gamma}^{144}).$, $elin(d, \Gamma_{gamma}^{146}).$,
+
+
+\section{Possible bipoles for $c \otimes d$ / $g \binampersand h$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{148} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{149} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{150} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{150} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow c :: }
+{\infer{\Gamma_{ gamma}^{153} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{171} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{171} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{171} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow g :: }
+{\Gamma_{ gamma}^{173} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+&
+\infer{\Gamma_{ gamma}^{171} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow h :: }
+{\Gamma_{ gamma}^{175} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }}}}}}
+&
+\infer{\Gamma_{ gamma}^{151} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{151} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{155} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{171}, \Gamma_{gamma}^{172}, \Gamma_{gamma}^{173}).$, $union(\Gamma_{gamma}^{171}, \Gamma_{gamma}^{174}, \Gamma_{gamma}^{175}).$, $union(\Gamma_{gamma}^{150}, \Gamma_{gamma}^{151}, \Gamma_{gamma}^{149}).$, $union(\Gamma_{gamma}^{150}, \Gamma_{gamma}^{152}, \Gamma_{gamma}^{153}).$, $union(\Gamma_{gamma}^{151}, \Gamma_{gamma}^{154}, \Gamma_{gamma}^{155}).$, $removed(g \binampersand h, \Gamma_{gamma}^{153}, \Gamma_{gamma}^{171}).$, $removed(c \otimes d, \Gamma_{gamma}^{148}, \Gamma_{gamma}^{149}).$, $in(g \binampersand h, \Gamma_{gamma}^{150}).$, $in(g \binampersand h, \Gamma_{gamma}^{149}).$, $in(g \binampersand h, \Gamma_{gamma}^{153}).$, $in(g \binampersand h, \Gamma_{gamma}^{148}).$, $in(c \otimes d, \Gamma_{gamma}^{148}).$, $in(c, \Gamma_{gamma}^{171}).$, $in(c, \Gamma_{gamma}^{173}).$, $in(c, \Gamma_{gamma}^{175}).$, $in(c, \Gamma_{gamma}^{152}).$, $in(c, \Gamma_{gamma}^{153}).$, $in(d, \Gamma_{gamma}^{154}).$, $in(d, \Gamma_{gamma}^{155}).$, $in(g, \Gamma_{gamma}^{172}).$, $in(g, \Gamma_{gamma}^{173}).$, $in(h, \Gamma_{gamma}^{174}).$, $in(h, \Gamma_{gamma}^{175}).$, $elin(c, \Gamma_{gamma}^{152}).$, $elin(d, \Gamma_{gamma}^{154}).$, $elin(g, \Gamma_{gamma}^{172}).$, $elin(h, \Gamma_{gamma}^{174}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{148} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{149} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{150} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{150} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{153} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{151} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{151} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow d :: }
+{\infer{\Gamma_{ gamma}^{155} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{156} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{156} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{156} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow g :: }
+{\Gamma_{ gamma}^{158} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }
+&
+\infer{\Gamma_{ gamma}^{156} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow h :: }
+{\Gamma_{ gamma}^{160} ; \Gamma_{un}^{8} ; \Gamma_{ infty}^{8} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{156}, \Gamma_{gamma}^{157}, \Gamma_{gamma}^{158}).$, $union(\Gamma_{gamma}^{156}, \Gamma_{gamma}^{159}, \Gamma_{gamma}^{160}).$, $union(\Gamma_{gamma}^{150}, \Gamma_{gamma}^{151}, \Gamma_{gamma}^{149}).$, $union(\Gamma_{gamma}^{150}, \Gamma_{gamma}^{152}, \Gamma_{gamma}^{153}).$, $union(\Gamma_{gamma}^{151}, \Gamma_{gamma}^{154}, \Gamma_{gamma}^{155}).$, $removed(g \binampersand h, \Gamma_{gamma}^{155}, \Gamma_{gamma}^{156}).$, $removed(c \otimes d, \Gamma_{gamma}^{148}, \Gamma_{gamma}^{149}).$, $in(g \binampersand h, \Gamma_{gamma}^{151}).$, $in(g \binampersand h, \Gamma_{gamma}^{149}).$, $in(g \binampersand h, \Gamma_{gamma}^{155}).$, $in(g \binampersand h, \Gamma_{gamma}^{148}).$, $in(c \otimes d, \Gamma_{gamma}^{148}).$, $in(c, \Gamma_{gamma}^{152}).$, $in(c, \Gamma_{gamma}^{153}).$, $in(d, \Gamma_{gamma}^{156}).$, $in(d, \Gamma_{gamma}^{158}).$, $in(d, \Gamma_{gamma}^{160}).$, $in(d, \Gamma_{gamma}^{154}).$, $in(d, \Gamma_{gamma}^{155}).$, $in(g, \Gamma_{gamma}^{157}).$, $in(g, \Gamma_{gamma}^{158}).$, $in(h, \Gamma_{gamma}^{159}).$, $in(h, \Gamma_{gamma}^{160}).$, $elin(c, \Gamma_{gamma}^{152}).$, $elin(d, \Gamma_{gamma}^{154}).$, $elin(g, \Gamma_{gamma}^{157}).$, $elin(h, \Gamma_{gamma}^{159}).$, 
+\section{Possible bipoles for $g \binampersand h$ / $c \otimes d$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{176} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{179} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{189} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{193} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{195} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{181} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{182} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{186} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{188} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{178}, \Gamma_{gamma}^{179}).$, $union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{180}, \Gamma_{gamma}^{181}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{191}, \Gamma_{gamma}^{189}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{192}, \Gamma_{gamma}^{193}).$, $union(\Gamma_{gamma}^{191}, \Gamma_{gamma}^{194}, \Gamma_{gamma}^{195}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{184}, \Gamma_{gamma}^{182}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{185}, \Gamma_{gamma}^{186}).$, $union(\Gamma_{gamma}^{184}, \Gamma_{gamma}^{187}, \Gamma_{gamma}^{188}).$, $removed(c \otimes d, \Gamma_{gamma}^{179}, \Gamma_{gamma}^{189}).$, $removed(c \otimes d, \Gamma_{gamma}^{181}, \Gamma_{gamma}^{182}).$, $removed(g \binampersand h, \Gamma_{gamma}^{176}, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{179}).$, $in(c \otimes d, \Gamma_{gamma}^{181}).$, $in(c \otimes d, \Gamma_{gamma}^{176}).$, $in(g \binampersand h, \Gamma_{gamma}^{176}).$, $in(g, \Gamma_{gamma}^{178}).$, $in(g, \Gamma_{gamma}^{179}).$, $in(g, \Gamma_{gamma}^{190}).$, $in(g, \Gamma_{gamma}^{189}).$, $in(g, \Gamma_{gamma}^{193}).$, $in(h, \Gamma_{gamma}^{180}).$, $in(h, \Gamma_{gamma}^{181}).$, $in(h, \Gamma_{gamma}^{183}).$, $in(h, \Gamma_{gamma}^{182}).$, $in(h, \Gamma_{gamma}^{186}).$, $in(c, \Gamma_{gamma}^{192}).$, $in(c, \Gamma_{gamma}^{193}).$, $in(c, \Gamma_{gamma}^{185}).$, $in(c, \Gamma_{gamma}^{186}).$, $in(d, \Gamma_{gamma}^{194}).$, $in(d, \Gamma_{gamma}^{195}).$, $in(d, \Gamma_{gamma}^{187}).$, $in(d, \Gamma_{gamma}^{188}).$, $elin(g, \Gamma_{gamma}^{178}).$, $elin(h, \Gamma_{gamma}^{180}).$, $elin(c, \Gamma_{gamma}^{192}).$, $elin(c, \Gamma_{gamma}^{185}).$, $elin(d, \Gamma_{gamma}^{194}).$, $elin(d, \Gamma_{gamma}^{187}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{176} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{179} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{189} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{193} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{195} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{181} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{182} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{186} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{188} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{178}, \Gamma_{gamma}^{179}).$, $union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{180}, \Gamma_{gamma}^{181}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{191}, \Gamma_{gamma}^{189}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{192}, \Gamma_{gamma}^{193}).$, $union(\Gamma_{gamma}^{191}, \Gamma_{gamma}^{194}, \Gamma_{gamma}^{195}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{184}, \Gamma_{gamma}^{182}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{185}, \Gamma_{gamma}^{186}).$, $union(\Gamma_{gamma}^{184}, \Gamma_{gamma}^{187}, \Gamma_{gamma}^{188}).$, $removed(c \otimes d, \Gamma_{gamma}^{179}, \Gamma_{gamma}^{189}).$, $removed(c \otimes d, \Gamma_{gamma}^{181}, \Gamma_{gamma}^{182}).$, $removed(g \binampersand h, \Gamma_{gamma}^{176}, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{179}).$, $in(c \otimes d, \Gamma_{gamma}^{181}).$, $in(c \otimes d, \Gamma_{gamma}^{176}).$, $in(g \binampersand h, \Gamma_{gamma}^{176}).$, $in(g, \Gamma_{gamma}^{178}).$, $in(g, \Gamma_{gamma}^{179}).$, $in(g, \Gamma_{gamma}^{191}).$, $in(g, \Gamma_{gamma}^{189}).$, $in(g, \Gamma_{gamma}^{195}).$, $in(h, \Gamma_{gamma}^{180}).$, $in(h, \Gamma_{gamma}^{181}).$, $in(h, \Gamma_{gamma}^{183}).$, $in(h, \Gamma_{gamma}^{182}).$, $in(h, \Gamma_{gamma}^{186}).$, $in(c, \Gamma_{gamma}^{192}).$, $in(c, \Gamma_{gamma}^{193}).$, $in(c, \Gamma_{gamma}^{185}).$, $in(c, \Gamma_{gamma}^{186}).$, $in(d, \Gamma_{gamma}^{194}).$, $in(d, \Gamma_{gamma}^{195}).$, $in(d, \Gamma_{gamma}^{187}).$, $in(d, \Gamma_{gamma}^{188}).$, $elin(g, \Gamma_{gamma}^{178}).$, $elin(h, \Gamma_{gamma}^{180}).$, $elin(c, \Gamma_{gamma}^{192}).$, $elin(c, \Gamma_{gamma}^{185}).$, $elin(d, \Gamma_{gamma}^{194}).$, $elin(d, \Gamma_{gamma}^{187}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{176} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{179} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{189} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{193} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{195} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{181} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{182} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{186} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{188} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{178}, \Gamma_{gamma}^{179}).$, $union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{180}, \Gamma_{gamma}^{181}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{191}, \Gamma_{gamma}^{189}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{192}, \Gamma_{gamma}^{193}).$, $union(\Gamma_{gamma}^{191}, \Gamma_{gamma}^{194}, \Gamma_{gamma}^{195}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{184}, \Gamma_{gamma}^{182}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{185}, \Gamma_{gamma}^{186}).$, $union(\Gamma_{gamma}^{184}, \Gamma_{gamma}^{187}, \Gamma_{gamma}^{188}).$, $removed(c \otimes d, \Gamma_{gamma}^{179}, \Gamma_{gamma}^{189}).$, $removed(c \otimes d, \Gamma_{gamma}^{181}, \Gamma_{gamma}^{182}).$, $removed(g \binampersand h, \Gamma_{gamma}^{176}, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{179}).$, $in(c \otimes d, \Gamma_{gamma}^{181}).$, $in(c \otimes d, \Gamma_{gamma}^{176}).$, $in(g \binampersand h, \Gamma_{gamma}^{176}).$, $in(g, \Gamma_{gamma}^{178}).$, $in(g, \Gamma_{gamma}^{179}).$, $in(g, \Gamma_{gamma}^{190}).$, $in(g, \Gamma_{gamma}^{189}).$, $in(g, \Gamma_{gamma}^{193}).$, $in(h, \Gamma_{gamma}^{180}).$, $in(h, \Gamma_{gamma}^{181}).$, $in(h, \Gamma_{gamma}^{184}).$, $in(h, \Gamma_{gamma}^{182}).$, $in(h, \Gamma_{gamma}^{188}).$, $in(c, \Gamma_{gamma}^{192}).$, $in(c, \Gamma_{gamma}^{193}).$, $in(c, \Gamma_{gamma}^{185}).$, $in(c, \Gamma_{gamma}^{186}).$, $in(d, \Gamma_{gamma}^{194}).$, $in(d, \Gamma_{gamma}^{195}).$, $in(d, \Gamma_{gamma}^{187}).$, $in(d, \Gamma_{gamma}^{188}).$, $elin(g, \Gamma_{gamma}^{178}).$, $elin(h, \Gamma_{gamma}^{180}).$, $elin(c, \Gamma_{gamma}^{192}).$, $elin(c, \Gamma_{gamma}^{185}).$, $elin(d, \Gamma_{gamma}^{194}).$, $elin(d, \Gamma_{gamma}^{187}).$, 
+{\small
+\[
+\infer{\Gamma_{ gamma}^{176} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{179} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{189} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{190} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{193} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{191} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{195} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}
+&
+\infer{\Gamma_{ gamma}^{177} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{181} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{182} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c \otimes d :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow c :: }
+{\infer{\Gamma_{ gamma}^{183} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow c :: }
+{\Gamma_{ gamma}^{186} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}
+&
+\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Downarrow d :: }
+{\infer{\Gamma_{ gamma}^{184} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow d :: }
+{\Gamma_{ gamma}^{188} ; \Gamma_{un}^{9} ; \Gamma_{ infty}^{9} ;  \Uparrow }}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{178}, \Gamma_{gamma}^{179}).$, $union(\Gamma_{gamma}^{177}, \Gamma_{gamma}^{180}, \Gamma_{gamma}^{181}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{191}, \Gamma_{gamma}^{189}).$, $union(\Gamma_{gamma}^{190}, \Gamma_{gamma}^{192}, \Gamma_{gamma}^{193}).$, $union(\Gamma_{gamma}^{191}, \Gamma_{gamma}^{194}, \Gamma_{gamma}^{195}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{184}, \Gamma_{gamma}^{182}).$, $union(\Gamma_{gamma}^{183}, \Gamma_{gamma}^{185}, \Gamma_{gamma}^{186}).$, $union(\Gamma_{gamma}^{184}, \Gamma_{gamma}^{187}, \Gamma_{gamma}^{188}).$, $removed(c \otimes d, \Gamma_{gamma}^{179}, \Gamma_{gamma}^{189}).$, $removed(c \otimes d, \Gamma_{gamma}^{181}, \Gamma_{gamma}^{182}).$, $removed(g \binampersand h, \Gamma_{gamma}^{176}, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{177}).$, $in(c \otimes d, \Gamma_{gamma}^{179}).$, $in(c \otimes d, \Gamma_{gamma}^{181}).$, $in(c \otimes d, \Gamma_{gamma}^{176}).$, $in(g \binampersand h, \Gamma_{gamma}^{176}).$, $in(g, \Gamma_{gamma}^{178}).$, $in(g, \Gamma_{gamma}^{179}).$, $in(g, \Gamma_{gamma}^{191}).$, $in(g, \Gamma_{gamma}^{189}).$, $in(g, \Gamma_{gamma}^{195}).$, $in(h, \Gamma_{gamma}^{180}).$, $in(h, \Gamma_{gamma}^{181}).$, $in(h, \Gamma_{gamma}^{184}).$, $in(h, \Gamma_{gamma}^{182}).$, $in(h, \Gamma_{gamma}^{188}).$, $in(c, \Gamma_{gamma}^{192}).$, $in(c, \Gamma_{gamma}^{193}).$, $in(c, \Gamma_{gamma}^{185}).$, $in(c, \Gamma_{gamma}^{186}).$, $in(d, \Gamma_{gamma}^{194}).$, $in(d, \Gamma_{gamma}^{195}).$, $in(d, \Gamma_{gamma}^{187}).$, $in(d, \Gamma_{gamma}^{188}).$, $elin(g, \Gamma_{gamma}^{178}).$, $elin(h, \Gamma_{gamma}^{180}).$, $elin(c, \Gamma_{gamma}^{192}).$, $elin(c, \Gamma_{gamma}^{185}).$, $elin(d, \Gamma_{gamma}^{194}).$, $elin(d, \Gamma_{gamma}^{187}).$,
+
+
+\section{Possible bipoles for $e \bindnasrepma f$ / $g \binampersand h$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{196} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{197} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{197} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{197} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{199} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow f :: }
+{\infer{\Gamma_{ gamma}^{201} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{202} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{202} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{202} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow g :: }
+{\Gamma_{ gamma}^{204} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow }
+&
+\infer{\Gamma_{ gamma}^{202} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow h :: }
+{\Gamma_{ gamma}^{206} ; \Gamma_{un}^{10} ; \Gamma_{ infty}^{10} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{202}, \Gamma_{gamma}^{203}, \Gamma_{gamma}^{204}).$, $union(\Gamma_{gamma}^{202}, \Gamma_{gamma}^{205}, \Gamma_{gamma}^{206}).$, $union(\Gamma_{gamma}^{197}, \Gamma_{gamma}^{198}, \Gamma_{gamma}^{199}).$, $union(\Gamma_{gamma}^{199}, \Gamma_{gamma}^{200}, \Gamma_{gamma}^{201}).$, $removed(g \binampersand h, \Gamma_{gamma}^{201}, \Gamma_{gamma}^{202}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{196}, \Gamma_{gamma}^{197}).$, $in(g \binampersand h, \Gamma_{gamma}^{197}).$, $in(g \binampersand h, \Gamma_{gamma}^{199}).$, $in(g \binampersand h, \Gamma_{gamma}^{201}).$, $in(g \binampersand h, \Gamma_{gamma}^{196}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{196}).$, $in(e, \Gamma_{gamma}^{202}).$, $in(e, \Gamma_{gamma}^{204}).$, $in(e, \Gamma_{gamma}^{206}).$, $in(e, \Gamma_{gamma}^{198}).$, $in(e, \Gamma_{gamma}^{199}).$, $in(e, \Gamma_{gamma}^{201}).$, $in(f, \Gamma_{gamma}^{202}).$, $in(f, \Gamma_{gamma}^{204}).$, $in(f, \Gamma_{gamma}^{206}).$, $in(f, \Gamma_{gamma}^{200}).$, $in(f, \Gamma_{gamma}^{201}).$, $in(g, \Gamma_{gamma}^{203}).$, $in(g, \Gamma_{gamma}^{204}).$, $in(h, \Gamma_{gamma}^{205}).$, $in(h, \Gamma_{gamma}^{206}).$, $elin(e, \Gamma_{gamma}^{198}).$, $elin(f, \Gamma_{gamma}^{200}).$, $elin(g, \Gamma_{gamma}^{203}).$, $elin(h, \Gamma_{gamma}^{205}).$, 
+\section{Possible bipoles for $g \binampersand h$ / $e \bindnasrepma f$:} 
+
+{\small
+\[
+\infer{\Gamma_{ gamma}^{207} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{208} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Downarrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{208} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow g \binampersand h :: }
+{\infer{\Gamma_{ gamma}^{208} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow g :: }
+{\infer{\Gamma_{ gamma}^{210} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{218} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{218} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{218} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{220} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{222} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow }}}}}}
+&
+\infer{\Gamma_{ gamma}^{208} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow h :: }
+{\infer{\Gamma_{ gamma}^{212} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow }
+{\infer{\Gamma_{ gamma}^{213} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Downarrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{213} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow e \bindnasrepma f :: }
+{\infer{\Gamma_{ gamma}^{213} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow e :: f :: }
+{\infer{\Gamma_{ gamma}^{215} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow f :: }
+{\Gamma_{ gamma}^{217} ; \Gamma_{un}^{11} ; \Gamma_{ infty}^{11} ;  \Uparrow }}}}}}}}}
+\]
+}
+CONSTRAINTS
+
+$union(\Gamma_{gamma}^{218}, \Gamma_{gamma}^{219}, \Gamma_{gamma}^{220}).$, $union(\Gamma_{gamma}^{220}, \Gamma_{gamma}^{221}, \Gamma_{gamma}^{222}).$, $union(\Gamma_{gamma}^{208}, \Gamma_{gamma}^{209}, \Gamma_{gamma}^{210}).$, $union(\Gamma_{gamma}^{208}, \Gamma_{gamma}^{211}, \Gamma_{gamma}^{212}).$, $union(\Gamma_{gamma}^{213}, \Gamma_{gamma}^{214}, \Gamma_{gamma}^{215}).$, $union(\Gamma_{gamma}^{215}, \Gamma_{gamma}^{216}, \Gamma_{gamma}^{217}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{210}, \Gamma_{gamma}^{218}).$, $removed(e \bindnasrepma f, \Gamma_{gamma}^{212}, \Gamma_{gamma}^{213}).$, $removed(g \binampersand h, \Gamma_{gamma}^{207}, \Gamma_{gamma}^{208}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{208}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{210}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{212}).$, $in(e \bindnasrepma f, \Gamma_{gamma}^{207}).$, $in(g \binampersand h, \Gamma_{gamma}^{207}).$, $in(g, \Gamma_{gamma}^{218}).$, $in(g, \Gamma_{gamma}^{220}).$, $in(g, \Gamma_{gamma}^{209}).$, $in(g, \Gamma_{gamma}^{210}).$, $in(g, \Gamma_{gamma}^{222}).$, $in(h, \Gamma_{gamma}^{211}).$, $in(h, \Gamma_{gamma}^{212}).$, $in(h, \Gamma_{gamma}^{213}).$, $in(h, \Gamma_{gamma}^{215}).$, $in(h, \Gamma_{gamma}^{217}).$, $in(e, \Gamma_{gamma}^{219}).$, $in(e, \Gamma_{gamma}^{220}).$, $in(e, \Gamma_{gamma}^{222}).$, $in(e, \Gamma_{gamma}^{214}).$, $in(e, \Gamma_{gamma}^{215}).$, $in(e, \Gamma_{gamma}^{217}).$, $in(f, \Gamma_{gamma}^{221}).$, $in(f, \Gamma_{gamma}^{222}).$, $in(f, \Gamma_{gamma}^{216}).$, $in(f, \Gamma_{gamma}^{217}).$, $elin(g, \Gamma_{gamma}^{209}).$, $elin(h, \Gamma_{gamma}^{211}).$, $elin(e, \Gamma_{gamma}^{219}).$, $elin(e, \Gamma_{gamma}^{214}).$, $elin(f, \Gamma_{gamma}^{221}).$, $elin(f, \Gamma_{gamma}^{216}).$,
+
+\end{document}
+
+
+
+

@@ -32,9 +32,9 @@ let createFresh () =
     try match Hashtbl.find global s with
       | n ->
         Hashtbl.replace global s (n+1);
-        Hashtbl.add fresh s n
+        Hashtbl.add fresh s (n+1)
       with Not_found ->
-        Hashtbl.add global s 1;
+        Hashtbl.add global s 0;
         Hashtbl.add fresh s 0
   ) subexps;
   create fresh
