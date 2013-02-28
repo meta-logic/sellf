@@ -86,8 +86,7 @@ not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(
 %not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), not geq(Sub2, Sub1). 
 
 % If all the leaves of the second tree are not provable, no models are generated
-:- not ok.
-"
+:- not ok.\n\n"
 
 (* Generating models for a set of constraints *)
 
@@ -156,11 +155,11 @@ let okIfProve leafs treeName =
     | [_] ->
       i := !i + 1;
       let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
-      "proveIf(" ^ leafName ^ ", _)."
+      "provIf(" ^ leafName ^ ", _)."
     | _ :: tl -> 
       i := !i + 1;
       let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
-      "proveIf(" ^ leafName ^ ", _), " ^ (okIfProve_aux tl)
+      "provIf(" ^ leafName ^ ", _), " ^ (okIfProve_aux tl)
   in
   "ok :- " ^ (okIfProve_aux leafs)
 
@@ -204,11 +203,7 @@ let proofImplies (der1, model1) (der2, model2) =
   genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
   let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
   let rec hasModel input = try match input_line input with
-    | str -> 
-      let lexbuf = Lexing.from_string str in
-      match Parser_models.model Lexer_models.token lexbuf with
-        | [] -> false
-        | _ -> true
+    | _ -> true (* If some line is printed, it means that there is a model *)
     with End_of_file -> let _ = Unix.close_process_in channel in false
   in
   hasModel channel  
