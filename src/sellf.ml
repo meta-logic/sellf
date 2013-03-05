@@ -151,25 +151,60 @@ solve_query () =
   match query_string with 
     | "#rules" -> generate_bipoles !Specification.introRules
 
-    | "#test_bipole" -> generate_bipoles !Specification.others
-
-    | "#permute" -> 
+    | "#bipole" -> 
       let i = ref 0 in
+      let formulas = !Specification.others @ !Specification.introRules in
       print_endline "\nThese are the formulas available: ";
       List.iter ( fun f ->
         print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
         i := !i + 1
-      ) !Specification.others;
+      ) formulas;
       print_newline ();
-      print_endline "SELLF will check the permutation of one formula F1 over\
-      another F2 (i.e., can a derivation where F1 is below F2 be transformed\
+      print_endline "SELLF will generate the bipole corresponding to the formula \
+      chosen and print a latex file (on the screen, sorry about that!) with them.";
+      print_endline "Please type the number of the formula: ";
+      let i1 = int_of_string (read_line ()) in
+      begin
+      let bipoles = Bipole.bipole (List.nth formulas i1) in
+        print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
+        \\usepackage{amsmath}\n\
+        \\usepackage{stmaryrd}\n\
+        \\usepackage[margin=1cm]{geometry}\n\
+        \\usepackage{proof}\n\n\
+        \\begin{document}\n\n";
+   
+        print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString (List.nth formulas i1)) ^ "$:} \n");
+        List.iter (fun (pt, model) ->
+          print_endline "{\\scriptsize";
+          print_endline "\\[";
+          print_endline (ProofTreeSchema.toTexString pt);
+          print_endline "\\]";
+          print_endline "}";
+          print_endline "CONSTRAINTS\n";
+          print_endline (Constraints.toTexString model);
+        ) bipoles;  
+   
+        print_endline "\\end{document}";
+      end
+
+    | "#permute" -> 
+      let i = ref 0 in
+      let formulas = !Specification.others @ !Specification.introRules in
+      print_endline "\nThese are the formulas available: ";
+      List.iter ( fun f ->
+        print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
+        i := !i + 1
+      ) formulas;
+      print_newline ();
+      print_endline "SELLF will check the permutation of one formula F1 over \
+      another F2 (i.e., can a derivation where F1 is below F2 be transformed \
       into a derivation where F2 is below F1?) \n";
       print_endline "Please type the number of F1: ";
       let i1 = int_of_string (read_line ()) in
       print_endline "Please type the number of F2: ";
       let i2 = int_of_string (read_line ()) in
       begin
-      match Permutation.permute (List.nth !Specification.others i1) (List.nth !Specification.others i2) with
+      match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
         | true -> print_endline "The rules permute."
         | false -> print_endline "The rules do not permute."
       end

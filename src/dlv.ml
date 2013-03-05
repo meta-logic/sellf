@@ -112,7 +112,7 @@ let getModels cstrSet =
   genFile cstrSet "temp";
   let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
   let rec readModel input = try match input_line input with
-    | str -> 
+    | str ->
       let lexbuf = Lexing.from_string str in
       let model = Parser_models.model Lexer_models.token lexbuf in
       (Constraints.create model) :: readModel input

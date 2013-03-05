@@ -30,7 +30,7 @@ let make_APP lst =
 */
 
 /* Terminal symbols */
-%token <int> INDEX
+%token <int> INDEX DB
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
 %token IN MCTX ELIN EMP UNION ADDFORM REQIN REMOVED
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
@@ -133,6 +133,7 @@ term:
   | NAME     { CONS ($1) }
   | VAR      { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
   | STRING   { STRING ($1) }
+  | DB       { DB($1) }
 ;
 
 subexp:

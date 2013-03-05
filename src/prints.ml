@@ -37,10 +37,10 @@ so that the parser can parser terms that were printed by the system. *)
 (* TODO: fix the printing of variables (keep track of the bindings and use the
 binding name, and not some internal representation like LOG or DB) *)
 let rec termToString term = match term with 
-  | VAR v -> 
-		if v.tag = EIG then 
+  | VAR v -> v.str (* Always parsed as a logical variable. Not sure if it will cause any problems... *) 
+		(*if v.tag = EIG then 
 			( (v.str)^"EIG_"^(string_of_int v.id) ) 
-		else ( (v.str)^"LOG_"^(string_of_int v.id) )
+		else ( (v.str)^"LOG_"^(string_of_int v.id) )*)
   | DB (i) -> ( "DB_"^(string_of_int i) )
   | INT (x) -> string_of_int x
   | CONS (x) -> x
@@ -66,7 +66,7 @@ let rec termToString term = match term with
       | _ -> termToString t
     end
   | PTR {contents = T t} -> termToString t
-  | PTR {contents = V v} ->  termToString (VAR v)
+  | PTR {contents = V v} -> termToString (VAR v)
   | PRED (s, t, _) -> termToString t
   | EQU (s, i, t) -> " eq prop "^(termToString t)^(string_of_int i)
   | TOP -> "top"
@@ -86,8 +86,8 @@ let rec termToString term = match term with
   | HBANG (s, t) -> "( ["^(termToString s)^"]hbang "^(termToString t)^" )"
   | QST (s, t) -> "( ["^(termToString s)^"]? "^(termToString t)^" )"
   | WITH (t1, t2) -> (termToString t1)^" & "^(termToString t2)
-  | FORALL (s, i, t) -> "(pi \\"^s^(string_of_int i)^" "^(termToString t)^")"
-  | EXISTS (s, i, t) -> "(sigma \\"^s^(string_of_int i)^" "^(termToString t)^")"
+  | FORALL (s, i, t) -> "(pi \\"^s^" "^(termToString t)^")"
+  | EXISTS (s, i, t) -> "(sigma \\"^s^" "^(termToString t)^")"
   | CLS (ty, t1, t2) -> (termToString t1)^(clsTypeToString ty)^(termToString t2)
   | NEW (s, t) -> "(nsub \\"^s^(termToString t)^")"
   | BRACKET (f) -> "{ "^(termToString f)^" }"

@@ -94,6 +94,7 @@ let deriveBipole seq form constr =
         constraints := List.map (fun cst -> Constraints.union cst c) !constraints;
         derive pt cont
 
+      (* Initial rule *)
       | PRED(str, terms, POS) | NOT(PRED(str, terms, NEG)) ->
         let c = ProofTreeSchema.applyInitial prooftree f in
         constraints := Constraints.times !constraints c;
@@ -161,7 +162,6 @@ let deriveBipole seq form constr =
 (* Generates the bipole of a formula from a generic initial sequent *)
 (* Considering the formula is chosen from gamma *)
 let bipole f = 
-  (*let context = ContextSchema.initialize (ContextSchema.create ()) in*)
   let context = ContextSchema.createFresh () in
   let sequent = SequentSchema.createAsyn context [] in
   let constraints = Constraints.isIn f "$gamma" context in

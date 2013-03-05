@@ -45,7 +45,8 @@ rule token = parse
   | "one"                 { ONE }
   | "zero"                { ZERO }
   | "pi \\" (varName as vn)        { FORALL(vn) }     
-  | "sigma \\" (varName as vn)     { EXISTS(vn) }     
+  | "sigma \\" (varName as vn)     { EXISTS(vn) }
+  | "DB_" (index as i)    { DB(int_of_string i) }
   | "hbang"               { HBANG }
   | "bang"                { BANG }
   | "?"                   { QST }

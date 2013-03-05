@@ -34,6 +34,9 @@ let derive2 spec1 spec2 =
     ) (ProofTreeSchema.getOpenLeaves pt1) []
     in
 
+    (*let size = List.length leafDerivations2over1 in
+    print_endline ("Leaf derivations: " ^ (string_of_int size));*)
+
     let bipoles2over1 = List.fold_right (fun leaves bipoles ->
       flush stdout;
       let unionModels = List.fold_right (fun (proof, m) acc -> 
@@ -69,8 +72,8 @@ let permute spec1 spec2 =
   \\usepackage[margin=1cm]{geometry}\n\
   \\usepackage{proof}\n\n\
   \\begin{document}\n\n";
-*)
-  (*print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec1) ^ "$ / $" ^ (Prints.termToTexString spec2) ^ "$:} \n");
+
+  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec1) ^ "$ / $" ^ (Prints.termToTexString spec2) ^ "$:} \n");
   List.iter (fun (pt, model) ->
     print_endline "{\\small";
     print_endline "\\[";
@@ -91,9 +94,9 @@ let permute spec1 spec2 =
     print_endline "CONSTRAINTS\n";
     print_endline (Constraints.toTexString model);
   ) bipoles21;
-  *)
+  
 
-  (*print_endline "\\end{document}";*)
+  print_endline "\\end{document}";*)
 
 
 (*

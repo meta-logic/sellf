@@ -177,20 +177,6 @@ let fVarC x = match x with
 
 let varName x y = "$"^x^(string_of_int y);;
 
-(* Functions to get the elements of an implication *)
-(* TODO: check if this is used. *)
-(*
-let rec getHead t = match t with
-  | LOLLI(s, t1, t2) -> t1
-  | ABS(s, i, t1) -> getHead t1
-  | _ -> failwith "Impossible to get head. Formula is not -o."
-
-let rec getBody t = match t with
-  | LOLLI(s, t1, t2) -> t2
-  | ABS(s, i, t1) -> getBody t1
-  | _ -> failwith "Impossible to get body. Formula is not -o."
-*)
-
 let rec tCheckAuxList term = TINT
 
 let rec deref t = match t with
@@ -198,7 +184,7 @@ let rec deref t = match t with
   | t -> t
 ;;
 
-(* ??? *)
+(* Saves a goal in the query mode *)
 let goal : terms ref = ref TOP ;;
 
 (* Transforms abstractions into universal quantifiers *)
