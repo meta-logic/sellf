@@ -87,6 +87,8 @@ let rec prove formula h suc fail =
 
 (* CODE FOR NEW CLEAN PROOF SEARCH. NOT FINISHED 
 
+  let fail : (unit -> unit) Stack.t = Stack.create () ;;
+  
   let propagateOutContext pt = match ProofTree.getPremises with
     | [p] -> 
       let ctxOutPremise = Sequent.getContextOut (ProofTree.getConclusion p) in
@@ -94,7 +96,7 @@ let rec prove formula h suc fail =
     | _ -> failwith "Invalid premises to propagate out context."
 
   (* This method should manage the in/out contexts and backtracking *)
-  let proofSearch prooftree height suc fail = 
+  let proofSearch prooftree height suc = 
     let conclusion = ProofTree.getConclusion prooftree in 
     match (Sequent.getPhase conclusion, Sequent.getGoals conclusion) with
 
@@ -109,14 +111,15 @@ let rec prove formula h suc fail =
       | PRED(_,_,NEG) 
       | NOT(PRED(_,_,POS)) ->
         let pt = ProofTree.releaseDown prooftree f in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
 
       | ADDOR(f1, f2) ->
-        let (pt1, sucFun) = ProofTree.applyAddOr1 prooftree f in
-        proofSearch pt1 height (fun () -> propagateOutContext prooftree; suc ()) (fun () ->
-          let (pt2, sucFun) = ProofTree.applyAddOr2 prooftree f in
-          proofSearch pt2 height (fun () -> propagateOutContext prooftree; suc ()) fail
-        )
+        let pt1 = ProofTree.applyAddOr1 prooftree f in
+        Stack.push (fun () -> 
+          let pt2 = ProofTree.applyAddOr2 prooftree f in
+          proofSearch pt2 height (fun () -> propagateOutContext prooftree; suc ())
+        ) fail;
+        proofSearch pt1 height (fun () -> propagateOutContext prooftree; suc ())
 
       | TENSOR(f1, f2) ->
         let pt1 = ProofTree.applyTensor1 prooftree f in
@@ -129,13 +132,13 @@ let rec prove formula h suc fail =
                 Sequent.setContextOut (ProofTree.getConclusion prooftree) ctxOutPremise
               | _ -> failwith "Invalid premise setting for tensor rule."
             ; suc ()
-          ) fail
-        ) fail
+          )
+        )
 
 
       | EXISTS(s, i, f1) ->
         let pt = ProofTree.applyExists prooftree f in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
 
       | ONE ->
         ProofTree.applyOne prooftree; 
@@ -146,18 +149,18 @@ let rec prove formula h suc fail =
       | BANG(CONS(s), f1) ->
         let pt = ProofTree.applyBang prooftree f in
         proofSearch pt height (fun () ->
-            (* Changes the output context if bang returns successfully *)
-            match ProofTree.getPremises prooftree with
-              | [p] -> 
-                let conclusion = ProofTree.getConclusion prooftree in
-                let ctx = Sequent.getContextIn conclusion in
-                let bangctxout = Context.bangout ctx s in
-                let premisectxout = Sequent.getCtxOut (ProofTree.getConclusion p) in
-                let newctxout = Context.merge bangctxout premisectxout in
-                Sequent.setContextOut conclusion newctxout;
-                suc ()
-              | _ -> failwith "Invalid premise setting for bang rule."
-        ) fail
+          (* Changes the output context if bang returns successfully *)
+          match ProofTree.getPremises prooftree with
+            | [p] -> 
+              let conclusion = ProofTree.getConclusion prooftree in
+              let ctx = Sequent.getContextIn conclusion in
+              let bangctxout = Context.bangout ctx s in
+              let premisectxout = Sequent.getCtxOut (ProofTree.getConclusion p) in
+              let newctxout = Context.merge bangctxout premisectxout in
+              Sequent.setContextOut conclusion newctxout;
+              suc ()
+            | _ -> failwith "Invalid premise setting for bang rule."
+        )
 
       (* TODO: initial rule *)
       | PRED(str, terms, POS) | NOT(PRED(str, terms, NEG)) ->
@@ -178,7 +181,7 @@ let rec prove formula h suc fail =
       | PRED(_,_,_)
       | NOT(PRED(_,_,_)) ->
         let pt = ProofTree.releaseUp prooftree hd in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
     
       | WITH(f1, f2) ->
         let pt1, pt2 = ProofTree.applyWith prooftree hd in
@@ -191,12 +194,12 @@ let rec prove formula h suc fail =
               | _ -> failwith "Invalid premise setting for with rule."
             ; suc ()
 
-          ) fail
-        ) fail
+          )
+        )
 
       | PARR(f1, f2) ->
         let pt = ProofTree.applyParr prooftree hd in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
 
       | TOP -> 
         ProofTree.applyTop prooftree; 
@@ -206,15 +209,15 @@ let rec prove formula h suc fail =
 
       | BOT ->
         let pt = ProofTree.applyBot prooftree hd in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
       
       | FORALL(s, i, f1) ->
         let pt = ProofTree.applyForall prooftree hd in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
 
       | QST(subexp, f1) ->
         let pt = ProofTree.applyQst prooftree hd in
-        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ()) fail
+        proofSearch pt height (fun () -> propagateOutContext prooftree; suc ())
 
       | _ -> failwith ("Invalid principal formula in asynchronous phase: "^(Prints.termToString (Term.observe hd)))
     end
@@ -223,7 +226,7 @@ let rec prove formula h suc fail =
 
     | _ -> failwith "Invalid sequent while searching for proofs."
 
-  in proofSearch root h suc fail
+  in proofSearch root h suc
 *)
 
 and prove_asyn proof h suc =

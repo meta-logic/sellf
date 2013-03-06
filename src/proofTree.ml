@@ -107,7 +107,7 @@ let applyTensor2 pt f =
     | [p] -> p.conclusion
     | _ -> failwith "Invalid premise setting for tensor rule."  
   in
-  let ctx = Sequent.getContextOut p in
+  let ctx = Sequent.getContextOut sibling in
   let f2 = match Term.observe f with
     | TENSOR(_,f2) -> f2
     | _ -> failwith "Wrong formula in rule application."
