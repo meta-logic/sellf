@@ -69,7 +69,7 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml context.ml contextSchema.ml constraints.ml parser_models.mly lexer_models.mll sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml dlv.ml bipole.ml permutation.ml typeChecker.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser_systems.mly lexer.mll lexer_top.mll sellf.ml 
+SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml context.ml contextSchema.ml constraints.ml parser_models.mly lexer_models.mll sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml dlv.ml bipole.ml permutation.ml typeChecker.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
 # The executable file to generate
 
@@ -189,8 +189,8 @@ clean::
 	rm -f $(EXEC)
 	rm -f $(EXEC).opt
 	rm -f *.annot
-	rm -f parser_systems.mli
-	rm -f parser_systems.ml
+	rm -f parser.mli
+	rm -f parser.ml
 	rm -f parser_models.mli
 	rm -f parser_models.ml
 	rm -f lexer_top.ml

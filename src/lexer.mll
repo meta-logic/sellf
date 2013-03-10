@@ -1,7 +1,7 @@
 (* File lexer.mll *)
 {
 (*open Parser*)        (* The type token is defined in parser.mli *)
-open Parser_systems
+open Parser
 exception Eof
 open Lexing 
 

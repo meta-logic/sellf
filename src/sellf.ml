@@ -96,7 +96,7 @@ let parse file_name = begin
   begin
     try 
       while true do
-        let _ = Parser_systems.types Lexer.token lexbuf in ();
+        let _ = Parser.types Lexer.token lexbuf in ();
       done; true
     with 
       |  Lexer.Eof -> 
@@ -105,7 +105,7 @@ let parse file_name = begin
             begin
             try
               while true do
-                let _ = Parser_systems.clause Lexer.token lexbuf in ();
+                let _ = Parser.clause Lexer.token lexbuf in ();
               done; true 
             with
               | Lexer.Eof -> true
@@ -123,7 +123,7 @@ let rec start () =
     let command = read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
-      let action = Parser_systems.top Lexer_top.token lexbuf_top in 
+      let action = Parser.top Lexer_top.token lexbuf_top in 
       match action with
       | "help" -> start ()
       | "verbose-on" -> print_endline "Verbose is set to on."; Term.verbose := true; start ()
@@ -223,8 +223,7 @@ solve_query () =
       let query = Lexing.from_string query_string in
       begin
       try 
-        (*let _ = Parser.goal Lexer.token query in ();*)
-        let _ = Parser_systems.goal Lexer.token query in 
+        let _ = Parser.goal Lexer.token query in 
           begin
             Context.createProofSearchContext ();
             Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
