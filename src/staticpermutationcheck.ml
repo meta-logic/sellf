@@ -383,36 +383,10 @@ let rulesCutNotPermute = not_permute cut rules in
   else 
     (print_endline "\nThe cut rule permutes over all rules."; true)
     
-(* This function check whether a rule is a bipole. If not it fails. *)
-let rec typecheck_rules rules = 
-let rec typecheck_bipole rule =
-let rec check_monopole mono = 
-  match mono with
-  | PRED("lft",_,_) | PRED("rght",_,_) | PRED("mlft",_,_) | PRED("mrght",_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
-  | PARR(b1,b2) | WITH(b1,b2) -> 
-    (check_monopole b1) && (check_monopole b2)
-  | QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
-  | QST(CONS(sub),PRED("mlft",_,_)) | QST(CONS(sub),PRED("mrght",_,_))  -> true
-  | FORALL(_,_,b) -> (check_monopole b)
-  | _ -> false
-  in
-match rule with
-| NOT(PRED("lft",_,_)) | NOT(PRED("rght",_,_)) | PRED("lft",_,_) | PRED("rght",_,_) 
-| NOT(PRED("mlft",_,_)) | NOT(PRED("mrght",_,_)) | PRED("mlft",_,_) | PRED("mrght",_,_) 
-| ONE | BOT | ZERO | TOP | EQU(_,_,_) -> true
-| TENSOR(b1, b2) | ADDOR(b1,b2) -> 
-    (typecheck_bipole b1) && (typecheck_bipole b2)
-| WITH(b1, b2) | PARR(b1,b2) -> 
-    (check_monopole b1) && (check_monopole b2)
-| BANG(_,b) | FORALL(_,_,b) -> check_monopole b
-| ABS(_, _, b) | EXISTS(_,_,b) -> typecheck_bipole b
-| QST(CONS(sub),PRED("lft",_,_)) | QST(CONS(sub),PRED("rght",_,_))  -> true
-| QST(CONS(sub),PRED("mlft",_,_)) | QST(CONS(sub),PRED("mrght",_,_))  -> true
-| _ -> false
-in
-match rules with 
+(* This function check whether a list of rules contains only bipoles *)
+let rec areBipoles rules = match rules with 
 | [] -> true
-| rl :: lst when typecheck_bipole rl -> typecheck_rules lst
+| rl :: lst when isBipole rl -> areBipoles lst
 | rl :: lst -> 
     print_endline ("The following clause is NOT a bipole -> \n"^Prints.termToString rl); 
     false
@@ -425,7 +399,7 @@ let rec cut_principal_aux cuts =
         cut_principal_aux lst 
   | _ -> false
 in 
-if typecheck_rules !Specification.introRules then 
+if areBipoles !Specification.introRules then 
   cut_principal_aux !Specification.cutRules
 else false
 
@@ -468,7 +442,7 @@ match cuts with
         weak_cut_aux_lst lst 
 | _ -> false
 in
-if typecheck_rules !Specification.introRules then 
+if areBipoles !Specification.introRules then 
   weak_cut_aux_lst !Specification.cutRules
 else false
 
