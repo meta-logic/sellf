@@ -323,17 +323,17 @@ top:
   execution time of a query. The default value is 'off'. (Note that the time
   measurement of the permutation checking is always on);";*)
   print_endline "#exit command terminates the program.";
-  print_endline "#help displays this message;";
+  print_endline "#help displays this message;\n";
   print_endline "There are the following commands available during state '?>':\n";
-  (*print_endline "#perm: checks if the rules specified in the file permute (all
-  possible combinations of 2 rules).";*)
+  print_endline "#check_rules: checks if all the rules of a file are bipoles.";
+  print_endline "#permute: checks if two rules of your choice permute.";
+  print_endline "#bipole: generates the bipole of a rule in linear logic (with generic context and constraints) and prints this to a latex file.";
   print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
   print_endline "#cutcoherence: checks whether the system specified on the file loaded is cut-coherent.";
   print_endline "#initialcoherence: checks whether the system specified on the file loaded is initial-coherent.";
   print_endline "#atomicelim: checks whether the system specified on the file loaded is weak coherent.";
   print_endline "#scopebang: prints which subexponentials will have their formulas erased and which should be empty when a !s formula is going to be used.";
-  print_endline "#rules: generates the bipoles of all the introduction rules of the system loaded (currently prints the open leaves of the proof tree and the constraint sets)";
-  print_endline "#done: you must type this to indicate that you are done working with a file and before loading another one.";
+  print_endline "#done: you must type this to indicate that you are done working with a file and before loading another one.\n";
   "help"
 }
 | VERBOSE ON {"verbose-on"}

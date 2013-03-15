@@ -125,7 +125,7 @@ solve_query () =
   else begin
   match query_string with 
 
-    (* Check if all rules are bipoles*)
+    (* Check if all rules are bipoles *)
     | "#check_rules" -> 
       let formulas = Specification.getAllRules () in
       List.iter (fun f -> match Term.isBipole f with
@@ -133,6 +133,7 @@ solve_query () =
         | false -> print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f))
       ) formulas
 
+    (* Generates the bipole of a rule and prints a latex file with it *)
     | "#bipole" -> 
       let i = ref 0 in
       let formulas = !Specification.others @ !Specification.introRules in
@@ -168,6 +169,7 @@ solve_query () =
         with Bipole.Not_bipole -> print_endline "This specification is not a bipole!"
       end
 
+    (* Check if two rules permute *)
     | "#permute" -> 
       let i = ref 0 in
       let formulas = !Specification.others @ !Specification.introRules in
