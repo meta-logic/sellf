@@ -95,6 +95,34 @@ var = {
   lts : int
 }
 
+(* Checks if a formula is a bipole *)
+(* 
+  Grammar for bipoles and monopoles:
+  B = not A | M | !M | B + B | B * B | exists B
+  M = A | ?A | M & M | M \par M | forall M
+*)
+let rec isMonopole f = match f with
+  | PRED(_,_,_) | EQU(_,_,_) -> true
+  | ZERO | TOP -> true
+  | WITH(m1, m2) -> isMonopole m1 && isMonopole m2
+  | PARR(m1, m2) -> isMonopole m1 && isMonopole m2
+  | FORALL(_,_, m) -> isMonopole m
+  (* Questions marks may have only atomic scope *)
+  | QST(_, PRED(_,_,_)) -> true
+  | _ -> false
+
+let rec isBipole f = match f with
+  | m when isMonopole m -> true
+  | NOT(PRED(_,_,_)) -> true
+  | ONE | BOT -> true
+  | TENSOR(b1, b2) -> isBipole b1 && isBipole b2
+  | ADDOR(b1, b2) -> isBipole b1 && isBipole b2
+  | EXISTS(_,_, b) -> isBipole b
+  | ABS(_,_, b) -> isBipole b
+  (* Bangs can only be applied to monopoles *)
+  | BANG(_, m) -> isMonopole m
+  | _ -> false
+
 (* Transforms a formula to negated normal form *)
 let rec nnf f = match f with
   | PRED(str, terms, p) -> f 

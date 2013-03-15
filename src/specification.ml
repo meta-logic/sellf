@@ -113,11 +113,14 @@ let processIntroRule t =
     | _ -> failwith "Valid predicates are 'lft' or 'right' or 'mlft' or 'mrght'."
 ;;
 
+let getAllRules () = !others @ !introRules @ !structRules @ !cutRules @ !axioms ;;
+
 let initialize () =
   structRules := [];
   cutRules := [];
   introRules := []; 
   axioms := [];
+  others := [];
   Hashtbl.clear kindTbl;
   Hashtbl.clear typeTbl;
   Hashtbl.clear lr_hash;

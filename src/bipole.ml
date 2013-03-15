@@ -159,12 +159,16 @@ let deriveBipole seq form constr =
   toPairsProofModel !results
 ;;
 
+exception Not_bipole
+
 (* Generates the bipole of a formula from a generic initial sequent *)
 (* Considering the formula is chosen from gamma *)
-let bipole f = 
-  let context = ContextSchema.createFresh () in
-  let sequent = SequentSchema.createAsyn context [] in
-  let constraints = Constraints.isIn f "$gamma" context in
-  deriveBipole sequent f constraints
+let bipole f =
+  if isBipole f then
+    let context = ContextSchema.createFresh () in
+    let sequent = SequentSchema.createAsyn context [] in
+    let constraints = Constraints.isIn f "$gamma" context in
+    deriveBipole sequent f constraints 
+  else raise Not_bipole
 ;;
 

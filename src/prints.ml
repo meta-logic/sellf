@@ -32,27 +32,26 @@ let rec typeToString typ = match typ with
       | TBASIC _ -> (typeToString x)^" -> "^(typeToString y)
       | _ -> "("^(typeToString x)^") -> "^(typeToString y)
 
-(* GR: this prints the formula in the system's syntax. It needs to be consistent
-so that the parser can parser terms that were printed by the system. *)
-(* TODO: fix the printing of variables (keep track of the bindings and use the
-binding name, and not some internal representation like LOG or DB) *)
-let rec termToString term = match term with 
+(* Prints a term replacing deBruijn indices by the actual variable name. This
+name is kept in the abstraction, and a stack of abstraction names is passed as
+argument *)
+let rec termToString_ term absList = match term with 
   | VAR v -> v.str (* Always parsed as a logical variable. Not sure if it will cause any problems... *) 
 		(*if v.tag = EIG then 
 			( (v.str)^"EIG_"^(string_of_int v.id) ) 
 		else ( (v.str)^"LOG_"^(string_of_int v.id) )*)
-  | DB (i) -> ( "DB_"^(string_of_int i) )
+  | DB (i) -> List.nth absList (i-1)
   | INT (x) -> string_of_int x
   | CONS (x) -> x
   | STRING (x) -> x
   | APP (x, y) -> 
-    let args = List.fold_right (fun el acc -> (termToString el)^" "^acc) y "" in
-    ( "( "^(termToString x)^" "^args^" )" )
-  | ABS (x, i, y) -> "(\\"^x^(string_of_int i)^" "^(termToString y)^")" 
-  | PLUS (ib1, ib2) -> (termToString ib1)^" + "^(termToString ib2)
-  | MINUS (ib1, ib2) -> (termToString ib1)^" - "^(termToString ib2)
-  | TIMES (ib1, ib2) -> (termToString ib1)^" * "^(termToString ib2)
-  | DIV (ib1, ib2) -> (termToString ib1)^" / "^(termToString ib2)
+    let args = List.fold_right (fun el acc -> (termToString_ el absList)^" "^acc) y "" in
+    ( "( "^(termToString_ x absList)^" "^args^" )" )
+  | ABS (x, i, y) -> "(\\"^x^" "^(termToString_ y ([x] @ absList))^")" 
+  | PLUS (ib1, ib2) -> (termToString_ ib1 absList)^" + "^(termToString_ ib2 absList)
+  | MINUS (ib1, ib2) -> (termToString_ ib1 absList)^" - "^(termToString_ ib2 absList)
+  | TIMES (ib1, ib2) -> (termToString_ ib1 absList)^" * "^(termToString_ ib2 absList)
+  | DIV (ib1, ib2) -> (termToString_ ib1 absList)^" / "^(termToString_ ib2 absList)
 
   | SUSP (t, ol, nl, env) -> 
     begin
@@ -60,37 +59,39 @@ let rec termToString term = match term with
       | DB i ->
         begin 
           match List.nth env (i-1) with 
-          | Binding(t_bind, j) ->  termToString t_bind
-          | _ -> termToString t
+          | Binding(t_bind, j) ->  termToString_ t_bind absList
+          | _ -> termToString_ t absList 
         end
-      | _ -> termToString t
+      | _ -> termToString_ t absList
     end
-  | PTR {contents = T t} -> termToString t
-  | PTR {contents = V v} -> termToString (VAR v)
-  | PRED (s, t, _) -> termToString t
-  | EQU (s, i, t) -> " eq prop "^(termToString t)^(string_of_int i)
+  | PTR {contents = T t} -> termToString_ t absList
+  | PTR {contents = V v} -> termToString_ (VAR v) absList
+  | PRED (s, t, _) -> termToString_ t absList
+  | EQU (s, i, t) -> " eq prop "^(termToString_ t absList)^(string_of_int i)
   | TOP -> "top"
   | ONE -> "one"
   | BOT -> "bot"
   | ZERO -> "zero"
-  | NOT (t) -> "(not "^(termToString t)^") "
-  | COMP (c, i1, i2) -> (termToString i1)^(compToString c)^(termToString i2)
-  | ASGN ( i1, i2) -> (termToString i1)^" is "^(termToString i2)
-  | PRINT (t1) -> "print "^(termToString t1)
+  | NOT (t) -> "(not "^(termToString_ t absList)^") "
+  | COMP (c, i1, i2) -> (termToString_ i1 absList)^(compToString c)^(termToString_ i2 absList)
+  | ASGN ( i1, i2) -> (termToString_ i1 absList)^" is "^(termToString_ i2 absList)
+  | PRINT (t1) -> "print "^(termToString_ t1 absList)
   | CUT -> "fail(cut)"
-  | TENSOR (t1, t2) -> (termToString t1)^" * "^(termToString t2)
-  | ADDOR (t1, t2) -> (termToString t1)^" + "^(termToString t2)
-  | PARR (t1, t2) -> (termToString t1)^" | "^(termToString t2)
-  | LOLLI (s, t1, t2) -> (termToString t2)^" ["^(termToString s)^"] o- "^(termToString t1)
-  | BANG (s, t) -> "( ["^(termToString s)^"]bang "^(termToString t)^" )"
-  | HBANG (s, t) -> "( ["^(termToString s)^"]hbang "^(termToString t)^" )"
-  | QST (s, t) -> "( ["^(termToString s)^"]? "^(termToString t)^" )"
-  | WITH (t1, t2) -> (termToString t1)^" & "^(termToString t2)
-  | FORALL (s, i, t) -> "(pi \\"^s^" "^(termToString t)^")"
-  | EXISTS (s, i, t) -> "(sigma \\"^s^" "^(termToString t)^")"
-  | CLS (ty, t1, t2) -> (termToString t1)^(clsTypeToString ty)^(termToString t2)
-  | NEW (s, t) -> "(nsub \\"^s^(termToString t)^")"
-  | BRACKET (f) -> "{ "^(termToString f)^" }"
+  | TENSOR (t1, t2) -> (termToString_ t1 absList)^" * "^(termToString_ t2 absList)
+  | ADDOR (t1, t2) -> (termToString_ t1 absList)^" + "^(termToString_ t2 absList)
+  | PARR (t1, t2) -> (termToString_ t1 absList)^" | "^(termToString_ t2 absList)
+  | LOLLI (s, t1, t2) -> (termToString_ t2 absList)^" ["^(termToString_ s absList)^"] o- "^(termToString_ t1 absList)
+  | BANG (s, t) -> "( ["^(termToString_ s absList)^"]bang "^(termToString_ t absList)^" )"
+  | HBANG (s, t) -> "( ["^(termToString_ s absList)^"]hbang "^(termToString_ t absList)^" )"
+  | QST (s, t) -> "( ["^(termToString_ s absList)^"]? "^(termToString_ t absList)^" )"
+  | WITH (t1, t2) -> (termToString_ t1 absList)^" & "^(termToString_ t2 absList)
+  | FORALL (s, i, t) -> "(pi \\"^s^" "^(termToString_ t ([s] @ absList))^")"
+  | EXISTS (s, i, t) -> "(sigma \\"^s^" "^(termToString_ t ([s] @ absList))^")"
+  | CLS (ty, t1, t2) -> (termToString_ t1 absList)^(clsTypeToString ty)^(termToString_ t2 absList)
+  | NEW (s, t) -> "(nsub \\"^s^(termToString_ t ([s] @ absList))^")"
+  | BRACKET (f) -> "{ "^(termToString_ f absList)^" }"
+
+let termToString term = termToString_ term []
 
 let termsListToString args = List.fold_right (fun el acc ->
   (termToString el)^" :: "^acc) args ""
@@ -105,23 +106,23 @@ let compToTexString ct = match ct with
     | LEQ -> " \\leq "
     | NEQ -> " \\neq "
 
-let rec termToTexString term = match term with 
-  | VAR v -> 
-		if v.tag = EIG then 
+let rec termToTexString_ term absList = match term with 
+  | VAR v -> v.str
+		(*if v.tag = EIG then 
 			( (v.str)^"EIG-"^(string_of_int v.id) ) 
-		else ( (v.str)^"LOG-"^(string_of_int v.id) )
-  | DB (i) -> ( "-DB"^(string_of_int i) )
+		else ( (v.str)^"LOG-"^(string_of_int v.id) )*)
+  | DB (i) -> List.nth absList (i-1)
   | INT (x) -> string_of_int x
   | CONS (x) -> x
   | STRING (x) -> x 
   | APP (x, y) -> 
-    let args = List.fold_right (fun el acc -> "("^(termToTexString el)^") "^acc) y "" in
-    ( (termToTexString x)^" "^args )
-  | ABS (x, i, y) -> "(\\lambda "^x^(string_of_int i)^" "^(termToTexString y)^")" 
-  | PLUS (ib1, ib2) -> (termToTexString ib1)^" + "^(termToTexString ib2)
-  | MINUS (ib1, ib2) -> (termToTexString ib1)^" - "^(termToTexString ib2)
-  | TIMES (ib1, ib2) -> (termToTexString ib1)^" \\times "^(termToTexString ib2)
-  | DIV (ib1, ib2) -> (termToTexString ib1)^" \\div "^(termToTexString ib2)
+    let args = List.fold_right (fun el acc -> "("^(termToTexString_ el absList)^") "^acc) y "" in
+    ( (termToTexString_ x absList)^" "^args )
+  | ABS (x, i, y) -> "(\\lambda "^x^" "^(termToTexString_ y ([x] @ absList))^")" 
+  | PLUS (ib1, ib2) -> (termToTexString_ ib1 absList)^" + "^(termToTexString_ ib2 absList)
+  | MINUS (ib1, ib2) -> (termToTexString_ ib1 absList)^" - "^(termToTexString_ ib2 absList)
+  | TIMES (ib1, ib2) -> (termToTexString_ ib1 absList)^" \\times "^(termToTexString_ ib2 absList)
+  | DIV (ib1, ib2) -> (termToTexString_ ib1 absList)^" \\div "^(termToTexString_ ib2 absList)
 
   | SUSP (t, ol, nl, env) -> 
     begin
@@ -129,37 +130,39 @@ let rec termToTexString term = match term with
       | DB i ->
         begin 
           match List.nth env (i-1) with 
-          | Binding(t_bind, j) ->  termToTexString t_bind
-          | _ -> termToTexString t
+          | Binding(t_bind, j) ->  termToTexString_ t_bind absList
+          | _ -> termToTexString_ t absList
         end
-      | _ -> termToTexString t
+      | _ -> termToTexString_ t absList
     end
-  | PTR {contents = T t} -> termToTexString t
-  | PTR {contents = V v} ->  termToTexString (VAR v)
-  | PRED (s, t, _) -> termToTexString t
-  | EQU (s, i, t) -> " eq prop "^(termToTexString t)^(string_of_int i)
+  | PTR {contents = T t} -> termToTexString_ t absList
+  | PTR {contents = V v} ->  termToTexString_ (VAR v) absList
+  | PRED (s, t, _) -> termToTexString_ t absList
+  | EQU (s, i, t) -> " eq prop "^(termToTexString_ t absList)^(string_of_int i)
   | TOP -> "\\top"
   | ONE -> "1"
   | BOT -> "\\bot"
   | ZERO -> "0"
-  | NOT (t) -> "\\neg "^(termToTexString t)
-  | COMP (c, i1, i2) -> (termToTexString i1)^(compToTexString c)^(termToTexString i2)
-  | ASGN ( i1, i2) -> (termToTexString i1)^" is "^(termToTexString i2)
-  | PRINT (t1) -> "print "^(termToTexString t1)
+  | NOT (t) -> "\\neg "^(termToTexString_ t absList)
+  | COMP (c, i1, i2) -> (termToTexString_ i1 absList)^(compToTexString c)^(termToTexString_ i2 absList)
+  | ASGN ( i1, i2) -> (termToTexString_ i1 absList)^" is "^(termToTexString_ i2 absList)
+  | PRINT (t1) -> "print "^(termToTexString_ t1 absList)
   | CUT -> "fail(cut)"
-  | TENSOR (t1, t2) -> (termToTexString t1)^" \\otimes "^(termToTexString t2)
-  | ADDOR (t1, t2) -> (termToTexString t1)^" \\oplus "^(termToTexString t2)
-  | PARR (t1, t2) -> (termToTexString t1)^" \\bindnasrepma "^(termToTexString t2)
-  | LOLLI (s, t1, t2) -> (termToTexString t2)^" \\multimap_{"^(termToTexString s)^"} "^(termToTexString t1)
-  | BANG (s, t) -> " !^{"^(termToTexString s)^"} "^(termToTexString t)
-  | HBANG (s, t) -> " !^{\\hat{"^(termToTexString s)^"}} "^(termToTexString t)
-  | QST (s, t) -> " ?^{"^(termToTexString s)^"} "^(termToTexString t)
-  | WITH (t1, t2) -> (termToTexString t1)^" \\binampersand "^(termToTexString t2)
-  | FORALL (s, i, t) -> "\\forall "^s^(string_of_int i)^" "^(termToTexString t)
-  | EXISTS (s, i, t) -> "\\exists "^s^(string_of_int i)^" "^(termToTexString t)
-  | CLS (ty, t1, t2) -> (termToTexString t1)^(clsTypeToString ty)^(termToTexString t2)
-  | NEW (s, t) -> "new \\lambda "^s^(termToTexString t)
-  | BRACKET (f) -> "\\{ "^(termToTexString f)^" \\}"
+  | TENSOR (t1, t2) -> (termToTexString_ t1 absList)^" \\otimes "^(termToTexString_ t2 absList)
+  | ADDOR (t1, t2) -> (termToTexString_ t1 absList)^" \\oplus "^(termToTexString_ t2 absList)
+  | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\bindnasrepma "^(termToTexString_ t2 absList)
+  | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\multimap_{"^(termToTexString_ s absList)^"} "^(termToTexString_ t1 absList)
+  | BANG (s, t) -> " !^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
+  | HBANG (s, t) -> " !^{\\hat{"^(termToTexString_ s absList)^"}} "^(termToTexString_ t absList)
+  | QST (s, t) -> " ?^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
+  | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\binampersand "^(termToTexString_ t2 absList)
+  | FORALL (s, i, t) -> "\\forall "^s^" "^(termToTexString_ t ([s] @ absList))
+  | EXISTS (s, i, t) -> "\\exists "^s^" "^(termToTexString_ t ([s] @ absList))
+  | CLS (ty, t1, t2) -> (termToTexString_ t1 absList)^(clsTypeToString ty)^(termToTexString_ t2 absList)
+  | NEW (s, t) -> "new \\lambda "^s^(termToTexString_ t ([s] @ absList))
+  | BRACKET (f) -> "\\{ "^(termToTexString_ f absList)^" \\}"
+
+let termToTexString term = termToTexString_ term []
 
 let termsListToTexString args = List.fold_right (fun el acc ->
   (termToTexString el)^" :: "^acc) args ""
@@ -171,17 +174,17 @@ let rec typeToTexString typ = match typ with
       | TBASIC _ -> (typeToTexString x)^" \\rightarrow "^(typeToTexString y)
       | _ -> "("^(typeToTexString x)^") \\rightarrow "^(typeToTexString y)
 
-let texFileHeader () = (
+let texFileHeader = (
   "\\documentclass[a4paper, 11pt]{article}\n"^ 
   "\\usepackage[utf8]{inputenc}\n"^ 
   "\\usepackage{amsmath}\n"^
   "\\usepackage{amssymb}\n"^ 
   "\\usepackage{stmaryrd}\n"^ 
   "\\usepackage{proof}\n\n"^
-  "\\usepackage[landscape]{geometry}\n\n"^ 
-  "\\begin{document}\n{\\tiny\n$$\n")
+  "\\usepackage[landscape, margin=1cm]{geometry}\n\n"^ 
+  "\\begin{document}\n")
   
-let texFileFooter () = "$$\n}\n\\end{document}"
+let texFileFooter = "\n\\end{document}"
     
 
 (* Removes special characters from a string *)

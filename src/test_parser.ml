@@ -4,7 +4,7 @@ let main () =
 try
 let lexbuf = Lexing.from_channel stdin in
 while true do
-  Parser_models.model Lexer_models.token lexbuf
+  Parser_models.input Lexer_models.token lexbuf
   (*let m = Parser_models.model Lexer_models.token lexbuf in
   let c = Constraints.create m in
   print_endline "Parsed:";

@@ -37,31 +37,6 @@ let initAll () =
   Coherence.initialize ();
 ;;
 
-(* TODO: improve this output *)
-let generate_bipoles formList = begin
-
-  let genBip r = 
-    print_endline("=======================================================");
-    print_endline("Bipoles for the formula: " ^ (Prints.termToString (Term.observe r)));
-    let bipoles = Bipole.bipole r in
-    List.iter ( fun (pt, model) ->
-      print_endline "-------------------------------------------------------";
-      print_endline "Open leaves: ";
-      ProofTreeSchema.printOpenLeaves pt;
-      print_endline "******************************************************";
-      print_endline (ProofTreeSchema.toTexString pt);
-      print_endline "******************************************************";
-      print_newline ();
-      print_endline "<<<<<< begin model >>>>>>>";
-      print_endline (Constraints.toString model);
-      print_endline "<<<<<< end model >>>>>>>\n";
-      print_endline "-------------------------------------------------------\n"
-    ) bipoles;
-    print_endline("=======================================================\n")
-  in
-  List.iter ( fun r -> genBip r ) formList
-end ;;
-
 let check_principalcut () = begin
   if Staticpermutationcheck.cut_principal () then 
     print_endline "Tatu could infer that reduction to principal cuts is possible." else
@@ -149,7 +124,14 @@ solve_query () =
   if query_string = "#done" then samefile := false      
   else begin
   match query_string with 
-    | "#rules" -> generate_bipoles !Specification.introRules
+
+    (* Check if all rules are bipoles*)
+    | "#check_rules" -> 
+      let formulas = Specification.getAllRules () in
+      List.iter (fun f -> match Term.isBipole f with
+        | true -> ()
+        | false -> print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f))
+      ) formulas
 
     | "#bipole" -> 
       let i = ref 0 in
@@ -160,31 +142,30 @@ solve_query () =
         i := !i + 1
       ) formulas;
       print_newline ();
-      print_endline "SELLF will generate the bipole corresponding to the formula \
-      chosen and print a latex file (on the screen, sorry about that!) with them.";
+      print_endline "SELLF will generate the bipoles corresponding to the formula \
+      chosen and print them in a latex file.";
       print_endline "Please type the number of the formula: ";
       let i1 = int_of_string (read_line ()) in
-      begin
-      let bipoles = Bipole.bipole (List.nth formulas i1) in
-        print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
-        \\usepackage{amsmath}\n\
-        \\usepackage{stmaryrd}\n\
-        \\usepackage[margin=1cm]{geometry}\n\
-        \\usepackage{proof}\n\n\
-        \\begin{document}\n\n";
-   
-        print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString (List.nth formulas i1)) ^ "$:} \n");
-        List.iter (fun (pt, model) ->
-          print_endline "{\\scriptsize";
-          print_endline "\\[";
-          print_endline (ProofTreeSchema.toTexString pt);
-          print_endline "\\]";
-          print_endline "}";
-          print_endline "CONSTRAINTS\n";
-          print_endline (Constraints.toTexString model);
-        ) bipoles;  
-   
-        print_endline "\\end{document}";
+      print_endline "Please type the name of the file: ";
+      let fileName = read_line () in
+      let file = open_out (fileName^".tex") in begin
+      try match Bipole.bipole (List.nth formulas i1) with
+        | bipoles ->
+          Printf.fprintf file "%s" Prints.texFileHeader;
+          Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i1));
+          List.iter (fun (pt, model) ->
+            Printf.fprintf file "%s" "{\\scriptsize";
+            Printf.fprintf file "%s" "\\[";
+            Printf.fprintf file "%s" (ProofTreeSchema.toTexString pt);
+            Printf.fprintf file "%s" "\\]";
+            Printf.fprintf file "%s" "}";
+            Printf.fprintf file "%s" "CONSTRAINTS\n";
+            Printf.fprintf file "%s" (Constraints.toTexString model);
+          ) bipoles;   
+          Printf.fprintf file "%s" Prints.texFileFooter;
+          close_out file;
+
+        with Bipole.Not_bipole -> print_endline "This specification is not a bipole!"
       end
 
     | "#permute" -> 
@@ -205,8 +186,8 @@ solve_query () =
       let i2 = int_of_string (read_line ()) in
       begin
       match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
-        | true -> print_endline "The rules permute."
-        | false -> print_endline "The rules do not permute."
+        | true -> print_endline "\nThe rules permute.\n"
+        | false -> print_endline "\nThe rules do not permute.\n"
       end
 
     | "#cutcoherence" -> check_cutcoherence ()

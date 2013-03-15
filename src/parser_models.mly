@@ -12,6 +12,7 @@
 (* Header (OCaml code) *)
 
 open Term
+open TypeChecker
 
 let parse_error s = 
   print_endline s;
@@ -30,7 +31,7 @@ let make_APP lst =
 */
 
 /* Terminal symbols */
-%token <int> INDEX DB
+%token <int> INDEX
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
 %token IN MCTX ELIN EMP UNION ADDFORM REQIN REMOVED
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
@@ -48,21 +49,19 @@ let make_APP lst =
 %start model
 %type <Constraints.constraintpred list> model
 
-/* GR TODO: remove the input things once I am using the parser only inside? */
-/*%start input
+/* Using this a start symbol will only parse and not return a model */
+%start input
 %type <unit> input
-*/
 
 %% 
 
 /* Grammar rules */
 
-/*
 input:
-   empty   { }
+  /* empty */  { }
   | NEWLINE { } 
-  | model NEWLINE { $1 }
-*/
+  | model NEWLINE {  }
+;
 
 model: 
   /* empty */                   { [] }
@@ -72,14 +71,36 @@ model:
 ;
 
 constraintPred:
-  | IN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                           { Constraints.IN($4, $7) }
-  | MCTX LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                         { Constraints.MCTX($4, $7) }
-  | ELIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                         { Constraints.ELIN($4, $7) }
-  | EMP LPAREN contextVar RPAREN                                                    { Constraints.EMP($3) }
-  | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN                { Constraints.UNION($3, $5, $7) }
-  | ADDFORM LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN     { Constraints.ADDFORM($4, $7, $9) }
-  | REQIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN                        { Constraints.REQIN($4, $7) }
-  | REMOVED LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN     { Constraints.REMOVED($4, $7, $9) }
+  | IN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in
+    Constraints.IN(f, $7) 
+  }
+  | MCTX LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in
+    Constraints.MCTX(f, $7) 
+  }
+  | ELIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in
+    Constraints.ELIN(f, $7) 
+  }
+  | EMP LPAREN contextVar RPAREN { 
+    Constraints.EMP($3) 
+  }
+  | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
+    Constraints.UNION($3, $5, $7) 
+  }
+  | ADDFORM LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in
+    Constraints.ADDFORM(f, $7, $9) 
+  }
+  | REQIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in
+    Constraints.REQIN(f, $7) 
+  }
+  | REMOVED LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN { 
+    let f = deBruijn true $4 in  
+    Constraints.REMOVED(f, $7, $9) 
+  }
   ;
 
 contextVar: 
@@ -99,7 +120,8 @@ formula:
   | HBANG formula            { HBANG (CONS("$infty"),$2) }
   | QST formula              { QST (CONS("$infty"),$2) }
   | FORALL formula           { FORALL ($1, 0, $2) } 
-  | EXISTS formula           { EXISTS ($1, 0, $2) } 
+  | EXISTS formula           { EXISTS ($1, 0, $2) }
+  | ABS formula              { ABS($1, 0, $2) }
   | formula TIMES formula    { TENSOR ($1, $3)}
   | formula PLUS formula     { ADDOR ($1, $3)}
   | formula PIPE formula     { PARR ($1, $3)}
@@ -124,7 +146,6 @@ pred:
 terms:
   | term                        { [$1] }
   | term terms                  { $1 :: $2 }
-  | ABS terms                   { [ABS($1, 0, (make_APP $2))] } 
   | LPAREN terms RPAREN         { [make_APP $2] }
   | LPAREN terms RPAREN terms   { (make_APP $2) :: $4 } 
 ;
@@ -133,7 +154,6 @@ term:
   | NAME     { CONS ($1) }
   | VAR      { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
   | STRING   { STRING ($1) }
-  | DB       { DB($1) }
 ;
 
 subexp:

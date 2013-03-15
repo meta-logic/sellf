@@ -219,10 +219,7 @@ body DOT {
   let clause_typecheck = deBruijn false raw_clause in
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
-  (* TODO: I might need to transform the abstractions of a goal into existential
-  quentifiers *)
   
-  (* add_goals clause_goal;*)
   goal := clause;
   if !verbose then begin
     print_endline (" New goal: "^(termToString $1));
@@ -277,6 +274,7 @@ body:
 | QST body              { QST (CONS("$infty"),$2) }
 | FORALL body           { FORALL ($1, 0, $2) } 
 | EXISTS body           { EXISTS ($1, 0, $2) } 
+| ABS body              { ABS($1, 0, $2) }
 | body TIMES body       { TENSOR ($1, $3)}
 | body PLUS body        { ADDOR ($1, $3)}
 | body PIPE body        { PARR ($1, $3)}
@@ -292,7 +290,6 @@ body:
 terms:
 | term                        { [$1] }
 | term terms                  { $1 :: $2 }
-| ABS terms                   { [ABS($1, 0, (make_APP $2))] } 
 | LPAREN terms RPAREN         { [make_APP $2] }
 | LPAREN terms RPAREN terms   { (make_APP $2) :: $4 } 
 ;

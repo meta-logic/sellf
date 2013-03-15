@@ -79,14 +79,14 @@ let checkDuality str (t1, t2) =
 
 (* TODO: put proper system name *)
 let cutCoherence () =
-  system_name := "proofsTex/proof";
+  system_name := "proofsTex/coherence/proof";
   Hashtbl.iter checkDuality Specification.lr_hash;
   if !cutcoherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
 ;;
 
 let initialCoherence () =
-  system_name := "proofsTex/proof";
+  system_name := "proofsTex/coherence/proof";
   Hashtbl.iter checkInitCoher Specification.lr_hash;
   if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
