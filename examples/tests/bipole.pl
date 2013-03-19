@@ -12,3 +12,5 @@ e | f.
 % with
 g & h.
 
+% not a bipole
+a & (b * c).

@@ -195,7 +195,7 @@ let proofImplies (der1, model1) (der2, model2) =
   genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
   let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
   let rec hasModel input = try match input_line input with
-    | _ -> true (* If some line is printed, it means that there is a model *)
+    | _ -> let _ = Unix.close_process_in channel in true (* If some line is printed, it means that there is a model *)
     with End_of_file -> let _ = Unix.close_process_in channel in false
   in
   hasModel channel  
