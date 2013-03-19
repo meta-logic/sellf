@@ -192,6 +192,30 @@ solve_query () =
         | false -> print_endline "\nThe rules do not permute.\n"
       end
 
+    (* Check if all rules permute *)
+    | "#permute_all" ->
+      let formulas = !Specification.others @ !Specification.introRules in
+      print_endline "SELLF will check the permutation of all formulas over all \
+      formulas.";
+      begin
+      List.iter (fun f1 -> 
+        List.iter (fun f2 ->
+          match Permutation.permute f1 f2 with
+            | true -> ()
+              (*print_endline (Prints.termToString f1);
+              print_endline "\npermutes over\n";
+              print_endline (Prints.termToString f2)*)
+            | false -> 
+              print_endline "------------------------------------------------------";
+              print_endline (Prints.termToString f1);
+              print_endline "\ndoes NOT permute over\n";
+              print_endline (Prints.termToString f2)
+        ) formulas
+      ) formulas;
+      print_endline "------------------------------------------------------";
+      print_endline "All the other rules permute."
+      end
+
     | "#cutcoherence" -> check_cutcoherence ()
     
     | "#initialcoherence" -> check_initialcoherence ()
