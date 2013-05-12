@@ -27,6 +27,8 @@ let create sq = {
 
 let getConclusion pt = pt.conclusion
 
+let getRule pt = pt.rule
+
 (* TODO: check if this actually copies a prooftree *)
 let rec copy pt = 
   let cp = create pt.conclusion in

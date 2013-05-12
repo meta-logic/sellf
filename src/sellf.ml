@@ -1,5 +1,6 @@
 open ProofTree
 open Subexponentials
+open Ol
 
 module TestUnify = 
   Unify.Make(struct
@@ -149,9 +150,15 @@ solve_query () =
       let i1 = int_of_string (read_line ()) in
       print_endline "Please type the name of the file: ";
       let fileName = read_line () in
-      let file = open_out (fileName^".tex") in begin
+      let file = open_out (fileName^".tex") in
+      let olPt = [] in
+      let olPtRef = ref olPt in begin
       try match Bipole.bipole (List.nth formulas i1) with
         | bipoles ->
+	  olPtRef := Derivation.transformTree bipoles;
+	  Derivation.solveFirstPhase bipoles !olPtRef;
+	  Derivation.solveSndPhase bipoles !olPtRef;
+	  List.iter OlProofTree.toMacroRule !olPtRef;
           Printf.fprintf file "%s" Prints.texFileHeader;
           Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i1));
           List.iter (fun (pt, model) ->
@@ -163,6 +170,14 @@ solve_query () =
             Printf.fprintf file "%s" "CONSTRAINTS\n";
             Printf.fprintf file "%s" (Constraints.toTexString model);
           ) bipoles;   
+          Printf.fprintf file "%s" "{\\section{Result:}}\n";
+          List.iter (fun olt ->
+            Printf.fprintf file "%s" "{\\scriptsize";
+            Printf.fprintf file "%s" "\\[";
+            Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+            Printf.fprintf file "%s" "\\]";
+            Printf.fprintf file "%s" "}";
+          ) !olPtRef;
           Printf.fprintf file "%s" Prints.texFileFooter;
           close_out file;
 

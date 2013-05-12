@@ -69,7 +69,7 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
+SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml ol.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
 # The executable file to generate
 
