@@ -284,10 +284,10 @@ module Derivation = struct
   let solveFirstPhase bplLst olProofTree =
     let rewSeq seq cstr = 
       match cstr with 
-      | MCTX (t, c) -> 
+      (*| MCTX (t, c) -> 
 	  if (fst(c) = "gamma") then
 	    let c' = OlContext.fixGamma c in solveMctx seq c' t
-	  else solveMctx seq c t
+	  else solveMctx seq c t*)
       | ELIN (t, c) -> 
 	  if (fst(c) = "gamma") then
 	    let c' = OlContext.fixGamma c in solveElin seq c' t
@@ -308,11 +308,11 @@ module Derivation = struct
     List.iter (fun (pt, model) ->
     List.iter (fun cstr -> 
       match cstr with
-      | MCTX (t, c) -> 
+      (*| MCTX (t, c) -> 
 	let rec rewTreeMctx olTree = 
 	  rewSeq olTree cstr;
 	  List.iter rewTreeMctx olTree.OlProofTree.tree in
-	List.iter rewTreeMctx olProofTree
+	List.iter rewTreeMctx olProofTree*)
 	
       | ELIN (t, c) -> 
 	let rec rewTreeElin olTree =

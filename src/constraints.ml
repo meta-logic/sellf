@@ -14,14 +14,13 @@ open Subexponentials
 
 let i = ref 0;;
 
+(* TODO: remove reqIn which is subsumed by remove?d *)
 type ctx = string * int
 type constraintpred = 
   | IN of terms * ctx
-  | MCTX of terms * ctx
   | ELIN of terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | ADDFORM of terms * ctx * ctx
   | REQIN of terms * ctx (* printed as ":- not in(term, ctx)."*)
   | REMOVED of terms * ctx * ctx
  
@@ -99,7 +98,8 @@ let initial ctx f =
   let isHere (sub, i) dualf = 
     let c1 = match type_of sub with
     | LIN | AFF -> ELIN(dualf, (sub, i))
-    | UNB | REL -> MCTX(dualf, (sub, i))
+    (*| UNB | REL -> MCTX(dualf, (sub, i))*)
+    | UNB | REL -> IN(dualf, (sub, i))
     in
     let empty = List.fold_right (fun (s, i) acc ->
       if s != sub then begin match type_of s with
@@ -118,16 +118,17 @@ let initial ctx f =
 let predToTexString c = match c with
   | IN (t, c) -> 
     "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
-  | MCTX (t, c) -> 
-    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
+  (*| MCTX (t, c) -> 
+    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"*)
   | ELIN (t, c) ->
     "$elin(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
   | EMP (c) -> 
     "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
     "$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$"
-  | ADDFORM (t, c1, c2) -> 
+  (*| ADDFORM (t, c1, c2) -> 
     "$addform(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ").$"
+  *)
   | REQIN (t, c) -> 
     "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in()).$"
   | REMOVED (t, c1, c2) -> 
@@ -139,16 +140,17 @@ let rec toTexString csts =
 let predToString c = match c with
   | IN (t, c) -> 
     "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
-  | MCTX (t, c) -> 
-    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
+  (*| MCTX (t, c) -> 
+    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."*)
   | ELIN (t, c) ->
     "elin(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | EMP (c) ->
     "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
-  | ADDFORM (t, c1, c2) -> 
+  (*| ADDFORM (t, c1, c2) -> 
     "addform(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ")."
+  *)
   | REQIN (t, c) -> 
     ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | REMOVED (t, c1, c2) -> 

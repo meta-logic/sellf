@@ -11,11 +11,9 @@
 type ctx = string * int
 type constraintpred = 
   | IN of Term.terms * ctx
-  | MCTX of Term.terms * ctx
   | ELIN of Term.terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | ADDFORM of Term.terms * ctx * ctx
   | REQIN of Term.terms * ctx
   | REMOVED of Term.terms * ctx * ctx
  

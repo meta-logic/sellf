@@ -11,6 +11,7 @@
 open Sequent
 open Context
 open Term
+open Subexponentials
 open Llrules
 
 type prooftree = {
@@ -75,7 +76,11 @@ let decide pt f subexp =
   let ctx = SequentSchema.getContext conc in
   let reqconstr = Constraints.requireIn f subexp ctx in
   let newctx = ContextSchema.next ctx subexp in
-  let remconstr = Constraints.remove f subexp ctx newctx in
+  let remconstr = match type_of subexp with
+    | AFF | LIN -> Constraints.remove f subexp ctx newctx
+    (* TODO create a requiredIn constraint here *)
+    | REL | UNB -> Constraints.create []
+  in
   (* Create a new sequent and add this as a premise to the prooftree *)
   let premise = SequentSchema.createSync newctx f in
   let newpt = create premise in

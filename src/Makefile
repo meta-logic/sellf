@@ -73,7 +73,7 @@ SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChe
 
 # The executable file to generate
 
-EXEC = sellf
+EXEC = sellf.test
 
 
 ########################## Advanced user's variables #####################

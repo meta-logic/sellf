@@ -97,8 +97,8 @@ let genFile cstrSet name =
   Printf.fprintf file "%s" union_clauses_set;
   Printf.fprintf file "%s" elin_clauses_set;
   Printf.fprintf file "%s" emp_clauses_set;
-  Printf.fprintf file "%s" mctx_clauses_set;
-  Printf.fprintf file "%s" addform_clauses_set;
+  (*Printf.fprintf file "%s" mctx_clauses_set;
+  Printf.fprintf file "%s" addform_clauses_set;*)
   Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
   Printf.fprintf file "%s" (Constraints.toString cstrSet);
@@ -168,8 +168,8 @@ let genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr name =
   Printf.fprintf file "%s" union_clauses_set;
   Printf.fprintf file "%s" elin_clauses_set;
   Printf.fprintf file "%s" emp_clauses_set;
-  Printf.fprintf file "%s" mctx_clauses_set;
-  Printf.fprintf file "%s" addform_clauses_set;
+  (*Printf.fprintf file "%s" mctx_clauses_set;
+  Printf.fprintf file "%s" addform_clauses_set;*)
   Printf.fprintf file "%s" removed_clauses_set;
   Printf.fprintf file "%s" aux_clauses_set;
   Printf.fprintf file "%s" proveIf_clauses;
