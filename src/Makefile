@@ -73,7 +73,7 @@ SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChe
 
 # The executable file to generate
 
-EXEC = sellf.test
+EXEC = sellf
 
 
 ########################## Advanced user's variables #####################
@@ -98,7 +98,10 @@ LIBS=$(WITHUNIX)
 # or if any C code have to be linked with your program
 # (irrelevant for ocamlopt)
 
-CUSTOM=-custom
+# G: Removing the -custom option so that the generated file works with the
+# debugger.
+#CUSTOM=-custom
+CUSTOM=
 
 # Default setting of the WITH* variables. Should be changed if your
 # local libraries are not found by the compiler.
