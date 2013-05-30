@@ -156,9 +156,9 @@ solve_query () =
       try match Bipole.bipole (List.nth formulas i1) with
         | bipoles ->
 	  olPtRef := Derivation.transformTree bipoles;
-	  Derivation.solveFirstPhase bipoles !olPtRef;
-	  Derivation.solveSndPhase bipoles !olPtRef;
-	  List.iter OlProofTree.toMacroRule !olPtRef;
+	  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPtRef;
+	  Derivation.solveFirstPhase !olPtRef;
+	  Derivation.solveSndPhase !olPtRef;
           Printf.fprintf file "%s" Prints.texFileHeader;
           Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i1));
           List.iter (fun (pt, model) ->
@@ -171,7 +171,7 @@ solve_query () =
             Printf.fprintf file "%s" (Constraints.toTexString model);
           ) bipoles;   
           Printf.fprintf file "%s" "{\\section{Result:}}\n";
-          List.iter (fun olt ->
+          List.iter (fun (olt, model) ->
             Printf.fprintf file "%s" "{\\scriptsize";
             Printf.fprintf file "%s" "\\[";
             Printf.fprintf file "%s" (OlProofTree.toTexString olt);

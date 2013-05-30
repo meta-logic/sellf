@@ -107,6 +107,8 @@ let permute spec1 spec2 =
   List.for_all (fun b12 ->
     List.exists (fun b21 ->
       Dlv.proofImplies b12 b21 
+      (*let rec accBipole b1 b2 acc = 
+	if Dlv.proofImplies b12 b21 then (b12, b21) :: acc else acc*)
     ) bipoles21
   ) bipoles12
 ;;
