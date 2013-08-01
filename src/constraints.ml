@@ -111,7 +111,9 @@ let initial ctx f =
     c1 :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
-    ( isHere c (nnf (NOT(f))) ) :: acc 
+  (* Gamma contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
+    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" then acc
+    else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs
 

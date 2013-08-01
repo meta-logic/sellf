@@ -104,12 +104,13 @@ let permute spec1 spec2 =
   bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
 *)
 
-  List.for_all (fun b12 ->
-    List.exists (fun b21 ->
-      Dlv.proofImplies b12 b21 
-      (*let rec accBipole b1 b2 acc = 
-	if Dlv.proofImplies b12 b21 then (b12, b21) :: acc else acc*)
-    ) bipoles21
-  ) bipoles12
+(*  List.for_all (fun b12 ->
+    List.exists (fun b21 ->*)
+  List.fold_right (fun b12 acc ->
+    if List.exists (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 then
+      let b21 = List.find (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 in
+      (b12, b21) :: acc
+    else acc
+  ) bipoles12 []
 ;;
 

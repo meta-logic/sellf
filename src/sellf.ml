@@ -96,7 +96,7 @@ end ;;
 let rec start () =
   initAll ();
   print_string ":> ";
-    let command = read_line() in
+    let command = "#load ../examples/proofsystems/ll" (*read_line()*) in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer_top.token lexbuf_top in 
@@ -157,8 +157,8 @@ solve_query () =
         | bipoles ->
 	  olPtRef := Derivation.transformTree bipoles;
 	  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPtRef;
-	  Derivation.solveFirstPhase !olPtRef;
-	  Derivation.solveSndPhase !olPtRef;
+	  Derivation.solveFirstPhaseBpl !olPtRef;
+	  Derivation.solveSndPhaseBpl !olPtRef;
           Printf.fprintf file "%s" Prints.texFileHeader;
           Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i1));
           List.iter (fun (pt, model) ->
@@ -202,13 +202,45 @@ solve_query () =
       print_endline "Please type the number of F2: ";
       let i2 = int_of_string (read_line ()) in
       begin
-      match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
+(*      match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
         | true -> print_endline "\nThe rules permute.\n"
-        | false -> print_endline "\nThe rules do not permute.\n"
+        | false -> print_endline "\nThe rules do not permute.\n"*)
+        let perm_bipoles = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
+        match perm_bipoles with
+        | [] -> print_endline "\nThe rules do not permute.\n"
+        | _ -> print_endline "Please type the name of the file: ";
+	      let fileName = read_line () in
+	      let file = open_out (fileName^".tex") in
+	      let olPt = [] in
+	      let olPtRef = ref olPt in
+	      olPtRef := Derivation.transformTree' perm_bipoles;
+	      List.iter (fun ((olt1, model1), (olt2, model2)) -> 
+		OlProofTree.toPermutationFormat olt1;
+		OlProofTree.toPermutationFormat olt2;
+	      ) !olPtRef;
+	      Derivation.solveFirstPhasePer !olPtRef;
+	      Derivation.solveSndPhasePer !olPtRef;
+	      Printf.fprintf file "%s" Prints.texFileHeader;
+	      Printf.fprintf file "\\section{Permutations: } \n";
+              List.iter (fun (b12, b21) ->
+		  Printf.fprintf file "%s" "{\\scriptsize";
+		  Printf.fprintf file "%s" "\\[";
+		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
+		  Printf.fprintf file "%s" "\\]";
+		  Printf.fprintf file "%s" "}";
+		  Printf.fprintf file "\n \\begin{center} $\\downarrow$ \\end{center} \n";
+		  Printf.fprintf file "%s" "{\\scriptsize";
+		  Printf.fprintf file "%s" "\\[";
+		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
+		  Printf.fprintf file "%s" "\\]";
+		  Printf.fprintf file "%s" "}";
+              ) !olPtRef;
+	      Printf.fprintf file "%s" Prints.texFileFooter;
+	      close_out file;
       end
 
     (* Check if all rules permute *)
-    | "#permute_all" ->
+    (*| "#permute_all" ->
       let formulas = !Specification.others @ !Specification.introRules in
       print_endline "SELLF will check the permutation of all formulas over all \
       formulas.";
@@ -229,7 +261,7 @@ solve_query () =
       ) formulas;
       print_endline "------------------------------------------------------";
       print_endline "All the other rules permute."
-      end
+      end*)
 
     | "#cutcoherence" -> check_cutcoherence ()
     
