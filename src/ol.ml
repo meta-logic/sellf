@@ -86,7 +86,7 @@ module OlContext = struct
       n = str_ctx || ((n = ("#" ^ (remDolar str_ctx))) && ((getFormSide (List.hd f)) = side))
   ) ctx.lst
   
-  let toTexString ctx side = 
+  let toTexString ctx side str_list = 
     let slotToTex ctx side str_ctx =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
@@ -142,7 +142,6 @@ module OlContext = struct
 	else acc
       | (_, _, _) -> "" ^ acc
     ) ctx.lst "") in
-    let str_list = getStrings ctx in
     (* Print all slots *)
     List.fold_right (fun str_ctx acc ->
       if (isEmpty ctx str_ctx side) then (remComma (slotToTex ctx side str_ctx)) ^ " \\mid " ^ acc
@@ -192,21 +191,18 @@ module OlSequent = struct
     | APP (t, tlist) -> t
     | _ -> f
     
-  (*let getMainForm seq = 
-    let ctx = getContext seq in
-    let goal = if seq.goals != [] then List.hd seq.goals else (* Arbitrary term *) ZERO in
-    getOnlyRule (formatForm goal)*)
+  let getMainForm seq = 
+    match seq.goals with
+    | [] -> NONE
+    | _ -> SOME (getOnlyRule (formatForm (List.hd seq.goals)))
   
   (* Remove the vertical bar remnant *)
   let formatContext str = 
     String.sub str 0 ((String.length str)-6)
   
-  let toTexString seq = 
-    match seq.pol with
-    | ASYN -> (formatContext (OlContext.toTexString seq.ctx "lft"))
-    ^ " \\vdash " ^ (formatContext (OlContext.toTexString seq.ctx "rght")) ^ "\\Uparrow"
-    | SYNC -> (formatContext (OlContext.toTexString seq.ctx "lft"))
-    ^ " \\vdash " ^ (formatContext (OlContext.toTexString seq.ctx "rght")) ^ "\\Downarrow"
+  let toTexString seq str_list = 
+    (formatContext (OlContext.toTexString seq.ctx "lft" str_list))
+    ^ " \\vdash " ^ (formatContext (OlContext.toTexString seq.ctx "rght" str_list))
     
 end;;
 
@@ -224,28 +220,66 @@ module OlProofTree = struct
     rule = rl;
   }
   
+  let getFromOption opt = 
+    match opt with
+    | SOME(x) -> x
+    | NONE -> raise (Invalid_argument "Option.get")
+  
   let getConclusion pt = pt.conclusion
+  
+  let getRule pt = pt.rule
   
   let getPol pt = 
     let conclusion = getConclusion pt in
     conclusion.OlSequent.pol
+    
+  let getListFromOptions lst = 
+    List.concat (List.map (fun el ->
+      match el with
+      | SOME (el') -> [getFromOption el]
+      | NONE -> []
+    ) lst )
  
   let toPermutationFormat olPt = 
     let firstPt = List.hd olPt.tree in
-    let rec getSwitchedPhase pt = 
-      match getPol pt with
-      | ASYN ->
-	if (List.exists (fun el -> (getPol el) = SYNC) pt.tree) then
-	  let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.tree in
-	  nextPt.tree <- [];
-	  nextPt.rule <- NONE;
-	  pt.tree <- [nextPt];
-	  [pt]
-	else List.concat (List.map (fun p -> getSwitchedPhase p) pt.tree)
-      | SYNC -> List.concat (List.map (fun p -> getSwitchedPhase p) pt.tree) in
-    let newPt = getSwitchedPhase olPt in
-    olPt.conclusion <- firstPt.conclusion;
-    olPt.tree <- newPt
+    let rec getSeq' pt = 
+      match (pt.tree, getPol pt) with 
+      | ([], ASYN) -> 
+	begin
+	  match pt.rule with 
+	  | SOME(r) -> [NONE]
+	  | NONE -> [SOME(pt)]
+	end
+      | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
+    let rec getSeq pt' =
+      let pt = getFromOption pt' in
+      match pt.tree with
+      | [] -> 
+	begin
+	  match (getRule pt) with 
+	  | SOME(r) -> [NONE]
+	  | NONE -> [SOME(pt)]
+	end
+      | _ -> 
+	begin
+	  match (getPol pt) with
+	  | ASYN ->
+	    if (List.exists (fun el -> (getPol el) = SYNC) pt.tree) then
+	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.tree in
+	      nextPt.tree <- List.concat (List.map (fun el -> match el with
+		| SOME (el') -> [getFromOption el]
+		| NONE -> [] 
+		) (getSeq' nextPt));
+	      [SOME(nextPt)]
+	    else let tree_opt = List.map (fun el -> SOME(el)) pt.tree in
+	    List.concat (List.map (fun p -> getSeq p) tree_opt)
+	  | SYNC -> 
+	    let tree_opt = List.map (fun el -> SOME(el)) pt.tree in
+	    List.concat (List.map (fun p -> getSeq p) tree_opt)
+	  end in  
+    let newPtList = getSeq (SOME(firstPt)) in
+    olPt.tree <- (getListFromOptions newPtList);
+    olPt.conclusion <- firstPt.conclusion
     
   let toMacroRule olPt = 
     let firstPt = List.hd olPt.tree in
@@ -256,19 +290,27 @@ module OlProofTree = struct
     let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
     olPt.tree <- newPremises
+    
+  let collectStrings pt =
+    let conclusion = getConclusion pt in
+    let context = OlSequent.getContext conclusion in
+    (OlContext.getStrings context)
   
-  let rec toTexString pt =
-    let seq = getConclusion pt in
-    (*let rule = OlSequent.getMainForm seq in*)
-    match pt.rule with
-    | SOME(r) ->
-      let topproof = match pt.tree with
-	| [] -> ""
-	| hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
-      in
-      "\\infer"(* ^ (termToTexString rule) ^ "_{" ^ (OlContext.getFormSide (List.hd seq.OlSequent.goals)) ^ "}" ^*) 
-      ^ "{"^(OlSequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"
-    | NONE -> (OlSequent.toTexString (getConclusion pt))
+  let toTexString pt =
+    let str_list = collectStrings pt in
+    let rec toTexString' pt = 
+      match pt.rule with
+      | SOME(r) ->
+	let seq = getConclusion pt in
+	let rule = getFromOption (OlSequent.getMainForm seq) in
+	let topproof = match pt.tree with
+	  | [] -> ""
+	  | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString' el)) tl "") 
+	in
+	"\\infer" ^ "[" ^ (termToTexString rule) ^ "_{" ^ (OlContext.getFormSide (List.hd seq.OlSequent.goals)) ^ "}]" 
+	^ "{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"
+      | NONE -> (OlSequent.toTexString (getConclusion pt) str_list) in
+    toTexString' pt
 
 end;;
 
@@ -335,7 +377,7 @@ module Derivation = struct
     olCtx.OlContext.lst <- newCtx;
     newCtx <> olCtxLst
     
-  let solveUnion olPt c1 c2 c3 = 
+  let solveUnion olPt c1 c2 c3 =
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
     let lctx = olCtx.OlContext.lst in
@@ -343,11 +385,11 @@ module Derivation = struct
     let newCtxRef = ref newCtx in
     newCtxRef := lctx;
     List.iter (fun (olc, f) ->
-      newCtxRef := List.map (fun (olc', f') -> 
-      if (olc' = (fst(c3))) then (("#", 0), []) 
+      newCtxRef := List.map (fun (olc', f') ->
+      if (olc' = (fst(c3))) then (("#", 0), [])
       else (olc', f')) !newCtxRef;
       if (olc = (fst(c3))) then
-	newCtxRef := c1 :: c2 :: !newCtxRef
+        newCtxRef := c1 :: c2 :: !newCtxRef
       else ()
     ) lctx;
     olCtx.OlContext.lst <- !newCtxRef;
@@ -377,7 +419,8 @@ module Derivation = struct
 	let c2' = OlContext.fixContext c2 in
 	let c1' = OlContext.fixContext c1 in
 	solveUnion seq (c1', []) (c2', []) (c3', [])
-    | _ -> false
+    (* Any other constraint is despised *)
+    | _ -> true
     
   let solveConstraintsFst cstr olProofTree =
     match cstr with
@@ -403,48 +446,50 @@ module Derivation = struct
       List.exists (fun el -> el = true) boolList
       
     | _ -> false
+    
+  let applyConstraints pt model = 
+    while (List.exists (fun el -> (solveConstraintsFst el pt) = true) model) do
+      List.iter (fun cstr -> if solveConstraintsFst cstr pt then () else ()) model
+    done
    
   (* First phase: #bipole *)
   let solveFirstPhaseBpl olBipole =
-    let cstrRemnant = [] in
-    let cstrRemnantRef = ref cstrRemnant in
     List.iter (fun (olProofTree, model) ->
-      List.iter (fun cstr -> 
-	if (solveConstraintsFst cstr olProofTree) then ()
+      let cstrRemainder = OlProofTree.getListFromOptions (List.map (fun cstr -> 
+	if (solveConstraintsFst cstr olProofTree) then NONE
 	else match cstr with
-	| ELIN (t, c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	| EMP (c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	| UNION (c1, c2, c3) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	| _ -> ();
-	List.iter (fun c -> if (solveConstraintsFst c olProofTree) then () else ()) !cstrRemnantRef;
-      ) model.lst;
+	  | ELIN (t, c) -> SOME(cstr)
+	  | EMP (c) -> SOME(cstr)
+	  | UNION (c1, c2, c3) -> SOME(cstr)
+	  | _ -> NONE
+      ) model.lst) in
+      applyConstraints olProofTree cstrRemainder;
     ) olBipole
     
   (* First phase: #permute *)
   let solveFirstPhasePer pairOfBipoles =
-    let cstrRemnant = [] in
-    let cstrRemnantRef = ref cstrRemnant in
-    let cstrRemnant' = [] in
-    let cstrRemnantRef' = ref cstrRemnant' in
     List.iter (fun ((olProofTree1, model1), (olProofTree2, model2)) ->
-      let solveModel olProofTree model cstrRemnantRef = 
-	List.iter (fun cstr -> 
-	  if (solveConstraintsFst cstr olProofTree) then ()
+      let solveModel olProofTree model = 
+	let cstrRemainder = List.map (fun cstr -> 
+	  if (solveConstraintsFst cstr olProofTree) then NONE
 	  else match cstr with
-	  | ELIN (t, c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	  | EMP (c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	  | UNION (c1, c2, c3) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	  | _ -> ();
-	  List.iter (fun c -> if (solveConstraintsFst c olProofTree) then () else ()) !cstrRemnantRef;
+	  | ELIN (t, c) -> SOME(cstr)
+	  | EMP (c) -> SOME(cstr)
+	  | UNION (c1, c2, c3) -> SOME(cstr)
+	  | _ -> NONE
 	) model.lst in
-      solveModel olProofTree1 model1 cstrRemnantRef;
-      solveModel olProofTree2 model2 cstrRemnantRef';      
+	cstrRemainder in
+      let cstrRemainder = OlProofTree.getListFromOptions (solveModel olProofTree1 model1) in
+      applyConstraints olProofTree1 cstrRemainder;
+      let cstrRemainder' = OlProofTree.getListFromOptions (solveModel olProofTree2 model2) in
+      applyConstraints olProofTree2 cstrRemainder';
     ) pairOfBipoles
     
   let rewSeqSnd seq cstr = 
     match cstr with 
     | IN (t, c) -> solveIn seq (OlContext.fixContext c) t
-    | _ -> false
+    (* Any other constraint is despised *)
+    | _ -> true
     
   let solveConstraintsSnd cstr olProofTree =
     match cstr with
@@ -456,37 +501,39 @@ module Derivation = struct
       List.exists (fun el -> el = true) boolList
     | _ -> false
     
+  let applyConstraints' pt model = 
+    while (List.exists (fun el -> (solveConstraintsSnd el pt) = true) model) do
+      List.iter (fun cstr -> if solveConstraintsSnd cstr pt then () else ()) model
+    done
+    
+    
   (* Second phase: #bipole *)     
   let solveSndPhaseBpl olBipole =
-    let cstrRemnant = [] in
-    let cstrRemnantRef = ref cstrRemnant in
     List.iter (fun (olProofTree, model) ->
-      List.iter (fun cstr ->
-    	if (solveConstraintsSnd cstr olProofTree) then ()
-	else match cstr with
-	| IN (t, c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	| _ -> ();
-	List.iter (fun e -> if (solveConstraintsSnd e olProofTree) then () else ()) !cstrRemnantRef;
-      ) model.lst
+      let cstrRemainder = OlProofTree.getListFromOptions (List.map (fun cstr -> 
+	  if (solveConstraintsFst cstr olProofTree) then NONE
+	  else match cstr with
+	  | IN (t, c) -> SOME(cstr)
+	  | _ -> NONE
+      ) model.lst ) in
+      applyConstraints olProofTree cstrRemainder;
     ) olBipole
     
   (* Second phase: #permute *)     
   let solveSndPhasePer pairOfBipoles =
-    let cstrRemnant = [] in
-    let cstrRemnantRef = ref cstrRemnant in
-    let cstrRemnant' = [] in
-    let cstrRemnantRef' = ref cstrRemnant' in
     List.iter (fun ((olProofTree1, model1), (olProofTree2, model2)) ->
-      let solveModel olProofTree model cstrRemnant =
-	List.iter (fun cstr ->
-	  if (solveConstraintsSnd cstr olProofTree) then ()
+      let solveModel olProofTree model =
+	let cstrRemainder = List.map (fun cstr -> 
+	  if (solveConstraintsFst cstr olProofTree) then NONE
 	  else match cstr with
-	  | IN (t, c) -> cstrRemnantRef := cstr :: !cstrRemnantRef
-	  | _ -> ();
-	  List.iter (fun e -> if (solveConstraintsSnd e olProofTree) then () else ()) !cstrRemnantRef;
+	  | IN (t, c) -> SOME(cstr)
+	  | _ -> NONE
 	) model.lst in
-	solveModel olProofTree1 model1 cstrRemnantRef;
-	solveModel olProofTree2 model2 cstrRemnantRef';
+	cstrRemainder in
+      let cstrRemainder = OlProofTree.getListFromOptions (solveModel olProofTree1 model1) in
+      applyConstraints olProofTree1 cstrRemainder;
+      let cstrRemainder' = OlProofTree.getListFromOptions (solveModel olProofTree2 model2) in
+      applyConstraints olProofTree2 cstrRemainder';
     ) pairOfBipoles
     
 end;;

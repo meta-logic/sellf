@@ -221,7 +221,8 @@ solve_query () =
 	      Derivation.solveFirstPhasePer !olPtRef;
 	      Derivation.solveSndPhasePer !olPtRef;
 	      Printf.fprintf file "%s" Prints.texFileHeader;
-	      Printf.fprintf file "\\section{Permutations: } \n";
+	      Printf.fprintf file "\\section{Possible permutations for $%s$ " (Prints.termToTexString (List.nth formulas i1));
+	      Printf.fprintf file " and $%s$:} \n" (Prints.termToTexString (List.nth formulas i2));
               List.iter (fun (b12, b21) ->
 		  Printf.fprintf file "%s" "{\\scriptsize";
 		  Printf.fprintf file "%s" "\\[";
