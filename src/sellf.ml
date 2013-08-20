@@ -229,12 +229,16 @@ solve_query () =
 		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
 		  Printf.fprintf file "%s" "\\]";
 		  Printf.fprintf file "%s" "}";
+		  Printf.fprintf file "%s" "CONSTRAINTS\n";
+		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b12)));
 		  Printf.fprintf file "\n \\begin{center} $\\downarrow$ \\end{center} \n";
 		  Printf.fprintf file "%s" "{\\scriptsize";
 		  Printf.fprintf file "%s" "\\[";
 		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
 		  Printf.fprintf file "%s" "\\]";
 		  Printf.fprintf file "%s" "}";
+		  Printf.fprintf file "%s" "CONSTRAINTS\n";
+		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b21)));
               ) !olPtRef;
 	      Printf.fprintf file "%s" Prints.texFileFooter;
 	      close_out file;
