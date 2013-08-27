@@ -96,7 +96,7 @@ end ;;
 let rec start () =
   initAll ();
   print_string ":> ";
-    let command = "#load ../examples/proofsystems/ll" (*read_line()*) in
+    let command = (*"#load ../examples/proofsystems/ll" *) read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer_top.token lexbuf_top in 
@@ -214,12 +214,14 @@ solve_query () =
 	      let olPt = [] in
 	      let olPtRef = ref olPt in
 	      olPtRef := Derivation.transformTree' perm_bipoles;
+	      Derivation.solveFirstPhasePer !olPtRef;
+	      Derivation.solveSndPhasePer !olPtRef;
 	      List.iter (fun ((olt1, model1), (olt2, model2)) -> 
+		(*Derivation.equatingContexts olt1;
+		Derivation.equatingContexts olt2;*)
 		OlProofTree.toPermutationFormat olt1;
 		OlProofTree.toPermutationFormat olt2;
 	      ) !olPtRef;
-	      Derivation.solveFirstPhasePer !olPtRef;
-	      Derivation.solveSndPhasePer !olPtRef;
 	      Printf.fprintf file "%s" Prints.texFileHeader;
 	      Printf.fprintf file "\\section{Possible permutations for $%s$ " (Prints.termToTexString (List.nth formulas i1));
 	      Printf.fprintf file " and $%s$:} \n" (Prints.termToTexString (List.nth formulas i2));
@@ -227,19 +229,23 @@ solve_query () =
 		  Printf.fprintf file "%s" "{\\scriptsize";
 		  Printf.fprintf file "%s" "\\[";
 		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
+		  (*Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(b12)));*)
 		  Printf.fprintf file "%s" "\\]";
 		  Printf.fprintf file "%s" "}";
-		  Printf.fprintf file "%s" "CONSTRAINTS\n";
-		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b12)));
+		  (*Printf.fprintf file "%s" "CONSTRAINTS\n";
+		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b12)));*)
 		  Printf.fprintf file "\n \\begin{center} $\\downarrow$ \\end{center} \n";
 		  Printf.fprintf file "%s" "{\\scriptsize";
 		  Printf.fprintf file "%s" "\\[";
 		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
+		  (*Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(b21)));*)
 		  Printf.fprintf file "%s" "\\]";
 		  Printf.fprintf file "%s" "}";
-		  Printf.fprintf file "%s" "CONSTRAINTS\n";
-		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b21)));
+		  Printf.fprintf file "%s" "\\\[0.7cm]";
+		  (*Printf.fprintf file "%s" "CONSTRAINTS\n";
+		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b21)));*)
               ) !olPtRef;
+              (* perm_bipoles;*)
 	      Printf.fprintf file "%s" Prints.texFileFooter;
 	      close_out file;
       end
