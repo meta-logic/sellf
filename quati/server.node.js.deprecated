@@ -1,0 +1,88 @@
+/*
+ * Server
+ * 
+ * Giselle Reis
+ * 08.2013
+ *
+ */
+
+function objToString (obj) {
+  var str = '';
+  for (var p in obj) {
+    if (obj.hasOwnProperty(p)) {
+      str += p + '::' + obj[p] + '\n';
+    }
+  }
+  return str;
+}
+
+function getBipoles(system, callback) {
+ 
+  console.log("Getting bipoles.")
+  var exec = require('child_process').exec;
+  var child;
+  child = exec("./sellf -bipoles " + system, 
+    function (error, stdout, stderr) {
+      console.log('stdout: ' + stdout);
+      console.log('stderr: ' + stderr);
+      if (error !== null) {
+        console.log('exec error: ' + error);
+        callback(error)
+      }
+      else callback(stdout)
+    });
+}
+
+function checkPermutation(system, r1, r2) {
+  //"Checking permutation of " + r1 + " over " + r2 + " of system " + system
+  console.log("Checking permutations.")
+  var exec = require('child_process').exec;
+  var child;
+  child = exec("./sellf -permute -r1=" + r1 + " -r2=" + r2 + " " + system, 
+    function (error, stdout, stderr) {
+      console.log('stdout: ' + stdout);
+      console.log('stderr: ' + stderr);
+      if (error !== null) {
+        console.log('exec error: ' + error);
+        callback(error)
+      }
+      else callback(stdout)
+    });
+}
+
+var http = require('http');
+var url = require('url');
+
+function onRequest(request, response) {
+  var query = url.parse(request.url, true).query
+  var action = query.action
+  console.log("The requested action was: " + action)
+
+  // This should be a latex code.
+  //var result = "";
+  if (action == "bipoles") {
+    var system = query.system
+    getBipoles(system, function(output){ 
+      response.writeHead(200, {'Content-Type': 'text/plain'})
+      response.write(output + '')
+      response.end()
+    })
+  } else if (action == "permutation") {
+    var system = query.system
+    var r1 = query.r1
+    var r2 = query.r2
+    checkPermutation(system, r1, r2, function(output){
+      response.writeHead(200, {'Content-Type': 'text/plain'})
+      response.write(output + '')
+      response.end()
+    })
+  }
+  
+}
+
+http.createServer(onRequest).listen(8000)
+console.log('Server running at http://localhost:8000/')
+
+
+
+

@@ -208,7 +208,7 @@ solve_query () =
         let perm_bipoles = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
         match perm_bipoles with
         | [] -> print_endline "\nThe rules do not permute.\n"
-        | _ -> print_endline "Please type the name of the file: ";
+        | _ -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
 	      let fileName = read_line () in
 	      let file = open_out (fileName^".tex") in
 	      let olPt = [] in

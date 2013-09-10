@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml401-transitional.dtd">
+
+<html>
+<head>
+
+<title> Quati </title>
+
+<!-- Removing web server advertisement -->
+<script type="text/javascript">
+  document.cookie = "cskeytech-overlay=shown; expires=Mo, 31 Dec 2012 00:00:00 UTC; path=/;";
+</script>
+
+<!-- MathJax to display LaTeX code -->
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+</script>
+
+<script type="text/javascript" src="actions.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css" />
+
+<link type="text/css" href="jquery/css/custom-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet" />	
+<script type="text/javascript" src="jquery/js/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script type="text/javascript">
+
+  // Avoiding conflicts with other jQuery libraries that were eventually
+  // included by the server *without* my permission.
+  var myJQ = jQuery.noConflict();
+
+	myJQ(document).ready(function(){
+
+		// Tabs
+		myJQ('#tabs').tabs();
+
+    // Button
+    myJQ('button').button();
+
+		
+	});
+</script>
+
+</head>
+<body>
+
+<div class="title"> <a href=""><img src="logo.png" alt="A cute quati." height="120"/></a> </div>
+<hr>
+<p> 
+Online system for checking permutation of sequent calculus rules.<br>
+Developed by: Giselle Reis, Vivek Nigam and Leonardo Lima<br>
+Contact: giselle [at] logic [dot] at <br>
+Based on the theoretical work: Checking Proof Transformations with ASP [<a href="references/paper.pdf">pdf</a>|<a href="http://prezi.com/nuq4a8cqb-kj/checking-proof-transformations-with-asp/" target="_blank">presentation</a>]- Vivek Nigam, Giselle Reis and Leonardo Lima <br>
+</p>
+
+<hr>
+
+<div id="tabs">
+
+  <ul>
+    <li><a href="#tabs-1">Checking permutations</a></li>
+  </ul>
+  
+  <div id="tabs-1">
+    <div>
+      <label>Choose a system<sup style="font-size: 8pt">1</sup>:</label>
+      <select id="select" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon" onchange="genBipoles(this.value)">
+        <option value="">--</option>
+        <option value="mlj"> mLJ </option>
+        <option value="s4"> S4 </option>
+        <option value="lax"> Lax Logic </option>
+        <option value="g3k"> G3k </option>
+        <option value="lal"> Linear Authorization Logic </option>
+        <option value="lk"> Classical Logic </option>
+        <option value="lj"> Intuitionistic Logic </option>
+        <option value="ll"> Linear Logic </option>
+      </select>
+      <p style="font-size: 10pt"><sup style="font-size: 8pt">1</sup> We are still working on an easy way for you to input your own systems.</p>
+    </div>
+
+    <div id="bipoles" style="display: none">
+      The rules of the system are the following<sup style="font-size: 8pt">2</sup>:
+
+      <div class="blank">
+        <p id="bipolesTex"></p>
+      </div>
+
+      <p style="font-size: 10pt"><sup style="font-size: 8pt">2</sup> We are also working on improving this visualization.</p>
+
+      I want to check wether the rule <input id="r1" type="text" size="2"/> permutes over the rule <input id="r2" type="text" size="2"/>.<br>
+      <button style="font-size: 11pt" onclick="checkPermutation()"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Does it?</button>
+    </div>
+    <br>
+
+    <div id="result" style="display: none">
+      Results:
+      <div class="blank">
+        <p id="permutationsTex"></p>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<br>
+
+<!-- Removing web server advertisement -->
+<!--script type="text/javascript">
+$(document).ready(function(){
+  $("#pageflip").remove();
+  $("#cskeytech-overlay-data").remove();
+  $("#cskeytech-overlay-overlay").remove();
+  $("#cskeytech-overlay-container").remove();
+  })
+</script-->
+
+</body>
+</html>
+

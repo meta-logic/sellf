@@ -300,6 +300,7 @@ let rec toTexString pt = match pt.rule with
       | [] -> ""
       | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
     in
-    "\\infer{"^(SequentSchema.toTexString (getConclusion pt))^"}\n{"^topproof^"}"
+    (*"\\infer{"^(SequentSchema.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
+    "\\cfrac{"^topproof^"}\n{"^(SequentSchema.toTexString (getConclusion pt))^"}"
   | NONE -> (SequentSchema.toTexString (getConclusion pt))
 

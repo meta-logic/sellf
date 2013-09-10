@@ -1,0 +1,20 @@
+body {
+  font: 12pt "Trebuchet MS", sans-serif; 
+  margin: 50px;
+}
+
+/* Fixes the positioning of the icon inside a button */
+span.ui-icon {
+  margin: 0 5px 0 0;
+  position: absolute;
+  left: .2em;
+  top: 50%;
+  margin-top: -8px;
+}
+
+/* For creating the blank divs where latex code is displayed */
+div.blank {
+  background: #ffffff;
+}
+
+

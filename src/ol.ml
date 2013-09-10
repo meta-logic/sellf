@@ -308,15 +308,17 @@ module OlProofTree = struct
     let rec toTexString' pt = 
       match pt.rule with
       | SOME(r) ->
-	let seq = getConclusion pt in
-	let rule = getFromOption (OlSequent.getMainForm seq) in
-	let topproof = match pt.tree with
-	  | [] -> ""
-	  | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString' el)) tl "") 
-	in
-	"\\infer" ^ "[" ^ (termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}]" 
-	^ "{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"
-      | NONE -> (OlSequent.toTexString (getConclusion pt) str_list) in
+	      let seq = getConclusion pt in
+	      let rule = getFromOption (OlSequent.getMainForm seq) in
+	      let topproof = match pt.tree with
+	        | [] -> ""
+	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString' el)) tl "") 
+	      in
+        let ruleNameTex = (termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}" in
+	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
+	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "} \;\; " ^ ruleNameTex 
+      | NONE -> (OlSequent.toTexString (getConclusion pt) str_list) 
+    in
     toTexString' pt
 
 end;;

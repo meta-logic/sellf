@@ -290,7 +290,8 @@ let rec getLeaves pt = List.fold_right (fun el acc ->
           | [] -> ""
           | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
         in
-        "\\infer{"^(Sequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"
+        (*"\\infer{"^(Sequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
+        "\\cfrac{"^topproof^"}\n{"^(Sequent.toTexString (getConclusion pt))^"}"
       (* An open proof has no premisses. *)
       | false -> (Sequent.toTexString (getConclusion pt))
       
