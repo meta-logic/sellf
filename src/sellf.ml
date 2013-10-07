@@ -21,6 +21,8 @@ let position lexbuf =
 let samefile = ref true ;;
 let fileName = ref "" ;;
 let check = ref "" ;;
+let rule1 = ref 0;;
+let rule2 = ref 0;;
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " [-v] [-i string] [-c string]"
 
@@ -28,7 +30,9 @@ let argslst = [
   ("-v", Arg.Unit (fun () -> Term.verbose := true), ": set verbose on.");
   ("-i", Arg.String (fun s -> fileName := s), ": prefix of .pl and .sig file (with path)");
   ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'cutcoherence',
-    'initialcoherence', 'atomicelim' or 'scopebang' (depending on what you want to check)");
+    'initialcoherence', 'atomicelim', 'scopebang', 'permute' or 'bipole' (depending on what you want to check)");
+  ("-r1", Arg.Int (fun r -> rule1 := r), ": set the number of the first rule to check the permutation above the second rule.");
+  ("-r2", Arg.Int (fun r -> rule2 := r), ": set the number of the second rule.");
 ]
 
 let initAll () = 
@@ -92,11 +96,174 @@ let parse file_name = begin
       |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
     end
 end ;;
+
+let bipole formulas i = 
+  print_endline "Please type the name of the file: ";
+  let fileName = read_line () in
+  let file = open_out (fileName^".tex") in
+  let olPt = ref [] in begin
+  try match Bipole.bipole (List.nth formulas i) with
+    | bipoles ->
+      olPt := Derivation.transformTree bipoles;
+      List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
+      Derivation.solveFirstPhaseBpl !olPt;
+      Derivation.solveSndPhaseBpl !olPt;
+      Printf.fprintf file "%s" Prints.texFileHeader;
+      (*Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i));
+      List.iter (fun (pt, model) ->
+	Printf.fprintf file "%s" "{\\scriptsize";
+	Printf.fprintf file "%s" "\\[";
+	Printf.fprintf file "%s" (ProofTreeSchema.toTexString pt);
+	Printf.fprintf file "%s" "\\]";
+	Printf.fprintf file "%s" "}";
+	Printf.fprintf file "%s" "CONSTRAINTS\n";
+	Printf.fprintf file "%s" (Constraints.toTexString model);
+      ) bipoles;   *)
+      (*Printf.fprintf file "%s" "{\\section{Result:}}\n";*)
+      List.iter (fun (olt, model) ->
+	Printf.fprintf file "%s" "{\\scriptsize";
+	Printf.fprintf file "%s" "\\[";
+	Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+	Printf.fprintf file "%s" "\\]";
+	Printf.fprintf file "%s" "}";
+      ) !olPt;
+      Printf.fprintf file "%s" Prints.texFileFooter;
+      close_out file;
+    with Bipole.Not_bipole -> print_endline "This specification is not a bipole!"
+  end;;
+  
+(* Command line #bipole *)
+let bipole_cl () = begin
+  let i = ref 0 in
+  let olPt = ref [] in
+  let formulas = !Specification.others @ !Specification.introRules in
+  let bpl_lst = ref [] in
+  let all_bipoles = List.for_all (fun f -> 
+    try match Bipole.bipole f with
+    | bipole -> bpl_lst := bipole :: !bpl_lst; 
+    true
+    with Bipole.Not_bipole -> false    
+  ) formulas in begin
+  if all_bipoles then
+  List.iter (fun bipoles ->
+    olPt := Derivation.transformTree bipoles;
+    List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
+    Derivation.solveFirstPhaseBpl !olPt;
+    Derivation.solveSndPhaseBpl !olPt;
+    List.iter (fun (olt, model) ->
+      print_endline (string_of_int(!i));
+      print_endline "\\[";
+      print_endline (OlProofTree.toTexString olt);
+      print_endline "\\]";
+    ) !olPt;
+    i := !i + 1
+  ) !bpl_lst
+  else print_endline "This specification is not a bipole!"
+  end
+end;;
+  
+let permute formulas i1 i2 =
+  let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
+  let perm_bipoles = fst(perm_pair) in
+  let perm_not_found = snd(perm_pair) in
+  match perm_bipoles with
+  | [] -> begin match perm_not_found with
+    | [] -> print_endline "\nThe rules do not permute.\nThe first rule do not have premises, hence is not possible to show the derivation."
+    | _ -> print_endline "\nThe rules do not permute.\nPlease type the name of the file to print the derivation that can not be permuted : ";
+    let fileName = read_line () in
+    let file = open_out (fileName^".tex") in
+    let olPt = ref [] in
+    olPt := Derivation.transformTree perm_not_found;
+    Derivation.solveFirstPhaseBpl !olPt;
+    Derivation.solveSndPhaseBpl !olPt;
+    Printf.fprintf file "%s" Prints.texFileHeader;
+    List.iter (fun (olt, model) ->
+      OlProofTree.toPermutationFormat olt;
+      Printf.fprintf file "%s" "{\\scriptsize";
+      Printf.fprintf file "%s" "\\[";
+      Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+      Printf.fprintf file "%s" "\\]";
+      Printf.fprintf file "%s" "}";
+    ) !olPt;
+    Printf.fprintf file "%s" Prints.texFileFooter;
+    close_out file;
+    end
+  | _ -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
+    let fileName = read_line () in
+    let file = open_out (fileName^".tex") in
+    let olPt = ref [] in
+    olPt := Derivation.transformTree' perm_bipoles;
+    Derivation.solveFirstPhasePer !olPt;
+    Derivation.solveSndPhasePer !olPt;
+    List.iter (fun ((olt1, model1), (olt2, model2)) -> 
+      Derivation.equatingContexts olt1;
+      Derivation.equatingContexts olt2;
+      OlProofTree.toPermutationFormat olt1;
+      OlProofTree.toPermutationFormat olt2;
+    ) !olPt;
+    Printf.fprintf file "%s" Prints.texFileHeader;
+    Printf.fprintf file "\\section{Possible permutations for $%s$ " (Prints.termToTexString (List.nth formulas i1));
+    Printf.fprintf file " and $%s$:} \n" (Prints.termToTexString (List.nth formulas i2));
+    List.iter (fun (b12, b21) ->
+	Printf.fprintf file "%s" "{\\scriptsize";
+	Printf.fprintf file "%s" "\\[";
+	Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
+	Printf.fprintf file "\n\\quad\\rightsquigarrow\\quad\n";
+	Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
+	Printf.fprintf file "%s" "\\]";
+	Printf.fprintf file "%s" "}";
+	Printf.fprintf file "%s" "\\\[0.7cm]";
+    ) !olPt;
+    Printf.fprintf file "%s" Prints.texFileFooter;
+    close_out file;;
+
+(* Command line #permute *)
+let permute_cl i1 i2 () = begin
+  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas_length = List.length formulas in
+  if ((i1 > formulas_length) || (i2 > formulas_length) || (i1 = i2)) then print_endline "\nInvalid number of rules.\n" 
+  else let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
+  let perm_bipoles = fst(perm_pair) in
+  let perm_not_found = snd(perm_pair) in
+    match perm_bipoles with
+    | [] -> begin match perm_not_found with
+      | [] -> print_endline "\nThe rules do not permute.\nThe first rule do not have premises, hence is not possible to show the derivation."
+      | _ -> print_endline "\nThe rules do not permute.\nThe derivation that can not be permuted are shown below: ";
+      let olPt = ref [] in
+      olPt := Derivation.transformTree perm_not_found;
+      Derivation.solveFirstPhaseBpl !olPt;
+      Derivation.solveSndPhaseBpl !olPt;
+      List.iter (fun (olt, model) ->
+	OlProofTree.toPermutationFormat olt;
+	print_endline "\\[";
+	print_endline (OlProofTree.toTexString olt);
+	print_endline "\\]";
+      ) !olPt 
+      end
+    | _ -> print_endline "\nThe rules permute.\nThe permutations are shown below: ";
+      let olPt = ref [] in
+      olPt := Derivation.transformTree' perm_bipoles;
+      Derivation.solveFirstPhasePer !olPt;
+      Derivation.solveSndPhasePer !olPt;
+      List.iter (fun ((olt1, model1), (olt2, model2)) -> 
+	Derivation.equatingContexts olt1;
+	Derivation.equatingContexts olt2;
+	OlProofTree.toPermutationFormat olt1;
+	OlProofTree.toPermutationFormat olt2;
+      ) !olPt;
+      List.iter (fun (b12, b21) ->
+	  print_endline "\\[";
+	  print_endline (OlProofTree.toTexString (fst(b12)));
+	  print_endline "\n\\quad\\rightsquigarrow\\quad\n";
+	  print_endline (OlProofTree.toTexString (fst(b21)));
+	  print_endline "\\]";
+      ) !olPt
+      end;;
  
 let rec start () =
   initAll ();
   print_string ":> ";
-    let command = (*"#load ../examples/proofsystems/ll" *) read_line() in
+    let command = read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer_top.token lexbuf_top in 
@@ -147,42 +314,8 @@ solve_query () =
       print_endline "SELLF will generate the bipoles corresponding to the formula \
       chosen and print them in a latex file.";
       print_endline "Please type the number of the formula: ";
-      let i1 = int_of_string (read_line ()) in
-      print_endline "Please type the name of the file: ";
-      let fileName = read_line () in
-      let file = open_out (fileName^".tex") in
-      let olPt = [] in
-      let olPtRef = ref olPt in begin
-      try match Bipole.bipole (List.nth formulas i1) with
-        | bipoles ->
-	  olPtRef := Derivation.transformTree bipoles;
-	  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPtRef;
-	  Derivation.solveFirstPhaseBpl !olPtRef;
-	  Derivation.solveSndPhaseBpl !olPtRef;
-          Printf.fprintf file "%s" Prints.texFileHeader;
-          Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i1));
-          List.iter (fun (pt, model) ->
-            Printf.fprintf file "%s" "{\\scriptsize";
-            Printf.fprintf file "%s" "\\[";
-            Printf.fprintf file "%s" (ProofTreeSchema.toTexString pt);
-            Printf.fprintf file "%s" "\\]";
-            Printf.fprintf file "%s" "}";
-            Printf.fprintf file "%s" "CONSTRAINTS\n";
-            Printf.fprintf file "%s" (Constraints.toTexString model);
-          ) bipoles;   
-          Printf.fprintf file "%s" "{\\section{Result:}}\n";
-          List.iter (fun (olt, model) ->
-            Printf.fprintf file "%s" "{\\scriptsize";
-            Printf.fprintf file "%s" "\\[";
-            Printf.fprintf file "%s" (OlProofTree.toTexString olt);
-            Printf.fprintf file "%s" "\\]";
-            Printf.fprintf file "%s" "}";
-          ) !olPtRef;
-          Printf.fprintf file "%s" Prints.texFileFooter;
-          close_out file;
-
-        with Bipole.Not_bipole -> print_endline "This specification is not a bipole!"
-      end
+      let i' = int_of_string (read_line ()) in
+      bipole formulas i'
 
     (* Check if two rules permute *)
     | "#permute" -> 
@@ -201,54 +334,7 @@ solve_query () =
       let i1 = int_of_string (read_line ()) in
       print_endline "Please type the number of F2: ";
       let i2 = int_of_string (read_line ()) in
-      begin
-(*      match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
-        | true -> print_endline "\nThe rules permute.\n"
-        | false -> print_endline "\nThe rules do not permute.\n"*)
-        let perm_bipoles = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
-        match perm_bipoles with
-        | [] -> print_endline "\nThe rules do not permute.\n"
-        | _ -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
-	      let fileName = read_line () in
-	      let file = open_out (fileName^".tex") in
-	      let olPt = [] in
-	      let olPtRef = ref olPt in
-	      olPtRef := Derivation.transformTree' perm_bipoles;
-	      Derivation.solveFirstPhasePer !olPtRef;
-	      Derivation.solveSndPhasePer !olPtRef;
-	      List.iter (fun ((olt1, model1), (olt2, model2)) -> 
-		(*Derivation.equatingContexts olt1;
-		Derivation.equatingContexts olt2;*)
-		OlProofTree.toPermutationFormat olt1;
-		OlProofTree.toPermutationFormat olt2;
-	      ) !olPtRef;
-	      Printf.fprintf file "%s" Prints.texFileHeader;
-	      Printf.fprintf file "\\section{Possible permutations for $%s$ " (Prints.termToTexString (List.nth formulas i1));
-	      Printf.fprintf file " and $%s$:} \n" (Prints.termToTexString (List.nth formulas i2));
-              List.iter (fun (b12, b21) ->
-		  Printf.fprintf file "%s" "{\\scriptsize";
-		  Printf.fprintf file "%s" "\\[";
-		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
-		  (*Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(b12)));*)
-		  Printf.fprintf file "%s" "\\]";
-		  Printf.fprintf file "%s" "}";
-		  (*Printf.fprintf file "%s" "CONSTRAINTS\n";
-		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b12)));*)
-		  Printf.fprintf file "\n \\begin{center} $\\downarrow$ \\end{center} \n";
-		  Printf.fprintf file "%s" "{\\scriptsize";
-		  Printf.fprintf file "%s" "\\[";
-		  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
-		  (*Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(b21)));*)
-		  Printf.fprintf file "%s" "\\]";
-		  Printf.fprintf file "%s" "}";
-		  Printf.fprintf file "%s" "\\\[0.7cm]";
-		  (*Printf.fprintf file "%s" "CONSTRAINTS\n";
-		  Printf.fprintf file "%s" (Constraints.toTexString (snd(b21)));*)
-              ) !olPtRef;
-              (* perm_bipoles;*)
-	      Printf.fprintf file "%s" Prints.texFileFooter;
-	      close_out file;
-      end
+      permute formulas i1 i2
 
     (* Check if all rules permute *)
     (*| "#permute_all" ->
@@ -308,8 +394,8 @@ solve_query () =
 
 let _ = 
 Arg.parse argslst (fun x -> raise (Arg.Bad ("Bad argument: "^x))) usage;
-match (!check, !fileName) with 
-  | ("", "") ->
+match (!check, !fileName, !rule1, !rule2) with 
+  | ("", "", _, _) ->
     print_endline "SELLF -- A linear logic framework for systems with locations.";
     print_endline "Version 0.5.\n";
     print_endline "Type #help for a list of available commands.\n";
@@ -317,21 +403,27 @@ match (!check, !fileName) with
       start ()
     done
   (* Running in batch mode *)
-  | ("principalcut", file) -> 
+  | ("principalcut", file, _, _) -> 
     initAll ();
     if parse file then check_principalcut ()
-  | ("cutcoherence", file) -> 
+  | ("cutcoherence", file, _, _) -> 
     initAll ();
     if parse file then check_cutcoherence ()
-  | ("initialcoherence", file) -> 
+  | ("initialcoherence", file, _, _) -> 
     initAll ();
     if parse file then check_initialcoherence ()
-  | ("atomicelim", file) -> 
+  | ("atomicelim", file, _, _) -> 
     initAll ();
     if parse file then check_atomicelim ()
-  | ("scopebang", file) ->
+  | ("scopebang", file, _, _) ->
     initAll ();
     if parse file then check_scopebang ()
-  | (x, y) -> failwith ("Invalid arguments.")
+  | ("bipole", file, _, _) ->
+    initAll ();
+    if parse file then bipole_cl ()
+  | ("permute", file, r1, r2) ->
+    initAll ();
+    if parse file then permute_cl r1 r2 ()
+  | (x, y, _, _) -> failwith ("Invalid arguments.")
 ;;
 

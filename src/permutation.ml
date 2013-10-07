@@ -63,7 +63,7 @@ let derive2 spec1 spec2 =
 let permute spec1 spec2 = 
   let bipoles12 = derive2 spec1 spec2 in
   let bipoles21 = derive2 spec2 spec1 in
-
+  
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
   function out of this.*)
   (*print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
@@ -106,11 +106,12 @@ let permute spec1 spec2 =
 
 (*  List.for_all (fun b12 ->
     List.exists (fun b21 ->*)
-  List.fold_right (fun b12 acc ->
+  let permutations = List.fold_right (fun b12 acc ->
     if List.exists (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 then
       let b21 = List.find (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 in
       (b12, b21) :: acc
     else acc
-  ) bipoles12 []
+  ) bipoles12 [] in
+  (permutations, bipoles12)
 ;;
 

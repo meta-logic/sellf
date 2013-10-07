@@ -312,7 +312,7 @@ module OlProofTree = struct
 	      let rule = getFromOption (OlSequent.getMainForm seq) in
 	      let topproof = match pt.tree with
 	        | [] -> ""
-	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString' el)) tl "") 
+	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
 	      in
         let ruleNameTex = (termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
@@ -516,52 +516,55 @@ module Derivation = struct
       applyConstraints' olProofTree2 model2;
     ) pairOfBipoles
     
-  (*(* Third phase: Equating the contexts *)
+  (* Third phase: Equating the contexts *)
   
-  (* Verify the algorithm below :| *)
-  let sameContexts ctx1 ctx2 = 
+  let sameContexts ctx1 ctx2 str = 
     List.for_all (fun (olc, f) ->
-      List.exists (fun (olc', f') -> olc = olc') ctx2.OlContext.lst
+      if (fst(olc)) = str then
+	List.exists (fun (olc', f') -> (olc = olc')) ctx2.OlContext.lst
+      else true
     ) ctx1.OlContext.lst
     
-    let getValidCtx ctx = 
-    List.concat (List.map (fun ((s, i), f) -> if (String.get s 0) = '#' then [] else [(s, i)]) ctx.OlContext.lst)
+  let getValidCtx ctx str = 
+    List.concat (List.map (fun ((s, i), f) -> 
+    if ((String.get s 0) = '#') || s <> str then []
+    else [(s, i)]) ctx.OlContext.lst)
     
   let getMaxPair n = 
     let rec max_value lst = match lst with
       | [] -> 0
       | hd :: tl -> max hd (max_value tl) in
-    (* This will work just with one context *) 
     let str = fst(List.hd n) in
     let lst' = List.map (fun (s, i) -> i) n in (str, max_value lst')
   
   let createContextList m n maxPair =
+    let ctx_name = fst(maxPair) in
     let i = ref (snd(maxPair)) in
     let counter = (fun () -> i := !i+1; !i) in
-    List.map (fun (s, i) -> List.map (fun (s', i') -> (fst(maxPair), counter())) m) n
-    
-  let getContextForm ctx = 
-    let lctx = List.fold_right (fun ((s,i), f) acc -> f @ acc) ctx.OlContext.lst [] in
-    (("#", 0), lctx)
+    List.map (fun (s, i) -> List.map (fun (s', i') -> ctx_name, counter()) m) n
     
   (* Returns a (ctx, list of ctx) list *)
   let getAssocN n lst = 
     let j = ref (-1) in
     let counter = (fun () -> j := !j+1; !j) in
-    List.map (fun (s, i) -> 
-      ((s,i), (List.nth lst (counter())))
-    ) n
+    List.map (fun (s, i) -> ((s,i), (List.nth lst (counter())))) n
   
   (* Returns a (ctx, list of ctx) list *)
   let getAssocM m lst = 
     let reagroupContextList lst = 
-      let j = ref (-1) in
-      let counter' = (fun () -> j := !j+1; !j) in
-      List.map (fun lst' -> List.map (fun ctx -> List.nth lst' (counter'())) lst' ) lst in
+      let q = ref (-1) in
+      let counter' = (fun () -> q := !q+1) in
+      let head = List.hd lst in
+      List.map (fun ctx ->
+	counter'();
+	List.fold_right (fun lst'' acc -> 
+	  (List.nth lst'' !q) :: acc
+	) lst []
+      ) head in
     let k = ref (-1) in
     let counter = (fun () -> k := !k+1; !k) in
     let lst' = reagroupContextList lst in
-    List.map (fun (s, i) -> ((s, i), List.nth lst (counter()))) m
+    List.map (fun (s, i) -> ((s, i), List.nth lst' (counter()))) m
   
   (* nCtx = (Ctx to find, List to rewrite the Ctx) *)
   let rewriteTree pt nctx = 
@@ -569,21 +572,14 @@ module Derivation = struct
       let olSeq = OlProofTree.getConclusion olPt in
       let olCtx = OlSequent.getContext olSeq in
       let lctx = olCtx.OlContext.lst in
-      let newCtxRef = ref [] in
-      (*let ctxRemainder = ref [] in*)
-      newCtxRef := lctx;
+      let newCtxRef = ref lctx in
       List.iter (fun (olc, f) ->
 	newCtxRef := List.map (fun (olc', f') ->
-	if (olc' = ctx) then 
-	  begin
-	    (*ctxRemainder := (getContextForm (olc', f')) :: !ctxRemainder;*)  
-	    (("#", 0), f')
-	  end
+	if (olc' = ctx) then (("#" ^ (fst(ctx)), 0), f')
 	else (olc', f')) !newCtxRef;
 	if (olc = ctx) then newCtxRef := listOfCtx @ !newCtxRef
 	else ()
       ) lctx;
-      (*newCtxRef := !ctxRemainder @ !newCtxRef;*)
       olCtx.OlContext.lst <- !newCtxRef in
     let rec rewTree olTree = 
       solve olTree (fst(nctx)) (snd(nctx));
@@ -591,19 +587,19 @@ module Derivation = struct
     rewTree pt
     
   let fixContexts lst = 
-    List.map (fun (s, i) -> ((s,i), [])) lst
+    List.map (fun lst' -> List.map (fun (s, i) -> ((s,i), [])) lst') lst
       
-  (* Create new contexts and apply this to ALL the tree *)
+  (* Create new contexts and apply this to the tree *)
   (* seq1 is the conclusion and seq2 the premise *)
-  let applyNewContexts pt seq1 seq2 = 
+  let applyNewContexts pt seq1 seq2 str = 
     let ctx1 = OlSequent.getContext seq1 in
     let ctx2 = OlSequent.getContext seq2 in
-    let m = getValidCtx ctx1 in
-    let n = getValidCtx ctx2 in
+    let m = getValidCtx ctx1 str in
+    let n = getValidCtx ctx2 str in
     let maxPair = getMaxPair n in
-    let lst = createContextList m n maxPair in
-    let nList = fixContexts (getAssocN n lst) in
-    let mList = fixContexts (getAssocM m lst) in
+    let lst = fixContexts (createContextList m n maxPair) in
+    let nList = getAssocN n lst in
+    let mList = getAssocM m lst in
     List.iter (fun nctx -> rewriteTree pt nctx) nList;
     List.iter (fun nctx -> rewriteTree pt nctx) mList;
     ()
@@ -613,16 +609,32 @@ module Derivation = struct
     let ptRef = ref pt in
     let rec getSequents' pt = 
       if (List.exists (fun pt' ->
-	match pt'.OlProofTree.rule with
-	| SOME(r) -> false
-	| NONE -> if (List.length pt'.OlProofTree.tree) = 0 then true else false
-      ) pt.OlProofTree.tree) then
-	if (sameContexts (OlProofTree.getContextFromPt (List.find (fun pt' -> 
-	pt'.OlProofTree.tree <> []) pt.OlProofTree.tree)) 
-	(OlProofTree.getContextFromPt pt)) then 
-	  getSequents' (List.find (fun pt' -> pt'.OlProofTree.tree <> []) pt.OlProofTree.tree)
-	else begin applyNewContexts !ptRef (OlProofTree.getConclusion pt) (OlProofTree.getConclusion (List.find (fun pt' -> pt'.tree <> 0) pt.OlProofTree.tree)); [] end
-      else List.concat (List.map (fun p -> getSequents' p) pt.OlProofTree.tree) in
-    getSequents' pt*)
+	  match pt'.OlProofTree.rule with
+	  | SOME(r) -> if (pt'.OlProofTree.tree = []) then true else false
+	  | NONE -> false
+	) pt.OlProofTree.tree) then
+	begin
+	  let pt2 = List.find (fun pt' -> pt'.OlProofTree.tree <> []) pt.OlProofTree.tree in
+	  let ctx1 = (OlProofTree.getContextFromPt pt) in
+	  let ctx2 = (OlProofTree.getContextFromPt pt2) in
+	  let seq1 = OlProofTree.getConclusion pt in
+	  let seq2 = OlProofTree.getConclusion pt2 in
+	  let ctx_str_lst = OlContext.getStrings ctx1 in
+	  if (List.for_all (fun str -> sameContexts ctx1 ctx2 str) ctx_str_lst) then
+	    getSequents' pt2
+	  else 
+	    begin 
+	      let ctx_str_lst = OlContext.getStrings ctx1 in
+	      let diff_ctx = List.map (fun el -> (el, (sameContexts ctx1 ctx2 el))) ctx_str_lst in
+	      List.iter (fun (str, bol) -> 
+		if bol = false then
+		while (sameContexts ctx1 ctx2 str) = false do
+		  applyNewContexts !ptRef seq1 seq2 str
+		done
+	      ) diff_ctx
+	    end
+	end
+      else List.iter (fun p -> getSequents' p) pt.OlProofTree.tree in
+    getSequents' pt
 
 end;;
