@@ -127,7 +127,7 @@ WITHDBM =dbm.cma -cclib -lmldbm -cclib -lndbm
 
 all:: .depend.input .depend $(EXEC)
 
-opt : $(EXEC).opt
+opt : $(EXEC)-opt
 
 #ocamlc -custom other options graphics.cma other files -cclib -lgraphics -cclib -lX11
 #ocamlc -thread -custom other options threads.cma other files -cclib -lthreads
@@ -140,13 +140,13 @@ SMLIY = $(SOURCES:.mly=.ml)
 SMLIYL = $(SMLIY:.mll=.ml)
 SMLYL = $(filter %.ml,$(SMLIYL))
 OBJS = $(SMLYL:.ml=.cmo)
-OPTOBJS = $(OBJS:.cmx=.cmx)
+OPTOBJS = $(SMLYL:.ml=.cmx)
 
 $(EXEC): $(OBJS) 
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(LIBS) $(OBJS)
 
-# $(EXEC)-opt: $(OPTOBJS)
-#	$(CAMLOPT) -o $(EXEC) $(LIBS:.cma=.cmxa) $(OPTOBJS)
+$(EXEC)-opt: $(OPTOBJS)
+	$(CAMLOPT) -o $(EXEC) $(LIBS:.cma=.cmxa) $(OPTOBJS)
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly 
 
@@ -192,6 +192,7 @@ clean::
 	rm -f $(EXEC)
 	rm -f $(EXEC).opt
 	rm -f *.annot
+	rm -f *.o
 	rm -f parser.mli
 	rm -f parser.ml
 	rm -f parser_models.mli
