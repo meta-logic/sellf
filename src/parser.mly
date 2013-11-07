@@ -45,8 +45,8 @@ let check_val_subexp sub1 sub2 =
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
 LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
-QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL
-%token <string> NAME STRING VAR FORALL EXISTS TSUB ABS NEW FILE
+QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
+%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE ABS NEW FILE
 %token <int> INT
 %right ARR  
 %left TIMES
@@ -170,6 +170,17 @@ clause:
       else failwith ("ERROR: More powerful subexponential "^$4^" cannot be smaller than the less powerful subexponential "^$2)
     | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
     | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
+}
+
+/* Define the context type */
+| SUBEXCTX NAME CTXTYPE NAME DOT {
+  match (Subexponentials.isSubexponentialDeclared $2) with
+    | true -> if ($4 = "lft") || ($4 = "rght") || ($4 = "rghtlft") then
+      begin
+	Hashtbl.add Subexponentials.ctxTbl $2 ($3, $4); NONE
+      end
+      else failwith ("ERROR: Subexpctx invalid side: "^$4)
+    | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
 }
 
 /* Defines which kind of rules we are specifying now */

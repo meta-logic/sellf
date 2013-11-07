@@ -22,6 +22,11 @@ let typeTbl = Hashtbl.create 100 ;;
 (* Each subexponential holds those which are greater than it. *)
 let orderTbl : (string, string) Hashtbl.t = Hashtbl.create 100 ;;
 
+(* Hashtable with subexponentials context types *)
+(* Context type: (formulas description, side) *)
+type ctxType = (string * string) ;;
+let ctxTbl : (string, ctxType) Hashtbl.t = Hashtbl.create 100 ;;
+
 let addType s t = Hashtbl.add typeTbl s t ;;
 
 let isSubexponentialDeclared name = try match Hashtbl.find typeTbl name with

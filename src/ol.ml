@@ -14,6 +14,7 @@ open ContextSchema
 open ProofTreeSchema
 open Constraints
 open Sequent
+open Subexponentials
 
 module OlContext = struct
   
@@ -58,6 +59,11 @@ module OlContext = struct
     | CONS (s) -> s
     | _ -> "empty"
   
+  let getFromOption opt = 
+    match opt with
+    | SOME(x) -> x
+    | NONE -> raise (Invalid_argument "Option.get")
+    
   let remComma str = 
     try String.sub str 0 ((String.length str)-2) with Invalid_argument("String.sub") -> str
   
@@ -83,10 +89,15 @@ module OlContext = struct
 	      else n :: acc
     ) ctx.lst []
     
+  let isTheCorrectSide n side =
+    let ctxType = try SOME(Hashtbl.find Subexponentials.ctxTbl n) with Not_found -> NONE in
+    if ctxType = NONE then false 
+    else snd(getFromOption(ctxType)) = side
+    
   let getFormString f side = 
     let formList = List.map (fun f' -> (f', (getAbsLst f' []))) f in
     (List.fold_right (fun (form, absLst) acc' ->
-      if (getFormSide form) = side then (termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
+      if ((getFormSide form) = side) then (termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
       else acc'
     ) formList "")
   
@@ -94,28 +105,29 @@ module OlContext = struct
     let slotToTex ctx side str_ctx =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
+      let isThisSide = isTheCorrectSide n side in
       match (n, side, f) with
       | ("#",_,_) -> acc
       | ("#lr",_,_) -> acc
       | ("#gamma",_,_) -> acc
       | ("#infty",_,_) -> acc
       | (_, "lft", []) -> 
-	if n = str_ctx then
+	if n = str_ctx && isThisSide then
 	  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 	else acc
       | (_, "lft", f') -> 
-	if n = str_ctx then
+	if n = str_ctx && isThisSide then
 	  begin
 	    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
 	    initialString ^ (getFormString f' "lft") ^ acc
 	  end
 	else acc
       | (_, "rght", []) -> 
-	if n = str_ctx then 
+	if n = str_ctx && isThisSide then 
 	  "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 	else acc
       | (_, "rght", f') ->
-	if n = str_ctx then
+	if n = str_ctx && isThisSide then
 	  begin
 	    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
 	    initialString ^ (getFormString f' "rght") ^ acc
@@ -219,11 +231,6 @@ module OlProofTree = struct
     rule = rl;
   }
   
-  let getFromOption opt = 
-    match opt with
-    | SOME(x) -> x
-    | NONE -> raise (Invalid_argument "Option.get")
-  
   let getConclusion pt = pt.conclusion
   
   let getContextFromPt pt = OlSequent.getContext (getConclusion pt) 
@@ -237,7 +244,7 @@ module OlProofTree = struct
   let getListFromOptions lst = 
     List.concat (List.map (fun el ->
       match el with
-      | SOME (el') -> [getFromOption el]
+      | SOME (el') -> [OlContext.getFromOption el]
       | NONE -> []
     ) lst )
  
@@ -253,7 +260,7 @@ module OlProofTree = struct
 	end
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
     let rec getSeq pt' =
-      let pt = getFromOption pt' in
+      let pt = OlContext.getFromOption pt' in
       match pt.tree with
       | [] -> 
 	begin
@@ -268,7 +275,7 @@ module OlProofTree = struct
 	    if (List.exists (fun el -> (getPol el) = SYNC) pt.tree) then
 	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.tree in
 	      nextPt.tree <- List.concat (List.map (fun el -> match el with
-		| SOME (el') -> [getFromOption el]
+		| SOME (el') -> [OlContext.getFromOption el]
 		| NONE -> [] 
 		) (getSeq' nextPt));
 	      [SOME(nextPt)]
@@ -309,7 +316,7 @@ module OlProofTree = struct
       match pt.rule with
       | SOME(r) ->
 	      let seq = getConclusion pt in
-	      let rule = getFromOption (OlSequent.getMainForm seq) in
+	      let rule = OlContext.getFromOption (OlSequent.getMainForm seq) in
 	      let topproof = match pt.tree with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 

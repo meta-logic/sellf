@@ -17,6 +17,7 @@ let instring = [^'"'] *
 let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
+let ctxtype = "many"  |  "one"
 
 rule token = parse 
 
@@ -27,6 +28,8 @@ rule token = parse
 | "type"                { TYPE }
 | "tsub"                {TSUBEX}
 | "subexp"              { SUBEX }
+| "subexpctx"           {SUBEXCTX}
+| ctxtype as t          {CTXTYPE(t)}
 | "context"             {CONTEXT}      
 | "subexprel"           {SUBEXPREL}
 | "pos"                 {POS}
@@ -36,7 +39,7 @@ rule token = parse
 | "cut"                 {CUTRULE}
 | "structural"          {STRUCTURAL}
 | "introduction"        {INTRODUCTION}
-| subtype as tsub {TSUB(tsub)}
+| subtype as tsub       {TSUB(tsub)}
 | ':'                   { DOTS }
 | "->"                  { TARR }
 | '.'                   { DOT }

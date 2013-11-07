@@ -97,40 +97,41 @@ let parse file_name = begin
     end
 end ;;
 
-let bipole formulas i = 
+let bipole () = 
   print_endline "Please type the name of the file: ";
   let fileName = read_line () in
   let file = open_out (fileName^".tex") in
-  let olPt = ref [] in begin
-  try match Bipole.bipole (List.nth formulas i) with
-    | bipoles ->
+  let i = ref 0 in
+  let olPt = ref [] in
+  let formulas = !Specification.others @ !Specification.introRules in
+  let bpl_lst = ref [] in
+  let all_bipoles = List.for_all (fun f -> 
+    try match Bipole.bipole f with
+    | bipole -> bpl_lst := !bpl_lst @ [bipole]; 
+    true
+    with Bipole.Not_bipole -> false    
+  ) formulas in
+  if all_bipoles then begin
+    Printf.fprintf file "%s" Prints.texFileHeader;
+    List.iter (fun bipoles ->
       olPt := Derivation.transformTree bipoles;
       List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
       Derivation.solveFirstPhaseBpl !olPt;
       Derivation.solveSndPhaseBpl !olPt;
-      Printf.fprintf file "%s" Prints.texFileHeader;
-      (*Printf.fprintf file "\\section{Possible bipoles for $%s$:} \n" (Prints.termToTexString (List.nth formulas i));
-      List.iter (fun (pt, model) ->
-	Printf.fprintf file "%s" "{\\scriptsize";
-	Printf.fprintf file "%s" "\\[";
-	Printf.fprintf file "%s" (ProofTreeSchema.toTexString pt);
-	Printf.fprintf file "%s" "\\]";
-	Printf.fprintf file "%s" "}";
-	Printf.fprintf file "%s" "CONSTRAINTS\n";
-	Printf.fprintf file "%s" (Constraints.toTexString model);
-      ) bipoles;   *)
-      (*Printf.fprintf file "%s" "{\\section{Result:}}\n";*)
       List.iter (fun (olt, model) ->
-	Printf.fprintf file "%s" "{\\scriptsize";
+	Printf.fprintf file "%s" ("\\begin{center}" ^ (string_of_int(!i)) ^ "\\end{center}" ^ "{\\scriptsize");
 	Printf.fprintf file "%s" "\\[";
 	Printf.fprintf file "%s" (OlProofTree.toTexString olt);
 	Printf.fprintf file "%s" "\\]";
 	Printf.fprintf file "%s" "}";
+	i := !i + 1;
       ) !olPt;
-      Printf.fprintf file "%s" Prints.texFileFooter;
-      close_out file;
-    with Bipole.Not_bipole -> print_endline "This specification is not a bipole!"
-  end;;
+    ) !bpl_lst;
+    Printf.fprintf file "%s" Prints.texFileFooter;
+    close_out file;
+    end
+  else print_endline "This specification is not a bipole!"
+  ;;
   
 (* Command line #bipole *)
 let bipole_cl () = begin
@@ -140,7 +141,7 @@ let bipole_cl () = begin
   let bpl_lst = ref [] in
   let all_bipoles = List.for_all (fun f -> 
     try match Bipole.bipole f with
-    | bipole -> bpl_lst := bipole :: !bpl_lst; 
+    | bipole -> bpl_lst := !bpl_lst @ [bipole]; 
     true
     with Bipole.Not_bipole -> false    
   ) formulas in begin
@@ -151,12 +152,12 @@ let bipole_cl () = begin
     Derivation.solveFirstPhaseBpl !olPt;
     Derivation.solveSndPhaseBpl !olPt;
     List.iter (fun (olt, model) ->
-      print_endline (string_of_int(!i));
+      print_endline ("\\begin{center}" ^ (string_of_int(!i)) ^ "\\end{center}");
       print_endline "\\[";
       print_endline (OlProofTree.toTexString olt);
       print_endline "\\]";
+      i := !i + 1;
     ) !olPt;
-    i := !i + 1
   ) !bpl_lst
   else print_endline "This specification is not a bipole!"
   end
@@ -302,20 +303,10 @@ solve_query () =
       ) formulas
 
     (* Generates the bipole of a rule and prints a latex file with it *)
-    | "#bipole" -> 
-      let i = ref 0 in
-      let formulas = !Specification.others @ !Specification.introRules in
-      print_endline "\nThese are the formulas available: ";
-      List.iter ( fun f ->
-        print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
-        i := !i + 1
-      ) formulas;
+    | "#bipole" ->
       print_newline ();
-      print_endline "SELLF will generate the bipoles corresponding to the formula \
-      chosen and print them in a latex file.";
-      print_endline "Please type the number of the formula: ";
-      let i' = int_of_string (read_line ()) in
-      bipole formulas i'
+      print_endline "SELLF will generate all the bipoles of the especification and print them in a latex file.";
+      bipole ()
 
     (* Check if two rules permute *)
     | "#permute" -> 
