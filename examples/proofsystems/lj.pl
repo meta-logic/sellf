@@ -8,6 +8,8 @@
 
 subexp r lin.
 
+subexpctx r one rght.
+
 rules introduction.
 
 % Implication

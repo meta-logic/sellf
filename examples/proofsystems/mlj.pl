@@ -9,6 +9,8 @@
 subexp l unb.
 subexp r unb.
 
+subexpctx l many lft.
+subexpctx r many rght.
 
 rules introduction.
 % Implication
