@@ -147,28 +147,6 @@ let print_rulenames () = begin
   ) rules_lst
 end ;;
 
-let apply_permute perm_bipoles = begin
-  let olPt = ref [] in
-  olPt := Derivation.transformTree' perm_bipoles;
-  Derivation.solveFirstPhasePer !olPt;
-  Derivation.solveSndPhasePer !olPt;
-  List.iter (fun ((olt1, model1), (olt2, model2)) -> 
-    Derivation.equatingContexts olt1;
-    Derivation.equatingContexts olt2;
-    OlProofTree.toPermutationFormat olt1;
-    OlProofTree.toPermutationFormat olt2;
-  ) !olPt;
-  !olPt
-end ;;
-
-let apply_perm_not_found perm_not_found = begin
-  let olPt = ref [] in
-  olPt := Derivation.transformTree perm_not_found;
-  Derivation.solveFirstPhaseBpl !olPt;
-  Derivation.solveSndPhaseBpl !olPt;
-  !olPt
-end ;;
-
 let bipole () = 
   print_endline "Please type the name of the file: ";
   let olPt = ref [] in
@@ -238,23 +216,9 @@ let permute formulas i1 i2 =
     end
   | _ -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
     let fileName = read_line () in
-    let file = open_out (fileName^".tex") in
-    let olPt = apply_permute perm_bipoles in
-    Printf.fprintf file "%s" Prints.texFileHeader;
-    Printf.fprintf file "\\section{Possible permutations for $%s$ " (Prints.termToTexString (List.nth formulas i1));
-    Printf.fprintf file " and $%s$:} \n" (Prints.termToTexString (List.nth formulas i2));
-    List.iter (fun (b12, b21) ->
-	Printf.fprintf file "%s" "{\\scriptsize";
-	Printf.fprintf file "%s" "\\[";
-	Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
-	Printf.fprintf file "\n\\quad\\rightsquigarrow\\quad\n";
-	Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
-	Printf.fprintf file "%s" "\\]";
-	Printf.fprintf file "%s" "}";
-	Printf.fprintf file "%s" "\\\[0.7cm]";
-    ) olPt;
-    Printf.fprintf file "%s" Prints.texFileFooter;
-    close_out file;;
+    Permutation.printPermutations fileName perm_bipoles
+;;
+
 
 (* Command line #permute *)
 let permute_cl n1 n2 = begin
@@ -272,20 +236,20 @@ let permute_cl n1 n2 = begin
       | _ -> print_endline "\nThe rules do not permute.\nThe derivation that can not be permuted are shown below: ";
       let olPt = apply_perm_not_found perm_not_found in
       List.iter (fun (olt, model) ->
-	OlProofTree.toPermutationFormat olt;
-	print_endline "\\[";
-	print_endline (OlProofTree.toTexString olt);
-	print_endline "\\]";
+				OlProofTree.toPermutationFormat olt;
+				print_endline "\\[";
+				print_endline (OlProofTree.toTexString olt);
+				print_endline "\\]";
       ) olPt 
       end
     | _ -> print_endline "\nThe rules permute.\nThe permutations are shown below: ";
       let olPt = apply_permute perm_bipoles in
       List.iter (fun (b12, b21) ->
-	  print_endline "\\[";
-	  print_endline (OlProofTree.toTexString (fst(b12)));
-	  print_endline "\n\\quad\\rightsquigarrow\\quad\n";
-	  print_endline (OlProofTree.toTexString (fst(b21)));
-	  print_endline "\\]";
+		    print_endline "\\[";
+		    print_endline (OlProofTree.toTexString (fst(b12)));
+			  print_endline "\n\\quad\\rightsquigarrow\\quad\n";
+			  print_endline (OlProofTree.toTexString (fst(b21)));
+			  print_endline "\\]";
       ) olPt
       end;;
  
@@ -356,28 +320,26 @@ solve_query () =
       permute formulas i1 i2
 
     (* Check if all rules permute *)
-    (*| "#permute_all" ->
+    | "#permute_all" ->
       let formulas = !Specification.others @ !Specification.introRules in
       print_endline "SELLF will check the permutation of all formulas over all \
       formulas.";
       begin
-      List.iter (fun f1 -> 
-        List.iter (fun f2 ->
+      let permutations = List.fold_right (fun f1 acc -> 
+        List.fold_right (fun f2 acc2 ->
           match Permutation.permute f1 f2 with
-            | true -> ()
-              (*print_endline (Prints.termToString f1);
-              print_endline "\npermutes over\n";
-              print_endline (Prints.termToString f2)*)
-            | false -> 
-              print_endline "------------------------------------------------------";
+            | ([], _) -> 
               print_endline (Prints.termToString f1);
               print_endline "\ndoes NOT permute over\n";
-              print_endline (Prints.termToString f2)
-        ) formulas
-      ) formulas;
-      print_endline "------------------------------------------------------";
-      print_endline "All the other rules permute."
-      end*)
+              print_endline (Prints.termToString f2);
+              acc2
+            | (perm_bipoles, _) -> perm_bipoles @ acc2
+        ) formulas acc
+      ) formulas [] in
+      print_endline("Please type the name of the file to print the permutations:");
+      let fileName = read_line() in
+        Permutation.printPermutations fileName permutations
+      end
 
     | "#cutcoherence" -> check_cutcoherence ()
     

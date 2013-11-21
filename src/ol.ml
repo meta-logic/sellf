@@ -89,6 +89,7 @@ module OlContext = struct
 	      else n :: acc
     ) ctx.lst []
     
+
   let getCtxType n = try SOME(Hashtbl.find Subexponentials.ctxTbl n) with Not_found -> NONE
     
   let checkSide n side =
@@ -126,60 +127,57 @@ module OlContext = struct
     (List.fold_right (fun ((n, i), f) acc ->
       let correctSide = checkSide n side in
       match (n, side, f) with
-      | ("#",_,_) -> acc
+      (*| ("#",_,_) -> acc
       | ("#lr",_,_) -> acc
       | ("#gamma",_,_) -> acc
-      | ("#infty",_,_) -> acc
+      | ("#infty",_,_) -> acc*)
       | (_, "lft", []) -> 
-	if n = str_ctx && correctSide then
-	  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-	else acc
+				if n = str_ctx && correctSide then
+				  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+				else acc
       | (_, "lft", f') -> 
-	if n = str_ctx && correctSide then
-	  begin
-	    checkFormSide f' n;
-	    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-	    initialString ^ (getFormString f' "lft") ^ acc
-	  end
-	else acc
+				if n = str_ctx && correctSide then
+				  begin
+				    checkFormSide f' n;
+				    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
+				    initialString ^ (getFormString f' "lft") ^ acc
+				  end
+				else acc
       | (_, "rght", []) -> 
-	if n = str_ctx && correctSide then 
-	  "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-	else acc
+				if n = str_ctx && correctSide then 
+				  "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+				else acc
       | (_, "rght", f') ->
-	if n = str_ctx && correctSide then
-	  begin
-	    checkFormSide f' n;
-	    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-	    initialString ^ (getFormString f' "rght") ^ acc
-	  end
-	else acc
+				if n = str_ctx && correctSide then
+				  begin
+				    checkFormSide f' n;
+				    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
+				    initialString ^ (getFormString f' "rght") ^ acc
+				  end
+				else acc
       | (_, _, _) -> acc
     ) ctx.lst "") ^
     (* Print formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
       match (n, side, f) with
       | (_, "lft", f') -> 
-	if n = "#" ^ (remDolar str_ctx) then
-	  (getFormString f' "lft") ^ acc
-	else acc
+				if n = "#" ^ (remDolar str_ctx) then
+				  (getFormString f' "lft") ^ acc
+				else acc
       | (_, "rght", f') -> 
       	if n = "#" ^ (remDolar str_ctx) then
-	  (getFormString f' "rght") ^ acc
-	else acc
+	        (getFormString f' "rght") ^ acc
+	      else acc
       | (_, _, _) -> acc
     ) ctx.lst "") in
     (* Print all slots *)
     List.fold_right (fun str_ctx acc ->
-      let correctSide = match str_ctx with
-      (*| "gamma" -> true
-      | "infty" -> true*)
-      | _ -> checkSide str_ctx side in
-      let slotString = remComma (slotToTex ctx side str_ctx) in
-      match (slotString, correctSide) with
-      | ("", false) -> acc
-      | ("", true) -> " \\cdot \\mid " ^ acc
-      | (slotString', _) -> slotString' ^ " \\mid " ^ acc
+      match checkSide str_ctx side with 
+        | false -> acc
+        | true ->
+          match remComma (slotToTex ctx side str_ctx) with
+            | "" -> " \\cdot \\mid " ^ acc
+            | str -> str ^ " \\mid " ^ acc
     ) str_list ""
   
   (* Hack to fix gamma constraints that come without $ *)
@@ -362,10 +360,11 @@ module Derivation = struct
     let seq = ProofTreeSchema.getConclusion pt in
     let rule = ProofTreeSchema.getRule pt in
     let ctx = SequentSchema.getContext seq in
-    let ctxList = [] in
-    let ctxListRef = ref ctxList in
-    Hashtbl.iter (fun str1 int1 -> ctxListRef := (str1, int1) :: !ctxListRef) ctx.hash;
-    let context = OlContext.create !ctxListRef in
+    let ctxListRef = Hashtbl.fold (fun str1 int1 acc -> 
+      if str1 = "$gamma" || str1 = "$infty" then acc
+      else (str1, int1) :: acc
+    ) ctx.hash [] in
+    let context = OlContext.create ctxListRef in
     let goals = SequentSchema.getGoals seq in
     let polarity = SequentSchema.getPhase seq in
     let sequent = OlSequent.create context goals polarity in
@@ -671,3 +670,26 @@ module Derivation = struct
     getSequents' pt
 
 end;;
+
+(* TODO: make it more modular? *)
+let apply_permute perm_bipoles = begin
+  let olPt = ref [] in
+  olPt := Derivation.transformTree' perm_bipoles;
+  Derivation.solveFirstPhasePer !olPt;
+  Derivation.solveSndPhasePer !olPt;
+  List.iter (fun ((olt1, model1), (olt2, model2)) -> 
+    Derivation.equatingContexts olt1;
+    Derivation.equatingContexts olt2;
+    OlProofTree.toPermutationFormat olt1;
+    OlProofTree.toPermutationFormat olt2;
+  ) !olPt;
+  !olPt
+end ;;
+
+let apply_perm_not_found perm_not_found = begin
+  let olPt = ref [] in
+  olPt := Derivation.transformTree perm_not_found;
+  Derivation.solveFirstPhaseBpl !olPt;
+  Derivation.solveSndPhaseBpl !olPt;
+  !olPt
+end ;;

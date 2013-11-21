@@ -177,11 +177,11 @@ clause:
   match (Subexponentials.isSubexponentialDeclared $2) with
     | true -> if ($3 = "one") || ($3 = "many") || ($3 = "none") then
       begin
-	if ($4 = "lft") || ($4 = "rght") || ($4 = "rghtlft") || (($3 = "none") && ($4 = "")) then
-	  begin
-	    Hashtbl.add Subexponentials.ctxTbl $2 ($3, $4); NONE
-	  end
-	else failwith ("ERROR: Subexpctx invalid side: "^$4)
+				if ($4 = "lft") || ($4 = "rght") || ($4 = "rghtlft") || (($3 = "none") && ($4 = "")) then
+				  begin
+				    Hashtbl.add Subexponentials.ctxTbl $2 ($3, $4); NONE
+				  end
+				else failwith ("ERROR: Subexpctx invalid side: "^$4)
       end
       else failwith ("ERROR: Subexpctx invalid context type: "^$3)
     | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 

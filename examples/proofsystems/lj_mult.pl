@@ -10,6 +10,9 @@
 subexp r lin.
 subexp l lin.
 
+subexpctx r one rght.
+subexpctx l many lft.
+
 rules introduction.
 
 % Implication
@@ -32,11 +35,9 @@ rules introduction.
 (not (lft (exists A))) * (pi \X ([l]? (lft (A X)))).
 (not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
 
-% False
-%(not (lft false)) * top.
-
-% True
-%(not (rght true)) * top.
+% Not
+(not (lft (myNot A))) * ([r]? (rght A)).
+(not (rght (myNot A))) * ([l]? (lft A)).
 
 rules axiom.
 ((not (lft A)) * (not (rght A))).

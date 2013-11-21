@@ -9,6 +9,7 @@
 (**************************************)
 
 open Sequent
+open Ol
 
 (* Generates all possible derivations of spec1/spec2 (bottom-up) *)
 let derive2 spec1 spec2 =
@@ -18,6 +19,7 @@ let derive2 spec1 spec2 =
   let sequent = SequentSchema.createAsyn context [] in
   let in1 = Constraints.isIn spec1 "$gamma" context in
   let in2 = Constraints.isIn spec2 "$gamma" context in
+  (* TODO: add the constraint that a context should have only one formula?? *)
   let constraints = Constraints.union in1 in2 in
 
   (* Compute possible bipoles for spec1 *)
@@ -104,8 +106,7 @@ let permute spec1 spec2 =
   bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
 *)
 
-(*  List.for_all (fun b12 ->
-    List.exists (fun b21 ->*)
+  (* TODO: try to avoid a call to dlv twice with the same arguments. *)
   let permutations = List.fold_right (fun b12 acc ->
     if List.exists (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 then
       let b21 = List.find (fun b21' -> Dlv.proofImplies b12 b21' = true) bipoles21 in
@@ -115,3 +116,21 @@ let permute spec1 spec2 =
   (permutations, bipoles12)
 ;;
 
+(* Prints the permutations of rules to a latex file *)
+let printPermutations fileName perm_bipoles = 
+  let file = open_out ("proofsTex/"^fileName^".tex") in
+  let olPt = apply_permute perm_bipoles in
+  Printf.fprintf file "%s" Prints.texFileHeader;
+  List.iter (fun (b12, b21) ->
+ 	  Printf.fprintf file "%s" "{\\scriptsize";
+ 	  Printf.fprintf file "%s" "\\[";
+ 	  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
+ 	  Printf.fprintf file "\n\\quad\\rightsquigarrow\\quad\n";
+ 	  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
+ 	  Printf.fprintf file "%s" "\\]";
+ 	  Printf.fprintf file "%s" "}";
+ 	  Printf.fprintf file "%s" "\\\[0.7cm]";
+  ) olPt;
+  Printf.fprintf file "%s" Prints.texFileFooter;
+  close_out file
+;;

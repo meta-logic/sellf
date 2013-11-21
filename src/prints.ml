@@ -201,4 +201,3 @@ let remSpecial s = try match  (String.index s '$') with
   with Not_found -> s
 ;;
 
-
