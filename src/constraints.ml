@@ -94,6 +94,18 @@ let bang ctx subexp =
 returned *)
 let initial ctx f = 
   let contexts = ContextSchema.getContexts ctx in
+  let checkDiffSide (sub, i) dualf = 
+    let ctxType = try SOME(Hashtbl.find Subexponentials.ctxTbl sub) with Not_found -> NONE in
+    match ctxType with
+    | SOME(tuple) -> begin
+	let side = snd(tuple) in begin
+	match dualf with
+	| PRED(side', _, _) -> (side <> "rghtlft") && (side <> side')
+	| _ -> true
+	end
+      end
+    | NONE -> true
+  in
   (* Suppose the dual of f is in s, generates all the constraints *)
   let isHere (sub, i) dualf = 
     let c1 = match type_of sub with
@@ -111,8 +123,8 @@ let initial ctx f =
     c1 :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
-  (* Gamma contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
-    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" then acc
+  (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
+    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || (checkDiffSide c (nnf (NOT(f)))) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs

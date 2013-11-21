@@ -89,10 +89,29 @@ module OlContext = struct
 	      else n :: acc
     ) ctx.lst []
     
-  let isTheCorrectSide n side =
-    let ctxType = try SOME(Hashtbl.find Subexponentials.ctxTbl n) with Not_found -> NONE in
-    if ctxType = NONE then false 
-    else snd(getFromOption(ctxType)) = side
+  let getCtxType n = try SOME(Hashtbl.find Subexponentials.ctxTbl n) with Not_found -> NONE
+    
+  let checkSide n side =
+    let ctxType = getCtxType n in
+    match ctxType with 
+    | SOME(tuple) -> let side' = snd(tuple) in
+      (side' = side) || (side' = "rghtlft")
+    | NONE -> false
+    
+  let checkFormSide f n = 
+    let ctxType = getCtxType n in
+    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) f in
+    match ctxType with
+    | SOME(tuple) -> List.iter (fun (form, absLst) ->
+	let formSide = getFormSide form in
+	let ctxSide = snd(tuple) in
+	if (formSide <> ctxSide) && (ctxSide <> "rghtlft") then begin
+	  print_string ("\nThe following formula can't belong to the context " ^ n ^ ": " ^ (termToString form) ^ 
+	  "\nPlease verify your especification.\n")
+	  end
+	else ()
+      ) formList
+    | NONE -> ()
     
   let getFormString f side = 
     let formList = List.map (fun f' -> (f', (getAbsLst f' []))) f in
@@ -105,30 +124,32 @@ module OlContext = struct
     let slotToTex ctx side str_ctx =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let isThisSide = isTheCorrectSide n side in
+      let correctSide = checkSide n side in
       match (n, side, f) with
       | ("#",_,_) -> acc
       | ("#lr",_,_) -> acc
       | ("#gamma",_,_) -> acc
       | ("#infty",_,_) -> acc
       | (_, "lft", []) -> 
-	if n = str_ctx && isThisSide then
+	if n = str_ctx && correctSide then
 	  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 	else acc
       | (_, "lft", f') -> 
-	if n = str_ctx && isThisSide then
+	if n = str_ctx && correctSide then
 	  begin
+	    checkFormSide f' n;
 	    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
 	    initialString ^ (getFormString f' "lft") ^ acc
 	  end
 	else acc
       | (_, "rght", []) -> 
-	if n = str_ctx && isThisSide then 
+	if n = str_ctx && correctSide then 
 	  "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 	else acc
       | (_, "rght", f') ->
-	if n = str_ctx && isThisSide then
+	if n = str_ctx && correctSide then
 	  begin
+	    checkFormSide f' n;
 	    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
 	    initialString ^ (getFormString f' "rght") ^ acc
 	  end
@@ -146,14 +167,19 @@ module OlContext = struct
       	if n = "#" ^ (remDolar str_ctx) then
 	  (getFormString f' "rght") ^ acc
 	else acc
-      | (_, _, _) -> "" ^ acc
+      | (_, _, _) -> acc
     ) ctx.lst "") in
     (* Print all slots *)
     List.fold_right (fun str_ctx acc ->
+      let correctSide = match str_ctx with
+      (*| "gamma" -> true
+      | "infty" -> true*)
+      | _ -> checkSide str_ctx side in
       let slotString = remComma (slotToTex ctx side str_ctx) in
-      match slotString with
-      | "" -> " \\cdot \\mid " ^ acc
-      | slotString' -> slotString' ^ " \\mid " ^ acc
+      match (slotString, correctSide) with
+      | ("", false) -> acc
+      | ("", true) -> " \\cdot \\mid " ^ acc
+      | (slotString', _) -> slotString' ^ " \\mid " ^ acc
     ) str_list ""
   
   (* Hack to fix gamma constraints that come without $ *)
@@ -309,7 +335,7 @@ module OlProofTree = struct
     | "rght" -> "R"
     | "lft" -> "L"
     | _ -> ""
-  
+    
   let toTexString pt =
     let str_list = collectStrings pt in
     let rec toTexString' pt = 
