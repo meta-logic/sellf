@@ -176,8 +176,14 @@ module OlContext = struct
         | false -> acc
         | true ->
           match remComma (slotToTex ctx side str_ctx) with
-            | "" -> " \\cdot \\mid " ^ acc
-            | str -> str ^ " \\mid " ^ acc
+            | "" -> begin match acc with
+              | "" -> " \\cdot " ^ acc
+              | _ -> " \\cdot \\mid " ^ acc
+            end
+            | str -> begin match acc with
+              | "" -> str ^ " " ^ acc
+              | _ -> str ^ " \\mid " ^ acc
+            end
     ) str_list ""
   
   (* Hack to fix gamma constraints that come without $ *)
@@ -228,16 +234,11 @@ module OlSequent = struct
     | [] -> NONE
     | _ -> SOME (getOnlyRule (formatForm (List.hd seq.goals)))
   
-  (* Remove the vertical bar remnant *)
-  let formatContext str = 
-    String.sub str 0 ((String.length str)-6)
-  
-  let toTexString seq str_list = 
-  match (getPol seq) with
-  | ASYN -> (formatContext (OlContext.toTexString seq.ctx "lft" str_list))
-    ^ " \\vdash " ^ (formatContext (OlContext.toTexString seq.ctx "rght" str_list)) (*^ " \\Uparrow "*)
-  | SYNC -> (formatContext (OlContext.toTexString seq.ctx "lft" str_list))
-    ^ " \\vdash " ^ (formatContext (OlContext.toTexString seq.ctx "rght" str_list)) (*^  " \\Downarrow "*)
+  let toTexString seq str_list = match (getPol seq) with
+    | ASYN -> (OlContext.toTexString seq.ctx "lft" str_list)
+      ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
+    | SYNC -> (OlContext.toTexString seq.ctx "lft" str_list)
+      ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
     
 end;;
 

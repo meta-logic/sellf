@@ -160,11 +160,11 @@ let bipole () =
     List.iter (fun bipoles ->
       olPt := apply_derivation bipoles;
       List.iter (fun (olt, model) ->
-	Printf.fprintf file "%s" "{\\scriptsize";
-	Printf.fprintf file "%s" "\\[";
-	Printf.fprintf file "%s" (OlProofTree.toTexString olt);
-	Printf.fprintf file "%s" "\\]";
-	Printf.fprintf file "%s" "}";
+				Printf.fprintf file "%s" "{\\scriptsize";
+				Printf.fprintf file "%s" "\\[";
+				Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+				Printf.fprintf file "%s" "\\]";
+				Printf.fprintf file "%s" "}";
       ) !olPt;
     ) bpl_lst;
     Printf.fprintf file "%s" Prints.texFileFooter;
