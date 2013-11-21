@@ -260,10 +260,10 @@ let permute formulas i1 i2 =
 let permute_cl n1 n2 = begin
   let formulas = !Specification.others @ !Specification.introRules in
   let rulesList = get_rulenames () in
+  let rules_length = List.length rulesList in
   let i1 = get_form_index n1 rulesList in
-  let i2 = get_form_index n2 rulesList in
-  if (i1 = i2) then print_endline "\nInvalid name of rules.\n" 
-  else let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
+  let i2 = get_form_index n2 rulesList in 
+  let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
   let perm_bipoles = fst(perm_pair) in
   let perm_not_found = snd(perm_pair) in
     match perm_bipoles with
