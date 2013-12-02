@@ -1,0 +1,30 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Butcher}{Butcher}{1981}]{Butcher}
+{\sc Butcher, J.} 1981.
+\newblock {\em Copy-editing: The Cambridge Handbook}.
+\newblock Cambridge University Press.
+
+\bibitem[\protect\citeauthoryear{{{C}adence {R}esearch {S}ystems}}{{{C}adence
+  {R}esearch {S}ystems}}{1994}]{crs:chez}
+{\sc {{C}adence {R}esearch {S}ystems}}. 1994.
+\newblock {\it {C}hez} {S}cheme {R}eference {M}anual.
+
+\bibitem[\protect\citeauthoryear{Cameron and Ito}{Cameron and
+  Ito}{1984}]{ci:gramps}
+{\sc Cameron, R.~D.} {\sc and} {\sc Ito, M.~R.} 1984.
+\newblock Grammar-based definition of metaprogramming systems.
+\newblock {\em {ACM} Transactions on Programming Languages and Systems\/}~{\em
+  6,\/}~1 (Jan.), 20--54.
+
+\bibitem[\protect\citeauthoryear{Grossman}{Grossman}{1982}]{Chicago}
+{\sc Grossman, J.}, Ed. 1982.
+\newblock {\em The Chicago Manual of Style}.
+\newblock University of Chicago Press.
+
+\bibitem[\protect\citeauthoryear{Lamport}{Lamport}{1986}]{LaTeX}
+{\sc Lamport, L.} 1986.
+\newblock {\em \LaTeX: A Document Preparation System\/}, 2 ed.
+\newblock Addison-Wesley, New York.
+
+\end{thebibliography}

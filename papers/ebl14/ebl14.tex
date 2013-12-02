@@ -1,0 +1,240 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mycommands}
+\usepackage{myproof}
+\usepackage{color}
+\usepackage{stmaryrd}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{times}
+% \usepackage{../mycommands}
+\usepackage{multirow}
+\usepackage{xspace}
+\usepackage{alltt}
+\usepackage{booktabs}
+%\usepackage{lineno}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\RequirePackage{txfonts}
+
+\usepackage{xspace}
+\RequirePackage{txfonts}
+\definecolor{MyDarkBlue}{RGB}{0,78,126}
+\definecolor{MyRed}{RGB}{255,48,48}
+\newcommand\thSeq{\ensuremath{\Tscr}}
+\newcommand\groundSet{\ensuremath{\mathcal{B}}}
+
+% \newcommand\leftarrow\supset
+\newcommand\lra{\longrightarrow}
+
+% Constraint predicates
+\newcommand{\elin}[2]{\ensuremath{{\tsl{unitctx}(\ensuremath{#1}, \ensuremath{#2})}}}
+\newcommand{\emp}[1]{\ensuremath{{\tsl{emp}(\ensuremath{#1})}}}
+\newcommand{\eqctx}[2]{\ensuremath{{\tsl{eqctx}(\ensuremath{#1},\ensuremath{#2})}}}
+\newcommand{\union}[3]{\ensuremath{{\tsl{union}(\ensuremath{#1},\ensuremath{#2},\ensuremath{ #3})}}}
+\newcommand{\In}[2]{\ensuremath{\tsl{in}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\Equ}[2]{\ensuremath{\tsl{Equ}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\unions}[2]{\ensuremath{\tsl{Unions}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\equal}[2]{\ensuremath{\tsl{Equal}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\equalCtx}[2]{\ensuremath{\tsl{EqualCtx}(\ensuremath{#1},\ensuremath{#2})}}
+% ProveIf predicates
+\newcommand{\inSequent}[2]{\ensuremath{\tsl{inSequent}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\inDer}[2]{\ensuremath{\tsl{inDer}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\provIf}[2]{\ensuremath{\tsl{proveIf}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\notProvIf}[2]{\ensuremath{\tsl{notProveIf}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\bounded}[1]{\ensuremath{{\tsl{bounded}(\ensuremath{#1})}}}
+
+% Names of the logic programs
+\newcommand\LPder{\ensuremath{\mathbb{P}_1}}
+\newcommand\LPprov{\ensuremath{\mathbb{P}_2}}
+\newcommand\dnot{\ensuremath{\mathit{not}}\xspace}
+%opening
+\title{Quati: From Linear Logic Specifications to Inference Rules (Extended Abstract)}
+\author{Vivek Nigam \& Leonardo Lima \\
+Universidade Federal da Paraíba, Brazil\\
+\texttt{vivek.nigam@gmail.com} \& \texttt{leonardo.alfs@gmail.com} 
+\and Giselle Reis\\
+Technische Universit\"at Wien, Vienna, Austria}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+In our previous work, we have shown that a great number of proof systems, such 
+as a multiconclusion system for intuitionisitic logic, can 
+be specified as theories in linear logic with subexponentials, a refinement of linear logic. 
+These theories are natural allowing for example the development of techniques for checking
+automatically non-trivial properties of the encoded systems, such as whether the encoded proof system 
+admits cut-elimination or to check which rule permutations are always allowed. 
+However, it takes some amount of effort to check whether a linear logic theory corresponds
+indeed to a given proof system. This paper fills this gap by developing a technique that automatically 
+transforms a linear logic specification into the inference rules it specifies thus allowing
+the user to check for errors in the specification. We applied our technique to our previous work for 
+checking and enumerating rule permutations from linear logic specifications, obtaining figures
+as they would normally appear in a proof theory text book. We are currently implementing our technique 
+as a tool called Quati to be launched soon.
+\end{abstract}
+
+\section{Introduction}
+Quati is a tool to be launched soon that takes a specification in linear logic with subexponentials~\cite{nigam09ppdp} 
+and infers automatically a number rules permutations that are always allowed. The theory and technique that 
+based this tool was explained in our previous work~\cite{nigam13iclp}. This paper tackles one of 
+Quati's method that was not explained before, namely, how to construct rules as they would appear in 
+a standard Proof-Theory book~\cite{troelstra96bpt} from a specification in linear logic with subexponential.
+
+Linear logic with Subexponentials is a refinement of linear logic, which allows for any number of 
+exponential-like connectives, called subexponentials, written $\nbang{\ell}$ and $\nquest{\ell}$ with a label $\ell$. These labels
+ are organized into a pre-order, $\prec$, specifying the provability relation among subexponentials.   
+In our recent work~\cite{nigam.jlc}, we demonstrated
+that a number of proof systems with rather complicated structural rules can be specified as linear logic with subexponential 
+theories. For example, a multiconclusion system (\mLJ) for intuitionisitic logic or a proof system for S4 modal logic can be specified in 
+Linear Logic with Subexponentials. 
+In fact, our encoding is quite strong having an adequacy on the level of 
+derivations~\cite{nigam10jar}. That is, there is a one-to-one correspondence between the (focused) derivations
+obtained from the theory and the derivations in the encoded proof system. 
+
+This notion of adequacy is formalized by using more advanced proof theory called focusing, for which we refrain here to 
+enter into the details for readability. Further details can be found in \cite{nigam.jlc}. In a nutshell focusing
+is a complete discipline for proofs (and derivations) introduced first in the context of logic programming 
+by Andreoli~\cite{andreoli92jlc} for Linear 
+Logic, which reduces the proof search do not know non-determinism. Focused proofs can be seen as the normal-form proofs for 
+proof search. 
+
+For our running example, we can show that the linear logic formula to the left corresponds exactly to \mLJ's implication 
+right introduction rule to the right:
+\[
+F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
+\lpar \nquest{r} \rght{B})] \qquad \qquad 
+ \infer[{\iimp_R}]{\Gamma \lra A \iimp B, \Delta}{\Gamma, A
+\lra B}
+\]
+This is illustrated by the following focused derivation that introduces the formula $F$:
+ \[
+ \infer=[{D_\infty,2 \times \exists}]{\llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} {\color{MyDarkBlue} \rght{\Delta, A \supset B}}
+\ndots{r} \cdot
+\Uparrow}
+{
+\infer[{\tensor}]{\llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} {\color{MyDarkBlue} \rght{\Delta, A \supset B}}
+\ndots{r} \cdot
+\Downarrow
+\rght{A\supset B}^\bot \tensor \nbang{l}(\nquest{l}\lft{A} \lpar
+\nquest{r}\rght{B})}
+{
+\infer[{I}]{\llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} {\color{MyDarkBlue} \rght{\Delta, A \supset B}}
+\ndots{r} \cdot
+\Downarrow
+\rght{A \supset B}^\bot}{}
+&
+\infer[{\nbang{l}}]{\llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} {\color{MyDarkBlue} \rght{\Delta, A \supset B}}
+\ndots{r} \cdot
+\Downarrow \nbang{l}(\nquest{l}\lft{A} \lpar
+\nquest{r}\rght{B})}
+{
+\infer=[{\lpar, \nquest{r}, \nquest{l}}]{ \llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} \cdot \ndots{r} 
+\cdot \Uparrow \nquest{l}\lft{A} \lpar
+\nquest{r}\rght{B})} {\llfDash
+\lEnc \ndots{\infty} \lft{\Gamma, A} \ndots{l} \rght{B} \ndots{r}
+\cdot \Uparrow}
+}
+}
+}
+\]
+Here we need to explain a bit of our notation. We use two meta-level atomic predicates
+$\lft{\cdot}$ and $\rght{\cdot}$ that takes an object-level formula to a linear logic 
+one. The former predicate specifies a formula to the left-hand side of the sequent, while the latter
+a formula to the right-hand side. Thus, the collection of atomic formulas $\lft{A_1}, \ldots
+\lft{A_n}, \rght{B_1}, \ldots, \rght{B_m}$ in a linear logic sequent specifies the object-level
+sequent $A_1, \ldots, A_n \lra B_1, \ldots, B_m$. If $\Gamma = A_1, \ldots, A_n$ is a multiset
+of formulas, then we write $\lft{\Gamma}$ for $\lft{A_1}, \ldots, \lft{A_n}$, similarly for $\rght{\Gamma}$.
+
+The derivation above with $\Uparrow$ and $\Downarrow$
+are sequents of the focused system for linear logic with subexponential enforcing the focusing 
+discipline. For the derivation above, we use three subexponential labels $\infty, l$
+and $r$. This is captured in the syntax by the sequent with three contexts: $\llfDash \lEnc \ndots{\infty}
+\lft{A_1}, \ldots \lft{A_n}  \ndots{l} \rght{B_1}, \ldots, \rght{B_m} \ndots{r} \cdot$ which stands for the linear logic sequent
+$\nbang{\infty} \lEnc, \nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1}, \ldots, \nquest{r} \rght{B_m}$, 
+where $\lEnc$ is the theory encoding the system.
+
+Now, the interesting fact is that the derivation above is the only way of introducing the formula $F$ 
+shown above by using the focusing 
+discipline. Notice that this derivation corresponds indeed to \mLJ's 
+implication right rule: The derivation's conclusion is $\llfDash \lEnc \ndots{\infty}
+\lft{\Gamma} \ndots{l} {\rght{\Delta, A \supset B}}
+\ndots{r} \cdot \Uparrow$ specifying the conclusion of \mLJ's 
+implication right rule $\Gamma \lra \Delta, A \supset B$ and 
+the derivation has one premise $\llfDash \lEnc \ndots{\infty} \lft{\Gamma, A} \ndots{l} \rght{B} \ndots{r}
+\cdot \Uparrow$, which corresponds to the premise of \mLJ's 
+implication right rule $\Gamma, A \lra B$.
+
+To check whether one given linear logic formula $G$ corresponds to some inference rule, in the same way as the 
+the formula $F$ corresponds to \mLJ's implication right rule, requires some effort. In particular, one needs
+to construct the focused derivation introducing the given formula $G$ and check whether this derivation indeed
+corresponds to the desired inference rule. This is particularly challenging as a given formula may specify 
+more than one rule. 
+
+\textbf{Example here, for instance tensor.}
+
+As we shown in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
+much easier by using propositional theories, called Answer-Sets. These theories were used for
+checking which rule permutations are valid. However, one downside of this method is that it 
+yields derivations which are hardly understandable for someone that is familiar with linear logic, 
+such as the focused derivation shown above. This is a serious limitation as it requires
+a deep understanding of focusing in order to understand the proof figures printed.
+
+This paper fills this gap by showing how to automatically derive and draw the inference rules
+specified by a linear logic formula as they would appear in a proof theory textbook. We are currently
+implementing the techniques mentioned in this paper in a tool called Quati to be released soon.
+
+% \section{Linear Logic with Subexponentials}
+
+\section{Constraints and the Construction of Derivation Skeletons}
+
+Explain the constraints and derivation skeletons. How this is constructed using focusing.
+
+\begin{table}[t]
+\caption{\small List of atomic formulas used together
+with their denotations and their logical axiomatization $\thSeq$. Following 
+usual logic programming conventions, all non-predicate term symbols are assumed 
+to be universally quantified, and we use commas, ``$,$'', for conjunctions and
+ ``$\leftarrow$'' for the reverse implication.}
+\label{fig:predicates}
+\begin{tabular}{l@{\quad}p{2cm}@{\quad}l}
+\toprule
+Alphabet & Denotation & Logic Specification \\[1pt]
+\midrule
+$\In{F}{\Gamma}$ & $F \in \Gamma$ & No theory.\\
+\midrule
+$\elin{F}{\Gamma}$ &  $\Gamma = \{F\}$ & (r1) $\In{F}{\Gamma} \leftarrow \elin{F}{\Gamma}$. \\[1pt]
+&& (r2) $\bot \leftarrow \In{F_1}{\Gamma}, \elin{F}{\Gamma}, F_1 \neq F$. \\
+\midrule
+$\emp{\Gamma}$ & $\Gamma = \emptyset$ 
+&  (r3) $\bot \leftarrow \In{F}{\Gamma}, \emp{\Gamma}$. \\
+\midrule
+$\union{\Gamma^1} {\Gamma^2} {\Gamma}$ & $\Gamma = \Gamma^1 \cup \Gamma^2$ & 
+   (r4) $\In{F}{\Gamma} \leftarrow \In{F}{\Gamma^1}, \union{\Gamma^1}{\Gamma^2}{\Gamma}$. \\[1pt]
+&& (r5) $\In{F}{\Gamma} \leftarrow \In{F}{\Gamma^2}, \union{\Gamma^1}{\Gamma^2}{\Gamma}$. \\[1pt]
+&& (r6) $\emp{\Gamma}  \leftarrow \emp{\Gamma^1},\emp{\Gamma^2}, \union{\Gamma^1}{\Gamma^2}{\Gamma}$. \\[1pt]
+&& (r7) $\In{F}{\Gamma^1}  \leftarrow \dnot\ \In{F}{\Gamma^2}, \In{F}{\Gamma}, \union{\Gamma^1}{\Gamma^2}{\Gamma}$. \\
+&& (r8) $\In{F}{\Gamma^2}  \leftarrow \dnot\ \In{F}{\Gamma^1}, \In{F}{\Gamma}, \union{\Gamma^1}{\Gamma^2}{\Gamma}$. \\
+\bottomrule
+\end{tabular}
+\vspace{-4mm}
+\end{table}
+
+
+\section{From Derivation Skeletons to Inference Rules}
+
+\section{Conclusions and Future Work}
+
+\bibliographystyle{plain}
+\bibliography{../master}
+
+\end{document}
