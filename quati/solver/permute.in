@@ -1,0 +1,165 @@
+% We use the following predicate names:
+%
+%  form(X) ->  Denotes that X is a formula;
+%  in(X, Ctx) -> Denotes that the  formula X is in the context Ctx; 
+%  union(C1, C2, C3)  -> Denotes that the union of the contexts C1 and C2
+%    contains the same elements as the context C3;
+% ctx(Ctx, Sub, Lin/Unb, Leaf, Tree) -> Denotes that the context Ctx belongs to the 
+%   linear/unbounded subexponential of the open leaf Leaf of the tree Tree.
+% in_geq(F, Sub, Leaf) -> Denotes that the formula F is in a context of a subexponential of 
+%   of the Leaf that is greater than the subexponential Sub.
+% provIf(Leaf1, Leaf2) -> Denotes that the Leaf1 is provable if Leaf2 is provable.
+
+in(X, S) :- in(X, S1), union(S1, S2, S).
+in(X, S) :- in(X, S2), union(S1, S2, S).
+in(X, S1) v in(X, S2) :- in(X, S), union(S1, S2, S).
+
+in(F, G) :- elin(F, G).
+:- in(F, G), elin(F1, G), F != F1.
+
+:- in(X, G), emp(G).
+
+% removed(F, G, G1): removing the formula F from context G yields the context G1
+
+in(F1, G1) :- removed(F, G, G1), in(F1, G), F != F1.
+
+emp(G1) :- emp(G), union(G1, G2, G).
+emp(G2) :- emp(G), union(G1, G2, G).
+elin(F, G1) v elin(F, G2) :- elin(F, G), union(G1, G2, G).
+emp(G1) v emp(G2) :- elin(F, G), union(G1, G2, G).
+emp(G) :- emp(G1), emp(G2), union(G1, G2, G).
+
+
+%% Clauses to certify: proof of Lf1 => proof of Lf2
+provIf(Lf2, Lf1) :- not not_provIf(Lf2, Lf1), ctx(_, _, _, Lf2, tree2), ctx(_, _, _, Lf1, tree1).
+
+% Every subexponential is greater than itself.
+% TODO: not safe. Find a way to specify this.
+% geq(X, X).
+
+% Definition of in_leaf
+in_leaf(F, Lf) :- in(F, C), ctx(C, _, _, Lf, _).
+
+% There is a formula in S1 that is not present in S2
+not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, _, _, Lf1, tree1), not in_leaf(F, Lf2), ctx(_, _, _, Lf2, tree2).
+
+% There is a formula in a linear context of S2 such that it is not in S1.
+not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), not in_leaf(F, Lf1), ctx(_, _, _, Lf1, tree1).
+
+% There is a formula in S1 that is in a lower context in S2.
+not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(C2, Sub2, _, Lf2, tree2), not geq(Sub2, Sub1). 
+
+% There is a formula in a linear context of S2 such that it is in S1 in a greater context.
+%not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), not geq(Sub2, Sub1). 
+
+% If all the leaves of the second tree are not provable, no models are generated
+:- not ok.
+
+geq( gamma,  gamma).
+geq(r, r).
+geq(l, l).
+geq( infty,  infty).
+union(gamma_2, gamma_3, gamma_1).
+union(r_1, r_2, r_0).
+union(l_1, l_2, l_0).
+union(gamma_4, gamma_5, gamma_3).
+union(r_3, r_4, r_2).
+union(r_3, r_5, r_6).
+union(r_4, r_7, r_8).
+union(l_3, l_4, l_2).
+union(gamma_13, gamma_14, gamma_12).
+union(r_21, r_22, r_8).
+union(r_22, r_25, r_26).
+union(l_9, l_10, l_4).
+removed("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_5, gamma_12).
+removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_0, gamma_1).
+in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_3).
+in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_1).
+in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_5).
+in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_0).
+in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_0).
+in("(\B (\A ( rght ( and A B  )  )))", r_1).
+in("(\B (\A ( rght ( and A B  )  )))", r_0).
+in("(\A ( rght A  ))", r_5).
+in("(\A ( rght A  ))", r_6).
+in("(\B ( rght B  ))", r_7).
+in("(\B ( rght B  ))", r_8).
+in("(\B ( rght B  ))", r_22).
+in("(\B ( rght B  ))", r_25).
+in("(\B ( rght B  ))", r_26).
+in("(\B (\A ( rght ( or A B  )  )))", r_2).
+in("(\B (\A ( rght ( or A B  )  )))", r_0).
+in("(\B (\A ( rght ( or A B  )  )))", r_4).
+in("(\B (\A ( rght ( or A B  )  )))", r_8).
+in("(\B (\A ( rght ( or A B  )  )))", r_21).
+elin("(\B (\A ( rght ( and A B  )  )))", r_1).
+elin("(\A ( rght A  ))", r_5).
+elin("(\B ( rght B  ))", r_7).
+elin("(\B ( rght B  ))", r_25).
+elin("(\B (\A ( rght ( or A B  )  )))", r_21).
+emp(gamma_2).
+emp(l_1).
+emp(gamma_13).
+emp(l_9).
+
+union(gamma_20, gamma_21, gamma_19).
+union(r_34, r_35, r_33).
+union(r_35, r_38, r_39).
+union(l_14, l_15, l_13).
+union(gamma_28, gamma_29, gamma_27).
+union(r_48, r_49, r_39).
+union(l_20, l_21, l_15).
+union(gamma_30, gamma_31, gamma_29).
+union(r_50, r_51, r_49).
+union(r_50, r_52, r_53).
+union(r_51, r_54, r_55).
+union(l_22, l_23, l_21).
+removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21, gamma_27).
+removed("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18, gamma_19).
+in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21).
+in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_19).
+in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_18).
+in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18).
+in("(\B (\A ( rght ( or A B  )  )))", r_34).
+in("(\B (\A ( rght ( or A B  )  )))", r_33).
+in("(\B ( rght B  ))", r_38).
+in("(\B ( rght B  ))", r_39).
+in("(\B ( rght B  ))", r_49).
+in("(\B ( rght B  ))", r_51).
+in("(\B ( rght B  ))", r_54).
+in("(\B ( rght B  ))", r_55).
+in("(\B (\A ( rght ( and A B  )  )))", r_35).
+in("(\B (\A ( rght ( and A B  )  )))", r_33).
+in("(\B (\A ( rght ( and A B  )  )))", r_39).
+in("(\B (\A ( rght ( and A B  )  )))", r_48).
+in("(\A ( rght A  ))", r_52).
+in("(\A ( rght A  ))", r_53).
+elin("(\B (\A ( rght ( or A B  )  )))", r_34).
+elin("(\B ( rght B  ))", r_38).
+elin("(\B ( rght B  ))", r_54).
+elin("(\B (\A ( rght ( and A B  )  )))", r_48).
+elin("(\A ( rght A  ))", r_52).
+emp(gamma_20).
+emp(l_14).
+emp(gamma_28).
+emp(l_20).
+
+ctx( gamma_4,  gamma, lin, tree1_leaf2, tree1).
+ctx(r_6, r, lin, tree1_leaf2, tree1).
+ctx(l_3, l, lin, tree1_leaf2, tree1).
+ctx( infty_0,  infty, unb, tree1_leaf2, tree1).
+ctx( gamma_14,  gamma, lin, tree1_leaf1, tree1).
+ctx(r_26, r, lin, tree1_leaf1, tree1).
+ctx(l_10, l, lin, tree1_leaf1, tree1).
+ctx( infty_0,  infty, unb, tree1_leaf1, tree1).
+
+ctx( gamma_30,  gamma, lin, tree2_leaf2, tree2).
+ctx(r_53, r, lin, tree2_leaf2, tree2).
+ctx(l_22, l, lin, tree2_leaf2, tree2).
+ctx( infty_1,  infty, unb, tree2_leaf2, tree2).
+ctx( gamma_31,  gamma, lin, tree2_leaf1, tree2).
+ctx(r_55, r, lin, tree2_leaf1, tree2).
+ctx(l_23, l, lin, tree2_leaf1, tree2).
+ctx( infty_1,  infty, unb, tree2_leaf1, tree2).
+
+ok :- provIf(tree2_leaf1, _), provIf(tree2_leaf2, _).
