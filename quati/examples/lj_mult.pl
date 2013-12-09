@@ -16,7 +16,7 @@ subexpctx l many lft.
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (lft (imp A B))) * (([r]bang ([r]? (rght A))) * ([l]? (lft B))).
 (not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
@@ -36,7 +36,7 @@ rules introduction.
 (not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
 
 % Not
-(not (lft (myNot A))) * ([r]? (rght A)).
+(not (lft (myNot A))) * ([r]bang ([r]? (rght A))).
 (not (rght (myNot A))) * ([l]? (lft A)).
 
 rules axiom.
