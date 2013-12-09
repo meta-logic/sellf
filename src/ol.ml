@@ -336,6 +336,7 @@ module OlProofTree = struct
     | _ -> ""
     
   let toTexString pt =
+    (* TODO: simplify this function by not passing str_list as a parameter *)
     let str_list = collectStrings pt in
     let rec toTexString' pt = 
       match pt.rule with

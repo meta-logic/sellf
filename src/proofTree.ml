@@ -284,92 +284,15 @@ let rec getLeaves pt = List.fold_right (fun el acc ->
       ) pt.premisses []
 *)
 
-    let rec toTexString pt = match pt.closed with
-      | true ->
-        let topproof = match pt.premises with
-          | [] -> ""
-          | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
-        in
-        (*"\\infer{"^(Sequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
-        "\\cfrac{"^topproof^"}\n{"^(Sequent.toTexString (getConclusion pt))^"}"
-      (* An open proof has no premisses. *)
-      | false -> (Sequent.toTexString (getConclusion pt))
+let rec toTexString pt = match pt.closed with
+  | true ->
+    let topproof = match pt.premises with
+      | [] -> ""
+      | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
+    in
+    (*"\\infer{"^(Sequent.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
+    "\\cfrac{"^topproof^"}\n{"^(Sequent.toTexString (getConclusion pt))^"}"
+  (* An open proof has no premisses. *)
+  | false -> (Sequent.toTexString (getConclusion pt))
       
-(*
-    let printTexProof pt out = 
-      Printf.fprintf out "\\documentclass[a4paper, 11pt]{article}\n"; 
-      Printf.fprintf out "\\usepackage[utf8]{inputenc}\n"; 
-      Printf.fprintf out "\\usepackage{amsmath}\n"; 
-      Printf.fprintf out "\\usepackage{amssymb}\n"; 
-      Printf.fprintf out "\\usepackage{stmaryrd}\n"; 
-      Printf.fprintf out "\\usepackage{proof}\n\n"; 
-      Printf.fprintf out "\\usepackage[landscape]{geometry}\n\n"; 
-      Printf.fprintf out "\\begin{document}\n{\\tiny\n$$\n";
-      printLatex pt out;
-      Printf.fprintf out "$$\n}\n\\end{document}"
-    
-    let printTexMacros lst out = 
-      Printf.fprintf out "\\documentclass[a4paper, 11pt]{article}\n"; 
-      Printf.fprintf out "\\usepackage[utf8]{inputenc}\n"; 
-      Printf.fprintf out "\\usepackage{amsmath}\n"; 
-      Printf.fprintf out "\\usepackage{amssymb}\n"; 
-      Printf.fprintf out "\\usepackage{stmaryrd}\n"; 
-      Printf.fprintf out "\\usepackage{proof}\n\n"; 
-      Printf.fprintf out "\\usepackage[landscape]{geometry}\n\n";
-      Printf.fprintf out "\\begin{document}\n\n";
-      let rec printEach lst out = match lst with
-        | [] -> ()
-        | (p, c)::t -> 
-          Printf.fprintf out "{\\tiny\n$$\n";
-          printLatex p out; 
-          Printf.fprintf out "$$\n}\n";
-          (*Printf.fprintf out "\\begin{itemize}\n";
-          Constraints.printTexConstraints c out;
-          Printf.fprintf out "\\end{itemize}\n";*)
-          printEach t out
-      in printEach lst out;
-      Printf.fprintf out "\n\\end{document}"
-
-
-(* Printing the tree for JIT (not implemented for macro rules) *)
-    let rec printJitChildren children out = match children with
-      | [] -> ()
-      | h::t -> printJitTree h out; printJitChildren t out
-
-    and printJitTree pt out = match pt.conclusion with
-      | SEQ(_, terms, ASYN) -> 
-        Printf.fprintf out "{ id: \"%d\", name: \"" !counter;
-        counter := !counter + 1; 
-        printf_list_terms out terms; Printf.fprintf out "\", \ndata: {},\nchildren: [";
-        printJitChildren pt.premisses out;
-        Printf.fprintf out "]}\n"
-  
-      | SEQ(_, terms, SYNC) ->
-        Printf.fprintf out "{ id: \"%d\", name: \"" !counter; 
-        counter := !counter + 1;
-        printf_list_terms out terms; Printf.fprintf out "\", \ndata: {},\nchildren: [";
-        printJitChildren pt.premisses out;
-        Printf.fprintf out "]}\n"
-(*  
-      | SEQ(_, terms, LHS, ASYN) ->
-        Printf.fprintf out "{ id: \"%d\", name: \"" !counter;
-        counter := !counter + 1; 
-        printf_list_terms out terms; Printf.fprintf out "\", \ndata: {},\nchildren: [";
-        printJitChildren pt.premisses out;
-        Printf.fprintf out "]}\n"
-   
-      | SEQ(_, terms, LHS, SYNC) ->
-        Printf.fprintf out "{ id: \"%d\", name: \"" !counter;
-        counter := !counter + 1; 
-        printf_list_terms out terms; Printf.fprintf out "\", \ndata: {},\nchildren: [";
-        printJitChildren pt.premisses out;
-        Printf.fprintf out "]}\n"
-*)
-      | SEQM(_, _, _) -> failwith "Printing Jit tree is not implemented for
-        macro rules."
-
-      | EMPSEQ -> ()
-    ;;  
-*)
-
 

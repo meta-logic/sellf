@@ -15,6 +15,7 @@ span.ui-icon {
 /* For creating the blank divs where latex code is displayed */
 div.blank {
   background: #ffffff;
+  font-size: 70%;
 }
 
 
