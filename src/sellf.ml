@@ -19,6 +19,8 @@ let position lexbuf =
     else
       print_string "";Format.sprintf ": line %d, character %d" line char
 
+let filePrefix = "proofsTex/" ;;
+
 let samefile = ref true ;;
 let fileName = ref "" ;;
 let check = ref "" ;;
@@ -151,7 +153,7 @@ let bipole () =
   print_endline "Please type the name of the file: ";
   let olPt = ref [] in
   let fileName = read_line () in
-  let file = open_out (fileName^".tex") in
+  let file = open_out (filePrefix ^ fileName ^ ".tex") in
   let pair_bpl = get_bipoles () in
   let all_bipoles = fst(pair_bpl) in
   let bpl_lst = snd(pair_bpl) in
@@ -191,17 +193,18 @@ let bipole_cl () = begin
   end
 end;;
   
-let permute formulas i1 i2 =
-  let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
-  let perm_bipoles = fst(perm_pair) in
-  let perm_not_found = snd(perm_pair) in
-  match perm_bipoles with
-  | [] -> begin match perm_not_found with
-    | [] -> print_endline "\nThe rules do not permute.\nThe first rule do not have premises, hence is not possible to show the derivation."
-    | _ -> print_endline "\nThe rules do not permute.\nPlease type the name of the file to print the derivation that can not be permuted : ";
+let permute formulas i1 i2 = match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
+  (* If the first list is empty, no bipoles could be constructed. *)
+  | ([], _) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
+  (* Else if there are no failures the second list should be empty. *)
+  | (pairs, []) -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
     let fileName = read_line () in
-    let file = open_out (fileName^".tex") in
-    let olPt = apply_perm_not_found perm_not_found in
+    Permutation.printPermutations fileName pairs
+  (* Else, some permutation was not possible. *)
+  | ( _, bipoles) -> print_endline "\nThe rules might not permute.\nPlease type the name of the file to print the derivation that can not be permuted : ";
+    let fileName = read_line () in
+    let file = open_out (filePrefix ^ fileName ^ ".tex") in
+    let olPt = apply_perm_not_found bipoles in
     Printf.fprintf file "%s" Prints.texFileHeader;
     List.iter (fun (olt, model) ->
       OlProofTree.toPermutationFormat olt;
@@ -213,37 +216,20 @@ let permute formulas i1 i2 =
     ) olPt;
     Printf.fprintf file "%s" Prints.texFileFooter;
     close_out file;
-    end
-  | _ -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
-    let fileName = read_line () in
-    Permutation.printPermutations fileName perm_bipoles
 ;;
 
-
 (* Command line #permute *)
-let permute_cl n1 n2 = begin
+let permute_cl n1 n2 = 
   let formulas = !Specification.others @ !Specification.introRules in
   let rulesList = get_rulenames () in
-  let rules_length = List.length rulesList in
   let i1 = get_form_index n1 rulesList in
   let i2 = get_form_index n2 rulesList in 
-  let perm_pair = Permutation.permute (List.nth formulas i1) (List.nth formulas i2) in
-  let perm_bipoles = fst(perm_pair) in
-  let perm_not_found = snd(perm_pair) in
-    match perm_bipoles with
-    | [] -> begin match perm_not_found with
-      | [] -> print_endline "\nThe rules do not permute.\nThe first rule do not have premises, hence is not possible to show the derivation."
-      | _ -> print_endline "\nThe rules do not permute.\nThe derivation that can not be permuted are shown below: ";
-      let olPt = apply_perm_not_found perm_not_found in
-      List.iter (fun (olt, model) ->
-				OlProofTree.toPermutationFormat olt;
-				print_endline "\\[";
-				print_endline (OlProofTree.toTexString olt);
-				print_endline "\\]";
-      ) olPt 
-      end
-    | _ -> print_endline "\nThe rules permute.\nThe permutations are shown below: ";
-      let olPt = apply_permute perm_bipoles in
+  match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with 
+    (* If the first list is empty, no bipoles could be constructed. *)
+    | ([], _) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
+    (* Else if there are no failures the second list should be empty. *)
+    | (pairs, []) -> print_endline "\nThe rules permute.\nThe permutations are shown below: ";
+      let olPt = apply_permute pairs in
       List.iter (fun (b12, b21) ->
 		    print_endline "\\[";
 		    print_endline (OlProofTree.toTexString (fst(b12)));
@@ -251,7 +237,16 @@ let permute_cl n1 n2 = begin
 			  print_endline (OlProofTree.toTexString (fst(b21)));
 			  print_endline "\\]";
       ) olPt
-      end;;
+    (* Else, some permutation was not possible. *)
+    | (_, bipoles) -> print_endline "\nThe rules do not permute.\nThe derivation that can not be permuted are shown below: ";
+      let olPt = apply_perm_not_found bipoles in
+      List.iter (fun (olt, model) ->
+				OlProofTree.toPermutationFormat olt;
+				print_endline "\\[";
+				print_endline (OlProofTree.toTexString olt);
+				print_endline "\\]";
+      ) olPt 
+;;
  
 let rec start () =
   initAll ();
