@@ -8,6 +8,8 @@
 
 subexp lr lin.
 
+subexpctx lr many rght.
+
 rules introduction.
 
 % Implication
