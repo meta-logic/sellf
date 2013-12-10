@@ -60,106 +60,80 @@ geq(r, r).
 geq(l, l).
 geq( infty,  infty).
 union(gamma_2, gamma_3, gamma_1).
-union(r_1, r_2, r_0).
-union(l_1, l_2, l_0).
+union(r_0, r_1, r_2).
+union(r_0, r_3, r_4).
 union(gamma_4, gamma_5, gamma_3).
-union(r_3, r_4, r_2).
-union(r_3, r_5, r_6).
-union(r_4, r_7, r_8).
-union(l_3, l_4, l_2).
 union(gamma_13, gamma_14, gamma_12).
-union(r_21, r_22, r_8).
-union(r_22, r_25, r_26).
-union(l_9, l_10, l_4).
-removed("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_5, gamma_12).
+union(l_0, l_5, l_6).
+removed("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_5, gamma_12).
 removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_0, gamma_1).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_3).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_1).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_5).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_0).
+in("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_3).
+in("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_1).
+in("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_5).
+in("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_0).
 in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_0).
-in("(\B (\A ( rght ( and A B  )  )))", r_1).
 in("(\B (\A ( rght ( and A B  )  )))", r_0).
-in("(\A ( rght A  ))", r_5).
-in("(\A ( rght A  ))", r_6).
-in("(\B ( rght B  ))", r_7).
-in("(\B ( rght B  ))", r_8).
-in("(\B ( rght B  ))", r_22).
-in("(\B ( rght B  ))", r_25).
-in("(\B ( rght B  ))", r_26).
-in("(\B (\A ( rght ( or A B  )  )))", r_2).
-in("(\B (\A ( rght ( or A B  )  )))", r_0).
-in("(\B (\A ( rght ( or A B  )  )))", r_4).
-in("(\B (\A ( rght ( or A B  )  )))", r_8).
-in("(\B (\A ( rght ( or A B  )  )))", r_21).
-elin("(\B (\A ( rght ( and A B  )  )))", r_1).
-elin("(\A ( rght A  ))", r_5).
-elin("(\B ( rght B  ))", r_7).
-elin("(\B ( rght B  ))", r_25).
-elin("(\B (\A ( rght ( or A B  )  )))", r_21).
+in("(\B (\A ( rght ( and A B  )  )))", r_2).
+in("(\B (\A ( rght ( and A B  )  )))", r_4).
+in("(\A ( rght A  ))", r_1).
+in("(\A ( rght A  ))", r_2).
+in("(\B ( rght B  ))", r_3).
+in("(\B ( rght B  ))", r_4).
+in("(\A ( lft ( forall A  )  ))", l_0).
+in("(\A ( lft ( forall A  )  ))", l_6).
+in("(\X (\A ( lft ( A X  )  )))", l_5).
+in("(\X (\A ( lft ( A X  )  )))", l_6).
+elin("(\A ( rght A  ))", r_1).
+elin("(\B ( rght B  ))", r_3).
+elin("(\X (\A ( lft ( A X  )  )))", l_5).
 emp(gamma_2).
-emp(l_1).
 emp(gamma_13).
-emp(l_9).
 
 union(gamma_20, gamma_21, gamma_19).
-union(r_34, r_35, r_33).
-union(r_35, r_38, r_39).
-union(l_14, l_15, l_13).
-union(gamma_28, gamma_29, gamma_27).
-union(r_48, r_49, r_39).
-union(l_20, l_21, l_15).
-union(gamma_30, gamma_31, gamma_29).
-union(r_50, r_51, r_49).
-union(r_50, r_52, r_53).
-union(r_51, r_54, r_55).
-union(l_22, l_23, l_21).
-removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21, gamma_27).
-removed("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18, gamma_19).
+union(l_9, l_10, l_11).
+union(gamma_23, gamma_24, gamma_22).
+union(r_5, r_6, r_7).
+union(r_5, r_8, r_9).
+union(gamma_25, gamma_26, gamma_24).
+removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21, gamma_22).
+removed("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_18, gamma_19).
 in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21).
 in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_19).
 in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_18).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18).
-in("(\B (\A ( rght ( or A B  )  )))", r_34).
-in("(\B (\A ( rght ( or A B  )  )))", r_33).
-in("(\B ( rght B  ))", r_38).
-in("(\B ( rght B  ))", r_39).
-in("(\B ( rght B  ))", r_49).
-in("(\B ( rght B  ))", r_51).
-in("(\B ( rght B  ))", r_54).
-in("(\B ( rght B  ))", r_55).
-in("(\B (\A ( rght ( and A B  )  )))", r_35).
-in("(\B (\A ( rght ( and A B  )  )))", r_33).
-in("(\B (\A ( rght ( and A B  )  )))", r_39).
-in("(\B (\A ( rght ( and A B  )  )))", r_48).
-in("(\A ( rght A  ))", r_52).
-in("(\A ( rght A  ))", r_53).
-elin("(\B (\A ( rght ( or A B  )  )))", r_34).
-elin("(\B ( rght B  ))", r_38).
-elin("(\B ( rght B  ))", r_54).
-elin("(\B (\A ( rght ( and A B  )  )))", r_48).
-elin("(\A ( rght A  ))", r_52).
+in("(sigma \A (not ( lft ( forall A  )  ))  * (sigma \X ( [l]? ( lft ( A X  )  ) )))", gamma_18).
+in("(\A ( lft ( forall A  )  ))", l_9).
+in("(\A ( lft ( forall A  )  ))", l_11).
+in("(\X (\A ( lft ( A X  )  )))", l_10).
+in("(\X (\A ( lft ( A X  )  )))", l_11).
+in("(\B (\A ( rght ( and A B  )  )))", r_5).
+in("(\B (\A ( rght ( and A B  )  )))", r_7).
+in("(\B (\A ( rght ( and A B  )  )))", r_9).
+in("(\A ( rght A  ))", r_6).
+in("(\A ( rght A  ))", r_7).
+in("(\B ( rght B  ))", r_8).
+in("(\B ( rght B  ))", r_9).
+elin("(\X (\A ( lft ( A X  )  )))", l_10).
+elin("(\A ( rght A  ))", r_6).
+elin("(\B ( rght B  ))", r_8).
 emp(gamma_20).
-emp(l_14).
-emp(gamma_28).
-emp(l_20).
+emp(gamma_23).
 
 ctx( gamma_4,  gamma, lin, tree1_leaf2, tree1).
-ctx(r_6, r, lin, tree1_leaf2, tree1).
-ctx(l_3, l, lin, tree1_leaf2, tree1).
+ctx(r_2, r, unb, tree1_leaf2, tree1).
+ctx(l_0, l, unb, tree1_leaf2, tree1).
 ctx( infty_0,  infty, unb, tree1_leaf2, tree1).
 ctx( gamma_14,  gamma, lin, tree1_leaf1, tree1).
-ctx(r_26, r, lin, tree1_leaf1, tree1).
-ctx(l_10, l, lin, tree1_leaf1, tree1).
+ctx(r_4, r, unb, tree1_leaf1, tree1).
+ctx(l_6, l, unb, tree1_leaf1, tree1).
 ctx( infty_0,  infty, unb, tree1_leaf1, tree1).
 
-ctx( gamma_30,  gamma, lin, tree2_leaf2, tree2).
-ctx(r_53, r, lin, tree2_leaf2, tree2).
-ctx(l_22, l, lin, tree2_leaf2, tree2).
+ctx( gamma_25,  gamma, lin, tree2_leaf2, tree2).
+ctx(r_7, r, unb, tree2_leaf2, tree2).
+ctx(l_11, l, unb, tree2_leaf2, tree2).
 ctx( infty_1,  infty, unb, tree2_leaf2, tree2).
-ctx( gamma_31,  gamma, lin, tree2_leaf1, tree2).
-ctx(r_55, r, lin, tree2_leaf1, tree2).
-ctx(l_23, l, lin, tree2_leaf1, tree2).
+ctx( gamma_26,  gamma, lin, tree2_leaf1, tree2).
+ctx(r_9, r, unb, tree2_leaf1, tree2).
+ctx(l_11, l, unb, tree2_leaf1, tree2).
 ctx( infty_1,  infty, unb, tree2_leaf1, tree2).
 
 ok :- provIf(tree2_leaf1, _), provIf(tree2_leaf2, _).

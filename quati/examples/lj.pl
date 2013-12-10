@@ -8,7 +8,7 @@
 
 subexp r lin.
 
-subexpctx r one rght.
+subexpctx r unit rght.
 
 rules introduction.
 

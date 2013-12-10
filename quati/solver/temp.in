@@ -29,45 +29,14 @@ elin(F, G1) v elin(F, G2) :- elin(F, G), union(G1, G2, G).
 emp(G1) v emp(G2) :- elin(F, G), union(G1, G2, G).
 emp(G) :- emp(G1), emp(G2), union(G1, G2, G).
 
-union(gamma_20, gamma_21, gamma_19).
-union(r_34, r_35, r_33).
-union(r_35, r_38, r_39).
-union(l_14, l_15, l_13).
-union(gamma_28, gamma_29, gamma_27).
-union(r_48, r_49, r_39).
-union(l_20, l_21, l_15).
-union(gamma_30, gamma_31, gamma_29).
-union(r_50, r_51, r_49).
-union(r_50, r_52, r_53).
-union(r_51, r_54, r_55).
-union(l_22, l_23, l_21).
-removed("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21, gamma_27).
-removed("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18, gamma_19).
-in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_21).
-in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_19).
-in("(sigma \B (sigma \A (not ( rght ( and A B  )  ))  * ( [r]? ( rght A  ) ) * ( [r]? ( rght B  ) )))", gamma_18).
-in("(sigma \B (sigma \A (not ( rght ( or A B  )  ))  * ( [r]? ( rght A  ) ) + ( [r]? ( rght B  ) )))", gamma_18).
-in("(\B (\A ( rght ( or A B  )  )))", r_34).
-in("(\B (\A ( rght ( or A B  )  )))", r_33).
-in("(\B ( rght B  ))", r_38).
-in("(\B ( rght B  ))", r_39).
-in("(\B (\A ( rght ( and A B  )  )))", r_39).
-in("(\B (\A ( rght ( and A B  )  )))", r_48).
-in("(\A ( rght A  ))", r_52).
-in("(\A ( rght A  ))", r_53).
-in("(\B ( rght B  ))", r_54).
-in("(\B ( rght B  ))", r_55).
-elin("(\B (\A ( rght ( or A B  )  )))", r_34).
-elin("(\B ( rght B  ))", r_38).
-elin("(\B (\A ( rght ( and A B  )  )))", r_48).
-elin("(\A ( rght A  ))", r_52).
-elin("(\B ( rght B  ))", r_54).
-emp(gamma_20).
-emp(l_14).
-emp(gamma_28).
-emp(l_20).
-in("(\B ( rght B  ))", r_49).
-in("(\B (\A ( rght ( and A B  )  )))", r_35).
-in("(\B ( rght B  ))", r_50).
-in("(\B ( rght B  ))", r_53).
-in("(\B (\A ( rght ( and A B  )  )))", r_33).
+:- not in("(sigma \A (not ( rght ( myNot A  )  ))  * ( [l]? ( lft A  ) ))",  gamma_50).
+removed("(sigma \A (not ( rght ( myNot A  )  ))  * ( [l]? ( lft A  ) ))",  gamma_50,  gamma_51).
+in("(sigma \A (not ( rght ( myNot A  )  ))  * ( [l]? ( lft A  ) ))",  gamma_50).
+union( gamma_52,  gamma_53,  gamma_51).
+union(r_58, r_59, r_57).
+union(l_56, l_57, l_55).
+elin("( rght ( myNot A  )  )", r_58).
+emp( gamma_52).
+emp(l_56).
+elin("( lft A  )", l_58).
+union(l_57, l_58, l_59).
