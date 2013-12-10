@@ -17,7 +17,7 @@ let instring = [^'"'] *
 let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
-let ctxtype = "many"  |  "one"
+let ctxtype = "many"  |  "unit"
 
 rule token = parse 
 
@@ -28,18 +28,18 @@ rule token = parse
 | "type"                { TYPE }
 | "tsub"                {TSUBEX}
 | "subexp"              { SUBEX }
-| "subexpctx"           {SUBEXCTX}
-| ctxtype as t          {CTXTYPE(t)}
-| "context"             {CONTEXT}      
-| "subexprel"           {SUBEXPREL}
-| "pos"                 {POS}
-| "neg"                 {NEG}
-| "rules"               {RULES}
-| "axiom"               {AXIOM}
-| "cut"                 {CUTRULE}
-| "structural"          {STRUCTURAL}
-| "introduction"        {INTRODUCTION}
-| subtype as tsub       {TSUB(tsub)}
+| "subexpctx"           { SUBEXCTX }
+| ctxtype as t          { CTXTYPE(t) }
+| "context"             { CONTEXT }      
+| "subexprel"           { SUBEXPREL }
+| "pos"                 { POS }
+| "neg"                 { NEG }
+| "rules"               { RULES }
+| "axiom"               { AXIOM }
+| "cut"                 { CUTRULE }
+| "structural"          { STRUCTURAL }
+| "introduction"        { INTRODUCTION }
+| subtype as tsub       { TSUB(tsub) }
 | ':'                   { DOTS }
 | "->"                  { TARR }
 | '.'                   { DOT }
@@ -58,7 +58,7 @@ rule token = parse
 | '-'                   { MINUS }
 | '*'                   { TIMES }
 | '/'                   { DIV } 
-| "<>"                   { NEQ }  
+| "<>"                  { NEQ }  
 | "<"                   { LESS }
 | "<="                  { LEQ }
 | '>'                   { GRT }
@@ -66,7 +66,7 @@ rule token = parse
 | '='                   { EQ }          
 | ":="                  { DEF }
 | ":-"                  { INVLOLLI } 
-| "-o"                { LOLLI }
+| "-o"                  { LOLLI }
 | ','                   { COMMA }
 | ';'                   { SEMICOLON }
 | "|"                   { PIPE }
