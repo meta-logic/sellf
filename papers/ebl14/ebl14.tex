@@ -18,6 +18,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \RequirePackage{txfonts}
+\newcommand\ctx[2]{\ensuremath{\textrm{ctx}_R(#1,#2)}}
 
 \usepackage{xspace}
 \RequirePackage{txfonts}
@@ -45,6 +46,16 @@
 \newcommand{\provIf}[2]{\ensuremath{\tsl{proveIf}(\ensuremath{#1},\ensuremath{#2})}}
 \newcommand{\notProvIf}[2]{\ensuremath{\tsl{notProveIf}(\ensuremath{#1},\ensuremath{#2})}}
 \newcommand{\bounded}[1]{\ensuremath{{\tsl{bounded}(\ensuremath{#1})}}}
+
+\newtheorem{theorem}{Theorem} 
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newenvironment{remark}{\noindent \textbf{Remark}\quad}{}
+\renewcommand{\red}[1]{\textcolor{red}{#1} }
+\newenvironment{Paragraph}[1]{\paragraph{#1}}
+
 
 % Names of the logic programs
 \newcommand\LPder{\ensuremath{\mathbb{P}_1}}
@@ -87,7 +98,9 @@ a standard Proof-Theory book~\cite{troelstra96bpt} from a specification in linea
 
 Linear logic with Subexponentials is a refinement of linear logic, which allows for any number of 
 exponential-like connectives, called subexponentials, written $\nbang{\ell}$ and $\nquest{\ell}$ with a label $\ell$. These labels
- are organized into a pre-order, $\prec$, specifying the provability relation among subexponentials.   
+ are organized into a pre-order, $\prec$, specifying the provability relation among subexponentials. Moreover, some subexponentials 
+ are allowed to weaken and contract, which are classified as unbounded, and the remaining subexpontntials are not allowed 
+ weaken and contract, which are classified as bounded. 
 In our recent work~\cite{nigam.jlc}, we demonstrated
 that a number of proof systems with rather complicated structural rules can be specified as linear logic with subexponential 
 theories. For example, a multiconclusion system (\mLJ) for intuitionisitic logic or a proof system for S4 modal logic can be specified in 
@@ -160,7 +173,7 @@ are sequents of the focused system for linear logic with subexponential enforcin
 discipline. For the derivation above, we use three subexponential labels $\infty, l$
 and $r$. This is captured in the syntax by the sequent with three contexts: $\llfDash \lEnc \ndots{\infty}
 \lft{A_1}, \ldots \lft{A_n}  \ndots{l} \rght{B_1}, \ldots, \rght{B_m} \ndots{r} \cdot$ which stands for the linear logic sequent
-$\nbang{\infty} \lEnc, \nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1}, \ldots, \nquest{r} \rght{B_m}$, 
+$\nquest{\infty} \lEnc, \nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1}, \ldots, \nquest{r} \rght{B_m}$, 
 where $\lEnc$ is the theory encoding the system.
 
 Now, the interesting fact is that the derivation above is the only way of introducing the formula $F$ 
@@ -180,8 +193,6 @@ to construct the focused derivation introducing the given formula $G$ and check 
 corresponds to the desired inference rule. This is particularly challenging as a given formula may specify 
 more than one rule. 
 
-\textbf{Example here, for instance tensor.}
-
 As we shown in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
 much easier by using propositional theories, called Answer-Sets. These theories were used for
 checking which rule permutations are valid. However, one downside of this method is that it 
@@ -195,9 +206,43 @@ implementing the techniques mentioned in this paper in a tool called Quati to be
 
 % \section{Linear Logic with Subexponentials}
 
-\section{Constraints and the Construction of Derivation Skeletons}
+\section{Construction of Derivation Skeletons}
 
-Explain the constraints and derivation skeletons. How this is constructed using focusing.
+\paragraph{Derivation Skeletons}
+As explained in our previous work~\cite{nigam13iclp}, we showed how to specify derivations in a declarative fashion 
+by using a pair $\tup{\Xi, \Bscr}$ called \emph{derivation skeletons}, where $\Xi$ is a generic derivation and 
+$\Bscr$ is a set of constraints.
+Its formal definition was introduced in \cite{nigam13iclp} and we only informally describe them here.   
+
+The set of constraints that we use are depicted in Table~\ref{fig:predicates}.
+The meaning of these constraints are specified by the logic formulas, expressed as logic program clauses, 
+also depicted in Table~\ref{fig:predicates}, with 
+only eight rules: $\textrm{(r1)}, \textrm{(r2)},\ldots, \textrm{(r8)}$. These
+rules and the predicates in Table~\ref{fig:predicates} specify in a declarative 
+fashion the content of a context variable, $\Gamma$, in a derivation.
+The encoding is all based on atomic formulas of the form $\In{F}{\Gamma}$, which 
+specify that the formula $F$ is in the context $\Gamma$. 
+% As it will be clear later in this section, 
+% one may specify which formulas exactly appear in the conclusion sequent of a derivation.
+
+The atomic formula $\elin{F}{\Gamma}$ specifies that the context $\Gamma$ has a
+single formula $F$. 
+The first rule (r1) specifies that $\In{F}{\Gamma}$, while the second rule (r2) is a constraint
+rule specifying that there is no other formula $F'$ different from $F$ in the context $\Gamma$.
+
+In some situations, for instance, when specifying the linear logic initial rule~\cite{girard87tcs}, 
+we need to specify that some contexts are empty, which is done by using the atomic formula $\emp{\Gamma}$.  
+Rule (r3) is a constraint that specifies that no formula can be in an empty context.
+ 
+The most elaborate specification are the rules (r4) -- (r8), which specify the atomic formula 
+$\union{\Gamma^1} {\Gamma^2} {\Gamma}$, i.e. $\Gamma = \Gamma^1 \cup \Gamma^2$.
+The rules (r4) and (r5) specify that $\Gamma^1 \subseteq \Gamma$ and $\Gamma^2 \subseteq \Gamma$, 
+that is, the occurrence of a formula that is in $\Gamma^i$ is also in $\Gamma$. The rule (r6) specifies that 
+if both $\Gamma^1$ and $\Gamma^2$ are empty then so is $\Gamma$. 
+The rules (r7) and (r8) 
+specify that these contexts are bounded, that is, the union 
+$\Gamma = \Gamma^1 \cup \Gamma^2$ is a multiset union. An occurrence of a formula in $\Gamma$ either comes
+from $\Gamma^1$ or from $\Gamma^2$.  
 
 \begin{table}[t]
 \caption{\small List of atomic formulas used together
@@ -228,6 +273,202 @@ $\union{\Gamma^1} {\Gamma^2} {\Gamma}$ & $\Gamma = \Gamma^1 \cup \Gamma^2$ &
 \end{tabular}
 \vspace{-4mm}
 \end{table}
+
+Consider the following illustrative example of how an inference derivation specifies 
+declaratively an inference rule:
+
+\paragraph{Example:}
+Consider the $\tensor_R$ rule shown to the left. The \emph{inference skeleton} for 
+it is the pair $\tup{\Xi_\tensor, \Bscr_\tensor}$, where $\Xi_\tensor$ is the derivation shown to the right:
+{\small
+\[
+\infer[\tensor_R]{{\Gamma, \Gamma'} \vdash \Delta, \Delta', A\tensor B}
+{{\Gamma} \vdash \Delta, A \qquad  {\Gamma'} \vdash \Delta', B}
+\qquad 
+\infer{\Gamma_{0,1} \vdash \Gamma_{0,2} }
+{
+{\Gamma_{1,1} \vdash \Gamma_{1,2} }
+&
+{\Gamma_{2,1} \vdash \Gamma_{2,2} }
+}
+\]
+}
+Notice that the generic derivation is composed by
+context variables, written of the $\Gamma_{i,j}$. In particular, each sequent and 
+each side of the sequent is marked with context variable, that is, where its contents
+are not specified, thus generic. 
+It is only used for specifying the shape of the derivation and not the formulas that 
+appear on it.
+
+The configuration of formulas in the derivation are specified by set of constraints.
+For example, the set of constraints associated to the generic derivation above is the 
+set:
+\begin{small}
+\[
+\Bscr = \left\{
+\begin{array}{c}
+\elin{A \tensor B}{\Gamma_{aux}^1},
+\elin{A}{\Gamma_{aux}^2},
+\elin{B}{\Gamma_{aux}^3}, \\
+\union{\Gamma_{aux}^1}{\Gamma_{aux}^4}{\Gamma_{0,2}},
+\union{\Gamma_{aux}^2}{\Gamma_{aux}^5}{\Gamma_{1,2}}, 
+\union{\Gamma_{aux}^3}{\Gamma_{aux}^6}{\Gamma_{2,2}},\\
+\union{\Gamma_{aux}^5}{\Gamma_{aux}^6}{\Gamma_{aux}^4},
+\union{\Gamma_{1,1}}{\Gamma_{1,2}}{\Gamma_{0,1}}
+\end{array}
+\right\}
+\]
+\end{small}%
+Here the context variables of the form $\Gamma_{aux}^i$, where $i \in \mathbb{N}$, are 
+auxiliary context variables not appearing in the generic derivation above, 
+but used to specify them. It is easy to check that the Logic Program (LP) $\Bscr_\tensor \cup \Tscr$
+has a single model (called answer-set by the logic programming community), 
+containing the formulas $\In{A \tensor B}{\Gamma_{0,2}}$,
+$\In{A}{\Gamma_{1,2}}$ and $\In{B}{\Gamma_{2,2}}$. There is a number of efficient 
+solvers available. For Quati we have used DLV~\cite{dlv}.
+
+In our previous work~\cite{nigam13iclp}, we discuss the advantages of representing 
+a derivation by using logic specifications. For instance, we developed the machinery 
+necessary for checking whether a rule permutes over another rule in a given proof system.
+In the following section, we enter into the details of extracting derivation skeletons
+from a lineaer logic specification. This is new with respect to \cite{nigam13iclp} and 
+complements this work with our previous work~\cite{nigam.jlc} on encoding proof systems with linear logic with 
+subexponentials 
+
+\subsection{Extracting a Derivation Skeleton from a Linear Logic Formula}
+
+In the Introduction, we briefly described that linear logic can be used as a meta-logic 
+to specify in a strong fashion object-logic inference rules with a strong level of 
+adequacy~\cite{nigam10jar}. Here we will show how we can obtain the corresponding
+Derivation Skeleton from a Linear Logic Formula. 
+
+We show some illustrative cases. Assume that there 
+are $n$ subexponentials. We initialize the algorithm by first constructing a sequent:
+\[
+ \vdash \Gamma_{0,1}, \ldots, \Gamma_{0,n}
+\]
+Each context variable corresponds to one of the subexponential context. For example, 
+for the encoding of \mLJ\ shown in the Introduction, there are three context $l,r, \infty$
+resulting in the following initial sequent:
+\[
+ \vdash \Gamma_{0,\infty}, \Gamma_{0,l}, \Gamma_{0,r}
+\]
+We initialize this sequent as $Seq_k$, where $k = 0$.
+Now, given a linear logic formula $F$ and the sequent $Seq_k$,
+our procedure runs recursively  on the height of the focused derivation introducing 
+the linear logic formula $F$ and returns a set of derivation skeletons all with the 
+same generic derivation, $\tup{\Xi, \Bscr_1, \ldots, \Bscr_n}$. Each $\Bscr_i$ specifies
+a possible derivation. 
+
+\textbf{Case $\tensor$:} if $F$ is of the form 
+$A \tensor B$, we construct the derivation skeleton:
+\[
+ \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ {\vdash \Gamma_{k+1,1}, \ldots, \Gamma_{k+1, n}
+ \qquad \vdash \Gamma_{k+2,1}, \ldots, \Gamma_{k+2, n}}
+\]
+where $Seq_k$ is the sequent $\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n}$ and the context variables 
+$\Gamma_{k+1, j}$ and $\Gamma_{k+2, j}$ are fresh for all $j$ that correspond to a bounded 
+subexponential and $\Gamma_{k+1, i} = \Gamma_{k, i} = \Gamma_{k+2, i}$ for all unbounded
+subexponentials. 
+
+Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m}$ and $\tup{\Xi_{k+2}, \Bscr_{k+2}^1, \ldots, \Bscr_{k+2}^l}$ be the 
+sets of derivation skeletons obtained by this algorithm when using the first and second premises
+with respectively $A$ and $B$. 
+Then the result of the algorithm on $F$ and $Seq_k$ is the derivation skeleton with generic derivation
+\[
+ \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ {\Xi_{k+1}  \qquad \Xi_{k+2}}
+\]
+and set of set of constraints $\{\Bscr_{k+1}^i \cup \Bscr_{k+2}^j \cup \Bscr_\tensor \mid 1 \leq i \leq m, 1\leq j \leq l\}$, 
+where $\Bscr_\tensor$ is 
+\[
+\Bscr_\tensor = \{\union{\Gamma_{k+1, j}}{\Gamma_{k+2, j}}{\Gamma_{k, j}} \mid \textrm{ $k$ bounded} \}
+\]
+The set $\Bscr_\tensor$ simply specifies that the contents of $\Gamma_{k, j}$ are split among the premises if 
+$k$ is a bounded subexponential.
+
+
+\textbf{Case $\nbang{\ell}$:} When $F = \nbang{\ell} A$, the derivation skeleton has a single 
+premise:
+\[
+ \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ {\vdash \Gamma_{k+1,1}, \ldots, \Gamma_{k+1, n}}
+\]
+where $Seq_k = \vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n}$ and the context variables 
+and  $\Gamma_{k+1, i} = \Gamma_{k, i}$ for all unbounded
+subexponentials. 
+
+Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m }$ be the 
+derivation skeletons obtained by this algorithm when using the premise
+and $A$. 
+The result of the algorithm on $F$ and $Seq_k$ is the derivation skeleton 
+\[
+ \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ {\Xi_{k+1}}
+\]
+and the set of constraints $\{\Bscr_{k+1}^i \cup \Bscr_{\nbang{\ell}} \mid 1 \leq i \leq m\}$, 
+where $\Bscr_{\nbang{\ell}}$ is the set 
+\[
+\Bscr_{\nbang{\ell}} = \{\union{\Gamma_{k+1, j}}{\Gamma_{aux}^j}{\Gamma_{k, j}}, \emp{\Gamma_{aux}^j} \mid \textrm{ $j$ bounded} \} \cup 
+\{\emp{\Gamma_{k+1, i}}\mid \textrm{ $\ell \npreceq i$} \}
+\]
+where all auxiliary contexts $\Gamma_{aux}^j$ are fresh. The set to the left specifies that the contents 
+of $\Gamma_{k, i}$ are the same as the contents of $\Gamma_{k+1, i}$ for all contexts $i$ that are bounded and the set to the right 
+specifies that all contexts $\Gamma_{k+1, i}$ for subexponentials $i$ such that $\ell \npreceq i$ have to be necessarily empty.
+
+\textbf{Case literal:} There are two possibilities, one where Let $F = A^\bot$ is a literal
+introduced by an initial rule or $F = A$ is an atomic formula resulting in an open premise. 
+We show the former case, 
+as the latter case is similar to the cases below.
+
+This is the base case of the algorithm. It returns the derivation:
+\[
+ \infer{Seq_k}{}
+\]
+and the set of set of constraints $\{\Bscr_B^j  \mid 
+\textrm{$j$ bounded} \} \cup \{\Bscr_U^j  \mid \textrm{$j$ unbounded} \}$, 
+where
+\[
+\begin{array}{l}
+ \Bscr_B^j = \{\elin{A}{\Gamma_k^j}\} \cup \{\emp{\Gamma_k^i} \mid i \neq j \textrm{ and $i$ bounded} \}\\
+ \Bscr_U^j = \{\In{A}{\Gamma_k^j}\} \cup \{\emp{\Gamma_k^i} \mid i \neq j \textrm{ and $i$ bounded} \}\\
+\end{array}
+\]
+The first type of set specifies the case when the matching atomic formula, $A$, appears alone in a bounded
+context, while the second type of set specifies the case when the matching atomic formula appears in an 
+unbounded context, in which case it does not have to appear alone.
+
+\textbf{Example:}
+
+
+\[
+F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
+\lpar \nquest{r} \rght{B})] \qquad \qquad 
+ \infer[{\iimp_R}]{\Gamma \lra A \iimp B, \Delta}{\Gamma, A
+\lra B}
+\]
+
+
+{\small
+\[
+\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
+{\Gamma_{ \Gamma}^{8} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  :: }
+\cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{6} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  ::  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists B \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{6} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+\]
+}
+ $\union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}$, $\In{rght (imp (A) (B)) }{ \Gamma_{r}^{3})}$, $\emp{\Gamma_{ \Gamma}^{8}}$, $\emp{\Gamma_{ \Gamma}^{9}}$, $\emp{\Gamma_{r}^{4})}$, $\elin{lft (A)}{ \Gamma_{l}^{4}}$, $\union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}}$, $\elin{rght (B)}{ \Gamma_{r}^{5})}$, $\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6})}.$
+
+
+
 
 
 \section{From Derivation Skeletons to Inference Rules}
