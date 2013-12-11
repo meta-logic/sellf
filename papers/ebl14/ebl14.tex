@@ -337,6 +337,7 @@ complements this work with our previous work~\cite{nigam.jlc} on encoding proof 
 subexponentials 
 
 \subsection{Extracting a Derivation Skeleton from a Linear Logic Formula}
+\label{sec:extract}
 
 In the Introduction, we briefly described that linear logic can be used as a meta-logic 
 to specify in a strong fashion object-logic inference rules with a strong level of 
@@ -540,12 +541,18 @@ the following procedure while there is a formula of the form $\In{F}{\Gamma}$ in
 Let $\In{F}{\Gamma} \in M_i$, then we apply the corresponding rule to all occurrences of $\Gamma$ in $\Xi_i$
 obtaining $\Xi_{i+1}$ and set $M_{i+1} = M \setminus \{\In{F}{\Gamma}\}$  and $i := i + 1$.
 
+\paragraph{Example}
+For the derivation skeleton shown in the exampe at the end of 
+Section~\ref{sec:extract} and using the model shown in that example, we obtain the following derivation:
 
 
 
+
+\paragraph{Two-sided Sequents}
 As we are using the one-sided presentation of linear logic with subexponentials, the derivations used 
 in our derivation skeleton is one sided. This constrast with the usual presentation of such inference
-rules in textbooks that have two sided sequents. 
+rules in textbooks that have two sided sequents. We associate to each context variable $\Gamma_s^i$ we 
+associate $\Delta_s^i$.
 
 {\scriptsize\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; 
