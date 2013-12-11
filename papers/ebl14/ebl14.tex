@@ -203,6 +203,7 @@ a deep understanding of focusing in order to understand the proof figures printe
 This paper fills this gap by showing how to automatically derive and draw the inference rules
 specified by a linear logic formula as they would appear in a proof theory textbook. We are currently
 implementing the techniques mentioned in this paper in a tool called Quati to be released soon.
+We show this procedure in a rather informal fashion, while we are still formalizing the correctness of our specification.
 
 % \section{Linear Logic with Subexponentials}
 
@@ -439,9 +440,11 @@ The first type of set specifies the case when the matching atomic formula, $A$, 
 context, while the second type of set specifies the case when the matching atomic formula appears in an 
 unbounded context, in which case it does not have to appear alone.
 
-\textbf{Example:}
+The following example illustrates the execution of the algorithm described above.
 
-
+\paragraph{Example:}
+ Consider the linear logic formula shown to the left that corresponds, as described in the 
+Introduction, to the \mLJ\ inference rule shown to the right.
 \[
 F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
 \lpar \nquest{r} \rght{B})] \qquad \qquad 
@@ -449,7 +452,9 @@ F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lf
 \lra B}
 \]
 
-
+Applying the algorithm described above, we obtain the following Derivation Skeleton, which is in fact the 
+derivation obtained by our implementation, thus the difference of notation; for example $rght(\cdot)$ is used for
+$\rght{\cdot}$ and $lft(\cdot)$ used for $\lft{\cdot}$:
 {\small
 \[
 \cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
@@ -462,16 +467,102 @@ F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lf
 {\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
 {\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
 {\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists B \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{6} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+% {\Gamma_{ \Gamma}^{6} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
 \]
 }
- $\union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}$, $\In{rght (imp (A) (B)) }{ \Gamma_{r}^{3})}$, $\emp{\Gamma_{ \Gamma}^{8}}$, $\emp{\Gamma_{ \Gamma}^{9}}$, $\emp{\Gamma_{r}^{4})}$, $\elin{lft (A)}{ \Gamma_{l}^{4}}$, $\union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}}$, $\elin{rght (B)}{ \Gamma_{r}^{5})}$, $\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6})}.$
-
-
+%VN: I modified the derivation above. Our programs is putting the formula F in the Gamma context.
+%%   I think that this should not be the case. It should be in infty.
+There is just a single set of constraints attached to this generic derivation:
+\[
+ \left\{\begin{array}{c}
+  \union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}, \In{rght (imp (A) (B)) }{ \Gamma_{r}^{3})}, 
+  \emp{\Gamma_{ \Gamma}^{8}},\\[2pt]
+  \emp{\Gamma_{ \Gamma}^{9}}, \emp{\Gamma_{r}^{4})},\elin{lft (A)}{ \Gamma_{l}^{4}},
+  \elin{rght (B)}{ \Gamma_{r}^{5})},\\[2pt]
+  \union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}},\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6})}.
+ \end{array}\right\}
+\]
+Notice that the constraints specify that the context $\Gamma^6_r$ in the open premise 
+may only contain the formula $\rght{B}$ as expected and moreover the formula $\rght{A \iimp B}$ is in the context
+$\Gamma^3_r$. This set of constraints is given to the prover DLV together with the theory depicted in Table~\ref{fig:predicates} and the 
+output of the prover are the minimal models of the theory. For this particular example, there is a single model depicted below:
+\[
+ \left\{\begin{array}{c}
+\union{\Gamma_{\Gamma}^{8}}{\Gamma_{\Gamma}^{9}}{ \Gamma_{\Gamma}^{7}}, 
+\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5}}{\Gamma_{r}^{6}}, \union{\Gamma_{l}^{3}}{ \Gamma_{l}^{4}}{ \Gamma_{l}^{5}},\\[2pt]
+\In{rght (imp (A) (B) )}{\Gamma_{r}^{3}}, \In{lft (A)} {\Gamma_{l}^{4}},
+\In{lft (A)} {\Gamma_{l}^{5}},\In{rght (B) }{ \Gamma_{r}^{5}},\In { rght (B)} { \Gamma_{r}^{6}},\\[2pt]
+\elin{ lft (A) }{ \Gamma_{l}^{4}}, \elin{rght (B)}{ \Gamma_{r}^{5}}, 
+\emp{\Gamma_{\Gamma}^{7}},\emp{\Gamma_{\Gamma}^{8}},\emp{\Gamma_{\Gamma}^{9}},\emp{\Gamma_{r}^{4}}
+        \end{array}
+ \right\}
+\]
+ 
+It is easy to check that the algorithm described above does construct Derivation Skeletons that correspond
+indeed to the focused derivation introducing a formula. However, there is a downside to this representation as it is 
+non-standard. One needs to understand the meaning of constraints and of focused derivations.  In the following section, 
+we demonstrate how to transform such a derivation skeleton to an inference rule closer to how it would be shown in a 
+proof theory textbook.
 
 
 
 \section{From Derivation Skeletons to Inference Rules}
+
+This section details how we transform a Derivation Skeleton $\tup{\Xi, \Bscr}$ to an 
+inference rule. To be more precise, we transform a model $M$ of the theory $\Bscr \cup \thSeq$
+to an inference rule. Thus the same derivation skeleton may have several (or no) inference rules associated 
+to it, namely one inference rule to each model of its set of constraints. Given a model $M$ and the generic
+derivation $\Xi$, we apply until the following rewrite rules in two phase:
+\[
+\begin{array}{l@{\quad}r@{~}l@{\quad}r@{\quad}l@{\quad}r@{\quad}l}
+\toprule
+{\textrm{Phase 1:}} 
+& \elin{F}{\Gamma}:  & \Gamma \rightarrow F 
+& \emp{\Gamma}: & \Gamma \rightarrow \cdot 
+& \union{\Gamma'}{\Gamma''}{\Gamma}: & \Gamma \rightarrow \Gamma',
+\Gamma''\\
+\midrule
+\textrm{Phase 2:} & \multicolumn{6}{c}{
+\In{F}{\Gamma}: \quad \Gamma \rightarrow \Gamma, F
+}\\
+\bottomrule
+\end{array}
+\]
+In the first phase, we proceed as follows: We set $\Xi_i := \Xi$ where $ i := 0$.
+We repeat the following procedure: If 
+$\elin{F}{\Gamma}, \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}$ in $M$, such 
+that there is an occurrence of $\Gamma$ in $\Xi_i$, then apply the corresponding 
+rule, obtaining $\Xi_{i+1}$ and set $i := i + 1$. 
+Let $\Xi'$ be the resulting generic derivation.
+For the second phase we initialize $M_i := M$ and $\Xi_i := \Xi'$, where $i := 0$. We repeat 
+the following procedure while there is a formula of the form $\In{F}{\Gamma}$ in $M_i$:
+Let $\In{F}{\Gamma} \in M_i$, then we apply the corresponding rule to all occurrences of $\Gamma$ in $\Xi_i$
+obtaining $\Xi_{i+1}$ and set $M_{i+1} = M \setminus \{\In{F}{\Gamma}\}$  and $i := i + 1$.
+
+
+
+
+As we are using the one-sided presentation of linear logic with subexponentials, the derivations used 
+in our derivation skeleton is one sided. This constrast with the usual presentation of such inference
+rules in textbooks that have two sided sequents. 
+
+{\scriptsize\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; 
+\quad
+\cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{l}^{3}, A  \vdash B }
+{\Gamma_{l}^{3}, A  \vdash  \cdot } \;\; }
+{\Gamma_{l}^{3}  \vdash  \cdot } \;\; }
+{\Gamma_{l}^{3}  \vdash  \cdot } \;\; }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; \]}
+
+{\scriptsize\[\cfrac{\Gamma_{l}^{3}, A  \vdash B }
+{\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; imp_{R}\]}
+
 
 \section{Conclusions and Future Work}
 
