@@ -111,13 +111,14 @@ obtained from the theory and the derivations in the encoded proof system.
 
 This notion of adequacy is formalized by using more advanced proof theory called focusing, for which we refrain here to 
 enter into the details for readability. Further details can be found in \cite{nigam.jlc}. In a nutshell focusing
-is a complete discipline for proofs (and derivations) introduced first in the context of logic programming 
+is a complete discipline for proofs introduced first in the context of logic programming 
 by Andreoli~\cite{andreoli92jlc} for Linear 
 Logic, which reduces the proof search do not know non-determinism. Focused proofs can be seen as the normal-form proofs for 
 proof search. 
 
-For our running example, we can show that the linear logic formula to the left corresponds exactly to \mLJ's implication 
-right introduction rule to the right:
+For our running example, we have shown in \cite{nigam.jlc} that the linear logic formula to the 
+left corresponds exactly to the implication right introduction rule of the multi-conclusion sequent calculus system for 
+intuitionistic logic called \mLJ~\cite{maehara54nmj} depicted to the right:
 \[
 F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
 \lpar \nquest{r} \rght{B})] \qquad \qquad 
@@ -196,14 +197,15 @@ more than one rule.
 As we shown in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
 much easier by using propositional theories, called Answer-Sets. These theories were used for
 checking which rule permutations are valid. However, one downside of this method is that it 
-yields derivations which are hardly understandable for someone that is familiar with linear logic, 
+yields derivations which are hardly understandable for someone that is not familiar with linear logic, 
 such as the focused derivation shown above. This is a serious limitation as it requires
 a deep understanding of focusing in order to understand the proof figures printed.
 
 This paper fills this gap by showing how to automatically derive and draw the inference rules
 specified by a linear logic formula as they would appear in a proof theory textbook. We are currently
 implementing the techniques mentioned in this paper in a tool called Quati to be released soon.
-We show this procedure in a rather informal fashion, while we are still formalizing the correctness of our specification.
+We show this procedure in a rather informal fashion, using the example above as running example. 
+We are currently writing down the correctness proof of our specification.
 
 % \section{Linear Logic with Subexponentials}
 
@@ -344,7 +346,8 @@ to specify in a strong fashion object-logic inference rules with a strong level 
 adequacy~\cite{nigam10jar}. Here we will show how we can obtain the corresponding
 Derivation Skeleton from a Linear Logic Formula. 
 
-We show some illustrative cases. Assume that there 
+We show some illustrative cases of our procedure, which is defined recursively on the 
+size of formulas. Assume that there 
 are $n$ subexponentials. We initialize the algorithm by first constructing a sequent:
 \[
  \vdash \Gamma_{0,1}, \ldots, \Gamma_{0,n}
@@ -545,16 +548,34 @@ obtaining $\Xi_{i+1}$ and set $M_{i+1} = M \setminus \{\In{F}{\Gamma}\}$  and $i
 For the derivation skeleton shown in the exampe at the end of 
 Section~\ref{sec:extract} and using the model shown in that example, we obtain the following derivation:
 
-
+\textbf{FIGURE MISSING}
 
 
 \paragraph{Two-sided Sequents}
 As we are using the one-sided presentation of linear logic with subexponentials, the derivations used 
 in our derivation skeleton is one sided. This constrast with the usual presentation of such inference
-rules in textbooks that have two sided sequents. We associate to each context variable $\Gamma_s^i$ we 
-associate $\Delta_s^i$.
+rules in textbooks that have two sided sequents. For this, however, we need more information from the 
+user. In particular, the user should specify which type of formulas, of the form $\lft{\cdot}, \rght{\cdot}$ or both, 
+and how many, a single or many formulas, a subexponential context is supposed to have. 
+This is done in the specification by using commands of the form:
+\[
+ \texttt{subexpctx l many lft.} \qquad
+ \texttt{subexpctx r many rght.}
+\]
+The declaration to the left specifies that the contexts for the subexponential $l$ has many formulas, but 
+all of them are of them form $\lft{\cdot}$, which means that there are formulas to be placed to the left
+of the sequent, similarly for the command to the declaration to the right.
 
-{\scriptsize\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
+Given such declarations, we associate to the each context of a subexponential $\Gamma_s^i$ the context
+$\Gamma_s^i$, with the same name, to represent the object logic formulas in $\Gamma_s^i$ that should be 
+placed to the left-hand-side of sequents, and $\Delta_s^i$ for the object logic formulas in  $\Gamma_s^i$
+that should be placed to the right-hand-side. With these new contexts, the derivation above is rewritten 
+to the derivation below where sequents are two-sided. The meta-level formulas of the form $\rght{F}$ (respectively, 
+$\lft{F}$) are replaced by $F$ and placed to the right-hand-side (respectively, left-hand-side) of the sequent. 
+We also elide contexts that have no declaration of which formulas they have, for instance, the contexts for the 
+subexponential $infty$ are elided.
+
+{\small\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; 
 \quad
 \cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{l}^{3}, A  \vdash B }
@@ -567,11 +588,38 @@ associate $\Delta_s^i$.
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; \]}
 
-{\scriptsize\[\cfrac{\Gamma_{l}^{3}, A  \vdash B }
+Notice that since declaration above specifies that the subexponential $r$ contains
+many formulas, but they are all placed to the right-hand-side of sequents, the derivation 
+above only has the $\Delta_r^i$ contexts, while the contexts of the form $\Gamma_r^i$ are not
+shown.
+
+The last step is then to simply collapse the derivation obtained by constructing the 
+inference rule obtained by using the conclusion of the derivation above and its premises. 
+For the derivation above, we obtain the following inference rule:
+
+{\small \[\cfrac{\Gamma_{l}^{3}, A  \vdash B }
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; imp_{R}\]}
 
+Notice that such a rule is very close to how it would appear in a standard proof-theory 
+textbook.
 
 \section{Conclusions and Future Work}
+
+This paper describes informally the procedure that from a specification of a proof system in 
+linear logic with subexponentials extracts inference rules as they would look in a proof theory
+textbook. This procedure is currently being implemented as part of a tool Quati that computes 
+which rule permutations are always possible.
+
+There is a number of future work directions to follow from this work. The first one is to 
+formalize our ideas, of which part can be found in our previous work~\cite{nigam13iclp}. Besides
+the implementation of our method, another
+direction that we are currently investigating is to extract linear logic with subexponentials from 
+a set of inference rules. This step will facilitate the use our other tools, such as the one described
+in \cite{nigam.jlc}, called TATU~\cite{tatu}, without requiring one to understand with depth how to 
+encode proof systems in linear logic with subexponentials.
+
+Finally, we are also investigating how to use our tool Quati in other applications, such as investigating
+the correctness of algorithms to maintain recursive distributed database~\cite{nigam12comlan}.
 
 \bibliographystyle{plain}
 \bibliography{../master}
