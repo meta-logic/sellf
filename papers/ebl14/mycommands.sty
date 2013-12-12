@@ -317,9 +317,9 @@
 %  \Invamp = Boxed \invamp.  Draw time < .02 sec, but max ~300 chars/page
 \newbox\iabox\setbox\iabox\invamp \def\Invamp{\copy\iabox}
 
-\newcommand\lpar{\mathrel{\Invamp}}
+%\newcommand\lpar{\mathrel{\Invamp}}
 %\newcommand\lpar{\mathbin{\wp}}  % Looks ugly
-%\newcommand\lpar{\bindnasrepma}  % Needs stmaryrd.sty, not on all machines
+\newcommand\lpar{\bindnasrepma}  % Needs stmaryrd.sty, not on all machines
 
 \long\def\hide#1\endhide{}
 

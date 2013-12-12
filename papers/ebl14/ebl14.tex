@@ -67,58 +67,70 @@
 Universidade Federal da Paraíba, Brazil\\
 \texttt{vivek.nigam@gmail.com} \& \texttt{leonardo.alfs@gmail.com} 
 \and Giselle Reis\\
-Technische Universit\"at Wien, Vienna, Austria}
+Technische Universit\"at Wien, Vienna, Austria\\
+\texttt{giselle@logic.at}}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-In our previous work, we have shown that a great number of proof systems, such 
+In our previous work, we have shown that a great number of sequent calculus proof systems, such 
 as a multiconclusion system for intuitionisitic logic, can 
-be specified as theories in linear logic with subexponentials, a refinement of linear logic. 
-These theories are natural allowing for example the development of techniques for checking
+be specified as theories in subexponential linear logic, a refinement of linear logic. 
+These theories are natural, allowing, for example, the development of techniques for checking
 automatically non-trivial properties of the encoded systems, such as whether the encoded proof system 
-admits cut-elimination or to check which rule permutations are always allowed. 
-However, it takes some amount of effort to check whether a linear logic theory corresponds
+admits cut-elimination or which rule permutations are always allowed. 
+However, it takes some effort to check whether a linear logic theory corresponds
 indeed to a given proof system. This paper fills this gap by developing a technique that automatically 
-transforms a linear logic specification into the inference rules it specifies thus allowing
-the user to check for errors in the specification. We applied our technique to our previous work for 
+transforms a linear logic specification into the sequent calculus inference rules it specifies thus allowing
+the user to check for errors in the specification. We applied this technique to our previous work for 
 checking and enumerating rule permutations from linear logic specifications, obtaining figures
 as they would normally appear in a proof theory text book. We are currently implementing our technique 
-as a tool called Quati to be launched soon.
+in a tool called Quati to be launched soon.
 \end{abstract}
 
 \section{Introduction}
-Quati is a tool to be launched soon that takes a specification in linear logic with subexponentials~\cite{nigam09ppdp} 
-and infers automatically a number rules permutations that are always allowed. The theory and technique that 
-based this tool was explained in our previous work~\cite{nigam13iclp}. This paper tackles one of 
-Quati's method that was not explained before, namely, how to construct rules as they would appear in 
-a standard Proof-Theory book~\cite{troelstra96bpt} from a specification in linear logic with subexponential.
+Quati is a tool to be launched soon that takes a specification in subexponential
+linear logic~\cite{nigam09ppdp}, henceforth referred to as \sell, and infers
+automatically rule permutations that are always allowed. The theory and
+technique that are the basis of this tool is explained in our previous
+work~\cite{nigam13iclp}. This paper describes one of Quati's features that was
+not explained before, namely, how to construct sequent calculus rules as they
+would appear in a standard Proof-Theory book~\cite{troelstra96bpt} from a
+specification in \sell.
 
-Linear logic with Subexponentials is a refinement of linear logic, which allows for any number of 
-exponential-like connectives, called subexponentials, written $\nbang{\ell}$ and $\nquest{\ell}$ with a label $\ell$. These labels
- are organized into a pre-order, $\prec$, specifying the provability relation among subexponentials. Moreover, some subexponentials 
- are allowed to weaken and contract, which are classified as unbounded, and the remaining subexpontntials are not allowed 
- weaken and contract, which are classified as bounded. 
-In our recent work~\cite{nigam.jlc}, we demonstrated
-that a number of proof systems with rather complicated structural rules can be specified as linear logic with subexponential 
-theories. For example, a multiconclusion system (\mLJ) for intuitionisitic logic or a proof system for S4 modal logic can be specified in 
-Linear Logic with Subexponentials. 
-In fact, our encoding is quite strong having an adequacy on the level of 
-derivations~\cite{nigam10jar}. That is, there is a one-to-one correspondence between the (focused) derivations
-obtained from the theory and the derivations in the encoded proof system. 
+Subexponential linear logic is a refinement of linear logic which allows any
+number of exponential-like connectives (i.e., $!$ and $?$), called
+subexponentials, written $\nbang{\ell}$ and $\nquest{\ell}$ with a label $\ell$.
+These labels are organized in a pre-order, $\prec$, which specifies the
+provability relation among subexponentials. Moreover, some subexponentials allow
+weakening and contraction of the formulas to which they are applied, these are
+classified as unbounded. The remaining subexponentials do not allow weakening
+and contraction of their formulas, these are classified as bounded. 
+In our recent work~\cite{nigam.jlc}, we demonstrated that a number of proof
+systems with rather complicated structural rules can be specified as \sell\
+theories, e.g., the multiconclusion system \mLJ\ for intuitionisitic logic and a
+proof system for the modal logic S4.
+In fact our encoding is quite strong, having an adequacy on the level of 
+derivations~\cite{nigam10jar}. This means that there is a one-to-one correspondence
+between the (focused) derivations in \sell\ obtained from the theory and the
+derivations in the encoded proof system.
 
-This notion of adequacy is formalized by using more advanced proof theory called focusing, for which we refrain here to 
-enter into the details for readability. Further details can be found in \cite{nigam.jlc}. In a nutshell focusing
-is a complete discipline for proofs introduced first in the context of logic programming 
-by Andreoli~\cite{andreoli92jlc} for Linear 
-Logic, which reduces the proof search do not know non-determinism. Focused proofs can be seen as the normal-form proofs for 
-proof search. 
+This notion of adequacy is formalized by using a more advanced proof theory
+concept called focusing, which we refrain to explain into details here for
+readability purposes. Further details can be found in \cite{nigam.jlc}. In a
+nutshell focusing is a complete discipline for proof search, introduced first in
+the context of linear logic programming by Andreoli~\cite{andreoli92jlc}, which
+reduces the proof search non-determinism. Focused proofs can be seen as a
+normal-form for proof search. 
 
-For our running example, we have shown in \cite{nigam.jlc} that the linear logic formula to the 
-left corresponds exactly to the implication right introduction rule of the multi-conclusion sequent calculus system for 
-intuitionistic logic called \mLJ~\cite{maehara54nmj} depicted to the right:
+For our running example, we will use the implication right rule of the
+multi-conclusion sequent calculus system for intuitionistic logic called
+\mLJ~\cite{maehara54nmj}. We have shown in \cite{nigam.jlc} that the linear
+logic formula $F$ to the left corresponds exactly to the rule depicted on the
+right. In this setting, we say that intuitionistic logic is the object-level
+logic, and \sell\ is the meta-level logic.
 \[
 F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
 \lpar \nquest{r} \rght{B})] \qquad \qquad 
@@ -126,6 +138,7 @@ F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lf
 \lra B}
 \]
 This is illustrated by the following focused derivation that introduces the formula $F$:
+{\small
  \[
  \infer=[{D_\infty,2 \times \exists}]{\llfDash \lEnc \ndots{\infty}
 \lft{\Gamma} \ndots{l} {\color{MyDarkBlue} \rght{\Delta, A \supset B}}
@@ -161,50 +174,57 @@ This is illustrated by the following focused derivation that introduces the form
 }
 }
 \]
-Here we need to explain a bit of our notation. We use two meta-level atomic predicates
-$\lft{\cdot}$ and $\rght{\cdot}$ that takes an object-level formula to a linear logic 
-one. The former predicate specifies a formula to the left-hand side of the sequent, while the latter
-a formula to the right-hand side. Thus, the collection of atomic formulas $\lft{A_1}, \ldots
-\lft{A_n}, \rght{B_1}, \ldots, \rght{B_m}$ in a linear logic sequent specifies the object-level
-sequent $A_1, \ldots, A_n \lra B_1, \ldots, B_m$. If $\Gamma = A_1, \ldots, A_n$ is a multiset
-of formulas, then we write $\lft{\Gamma}$ for $\lft{A_1}, \ldots, \lft{A_n}$, similarly for $\rght{\Gamma}$.
+}
+Here we need to explain a bit of our notation. We use two linear logic atomic predicates
+$\lft{\cdot}$ and $\rght{\cdot}$ that take object-level formulas as arguments.
+The former predicate specifies a formula on the left-hand side of the object
+logic's sequent, while the latter a formula on the right-hand side. Thus, the collection
+of atomic formulas $\lft{A_1}, \ldots \lft{A_n}, \rght{B_1}, \ldots, \rght{B_m}$
+in a linear logic sequent specifies the object-level sequent $A_1, \ldots, A_n
+\lra B_1, \ldots, B_m$. If $\Gamma = A_1, \ldots, A_n$ is a multiset of
+formulas, then we write $\lft{\Gamma}$ for $\lft{A_1}, \ldots, \lft{A_n}$,
+similarly for $\rght{\Gamma}$.
 
-The derivation above with $\Uparrow$ and $\Downarrow$
-are sequents of the focused system for linear logic with subexponential enforcing the focusing 
-discipline. For the derivation above, we use three subexponential labels $\infty, l$
-and $r$. This is captured in the syntax by the sequent with three contexts: $\llfDash \lEnc \ndots{\infty}
-\lft{A_1}, \ldots \lft{A_n}  \ndots{l} \rght{B_1}, \ldots, \rght{B_m} \ndots{r} \cdot$ which stands for the linear logic sequent
-$\nquest{\infty} \lEnc, \nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1}, \ldots, \nquest{r} \rght{B_m}$, 
-where $\lEnc$ is the theory encoding the system.
+The symbols $\Uparrow$ and $\Downarrow$ are part of the sequents of the focused
+system for \sell, enforcing the focusing discipline. For the derivation above,
+we use three subexponential labels $\infty$, $l$ and $r$. This is captured in
+the syntax by the sequent with three contexts: $\llfDash \lEnc \ndots{\infty}
+\lft{A_1}, \ldots \lft{A_n}  \ndots{l} \rght{B_1}, \ldots, \rght{B_m} \ndots{r}
+\cdot$ which stands for the linear logic sequent $\nquest{\infty} \lEnc,
+\nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1},
+\ldots, \nquest{r} \rght{B_m}$, where $\lEnc$ is the theory encoding the
+object-level logic.
 
-Now, the interesting fact is that the derivation above is the only way of introducing the formula $F$ 
-shown above by using the focusing 
-discipline. Notice that this derivation corresponds indeed to \mLJ's 
-implication right rule: The derivation's conclusion is $\llfDash \lEnc \ndots{\infty}
-\lft{\Gamma} \ndots{l} {\rght{\Delta, A \supset B}}
-\ndots{r} \cdot \Uparrow$ specifying the conclusion of \mLJ's 
-implication right rule $\Gamma \lra \Delta, A \supset B$ and 
-the derivation has one premise $\llfDash \lEnc \ndots{\infty} \lft{\Gamma, A} \ndots{l} \rght{B} \ndots{r}
-\cdot \Uparrow$, which corresponds to the premise of \mLJ's 
-implication right rule $\Gamma, A \lra B$.
+Now, the interesting fact is that the derivation above is the only way of
+introducing the formula $F$ by using the focusing discipline. Notice that this
+derivation corresponds indeed to \mLJ's implication right rule: The derivation's
+conclusion is $\llfDash \lEnc \ndots{\infty} \lft{\Gamma} \ndots{l}
+{\rght{\Delta, A \supset B}} \ndots{r} \cdot \Uparrow$ specifying the conclusion
+of \mLJ's implication right rule $\Gamma \lra \Delta, A \supset B$ and the
+derivation has one open premise $\llfDash \lEnc \ndots{\infty} \lft{\Gamma, A}
+\ndots{l} \rght{B} \ndots{r} \cdot \Uparrow$, which corresponds to the premise
+of \mLJ's implication right rule $\Gamma, A \lra B$.
 
-To check whether one given linear logic formula $G$ corresponds to some inference rule, in the same way as the 
-the formula $F$ corresponds to \mLJ's implication right rule, requires some effort. In particular, one needs
+Checking whether one given linear logic formula $G$ corresponds to some
+inference rule, in the same way as the formula $F$ corresponds to \mLJ's
+implication right rule, requires some effort. In particular, one needs
 to construct the focused derivation introducing the given formula $G$ and check whether this derivation indeed
 corresponds to the desired inference rule. This is particularly challenging as a given formula may specify 
 more than one rule. 
 
-As we shown in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
+As we show in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
 much easier by using propositional theories, called Answer-Sets. These theories were used for
 checking which rule permutations are valid. However, one downside of this method is that it 
 yields derivations which are hardly understandable for someone that is not familiar with linear logic, 
 such as the focused derivation shown above. This is a serious limitation as it requires
 a deep understanding of focusing in order to understand the proof figures printed.
 
-This paper fills this gap by showing how to automatically derive and draw the inference rules
+This paper solves this problem by showing how to automatically derive and draw
+the object-level inference rules
 specified by a linear logic formula as they would appear in a proof theory textbook. We are currently
 implementing the techniques mentioned in this paper in a tool called Quati to be released soon.
-We show this procedure in a rather informal fashion, using the example above as running example. 
+We show this procedure in a rather informal fashion, using the example above as
+the running example. 
 We are currently writing down the correctness proof of our specification.
 
 % \section{Linear Logic with Subexponentials}
@@ -218,9 +238,9 @@ $\Bscr$ is a set of constraints.
 Its formal definition was introduced in \cite{nigam13iclp} and we only informally describe them here.   
 
 The set of constraints that we use are depicted in Table~\ref{fig:predicates}.
-The meaning of these constraints are specified by the logic formulas, expressed as logic program clauses, 
-also depicted in Table~\ref{fig:predicates}, with 
-only eight rules: $\textrm{(r1)}, \textrm{(r2)},\ldots, \textrm{(r8)}$. These
+The meaning of these constraints is specified by the rules $\textrm{(r1)},
+\textrm{(r2)},\ldots, \textrm{(r8)}$, expressed as logic program clauses, 
+also depicted in Table~\ref{fig:predicates}. These
 rules and the predicates in Table~\ref{fig:predicates} specify in a declarative 
 fashion the content of a context variable, $\Gamma$, in a derivation.
 The encoding is all based on atomic formulas of the form $\In{F}{\Gamma}$, which 
@@ -233,6 +253,8 @@ single formula $F$.
 The first rule (r1) specifies that $\In{F}{\Gamma}$, while the second rule (r2) is a constraint
 rule specifying that there is no other formula $F'$ different from $F$ in the context $\Gamma$.
 
+%% TODO: mention the rule or change to neg_l of LJ, which requires the right
+%% side of the sequent to be empty. [Giselle]
 In some situations, for instance, when specifying the linear logic initial rule~\cite{girard87tcs}, 
 we need to specify that some contexts are empty, which is done by using the atomic formula $\emp{\Gamma}$.  
 Rule (r3) is a constraint that specifies that no formula can be in an empty context.
@@ -240,7 +262,7 @@ Rule (r3) is a constraint that specifies that no formula can be in an empty cont
 The most elaborate specification are the rules (r4) -- (r8), which specify the atomic formula 
 $\union{\Gamma^1} {\Gamma^2} {\Gamma}$, i.e. $\Gamma = \Gamma^1 \cup \Gamma^2$.
 The rules (r4) and (r5) specify that $\Gamma^1 \subseteq \Gamma$ and $\Gamma^2 \subseteq \Gamma$, 
-that is, the occurrence of a formula that is in $\Gamma^i$ is also in $\Gamma$. The rule (r6) specifies that 
+that is, a formula occurrence that is in $\Gamma^i$ is also in $\Gamma$. The rule (r6) specifies that 
 if both $\Gamma^1$ and $\Gamma^2$ are empty then so is $\Gamma$. 
 The rules (r7) and (r8) 
 specify that these contexts are bounded, that is, the union 
@@ -277,35 +299,34 @@ $\union{\Gamma^1} {\Gamma^2} {\Gamma}$ & $\Gamma = \Gamma^1 \cup \Gamma^2$ &
 \vspace{-4mm}
 \end{table}
 
-Consider the following illustrative example of how an inference derivation specifies 
+Consider the following illustrative example of how a derivation skeleton specifies 
 declaratively an inference rule:
 
 \paragraph{Example:}
-Consider the $\tensor_R$ rule shown to the left. The \emph{inference skeleton} for 
-it is the pair $\tup{\Xi_\tensor, \Bscr_\tensor}$, where $\Xi_\tensor$ is the derivation shown to the right:
+Consider the $\tensor_R$ rule shown to the left. Its \emph{inference skeleton} 
+is the pair $\tup{\Xi_\tensor, \Bscr_\tensor}$, where $\Xi_\tensor$ is the derivation shown to the right:
 {\small
 \[
 \infer[\tensor_R]{{\Gamma, \Gamma'} \vdash \Delta, \Delta', A\tensor B}
 {{\Gamma} \vdash \Delta, A \qquad  {\Gamma'} \vdash \Delta', B}
 \qquad 
-\infer{\Gamma_{0,1} \vdash \Gamma_{0,2} }
+\infer{\Gamma^0_1 \vdash \Gamma^0_2 }
 {
-{\Gamma_{1,1} \vdash \Gamma_{1,2} }
+{\Gamma^1_1 \vdash \Gamma^1_2 }
 &
-{\Gamma_{2,1} \vdash \Gamma_{2,2} }
+{\Gamma^2_1 \vdash \Gamma^2_2 }
 }
 \]
 }
 Notice that the generic derivation is composed by
-context variables, written of the $\Gamma_{i,j}$. In particular, each sequent and 
-each side of the sequent is marked with context variable, that is, where its contents
+context variables $\Gamma^i_j$. In particular, each sequent and 
+each side of the sequent is marked with a context variable, that is, its contents
 are not specified, thus generic. 
 It is only used for specifying the shape of the derivation and not the formulas that 
 appear on it.
 
 The configuration of formulas in the derivation are specified by set of constraints.
-For example, the set of constraints associated to the generic derivation above is the 
-set:
+The set of constraints associated to the generic derivation above is:
 \begin{small}
 \[
 \Bscr = \left\{
@@ -313,11 +334,11 @@ set:
 \elin{A \tensor B}{\Gamma_{aux}^1},
 \elin{A}{\Gamma_{aux}^2},
 \elin{B}{\Gamma_{aux}^3}, \\
-\union{\Gamma_{aux}^1}{\Gamma_{aux}^4}{\Gamma_{0,2}},
-\union{\Gamma_{aux}^2}{\Gamma_{aux}^5}{\Gamma_{1,2}}, 
-\union{\Gamma_{aux}^3}{\Gamma_{aux}^6}{\Gamma_{2,2}},\\
+\union{\Gamma_{aux}^1}{\Gamma_{aux}^4}{\Gamma^{0}_{2}},
+\union{\Gamma_{aux}^2}{\Gamma_{aux}^5}{\Gamma^{1}_{2}}, 
+\union{\Gamma_{aux}^3}{\Gamma_{aux}^6}{\Gamma^{2}_{2}},\\
 \union{\Gamma_{aux}^5}{\Gamma_{aux}^6}{\Gamma_{aux}^4},
-\union{\Gamma_{1,1}}{\Gamma_{1,2}}{\Gamma_{0,1}}
+\union{\Gamma^1_1}{\Gamma^1_2}{\Gamma^0_1}
 \end{array}
 \right\}
 \]
@@ -326,41 +347,45 @@ Here the context variables of the form $\Gamma_{aux}^i$, where $i \in \mathbb{N}
 auxiliary context variables not appearing in the generic derivation above, 
 but used to specify them. It is easy to check that the Logic Program (LP) $\Bscr_\tensor \cup \Tscr$
 has a single model (called answer-set by the logic programming community), 
-containing the formulas $\In{A \tensor B}{\Gamma_{0,2}}$,
-$\In{A}{\Gamma_{1,2}}$ and $\In{B}{\Gamma_{2,2}}$. There is a number of efficient 
-solvers available. For Quati we have used DLV~\cite{dlv}.
+containing the formulas $\In{A \tensor B}{\Gamma^{0}_{2}}$,
+$\In{A}{\Gamma^{1}_{2}}$ and $\In{B}{\Gamma^{2}_{2}}$. There is a number of efficient 
+solvers available. For Quati we use DLV~\cite{dlv}.
 
 In our previous work~\cite{nigam13iclp}, we discuss the advantages of representing 
-a derivation by using logic specifications. For instance, we developed the machinery 
-necessary for checking whether a rule permutes over another rule in a given proof system.
+a derivation using logic specifications. In particular, we can reason over
+these specifications, thus reasoning about different logics in a uniform way.
+For instance, we developed the machinery necessary for checking whether a rule
+permutes over another rule in the object logic using its \sell\ specification.
+Therefore, we can check the permutation of rules in many systems using the same
+method.
 In the following section, we enter into the details of extracting derivation skeletons
-from a lineaer logic specification. This is new with respect to \cite{nigam13iclp} and 
-complements this work with our previous work~\cite{nigam.jlc} on encoding proof systems with linear logic with 
-subexponentials 
+from a linear logic specification. This is new with respect to \cite{nigam13iclp} and 
+complements this work with our previous work~\cite{nigam.jlc} on encoding proof
+systems in \sell. 
 
 \subsection{Extracting a Derivation Skeleton from a Linear Logic Formula}
 \label{sec:extract}
 
-In the Introduction, we briefly described that linear logic can be used as a meta-logic 
-to specify in a strong fashion object-logic inference rules with a strong level of 
+In the introduction, we briefly described that linear logic can be used as a meta-logic 
+to specify object-logic inference rules with a strong level of 
 adequacy~\cite{nigam10jar}. Here we will show how we can obtain the corresponding
-Derivation Skeleton from a Linear Logic Formula. 
+derivation skeleton from a linear logic formula. 
 
 We show some illustrative cases of our procedure, which is defined recursively on the 
 size of formulas. Assume that there 
 are $n$ subexponentials. We initialize the algorithm by first constructing a sequent:
 \[
- \vdash \Gamma_{0,1}, \ldots, \Gamma_{0,n}
+ \vdash \Gamma^{0}_{1}, \ldots, \Gamma^{0}_{n}
 \]
-Each context variable corresponds to one of the subexponential context. For example, 
-for the encoding of \mLJ\ shown in the Introduction, there are three context $l,r, \infty$
-resulting in the following initial sequent:
+Each context variable corresponds to one of the subexponential contexts. For example, 
+for the encoding of \mLJ\ shown in the introduction, there are three contexts:
+$l$, $r$, $\infty$, resulting in the following initial sequent:
 \[
- \vdash \Gamma_{0,\infty}, \Gamma_{0,l}, \Gamma_{0,r}
+ \vdash \Gamma^0_{\infty}, \Gamma^{0}_{l}, \Gamma^{0}_{r}
 \]
 We initialize this sequent as $Seq_k$, where $k = 0$.
 Now, given a linear logic formula $F$ and the sequent $Seq_k$,
-our procedure runs recursively  on the height of the focused derivation introducing 
+our procedure runs recursively on the height of the focused derivation introducing 
 the linear logic formula $F$ and returns a set of derivation skeletons all with the 
 same generic derivation, $\tup{\Xi, \Bscr_1, \ldots, \Bscr_n}$. Each $\Bscr_i$ specifies
 a possible derivation. 
@@ -368,13 +393,13 @@ a possible derivation.
 \textbf{Case $\tensor$:} if $F$ is of the form 
 $A \tensor B$, we construct the derivation skeleton:
 \[
- \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
- {\vdash \Gamma_{k+1,1}, \ldots, \Gamma_{k+1, n}
- \qquad \vdash \Gamma_{k+2,1}, \ldots, \Gamma_{k+2, n}}
+ \infer{\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n} }
+ {\vdash \Gamma^{k+1}_{1}, \ldots, \Gamma^{k+1}_{n}
+ \qquad \vdash \Gamma^{k+2}_{1}, \ldots, \Gamma^{k+2}_{n}}
 \]
-where $Seq_k$ is the sequent $\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n}$ and the context variables 
-$\Gamma_{k+1, j}$ and $\Gamma_{k+2, j}$ are fresh for all $j$ that correspond to a bounded 
-subexponential and $\Gamma_{k+1, i} = \Gamma_{k, i} = \Gamma_{k+2, i}$ for all unbounded
+where $Seq_k$ is the sequent $\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n}$ and the context variables 
+$\Gamma^{k+1}_{j}$ and $\Gamma^{k+2}_{j}$ are fresh for all $j$ that correspond to a bounded 
+subexponential and $\Gamma^{k+1}_{i} = \Gamma^{k}_{i} = \Gamma^{k+2}_{i}$ for all unbounded
 subexponentials. 
 
 Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m}$ and $\tup{\Xi_{k+2}, \Bscr_{k+2}^1, \ldots, \Bscr_{k+2}^l}$ be the 
@@ -382,26 +407,28 @@ sets of derivation skeletons obtained by this algorithm when using the first and
 with respectively $A$ and $B$. 
 Then the result of the algorithm on $F$ and $Seq_k$ is the derivation skeleton with generic derivation
 \[
- \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ \infer{\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n} }
  {\Xi_{k+1}  \qquad \Xi_{k+2}}
 \]
 and set of set of constraints $\{\Bscr_{k+1}^i \cup \Bscr_{k+2}^j \cup \Bscr_\tensor \mid 1 \leq i \leq m, 1\leq j \leq l\}$, 
 where $\Bscr_\tensor$ is 
 \[
-\Bscr_\tensor = \{\union{\Gamma_{k+1, j}}{\Gamma_{k+2, j}}{\Gamma_{k, j}} \mid \textrm{ $k$ bounded} \}
+\Bscr_\tensor = \{\union{\Gamma^{k+1}_{j}}{\Gamma^{k+2}_{j}}{\Gamma^{k}_{j}} \mid
+\textrm{ $j$ bounded} \}
 \]
-The set $\Bscr_\tensor$ simply specifies that the contents of $\Gamma_{k, j}$ are split among the premises if 
-$k$ is a bounded subexponential.
+The set $\Bscr_\tensor$ simply specifies that the contents of $\Gamma^{k}_{j}$ are split among the premises if 
+$j$ is a bounded subexponential.
 
-
+%% TODO: maybe this case is too complicated, since the !^l rule was not
+%% explained... Drop it? [Giselle]
 \textbf{Case $\nbang{\ell}$:} When $F = \nbang{\ell} A$, the derivation skeleton has a single 
 premise:
 \[
- \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
- {\vdash \Gamma_{k+1,1}, \ldots, \Gamma_{k+1, n}}
+ \infer{\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n} }
+ {\vdash \Gamma^{k+1}_{1}, \ldots, \Gamma^{k+1}_{n}}
 \]
-where $Seq_k = \vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n}$ and the context variables 
-and  $\Gamma_{k+1, i} = \Gamma_{k, i}$ for all unbounded
+where $Seq_k = \vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n}$ and the context variables 
+and  $\Gamma^{k+1}_{i} = \Gamma^{k}_{i}$ for all unbounded
 subexponentials. 
 
 Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m }$ be the 
@@ -409,20 +436,22 @@ derivation skeletons obtained by this algorithm when using the premise
 and $A$. 
 The result of the algorithm on $F$ and $Seq_k$ is the derivation skeleton 
 \[
- \infer{\vdash \Gamma_{k,1}, \ldots, \Gamma_{k, n} }
+ \infer{\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n} }
  {\Xi_{k+1}}
 \]
 and the set of constraints $\{\Bscr_{k+1}^i \cup \Bscr_{\nbang{\ell}} \mid 1 \leq i \leq m\}$, 
 where $\Bscr_{\nbang{\ell}}$ is the set 
 \[
-\Bscr_{\nbang{\ell}} = \{\union{\Gamma_{k+1, j}}{\Gamma_{aux}^j}{\Gamma_{k, j}}, \emp{\Gamma_{aux}^j} \mid \textrm{ $j$ bounded} \} \cup 
-\{\emp{\Gamma_{k+1, i}}\mid \textrm{ $\ell \npreceq i$} \}
+\Bscr_{\nbang{\ell}} = \{\union{\Gamma^{k+1}_{j}}{\Gamma_{aux}^j}{\Gamma^{k}_{j}}, \emp{\Gamma_{aux}^j} \mid \textrm{ $j$ bounded} \} \cup 
+\{\emp{\Gamma^{k+1}_{i}}\mid \textrm{ $\ell \npreceq i$} \}
 \]
 where all auxiliary contexts $\Gamma_{aux}^j$ are fresh. The set to the left specifies that the contents 
-of $\Gamma_{k, i}$ are the same as the contents of $\Gamma_{k+1, i}$ for all contexts $i$ that are bounded and the set to the right 
-specifies that all contexts $\Gamma_{k+1, i}$ for subexponentials $i$ such that $\ell \npreceq i$ have to be necessarily empty.
+of $\Gamma^{k}_{i}$ are the same as the contents of $\Gamma^{k+1}_{i}$ for all contexts $i$ that are bounded and the set to the right 
+specifies that all contexts $\Gamma^{k+1}_{i}$ for subexponentials $i$ such that
+$\ell \npreceq i$ have to be necessarily empty. The emptiness of these contexts
+is exactly the side-condition of the rule for $\nbang{\ell}$.
 
-\textbf{Case literal:} There are two possibilities, one where Let $F = A^\bot$ is a literal
+\textbf{Case literal:} There are two possibilities, one where $F = A^\bot$ is a literal
 introduced by an initial rule or $F = A$ is an atomic formula resulting in an open premise. 
 We show the former case, 
 as the latter case is similar to the cases below.
@@ -437,7 +466,7 @@ where
 \[
 \begin{array}{l}
  \Bscr_B^j = \{\elin{A}{\Gamma_k^j}\} \cup \{\emp{\Gamma_k^i} \mid i \neq j \textrm{ and $i$ bounded} \}\\
- \Bscr_U^j = \{\In{A}{\Gamma_k^j}\} \cup \{\emp{\Gamma_k^i} \mid i \neq j \textrm{ and $i$ bounded} \}\\
+ \Bscr_U^j = \{\In{A}{\Gamma_k^j}\} \cup \{\emp{\Gamma_k^i} \mid \textrm{ $i$ bounded} \}\\
 \end{array}
 \]
 The first type of set specifies the case when the matching atomic formula, $A$, appears alone in a bounded
@@ -447,8 +476,8 @@ unbounded context, in which case it does not have to appear alone.
 The following example illustrates the execution of the algorithm described above.
 
 \paragraph{Example:}
- Consider the linear logic formula shown to the left that corresponds, as described in the 
-Introduction, to the \mLJ\ inference rule shown to the right.
+Consider the linear logic formula shown to the left that corresponds, as described in the 
+introduction, to the \mLJ\ inference rule shown to the right.
 \[
 F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lft{A}
 \lpar \nquest{r} \rght{B})] \qquad \qquad 
@@ -463,6 +492,7 @@ $\rght{\cdot}$ and $lft(\cdot)$ used for $\lft{\cdot}$:
 \[
 \cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
 {\Gamma_{ \Gamma}^{8} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  :: }
+\qquad
 \cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{6} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow }
 {\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{r} rght (B)  :: }}
 {\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  ::  ?^{r} rght (B)  :: }}
@@ -482,7 +512,7 @@ There is just a single set of constraints attached to this generic derivation:
  \left\{\begin{array}{c}
   \union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}, \In{rght (imp (A) (B)) }{ \Gamma_{r}^{3})}, 
   \emp{\Gamma_{ \Gamma}^{8}},\\[2pt]
-  \emp{\Gamma_{ \Gamma}^{9}}, \emp{\Gamma_{r}^{4})},\elin{lft (A)}{ \Gamma_{l}^{4}},
+  \emp{\Gamma_{ \Gamma}^{9}}, \emp{\Gamma_{r}^{4}},\elin{lft (A)}{ \Gamma_{l}^{4}},
   \elin{rght (B)}{ \Gamma_{r}^{5})},\\[2pt]
   \union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}},\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6})}.
  \end{array}\right\}
@@ -503,21 +533,21 @@ output of the prover are the minimal models of the theory. For this particular e
  \right\}
 \]
  
-It is easy to check that the algorithm described above does construct Derivation Skeletons that correspond
-indeed to the focused derivation introducing a formula. However, there is a downside to this representation as it is 
-non-standard. One needs to understand the meaning of constraints and of focused derivations.  In the following section, 
-we demonstrate how to transform such a derivation skeleton to an inference rule closer to how it would be shown in a 
+It is easy to check that the algorithm described above does construct derivation
+skeletons that correspond indeed to the focused derivation introducing a
+formula. However, there is a downside to this representation as it is
+non-standard. One needs to understand the meaning of constraints and of focused
+derivations.  In the following section, we demonstrate how to transform such a
+derivation skeleton into an inference rule closer to how it would be shown in a
 proof theory textbook.
-
-
 
 \section{From Derivation Skeletons to Inference Rules}
 
-This section details how we transform a Derivation Skeleton $\tup{\Xi, \Bscr}$ to an 
-inference rule. To be more precise, we transform a model $M$ of the theory $\Bscr \cup \thSeq$
-to an inference rule. Thus the same derivation skeleton may have several (or no) inference rules associated 
+This section details how we transform a derivation skeleton $\tup{\Xi, \Bscr}$
+into an inference rule. To be more precise, we transform a model $M$ of the theory $\Bscr \cup \thSeq$
+into an inference rule. Thus the same derivation skeleton may have several (or no) inference rules associated 
 to it, namely one inference rule to each model of its set of constraints. Given a model $M$ and the generic
-derivation $\Xi$, we apply until the following rewrite rules in two phase:
+derivation $\Xi$, we apply the following rewrite rules in two phases:
 \[
 \begin{array}{l@{\quad}r@{~}l@{\quad}r@{\quad}l@{\quad}r@{\quad}l}
 \toprule
@@ -533,9 +563,12 @@ derivation $\Xi$, we apply until the following rewrite rules in two phase:
 \bottomrule
 \end{array}
 \]
+
+%% TODO: this is a bit confusing... but I feel like I did not understand enough
+%% to improve it. [Giselle]
 In the first phase, we proceed as follows: We set $\Xi_i := \Xi$ where $ i := 0$.
 We repeat the following procedure: If 
-$\elin{F}{\Gamma}, \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}$ in $M$, such 
+$\elin{F}{\Gamma}, \emp{\Gamma}, \union{\Gamma'}{\Gamma''}{\Gamma}$ are in $M$, such 
 that there is an occurrence of $\Gamma$ in $\Xi_i$, then apply the corresponding 
 rule, obtaining $\Xi_{i+1}$ and set $i := i + 1$. 
 Let $\Xi'$ be the resulting generic derivation.
@@ -544,8 +577,8 @@ the following procedure while there is a formula of the form $\In{F}{\Gamma}$ in
 Let $\In{F}{\Gamma} \in M_i$, then we apply the corresponding rule to all occurrences of $\Gamma$ in $\Xi_i$
 obtaining $\Xi_{i+1}$ and set $M_{i+1} = M \setminus \{\In{F}{\Gamma}\}$  and $i := i + 1$.
 
-\paragraph{Example}
-For the derivation skeleton shown in the exampe at the end of 
+\paragraph{Example:}
+For the derivation skeleton shown in the example at the end of 
 Section~\ref{sec:extract} and using the model shown in that example, we obtain the following derivation:
 
 \textbf{FIGURE MISSING}
@@ -553,20 +586,21 @@ Section~\ref{sec:extract} and using the model shown in that example, we obtain t
 
 \paragraph{Two-sided Sequents}
 As we are using the one-sided presentation of linear logic with subexponentials, the derivations used 
-in our derivation skeleton is one sided. This constrast with the usual presentation of such inference
+in our derivation skeleton is one sided. This contrasts with the usual presentation of such inference
 rules in textbooks that have two sided sequents. For this, however, we need more information from the 
 user. In particular, the user should specify which type of formulas, of the form $\lft{\cdot}, \rght{\cdot}$ or both, 
 and how many, a single or many formulas, a subexponential context is supposed to have. 
-This is done in the specification by using commands of the form:
+This is done in the specification by declarations like the following:
 \[
  \texttt{subexpctx l many lft.} \qquad
  \texttt{subexpctx r many rght.}
 \]
-The declaration to the left specifies that the contexts for the subexponential $l$ has many formulas, but 
-all of them are of them form $\lft{\cdot}$, which means that there are formulas to be placed to the left
-of the sequent, similarly for the command to the declaration to the right.
+The declaration on the left specifies that the contexts for the subexponential
+$l$ have many formulas, but all of them are of them form $\lft{\cdot}$, which
+means that there are formulas to be placed to the left of the sequent, similarly
+for the declaration on the right.
 
-Given such declarations, we associate to the each context of a subexponential $\Gamma_s^i$ the context
+Given such declarations, we associate to each context of a subexponential $\Gamma_s^i$ the context
 $\Gamma_s^i$, with the same name, to represent the object logic formulas in $\Gamma_s^i$ that should be 
 placed to the left-hand-side of sequents, and $\Delta_s^i$ for the object logic formulas in  $\Gamma_s^i$
 that should be placed to the right-hand-side. With these new contexts, the derivation above is rewritten 
@@ -588,13 +622,13 @@ subexponential $infty$ are elided.
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; }
 {\Gamma_{l}^{3}  \vdash \Delta_{r}^{3}, imp (A) (B)  } \;\; \]}
 
-Notice that since declaration above specifies that the subexponential $r$ contains
+Notice that, since the declaration above specifies that the subexponential $r$ contains
 many formulas, but they are all placed to the right-hand-side of sequents, the derivation 
 above only has the $\Delta_r^i$ contexts, while the contexts of the form $\Gamma_r^i$ are not
 shown.
 
-The last step is then to simply collapse the derivation obtained by constructing the 
-inference rule obtained by using the conclusion of the derivation above and its premises. 
+The last step is then to simply collapse the derivation obtained and construct the 
+inference rule by using the conclusion of the derivation and its open premises. 
 For the derivation above, we obtain the following inference rule:
 
 {\small \[\cfrac{\Gamma_{l}^{3}, A  \vdash B }
@@ -605,20 +639,21 @@ textbook.
 
 \section{Conclusions and Future Work}
 
-This paper describes informally the procedure that from a specification of a proof system in 
-linear logic with subexponentials extracts inference rules as they would look in a proof theory
-textbook. This procedure is currently being implemented as part of a tool Quati that computes 
-which rule permutations are always possible.
+This paper describes informally the procedure for extracting inference rules, as
+they would appear in a proof theory textbook, from a specification of a proof system in 
+subexponential linear logic. This procedure is currently being implemented
+as part of a tool called Quati that computes rule permutations.
 
 There is a number of future work directions to follow from this work. The first one is to 
-formalize our ideas, of which part can be found in our previous work~\cite{nigam13iclp}. Besides
-the implementation of our method, another
-direction that we are currently investigating is to extract linear logic with subexponentials from 
-a set of inference rules. This step will facilitate the use our other tools, such as the one described
-in \cite{nigam.jlc}, called TATU~\cite{tatu}, without requiring one to understand with depth how to 
-encode proof systems in linear logic with subexponentials.
+formalize our ideas, part of which can be found already in our previous
+work~\cite{nigam13iclp}. Besides the implementation of our method, another
+direction that we are currently investigating is the extraction of \sell\
+specifications from a set of inference rules, i.e. the opposite direction of
+what was shown in this work. This step will facilitate the use of our tools, such as the one described
+in \cite{nigam.jlc}, called TATU~\cite{tatu}, without requiring a greater
+understanding of subexponential linear logic to encode proof systems in it.
 
-Finally, we are also investigating how to use our tool Quati in other applications, such as investigating
+Finally, we are also investigating how to use Quati in other applications, such as
 the correctness of algorithms to maintain recursive distributed database~\cite{nigam12comlan}.
 
 \bibliographystyle{plain}
