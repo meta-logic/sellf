@@ -108,11 +108,14 @@ let genFile cstrSet name =
 (* This function will return a list of models. These models are represented
 as strings which are the true predicated in the format of facts (e.g.
 "pred(a). pred(b)." *)
-let getModels cstrSet = 
+let getModels cstrSet =
   genFile cstrSet "temp";
   let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
   let rec readModel input = try match input_line input with
     | str ->
+      print_endline "============== Before parsing =================";
+      print_endline str;
+      print_endline "===============================================";
       let lexbuf = Lexing.from_string str in
       let model = Parser_models.model Lexer_models.token lexbuf in
       (Constraints.create model) :: readModel input

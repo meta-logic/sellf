@@ -18,8 +18,15 @@ open Term
 (* pairs consisting of a proof tree schema and a valid non-empty model *)
 let toPairsProofModel bipoles = List.fold_right (fun (pt, cstrlst) acc ->
   List.fold_right (fun cs acc ->
+    print_endline "==================== Finding model for ===================";
+    print_endline (Constraints.toString cs);
+    print_endline "==========================================================";
     let nonemptymodels = List.filter (fun m -> not (Constraints.isEmpty m)) (Dlv.getModels cs) in
-    (List.map (fun model -> (pt, model)) nonemptymodels) @ acc
+    (List.map (fun model -> 
+      print_endline "==================== Found ===================";
+      print_endline (Constraints.toString model);
+      print_endline "==========================================================";
+      (pt, model)) nonemptymodels) @ acc
   ) cstrlst acc
 ) bipoles []
 ;;

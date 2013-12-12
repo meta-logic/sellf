@@ -113,7 +113,7 @@ formula:
   | QST formula              { QST (CONS("$infty"),$2) }
   | FORALL formula           { FORALL ($1, 0, $2) } 
   | EXISTS formula           { EXISTS ($1, 0, $2) }
-  | ABS formula              { ABS($1, 0, $2) }
+  | ABS formula              { print_endline "parsing inserting abs >:("; ABS($1, 0, $2) }
   | formula TIMES formula    { TENSOR ($1, $3)}
   | formula PLUS formula     { ADDOR ($1, $3)}
   | formula PIPE formula     { PARR ($1, $3)}

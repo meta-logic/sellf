@@ -100,6 +100,7 @@ let parse file_name = begin
     end
 end ;;
 
+(* TODO: improve here *)
 let get_bipoles () = begin
   let formulas = !Specification.others @ !Specification.introRules in
   let bpl_lst = ref [] in

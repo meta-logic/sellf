@@ -22,6 +22,10 @@ let derive2 spec1 spec2 =
   (* TODO: add the constraint that a context should have only one formula?? *)
   let constraints = Constraints.union in1 in2 in
 
+  print_endline "====================== Initial constraints =====================";
+  print_endline (Constraints.toString constraints);
+  print_endline "================================================================";
+
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
 
@@ -29,8 +33,8 @@ let derive2 spec1 spec2 =
   List.fold_right (fun (pt1, mdl) bp ->
     (* This is a list of lists... each open leaf has a list of (proof tree *
        model) and these lists are the elements of the resulting list. *)
-    let leafDerivations2over1 = List.fold_right (fun ol acc ->
-      match (Bipole.deriveBipole ol spec2 mdl) with
+    let leafDerivations2over1 = List.fold_right (fun open_leaf acc ->
+      match (Bipole.deriveBipole open_leaf spec2 mdl) with
         | [] -> acc
         | lst -> lst :: acc
     ) (ProofTreeSchema.getOpenLeaves pt1) []
@@ -40,7 +44,6 @@ let derive2 spec1 spec2 =
     print_endline ("Leaf derivations: " ^ (string_of_int size));*)
 
     let bipoles2over1 = List.fold_right (fun leaves bipoles ->
-      flush stdout;
       let unionModels = List.fold_right (fun (proof, m) acc -> 
         Constraints.union m acc
       ) leaves (Constraints.create []) in
