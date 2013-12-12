@@ -174,7 +174,7 @@ This is illustrated by the following focused derivation that introduces the form
 }
 }
 \]
-}
+}%
 Here we need to explain a bit of our notation. We use two linear logic atomic predicates
 $\lft{\cdot}$ and $\rght{\cdot}$ that take object-level formulas as arguments.
 The former predicate specifies a formula on the left-hand side of the object
@@ -188,14 +188,15 @@ similarly for $\rght{\Gamma}$.
 The symbols $\Uparrow$ and $\Downarrow$ are part of the sequents of the focused
 system for \sell, enforcing the focusing discipline. For the derivation above,
 we use three subexponential labels $\infty$, $l$ and $r$. This is captured in
-the syntax by the sequent with three contexts: $\llfDash \lEnc \ndots{\infty}
+the syntax by the sequent with four contexts, one for each label and a context
+for formulas not marked with a subexponential: $\llfDash \lEnc \ndots{\infty}
 \lft{A_1}, \ldots \lft{A_n}  \ndots{l} \rght{B_1}, \ldots, \rght{B_m} \ndots{r}
 \cdot$ which stands for the linear logic sequent $\nquest{\infty} \lEnc,
 \nquest{l} \lft{A_1}, \ldots, \nquest{l} \lft{A_n}, \nquest{r} \rght{B_1},
 \ldots, \nquest{r} \rght{B_m}$, where $\lEnc$ is the theory encoding the
 object-level logic.
 
-Now, the interesting fact is that the derivation above is the only way of
+The interesting fact is that the derivation above is the only way of
 introducing the formula $F$ by using the focusing discipline. Notice that this
 derivation corresponds indeed to \mLJ's implication right rule: The derivation's
 conclusion is $\llfDash \lEnc \ndots{\infty} \lft{\Gamma} \ndots{l}
@@ -210,10 +211,10 @@ inference rule, in the same way as the formula $F$ corresponds to \mLJ's
 implication right rule, requires some effort. In particular, one needs
 to construct the focused derivation introducing the given formula $G$ and check whether this derivation indeed
 corresponds to the desired inference rule. This is particularly challenging as a given formula may specify 
-more than one rule. 
+more than one rule (see \cite{nigam.jlc}). 
 
 As we show in our recent work~\cite{nigam13iclp}, constructing such focused derivations is 
-much easier by using propositional theories, called Answer-Sets. These theories were used for
+much easier by using propositional theories, called Answer-Sets~\cite{gelfond90iclp}. These theories were used for
 checking which rule permutations are valid. However, one downside of this method is that it 
 yields derivations which are hardly understandable for someone that is not familiar with linear logic, 
 such as the focused derivation shown above. This is a serious limitation as it requires
@@ -349,7 +350,7 @@ but used to specify them. It is easy to check that the Logic Program (LP) $\Bscr
 has a single model (called answer-set by the logic programming community), 
 containing the formulas $\In{A \tensor B}{\Gamma^{0}_{2}}$,
 $\In{A}{\Gamma^{1}_{2}}$ and $\In{B}{\Gamma^{2}_{2}}$. There is a number of efficient 
-solvers available. For Quati we use DLV~\cite{dlv}.
+solvers available. For Quati we use DLV~\cite{leone06tcl}.
 
 In our previous work~\cite{nigam13iclp}, we discuss the advantages of representing 
 a derivation using logic specifications. In particular, we can reason over
@@ -366,7 +367,7 @@ systems in \sell.
 \subsection{Extracting a Derivation Skeleton from a Linear Logic Formula}
 \label{sec:extract}
 
-In the introduction, we briefly described that linear logic can be used as a meta-logic 
+In the Introduction, we briefly described that linear logic can be used as a meta-logic 
 to specify object-logic inference rules with a strong level of 
 adequacy~\cite{nigam10jar}. Here we will show how we can obtain the corresponding
 derivation skeleton from a linear logic formula. 
@@ -399,8 +400,8 @@ $A \tensor B$, we construct the derivation skeleton:
 \]
 where $Seq_k$ is the sequent $\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n}$ and the context variables 
 $\Gamma^{k+1}_{j}$ and $\Gamma^{k+2}_{j}$ are fresh for all $j$ that correspond to a bounded 
-subexponential and $\Gamma^{k+1}_{i} = \Gamma^{k}_{i} = \Gamma^{k+2}_{i}$ for all unbounded
-subexponentials. 
+subexponential $j$ and $\Gamma^{k+1}_{i} = \Gamma^{k}_{i} = \Gamma^{k+2}_{i}$ for all unbounded
+subexponentials $i$. 
 
 Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m}$ and $\tup{\Xi_{k+2}, \Bscr_{k+2}^1, \ldots, \Bscr_{k+2}^l}$ be the 
 sets of derivation skeletons obtained by this algorithm when using the first and second premises
@@ -427,8 +428,8 @@ premise:
  \infer{\vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n} }
  {\vdash \Gamma^{k+1}_{1}, \ldots, \Gamma^{k+1}_{n}}
 \]
-where $Seq_k = \vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n}$ and the context variables 
-and  $\Gamma^{k+1}_{i} = \Gamma^{k}_{i}$ for all unbounded
+where $Seq_k$ is the sequent $ \vdash \Gamma^{k}_{1}, \ldots, \Gamma^{k}_{n}$ and   
+$\Gamma^{k+1}_{i} = \Gamma^{k}_{i}$ for all unbounded
 subexponentials. 
 
 Let $\tup{\Xi_{k+1}, \Bscr_{k+1}^1, \ldots, \Bscr_{k+1}^m }$ be the 
@@ -488,6 +489,7 @@ F = \exists A. \exists B. [\rght{A\iimp B}^\bot \tensor \nbang{l}(\nquest{l} \lf
 Applying the algorithm described above, we obtain the following Derivation Skeleton, which is in fact the 
 derivation obtained by our implementation, thus the difference of notation; for example $rght(\cdot)$ is used for
 $\rght{\cdot}$ and $lft(\cdot)$ used for $\lft{\cdot}$:
+
 {\small
 \[
 \cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
@@ -510,11 +512,11 @@ $\rght{\cdot}$ and $lft(\cdot)$ used for $\lft{\cdot}$:
 There is just a single set of constraints attached to this generic derivation:
 \[
  \left\{\begin{array}{c}
-  \union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}, \In{rght (imp (A) (B)) }{ \Gamma_{r}^{3})}, 
+  \union{\Gamma_{ \Gamma}^{8}}{\Gamma_{ \Gamma}^{9}}{\Gamma_{ \Gamma}^{7}}, \In{rght (imp (A) (B)) }{ \Gamma_{r}^{3}}, 
   \emp{\Gamma_{ \Gamma}^{8}},\\[2pt]
   \emp{\Gamma_{ \Gamma}^{9}}, \emp{\Gamma_{r}^{4}},\elin{lft (A)}{ \Gamma_{l}^{4}},
-  \elin{rght (B)}{ \Gamma_{r}^{5})},\\[2pt]
-  \union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}},\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6})}.
+  \elin{rght (B)}{ \Gamma_{r}^{5}},\\[2pt]
+  \union{\Gamma_{l}^{3}} {\Gamma_{l}^{4}} {\Gamma_{l}^{5}},\union{\Gamma_{r}^{4}}{\Gamma_{r}^{5} } {\Gamma_{r}^{6}}.
  \end{array}\right\}
 \]
 Notice that the constraints specify that the context $\Gamma^6_r$ in the open premise 
@@ -606,7 +608,7 @@ placed to the left-hand-side of sequents, and $\Delta_s^i$ for the object logic 
 that should be placed to the right-hand-side. With these new contexts, the derivation above is rewritten 
 to the derivation below where sequents are two-sided. The meta-level formulas of the form $\rght{F}$ (respectively, 
 $\lft{F}$) are replaced by $F$ and placed to the right-hand-side (respectively, left-hand-side) of the sequent. 
-We also elide contexts that have no declaration of which formulas they have, for instance, the contexts for the 
+We also elide contexts that have no declaration of which formulas they have; for instance, the contexts for the 
 subexponential $infty$ are elided.
 
 {\small\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
