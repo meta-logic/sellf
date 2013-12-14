@@ -28,6 +28,11 @@ module OlContext = struct
     lst = List.map (fun ctx -> (ctx, [])) ctxList;
   }
   
+  (*let rec normalize f i acc =
+    match f with
+    | EXISTS(s, i', t) -> normalize (Norm.hnorm (APP(ABS(s, i', t), [CONS(s ^ (string_of_int i))])) i acc )
+    | _ -> f*)
+  
   (* This is necessary because the last formulas are DB(i) *)
   let rec getAbsLst f absLst =
     match f with
@@ -127,10 +132,6 @@ module OlContext = struct
     (List.fold_right (fun ((n, i), f) acc ->
       let correctSide = checkSide n side in
       match (n, side, f) with
-      (*| ("#",_,_) -> acc
-      | ("#lr",_,_) -> acc
-      | ("#gamma",_,_) -> acc
-      | ("#infty",_,_) -> acc*)
       | (_, "lft", []) -> 
 				if n = str_ctx && correctSide then
 				  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
@@ -177,12 +178,12 @@ module OlContext = struct
         | true ->
           match remComma (slotToTex ctx side str_ctx) with
             | "" -> begin match acc with
-              | "" -> " \\cdot " ^ acc
-              | _ -> " \\cdot \\mid " ^ acc
+              (*| "" -> " \\cdot " ^ acc*)
+              | _ -> "\\ndots{"^ str_ctx ^"} \\cdot " ^ acc
             end
             | str -> begin match acc with
-              | "" -> str ^ " " ^ acc
-              | _ -> str ^ " \\mid " ^ acc
+              (*| "" -> str ^ " " ^ acc*)
+              | _ -> acc ^ " \\ndots{"^ str_ctx ^"} " ^ str
             end
     ) str_list ""
   
@@ -234,12 +235,9 @@ module OlSequent = struct
     | [] -> NONE
     | _ -> SOME (getOnlyRule (formatForm (List.hd seq.goals)))
   
-  let toTexString seq str_list = match (getPol seq) with
-    | ASYN -> (OlContext.toTexString seq.ctx "lft" str_list)
-      ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
-    | SYNC -> (OlContext.toTexString seq.ctx "lft" str_list)
-      ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
-    
+  let toTexString seq str_list = (OlContext.toTexString seq.ctx "lft" str_list)
+				  ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
+ 
 end;;
 
 module OlProofTree = struct

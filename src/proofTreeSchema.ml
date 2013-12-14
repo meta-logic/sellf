@@ -298,7 +298,7 @@ let rec toTexString pt = match pt.rule with
   | SOME(r) ->
     let topproof = match pt.premises with
       | [] -> ""
-      | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> "\n&\n"^(toTexString el)) tl "") 
+      | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> (*"\n&\n"^*)(toTexString el)) tl "") 
     in
     (*"\\infer{"^(SequentSchema.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
     "\\cfrac{"^topproof^"}\n{"^(SequentSchema.toTexString (getConclusion pt))^"}"
