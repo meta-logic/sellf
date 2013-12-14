@@ -46,7 +46,7 @@ let derive2 spec1 spec2 =
       let models = Dlv.getModels unionModels in
       List.fold_right (fun model accBp ->
         match Constraints.isEmpty model with
-        | true -> print_endline "Empty model!!!"; bipoles
+        | true -> bipoles
           | false ->
             let pt1copy = ProofTreeSchema.copy pt1 in
             let bipole = List.fold_right (fun (leaf, _) pt ->
