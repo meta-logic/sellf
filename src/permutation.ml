@@ -46,7 +46,7 @@ let derive2 spec1 spec2 =
       let models = Dlv.getModels unionModels in
       List.fold_right (fun model accBp ->
         match Constraints.isEmpty model with
-          | true -> bipoles
+        | true -> print_endline "Empty model!!!"; bipoles
           | false ->
             let pt1copy = ProofTreeSchema.copy pt1 in
             let bipole = List.fold_right (fun (leaf, _) pt ->
@@ -61,10 +61,24 @@ let derive2 spec1 spec2 =
   ) bipoles1 []
 ;;
 
-let permute spec1 spec2 = 
-  let bipoles12 = derive2 spec1 spec2 in
-  let bipoles21 = derive2 spec2 spec1 in
-  
+let permute spec1 spec2 =
+
+  (* TODO: normalize the specifications. Do this in a more elegant way!! *)
+  let rec instantiate_ex spec constLst = match spec with
+    | Term.EXISTS(s, i, f) ->
+      let constant = Term.CONST (List.hd constLst) in
+      let newf = Norm.hnorm (Term.APP (Term.ABS (s, 1, f), [constant])) in
+      instantiate_ex newf (List.tl constLst)
+    | _ -> (spec, constLst)
+  in
+  (* We shouldn't have more than 4 existentially quantified variables... *)
+  let constLst = ["b"; "a"; "d"; "c"; "e"] in
+  let (spec1norm, rest) = instantiate_ex spec1 constLst in
+  let (spec2norm, rest2) = instantiate_ex spec2 rest in
+
+  let bipoles12 = derive2 spec1norm spec2norm in
+  let bipoles21 = derive2 spec2norm spec1norm in
+
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
   function out of this.*)
   (*print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
