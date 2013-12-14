@@ -1,4 +1,4 @@
-\documentclass[a4paper,10pt]{article}
+\documentclass{ebl}
 \usepackage[utf8]{inputenc}
 \usepackage{mycommands}
 \usepackage{myproof}
@@ -493,16 +493,16 @@ $\rght{\cdot}$ and $lft(\cdot)$ used for $\lft{\cdot}$:
 {\small
 \[
 \cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
-{\Gamma_{ \Gamma}^{8} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  :: }
+{\Gamma_{ \Gamma}^{8} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )   }
 \qquad
 \cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{6} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow }
-{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  ::  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
-{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists B \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)  :: }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  ::  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{9} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)   }}
+{\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \exists B \exists A \neg rght (imp (A) (B) )  \otimes  !^{l}  ?^{l} lft (A)  \bindnasrepma  ?^{r} rght (B)   }}
 % {\Gamma_{ \Gamma}^{6} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
 {\Gamma_{ \Gamma}^{7} ; \Gamma_{r}^{3} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow }
 \]
@@ -581,9 +581,22 @@ obtaining $\Xi_{i+1}$ and set $M_{i+1} = M \setminus \{\In{F}{\Gamma}\}$  and $i
 
 \paragraph{Example:}
 For the derivation skeleton shown in the example at the end of 
-Section~\ref{sec:extract} and using the model shown in that example, we obtain the following derivation:
+Section~\ref{sec:extract} and using the model shown in that example, we obtain the following derivation (again
+obtained from our implementation):
 
-\textbf{FIGURE MISSING}
+{\small\[\cfrac{\cfrac{\cfrac{\cfrac{\cfrac{}
+{\Gamma_{r}^{0}, imp (A) (B)  \Downarrow \neg lft (imp (A) (B) )  }
+\cfrac{\cfrac{\cfrac{\Gamma_{r}^{0}, imp (A) (B) \Uparrow }
+{\Gamma_{r}^{0}, imp (A) (B) \Uparrow  ?^{r} rght (A)  } \qquad}
+{\Gamma_{r}^{0}, imp (A) (B)  \Downarrow  ?^{r} rght (A)   }
+\cfrac{\cfrac{imp (A) (B) \Uparrow }
+{\Gamma_{r}^{0}, imp (A) (B) \Uparrow  ?^{l} lft (B)   }\qquad}
+{\Gamma_{r}^{0}, imp (A) (B) \Downarrow  ?^{l} lft (B)   }}
+{\Gamma_{r}^{0}, imp (A) (B) \Downarrow  ?^{r} rght (A)  \otimes  ?^{l} lft (B)  }}
+{\Gamma_{r}^{0}, imp (A) (B) \Downarrow \neg lft (imp (A) (B) )  \otimes  ?^{r} rght (A)  \otimes  ?^{l} lft (B)   }}
+{\Gamma_{r}^{0}, imp (A) (B) \Downarrow \exists A \neg lft (imp (A) (B) )  \otimes  ?^{r} rght (A)  \otimes  ?^{l} lft (B)   }}
+{\Gamma_{r}^{0}, imp (A) (B) \Downarrow \exists B \exists A \neg lft (imp (A) (B) )  \otimes  ?^{r} rght (A)  \otimes  ?^{l} lft (B)   }}
+{\Gamma_{r}^{0}, imp (A) (B) \Uparrow }\]}
 
 
 \paragraph{Two-sided Sequents}
