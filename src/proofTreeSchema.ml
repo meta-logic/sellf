@@ -153,7 +153,7 @@ let applyQst pt f =
   let ctx = SequentSchema.getContext conc in
   let goals = SequentSchema.getGoals conc in
   let subexp, f1 = match Term.observe f with 
-    | QST(CONS(s), f1) -> s, f1
+    | QST(CONST(s), f1) -> s, f1
     | _ -> failwith "Wrong formula in rule application."
   in
   let newctx = ContextSchema.insert ctx subexp in
@@ -252,9 +252,13 @@ let applyExists pt f =
   in
   let newctx = ContextSchema.copy ctx in
   Term.varid := !Term.varid + 1;
+  (*
   let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
   let ptr = PTR {contents = new_var} in
   let newf = Norm.hnorm (APP (ABS (s, 1, f1), [ptr])) in
+  *)  
+  let constant = CONST ((String.lowercase s)) in
+  let newf = Norm.hnorm (APP (ABS (s, 1, f1), [constant])) in
   let premise = SequentSchema.createSync newctx newf in
   let newpt = create premise in
   pt.rule <- SOME(EXISTSRULE);
@@ -282,7 +286,7 @@ let applyBang pt f =
   let conc = getConclusion pt in
   let ctx = SequentSchema.getContext conc in
   let s, f1 = match Term.observe f with
-    | BANG(CONS(s), f1) -> s, f1
+    | BANG(CONST(s), f1) -> s, f1
     | _ -> failwith "Wrong formula in rule application."
   in
   let newctx = ContextSchema.bang ctx s in

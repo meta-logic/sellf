@@ -253,18 +253,18 @@ prop:
   match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
     | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; assert false
-      (*PRED ($1, CONS($1), NEG )*)
-    | true, _ -> PRED ($1, CONS($1), NEG )
+      (*PRED ($1, CONST($1), NEG )*)
+    | true, _ -> PRED ($1, CONST($1), NEG )
     (* GR Parsing subexponentials as predicates? *)
-    | _, true -> PRED ($1, CONS($1), NEG )
+    | _, true -> PRED ($1, CONST($1), NEG )
 }
 | NAME terms {
   match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
     | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; assert false
-      (*PRED ($1, CONS($1), NEG )*)
-    | true, _ -> PRED ($1, APP(CONS($1), $2), NEG )
-    | _, true -> PRED ($1, CONS($1), NEG )
+      (*PRED ($1, CONST($1), NEG )*)
+    | true, _ -> PRED ($1, APP(CONST($1), $2), NEG )
+    | _, true -> PRED ($1, CONST($1), NEG )
 }
 
 /* VN: Predicates can also be variables. */
@@ -284,9 +284,9 @@ body:
 | LBRACKET term RBRACKET BANG body              {BANG ($2,$5)}
 | LBRACKET term RBRACKET HBANG body             {HBANG ($2,$5)}
 | LBRACKET term RBRACKET QST body               {QST ($2,$5)}
-| BANG body             { BANG (CONS("$infty"),$2) }
-| HBANG body            { HBANG (CONS("$infty"),$2) }
-| QST body              { QST (CONS("$infty"),$2) }
+| BANG body             { BANG (CONST("$infty"),$2) }
+| HBANG body            { HBANG (CONST("$infty"),$2) }
+| QST body              { QST (CONST("$infty"),$2) }
 | FORALL body           { FORALL ($1, 0, $2) } 
 | EXISTS body           { EXISTS ($1, 0, $2) } 
 | ABS body              { ABS($1, 0, $2) }
@@ -314,9 +314,9 @@ term:
   match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
     | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
       print_newline(); flush stdout; assert false
-      (*PRED ($1, CONS($1), NEG )*)
-    | true, _ -> CONS ($1)
-    | _, true -> CONS ($1)
+      (*PRED ($1, CONST($1), NEG )*)
+    | true, _ -> CONST ($1)
+    | _, true -> CONST ($1)
 }
 | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
 | INT               { INT ($1) } 

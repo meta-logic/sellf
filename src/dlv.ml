@@ -113,9 +113,6 @@ let getModels cstrSet =
   let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
   let rec readModel input = try match input_line input with
     | str ->
-      print_endline "============== Before parsing =================";
-      print_endline str;
-      print_endline "===============================================";
       let lexbuf = Lexing.from_string str in
       let model = Parser_models.model Lexer_models.token lexbuf in
       (Constraints.create model) :: readModel input

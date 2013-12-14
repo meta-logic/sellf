@@ -56,7 +56,7 @@ module OlContext = struct
     | BANG (t1, t2) -> getFormSide t1
     | NOT (t) -> getFormSide t
     | PRED (s, t, pol) -> s
-    | CONS (s) -> s
+    | CONST (s) -> s
     | _ -> "empty"
   
   let getFromOption opt = 

@@ -71,7 +71,7 @@ model:
 ;
 
 constraintPred:
-  | IN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
+  | IN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN {
     let f = deBruijn true $4 in
     Constraints.IN(f, $7) 
   }
@@ -108,12 +108,12 @@ formula:
   | LBRACKET subexp RBRACKET BANG formula   { BANG ($2,$5) }
   | LBRACKET subexp RBRACKET HBANG formula  { HBANG ($2,$5) }
   | LBRACKET subexp RBRACKET QST formula    { QST ($2,$5) }
-  | BANG formula             { BANG (CONS("$infty"),$2) }
-  | HBANG formula            { HBANG (CONS("$infty"),$2) }
-  | QST formula              { QST (CONS("$infty"),$2) }
+  | BANG formula             { BANG (CONST("$infty"),$2) }
+  | HBANG formula            { HBANG (CONST("$infty"),$2) }
+  | QST formula              { QST (CONST("$infty"),$2) }
   | FORALL formula           { FORALL ($1, 0, $2) } 
   | EXISTS formula           { EXISTS ($1, 0, $2) }
-  | ABS formula              { print_endline "parsing inserting abs >:("; ABS($1, 0, $2) }
+  | ABS formula              { ABS($1, 0, $2) }
   | formula TIMES formula    { TENSOR ($1, $3)}
   | formula PLUS formula     { ADDOR ($1, $3)}
   | formula PIPE formula     { PARR ($1, $3)}
@@ -126,8 +126,8 @@ formula:
 ;
 
 pred:
-  | NAME         { PRED ($1, CONS($1), NEG) } 
-  | NAME terms   { PRED ($1, APP(CONS($1), $2), NEG ) }
+  | NAME         { PRED ($1, CONST($1), NEG) } 
+  | NAME terms   { PRED ($1, APP(CONST($1), $2), NEG ) }
   | VAR          { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }
   | VAR terms { 
     let var_head =  VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} in
@@ -143,13 +143,13 @@ terms:
 ;
 
 term:
-  | NAME     { CONS ($1) }
+  | NAME     { CONST ($1) }
   | VAR      { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
   | STRING   { STRING ($1) }
 ;
 
 subexp:
-  | NAME { CONS ($1) }
+  | NAME { CONST ($1) }
 ;
 
 %%

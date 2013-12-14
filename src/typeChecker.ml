@@ -104,7 +104,7 @@ let rec collect_free_variables clause =
         | VAR v  when List.mem v.str freeVar || List.mem v.str bVar-> freeVar
         | VAR v  -> v.str :: freeVar
         | PRED(_, t1, _) -> collect_free_variables_aux freeVar bVar t1
-        | TOP | ONE | BOT | ZERO | CUT | DB _ | INT _ | CONS _ | STRING _ | SUSP _ -> freeVar
+        | TOP | ONE | BOT | ZERO | CUT | DB _ | INT _ | CONST _ | STRING _ | SUSP _ -> freeVar
         | EQU(_, _, t1) | PRINT(t1)  -> collect_free_variables_aux freeVar bVar t1
         | FORALL(str, _, t1) | EXISTS(str, _, t1) 
         | ABS(str, _, t1) | NEW (str, t1) -> collect_free_variables_aux freeVar (str :: bVar) t1
@@ -141,7 +141,7 @@ let deBruijn flag clause =
     | t::body -> ABS(t, 1, add_abstractions body clause)
   end in
   let freeVar = collect_free_variables clause in
-  (*let _ = List.iter print_string freeVar in*)  
+  (*let _ = List.iter print_string freeVar in*)
   let clause_abs = add_abstractions freeVar clause in
   let fVarCInit x = (match x with 
     | "$example" -> (0,0,0)
@@ -217,7 +217,7 @@ match term with
 	| STRING (x) -> ((TBASIC (TSTRING)), unifyTypes (TBASIC (TSTRING)) typ sub, env, varC)
 	(*VN: Not exhaustive yet. Waiting for a better implem. for lists*)
 	(*| LIST (x) -> ((TBASIC (TLIST(TINT))), unifyTypes (TBASIC (TLIST(TINT))) typ sub, env, varC) *)
-	| CONS (x) -> 
+	| CONST (x) -> 
       begin
        match typ with 
        | TBASIC(TSUBEX) -> 

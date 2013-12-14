@@ -37,7 +37,7 @@ let rec get_subexp_from_monopole mono =
   | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> []
   | PARR(b1,b2) | WITH(b1,b2) -> 
     List.append (get_subexp_from_monopole b1) (get_subexp_from_monopole b2)
-  | QST(CONS(sub),b2) -> [SOME(sub)]
+  | QST(CONST(sub),b2) -> [SOME(sub)]
   | FORALL(_,_,b) -> (get_subexp_from_monopole b)
   | _ -> failwith "Unexpected term in a monopole, while getting subexponentials
 from monopole."
@@ -47,7 +47,7 @@ from monopole."
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       List.append (get_subexp_prefix b1) (get_subexp_prefix b2)
-  | BANG(CONS(sub),b) -> [SOME(sub) :: (get_subexp_from_monopole b)]
+  | BANG(CONST(sub),b) -> [SOME(sub) :: (get_subexp_from_monopole b)]
   | PARR(_,_) | QST(_,_) | WITH(_,_) | FORALL(_,_,_) -> 
     [NONE :: (get_subexp_from_monopole rule)]
   | ABS(_, _, b) | EXISTS(_,_,b) -> get_subexp_prefix b
@@ -92,37 +92,37 @@ let rec get_subexp_cut cut =
     (match body with
     | TENSOR(a,b) ->       
       (match a,b with 
-      | QST(CONS(sub2),PRED("lft",_ , _)), QST(CONS(sub4),PRED("rght", _, _)) -> 
+      | QST(CONST(sub2),PRED("lft",_ , _)), QST(CONST(sub4),PRED("rght", _, _)) -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
-      | QST(CONS(sub2),PRED("mlft",_ , _)), QST(CONS(sub4),PRED("mrght", _, _)) -> 
+      | QST(CONST(sub2),PRED("mlft",_ , _)), QST(CONST(sub4),PRED("mrght", _, _)) -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
-      | QST(CONS(sub4),PRED("rght", _, _)), QST(CONS(sub2),PRED("lft",_, _))  -> 
+      | QST(CONST(sub4),PRED("rght", _, _)), QST(CONST(sub2),PRED("lft",_, _))  -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
-      | QST(CONS(sub4),PRED("mrght", _, _)), QST(CONS(sub2),PRED("mlft",_, _))  -> 
+      | QST(CONST(sub4),PRED("mrght", _, _)), QST(CONST(sub2),PRED("mlft",_, _))  -> 
           [NONE, SOME(sub2), NONE, SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), QST(CONS(sub4),PRED("rght", _, _)) -> 
+      | BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))), QST(CONST(sub4),PRED("rght", _, _)) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))), QST(CONS(sub4),PRED("mrght", _, _)) -> 
+      | BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))), QST(CONST(sub4),PRED("mrght", _, _)) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
-      | QST(CONS(sub4),PRED("rght", _, _)), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) -> 
+      | QST(CONST(sub4),PRED("rght", _, _)), BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
-      | QST(CONS(sub4),PRED("mrght", _, _)), BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))) -> 
+      | QST(CONST(sub4),PRED("mrght", _, _)), BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))) -> 
           [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
-      | QST(CONS(sub2),PRED("lft",_, _)), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) -> 
+      | QST(CONST(sub2),PRED("lft",_, _)), BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
-      | QST(CONS(sub2),PRED("mlft",_, _)), BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))) -> 
+      | QST(CONST(sub2),PRED("mlft",_, _)), BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), QST(CONS(sub2),PRED("lft",_, _)) -> 
+      | BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))), QST(CONST(sub2),PRED("lft",_, _)) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))), QST(CONS(sub2),PRED("mlft",_, _)) -> 
+      | BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))), QST(CONST(sub2),PRED("mlft",_, _)) -> 
           [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))), BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))) ->
+      | BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))), BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))), BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))) ->
+      | BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))), BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub3),QST(CONS(sub4),PRED("rght", _, _))), BANG(CONS(sub1),QST(CONS(sub2),PRED("lft",_, _))) ->
+      | BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))), BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
-      | BANG(CONS(sub3),QST(CONS(sub4),PRED("mrght", _, _))), BANG(CONS(sub1),QST(CONS(sub2),PRED("mlft",_, _))) ->
+      | BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))), BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))) ->
           [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
       | _ -> failwith "Wrong cut")
     | _ -> failwith "Wrong cut")
@@ -195,7 +195,7 @@ match rule with
   | EQU(_,_,_) | QST(_,_) | PARR(_,_) | FORALL(_,_,_) -> false
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       has_bang b1 || has_bang b2
-  | BANG(CONS(sub),b) -> true
+  | BANG(CONST(sub),b) -> true
   | ABS(_, _, b) | EXISTS(_,_,b) ->  has_bang b
   | _ -> failwith "Unexpected term in a bipole, while checking whether there is a bang."
 
@@ -204,9 +204,9 @@ match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) | PARR(b1,b2) | WITH(b1,b2) -> 
       List.append (collect_quests b1) (collect_quests b2)
-  | BANG(CONS(sub),b) -> (collect_quests b)
+  | BANG(CONST(sub),b) -> (collect_quests b)
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests b)
-  | QST(CONS(sub),b2) -> [SOME(sub)]
+  | QST(CONST(sub),b2) -> [SOME(sub)]
   | _ -> failwith "Unexpected term in a rule, while collecting quests."
 
 let rec collect_bangs rule = 
@@ -214,9 +214,9 @@ match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) | PARR(b1,b2) | WITH(b1,b2) -> 
       List.append (collect_bangs b1) (collect_bangs b2)
-  | BANG(CONS(sub),b) -> [SOME(sub)]
+  | BANG(CONST(sub),b) -> [SOME(sub)]
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_bangs b)
-  | QST(CONS(sub),b2) -> []
+  | QST(CONST(sub),b2) -> []
   | _ -> failwith "Unexpected term in a rule, while collecting bangs."
 
 
@@ -242,7 +242,7 @@ match rule with
 let rec findEquiv rule structRules = 
 let rec findQST rule = 
 match rule with 
-| QST(CONS(sub),_) -> sub
+| QST(CONST(sub),_) -> sub
 | ABS(_, _, b) | EXISTS(_,_,b) -> findQST b
 | TENSOR(b1, b2) -> findQST b2
 | _ -> failwith "Unexpected term in a rule, while extracting the QST."
@@ -317,8 +317,8 @@ let termsListToString args = List.fold_right (fun el acc ->
 let rec print_rule rule = 
 let rec replace_Log term = 
   match term with
-  | VAR _ -> CONS("_")
-  | PTR _ -> CONS("_")
+  | VAR _ -> CONST("_")
+  | PTR _ -> CONST("_")
   | APP(b1, lb2) ->  
       let t1 = replace_Log b1 in
       let lt1 = List.map (fun ele -> replace_Log ele) lb2 in 
@@ -327,16 +327,16 @@ let rec replace_Log term =
 in 
 let rec pretty_print hd = 
   match hd with
-  | APP(CONS("lft"), b) -> 
+  | APP(CONST("lft"), b) -> 
     let _ = print_string "Left Introduction rule for " in
     print_string (termsListToString b)
-  | APP(CONS("mlft"), b) -> 
+  | APP(CONST("mlft"), b) -> 
     let _ = print_string "Left Introduction rule for " in
     print_string (termsListToString b)
-  | APP(CONS("rght"), b) -> 
+  | APP(CONST("rght"), b) -> 
     let _ = print_string "Right Introduction rule for " in
     print_string (termsListToString b)
-  | APP(CONS("mrght"), b) -> 
+  | APP(CONST("mrght"), b) -> 
     let _ = print_string "Right Introduction rule for " in
     print_string (termsListToString b)
   | _ -> failwith "Unexpected term while printing the head of the rule."
@@ -409,10 +409,10 @@ match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) | PARR(b1,b2) | WITH(b1,b2) -> 
       List.append (collect_quests_aux b1 str) (collect_quests_aux b2 str)
-  | BANG(CONS(sub),b) -> (collect_quests_aux b str)
+  | BANG(CONST(sub),b) -> (collect_quests_aux b str)
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests_aux b str)
-  | QST(CONS(sub),PRED(str1,_,_)) when str = str1 -> [SOME(sub)]
-  | QST(CONS(sub),_) -> []
+  | QST(CONST(sub),PRED(str1,_,_)) when str = str1 -> [SOME(sub)]
+  | QST(CONST(sub),_) -> []
   | _ -> failwith "Unexpected term in a rule, while collecting string quests."
 in
 let all_subs_lft = 

@@ -33,6 +33,14 @@ type polarity =
 | NEG
 ;;
 
+(*
+type lambdaExp = 
+  | VAR
+  | CONST of string
+  | ABS
+  | APP
+*)
+
 (*Propositions are atoms, equalities, and logical connectives.*)
 type terms = 
 | PRED of string * terms * polarity (* G: name of the predicate (string) and head (terms) *)
@@ -60,7 +68,7 @@ type terms =
 | VAR of var
 | DB of int        (*This seems necessary for head normalization procedure.*)
 | INT of int
-| CONS of string
+| CONST of string
 | STRING of string
 (*| LIST of lists*)
 | APP of terms * terms list
@@ -85,7 +93,7 @@ and
 tag =  (*VN: Tag for variables: either an eigenvariable or a logical variable.
 The logical variable points to a term. This is used to instantiate the variable
 when performing unification.*)
-EIG | CONST  | LOG
+EIG | CST | LOG
 and 
 var = {
   str : string;
@@ -289,9 +297,9 @@ let rec list2term head args =
   | [] ->  head
   | term1 :: body -> list2term (APP(head, term1)) body
 
-(* Extracts the string from a CONS *)
+(* Extracts the string from a CONST *)
 let extract_str c = match c with
-  | CONS(str) -> str
+  | CONST(str) -> str
   | _ -> failwith "Trying to extract the string for the worng term or this case is not implemented."
 
 let rec eq t1 t2 =
@@ -322,7 +330,7 @@ let rec eq t1 t2 =
                  | Binding (t,i), Binding (tt,j) when i=j && eq t tt -> true
                  | _ -> false)
             true e ee
-    (*| CONS s1, CONS s2 -> s1 = s2*)
+    (*| CONST s1, CONST s2 -> s1 = s2*)
     | _ -> false
 
 
@@ -407,18 +415,22 @@ let get_var_by_name ~tag ~ts ~lts name =
 
 (* Same as [get_var_by_name] but infers the tag from the name and sets both
  * levels to 0. *)
+(*
 let atom name =
   let tag = match name.[0] with
     | 'A'..'Z' -> LOG
     | _ -> CONST
   in
     get_var_by_name ~ts:0 ~lts:0 ~tag name
-
+*)
+(*
 let get_var x = match observe x with
   | VAR v -> v
   | _ -> assert false
+*)
 
 (** Raise Not_found if not naming hint is attached to the variable. *)
+(*
 let get_hint v =
   let v = get_var v in
   try
@@ -430,9 +442,11 @@ let get_hint v =
           | EIG -> "h"
           | CONST -> "c"
         end
+*)
 
 (** Find an unique name for [v] (based on a naming hint if there is one)
   * and registers it in the symbols table. *)
+(*
 let get_name var =
   let var = deref var in
   let existing_name =
@@ -465,13 +479,15 @@ let get_name var =
               end
           in
             lookup (-1)
+*)
 
-let dummy = let n = -1 in PTR(ref(V {str="_"; id=n;ts=n;lts=n;tag=CONST }))
+(*let dummy = let n = -1 in PTR(ref(V {str="_"; id=n;ts=n;lts=n;tag=CONST }))*)
 
 (** [get_dummy_name prefix] finds a free name starting with [prefix] and
   * registers it. If [start] is not provided, the attempted suffixes will be
   * "", "0", "1", etc. If it is provided it will be used as the first suffix to
   * try. *)
+(*
 let get_dummy_name ?(start=(-1)) prefix =
   let rec lookup suffix =
     let name =
@@ -485,8 +501,9 @@ let get_dummy_name ?(start=(-1)) prefix =
       end
   in
     lookup start
-
+*)
 (** List of [n] new dummy names, most recent first. *)
+(*
 let get_dummy_names ?(start=(-1)) n prefix =
   let rec aux i =
     if i=0 then [] else
@@ -494,12 +511,15 @@ let get_dummy_names ?(start=(-1)) n prefix =
         (get_dummy_name ~start prefix)::tl
   in
     List.rev (aux n)
+*)
 
+(*
 let is_free name =
   not (NS.mem name !symbols)
 
 let free n =
   symbols := NS.remove n !symbols
+*)
 
 (** {1 Copying} *)
 
@@ -529,7 +549,7 @@ let copy_eigen () =
     | PLUS (t1,t2) -> PLUS (cp t1, cp t2)
     | STRING (t1) -> STRING (t1)
     | INT (t1) -> INT (t1)
-    | CONS (t1) -> CONS (t1)
+    | CONST (t1) -> CONST (t1)
     (*| LIST (t1) -> LIST(t1)*)
     (*| NB i*) | DB i as x -> x
     | SUSP _ | PTR _ -> assert false
@@ -539,9 +559,13 @@ let copy_eigen () =
 
 (** {1 Convenience} *)
 
+(*
 let string text = get_var_by_name ~tag:CONST ~lts:0 ~ts:0 text
+*)
 
+(*
 let binop s a b = APP ((atom s),[a;b])
+*)
 
 let db n = DB n
 
@@ -579,6 +603,7 @@ let div l = match l with
   in
     nb [] x*)
 
+(*
 module Notations =
 struct
   let (%=) = eq
@@ -586,7 +611,12 @@ struct
   let (//) = lambda
   let (^^) = app
 end
+*)
 
+(*
 let fresh_name name =
   let v = fresh ~name:name CONST ~lts:0 ~ts:0 in
   get_name v
+*)
+
+

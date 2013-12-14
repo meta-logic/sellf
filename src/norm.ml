@@ -45,7 +45,7 @@ let rec hnorm term =
   match Term.observe term with
     | Term.VAR _
     (*| Term.NB _*)
-    | Term.CONS _
+    | Term.CONST _
     (*| Term.LIST _*)
     | Term.STRING _
     | Term.INT _ | Term.TOP | Term.ONE | Term.BOT | Term.ZERO | Term.CUT
@@ -90,7 +90,7 @@ let rec hnorm term =
         let t = hnorm t in
           begin match Term.observe t with
             (*| Term.NB _ *)
-            | Term.CONS _ (*| Term.LIST _*) | Term.STRING _ | Term.INT _ 
+            | Term.CONST _ (*| Term.LIST _*) | Term.STRING _ | Term.INT _ 
             | Term.TOP | Term.ONE | Term.BOT | Term.ZERO | Term.VAR _  | Term.CUT -> t
             | Term.DB i ->
                 if i > ol then
@@ -147,7 +147,7 @@ let rec deep_norm t =
   let t = hnorm t in
     match Term.observe t with
       (*| Term.NB _ *)
-      | Term.CONS _
+      | Term.CONST _
       (*| Term.LIST _*)
       | Term.STRING _
       | Term.INT _ | Term.ONE | Term.TOP | Term.BOT | Term.ZERO | Term.CUT

@@ -45,7 +45,6 @@ let isEmpty cst = (List.length cst.lst) == 0
 
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
-  print_endline ("********* Creating in constraint with: " ^ (Prints.termToString f));
   create [IN(f, (subexp, index))]
 
 let requireIn f subexp ctx =
@@ -110,13 +109,9 @@ let initial ctx f =
   (* Suppose the dual of f is in s, generates all the constraints *)
   let isHere (sub, i) dualf = 
     let c1 = match type_of sub with
-    | LIN | AFF -> 
-      print_endline ("********* Creating (initial) elin constraint with: " ^ (Prints.termToString dualf));
-      ELIN(dualf, (sub, i))
+    | LIN | AFF -> ELIN(dualf, (sub, i))
     (*| UNB | REL -> MCTX(dualf, (sub, i))*)
-    | UNB | REL -> 
-      print_endline ("********* Creating (initial) in constraint with: " ^ (Prints.termToString dualf));
-      IN(dualf, (sub, i))
+    | UNB | REL -> IN(dualf, (sub, i))
     in
     let empty = List.fold_right (fun (s, i) acc ->
       if s != sub then begin match type_of s with

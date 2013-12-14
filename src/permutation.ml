@@ -22,10 +22,6 @@ let derive2 spec1 spec2 =
   (* TODO: add the constraint that a context should have only one formula?? *)
   let constraints = Constraints.union in1 in2 in
 
-  print_endline "====================== Initial constraints =====================";
-  print_endline (Constraints.toString constraints);
-  print_endline "================================================================";
-
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
 

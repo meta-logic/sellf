@@ -83,9 +83,9 @@ let addRSpec str t = try match Hashtbl.find lr_hash str with
   with Not_found -> Hashtbl.add lr_hash str (ZERO, t)
 
 let getFirstArgName p = match p with
-  | APP(CONS(n), lst) -> begin match lst with
-    | CONS(s) :: t -> s
-    | APP(CONS(s), _) :: t -> s
+  | APP(CONST(n), lst) -> begin match lst with
+    | CONST(s) :: t -> s
+    | APP(CONST(s), _) :: t -> s
     | _ -> failwith "Error while getting the name of a connective. Are you sure
     this is a introduction rule specification?"
   end

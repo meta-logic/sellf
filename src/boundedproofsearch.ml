@@ -146,7 +146,7 @@ let rec prove formula h suc fail =
         Sequent.setContextOut (ProofTree.getConclusion prooftree) ctx;
         suc ()
 
-      | BANG(CONS(s), f1) ->
+      | BANG(CONST(s), f1) ->
         let pt = ProofTree.applyBang prooftree f in
         proofSearch pt height (fun () ->
           (* Changes the output context if bang returns successfully *)
@@ -298,7 +298,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       match Term.observe s with
-        | CONS(sub) ->
+        | CONST(sub) ->
           let newctx = Context.add ctxin f sub in
           let sq = Sequent.create newctx ctxout goals ASYN in
           prove_asyn (ProofTree.update proof sq) h (fun () ->
@@ -347,7 +347,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end;
       varid := !varid + 1;
       let string_sub = "NSUBEXP"^(string_of_int !varid) in
-      let new_cons = CONS string_sub in
+      let new_cons = CONST string_sub in
       let newf = Norm.hnorm (APP (ABS (s, 1, t1), [new_cons])) in
       new_subexp string_sub;
       goals := newf :: t;
@@ -397,13 +397,13 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       begin
         match (Norm.hnorm (APP( (Term.observe head), arg1))) with
         | f -> (match f with 
-          | CONS(str) ->
-            let p = (PRED (str, CONS(str), NEG)) in
+          | CONST(str) ->
+            let p = (PRED (str, CONST(str), NEG)) in
             let newctx = Context.add ctxin p "$gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
             prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
-          | APP(CONS(str3), arg2) ->
-            let p = (PRED(str3, APP(CONS(str3), arg2), NEG)) in
+          | APP(CONST(str3), arg2) ->
+            let p = (PRED(str3, APP(CONST(str3), arg2), NEG)) in
             let newctx = Context.add ctxin p "$gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
             prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
@@ -440,7 +440,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Context.toString ctxin);
       end;
       match Term.observe sub with
-        | CONS(s) -> 
+        | CONST(s) -> 
           let sq = Sequent.create ctxin ctxout [goal] ASYN in
           prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
         | _ -> failwith "Unitialized subexponential while solving lolli."
@@ -570,7 +570,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
           print_endline (Context.toString ctxin);
         end;
         match Term.observe sub with
-        | CONS(s) -> 
+        | CONST(s) -> 
           let newctxin = Context.bangin ctxin s in
           let sq = Sequent.create newctxin ctxout [f] ASYN in
           prove_asyn (ProofTree.update proof sq) h ( fun () ->
@@ -595,7 +595,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Prints.termToString (Term.observe goal));
       end;
       match Term.observe sub with
-        | CONS (s) -> ( try match Hashtbl.find !context s with
+        | CONST (s) -> ( try match Hashtbl.find !context s with
           | [] -> 
             if !verbose then print_endline ("Solved hbang "^s^".\n"); 
             goals := f :: t; 
@@ -668,12 +668,12 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | APP(head, arg1) -> 
       begin
         match (Norm.hnorm (APP(head, arg1))) with
-        | CONS(str) -> 
-          let p = (PRED (str, CONS(str), NEG)) in
+        | CONST(str) -> 
+          let p = (PRED (str, CONST(str), NEG)) in
           let sq = Sequent.create ctxin ctxout [p] SYNC in
           prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
-        | APP(CONS(str3), arg2) -> 
-          let p = (PRED (str3, APP(CONS(str3), arg2), NEG)) in 
+        | APP(CONST(str3), arg2) -> 
+          let p = (PRED (str3, APP(CONST(str3), arg2), NEG)) in 
           let sq = Sequent.create ctxin ctxout [p] SYNC in
           prove_sync (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
         | _ -> failwith "Error while normalizing lambda term."

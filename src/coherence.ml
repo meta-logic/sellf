@@ -36,8 +36,8 @@ let checkInitCoher str (t1, t2) =
   (* Put axiom formulas on the context *)
   Context.createInitialCoherenceContext ();
   
-  let bt1 = QST(CONS("$infty"), t1) in
-  let bt2 = QST(CONS("$infty"), t2) in
+  let bt1 = QST(CONST("$infty"), t1) in
+  let bt2 = QST(CONST("$infty"), t2) in
   (* print_endline "Proving initial coherence of:";
   print_endline (termToString bt1);
   print_endline (termToString bt2); *)

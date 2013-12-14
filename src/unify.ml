@@ -45,7 +45,7 @@ open Term
 (*let (isLeft, isRight) = (P.instantiatable = EIG, P.instantiatable = LOG)*)
 
 let constant tag =
-  tag = Term.CONST || tag = constant_like
+  tag = Term.CST || tag = constant_like
 let variable tag =
   tag = instantiatable
 let fresh = fresh instantiatable
@@ -123,7 +123,7 @@ let can_bind v t =
       | ABS (_, n', t) -> aux (n+n') t
       | APP (h, ts) ->
           aux n h && List.for_all (aux n) (List.map Norm.hnorm ts)
-      | SUSP _ | PTR _ | DIV _ | TIMES _ | MINUS _ | PLUS _ (*| LIST _*) | STRING _ | CONS _ | INT _-> assert false
+      | SUSP _ | PTR _ | DIV _ | TIMES _ | MINUS _ | PLUS _ (*| LIST _*) | STRING _ | CONST _ | INT _-> assert false
       | _ -> failwith "Not expected term in function 'can_bind', unify.ml"
   in
     aux 0 t
@@ -439,7 +439,7 @@ let makesubst h1 t2 a1 =
             let j = nbindex i a1 n in
               if j = 0 then raise OccursCheck ;
               Term.db (j+lev)*)
-      | Term.CONS _ ->  c
+      | Term.CONST _ ->  c
       | Term.STRING _ ->  c
       | Term.INT _ | ONE | TOP | CUT ->  c
       | Term.DB i ->
@@ -464,7 +464,7 @@ let makesubst h1 t2 a1 =
                 Term.app
                   (nested_subst h2 lev)
                   (List.map (fun x -> nested_subst (Norm.hnorm x) lev) a2)
-            | Term.DB _ (* | Term.NB _*) | CONS _ ->
+            | Term.DB _ (* | Term.NB _*) | CONST _ ->
                 Term.app
                   (nested_subst h2 lev)
                   (List.map (fun x -> nested_subst (Norm.hnorm x) lev) a2)
@@ -567,7 +567,7 @@ let makesubst h1 t2 a1 =
                   else
                     raise TypesMismatch
             | Term.APP _ | Term.ABS _
-            | Term.VAR _ | Term.DB _ (*| Term.NB _*) | CONS _ ->
+            | Term.VAR _ | Term.DB _ (*| Term.NB _*) | CONST _ ->
                 Term.lambda (n+lev) (nested_subst t2 lev)
             | Term.SUSP _ | Term.PTR _ -> assert false
             | STRING _ | INT _ -> assert false (*VN: The following cannot appear in the head of applications.*)
@@ -709,7 +709,7 @@ and unify_app_term h1 a1 t1 t2 = match Term.observe h1,Term.observe t2 with
   | _, Term.VAR {tag=t}
   | Term.VAR {tag=t}, _ when not (variable t || constant t) ->
       failwith "logic variable on the left"
-  | Term.CONS(head1), Term.APP(h, a2) when h = h1 -> unify_list a1 a2
+  | Term.CONST(head1), Term.APP(h, a2) when h = h1 -> unify_list a1 a2
   | _ -> raise (ConstClash (h1,t2))
 
 (** The main unification procedure.
@@ -771,7 +771,7 @@ and unify t1 t2 = match Term.observe t1,Term.observe t2 with
   | Term.MINUS (a1,b1), Term.MINUS (a2,b2)  -> unify_list [a1;b1] [a2;b2]
   | Term.TIMES (a1,b1), Term.TIMES (a2,b2)  -> unify_list [a1;b1] [a2;b2]
   | Term.DIV (a1,b1), Term.DIV (a2,b2)  -> unify_list [a1;b1] [a2;b2]
-  | Term.CONS(c1), CONS(c2)  -> if c1 = c2 then () else failwith "ERROR: Unifying different constants."
+  | Term.CONST(c1), CONST(c2)  -> if c1 = c2 then () else failwith "ERROR: Unifying different constants."
   | Term.STRING(c1), STRING(c2)  -> if c1 = c2 then () else failwith "ERROR: Unifying different constants."
   | Term.INT(c1), INT(c2)  -> if c1 = c2 then () else failwith "ERROR: Unifying different constants."
   (*| Term.NB n,_                        -> unify_nv_term n t1 t2*)

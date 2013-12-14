@@ -11,7 +11,7 @@
 }
 
 let cstName = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']*
-let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+let varName = ['A' - 'Z']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let index = ['0' - '9']+
 
 rule token = parse
@@ -56,3 +56,4 @@ rule token = parse
   | '\n'                  { NEWLINE }
   | cstName as cn  { NAME(cn) }
   | eof          { raise End_of_file }
+
