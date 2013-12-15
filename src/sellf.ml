@@ -379,6 +379,17 @@ match (!check, !fileName, !rule1, !rule2) with
     while true do
       start ()
     done
+  (* Load file from the command line *)
+  | ("", file, _, _) ->
+    initAll();
+    if parse file then begin
+      print_endline "SELLF -- A linear logic framework for systems with locations.";
+      print_endline "Version 0.5.\n";
+      print_endline ("The file: " ^ file ^ " was loaded.\n");
+      while true do
+	solve_query ()
+      done
+    end
   (* Running in batch mode *)
   | ("principalcut", file, _, _) -> 
     initAll ();
