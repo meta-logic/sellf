@@ -13,6 +13,10 @@ subexp cr lin.
 subexprel r < cr.
 subexprel cr < l.
 
+subexpctx l many lft.
+subexpctx r single rght.
+subexpctx cr single rght.
+
 rules introduction.
 % Conjunction
 (not (lft (and A B))) * ([l]? (lft A)) | ([l]? (lft B)).

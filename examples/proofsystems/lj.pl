@@ -8,12 +8,13 @@
 
 subexp r lin.
 
-subexpctx r unit rght.
+subexpctx r single rght.
+subexpctx l many lft.
 
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) * (([r]? (rght A)) * (? (lft B))).
+(not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * (? (lft B))).
 (not (rght (imp A B))) *  ((? (lft A)) | ([r]? (rght B))).
 
 % Conjunction

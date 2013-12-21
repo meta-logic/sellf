@@ -11,6 +11,9 @@ subexp r lin.
 
 subexprel r < l.
 
+subexpctx l many lft.
+subexpctx r single rght.
+
 rules introduction.
 
 % Implication

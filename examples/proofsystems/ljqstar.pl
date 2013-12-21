@@ -12,6 +12,10 @@ subexp f lin.
 
 subexprel r < l.
 
+subexpctx l many lft.
+subexpctx r many rght.
+subexpctx f single both.
+
 rules axiom.
 % Init
 sigma \A ((not (lft A)) * (not (rght A))).

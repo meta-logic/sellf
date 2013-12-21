@@ -3,6 +3,8 @@
 rules introduction.
 subexp r lin.
 
+%VN: Not sure which system is this and therefore did not add the subexpctx relations.
+
 % Implication
 (not (lft  (imp A B))) * ((bang ([r]? (rght A))) *  (? (lft B))).
 (not (rght (imp A B))) * (bang ((? (lft A)) | ([r]? (rght B)))).

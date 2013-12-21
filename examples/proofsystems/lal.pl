@@ -38,6 +38,20 @@ subexprel h2 < k2.
 subexprel k1 < gl.
 subexprel k2 < gl.
 
+subexpctx l many lft.
+subexpctx ll many lft.
+subexpctx gl many lft.
+subexpctx k1 many lft.
+subexpctx k2 many lft.
+subexpctx h1 many lft.
+subexpctx h2 many lft.
+subexpctx s1L many lft.
+subexpctx s2L many lft.
+
+subexpctx r single rght.
+subexpctx s1R single rght.
+subexpctx s2R single rght.
+
 rules introduction.
 % Tensor
 (not (lft (ten A B))) * ([l]? (lft A)) | ([l]? (lft B)).

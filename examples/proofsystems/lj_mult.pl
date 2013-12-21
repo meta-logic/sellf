@@ -10,7 +10,7 @@
 subexp r lin.
 subexp l lin.
 
-subexpctx r unit rght.
+subexpctx r single rght.
 subexpctx l many lft.
 
 rules introduction.
