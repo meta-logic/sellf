@@ -17,7 +17,7 @@ let instring = [^'"'] *
 let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
-let ctxtype = "many"  |  "unit"
+let ctxtype = "many"  |  "single"
 
 rule token = parse 
 
