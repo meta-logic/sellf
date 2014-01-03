@@ -219,6 +219,22 @@ let permute formulas i1 i2 = match Permutation.permute (List.nth formulas i1) (L
     close_out file;
 ;;
 
+(* permute_bin: Returns "1" if the rules permute and "0" otherwise *)
+let permute_bin n1 n2 = 
+  let formulas = !Specification.others @ !Specification.introRules in
+  let rulesList = get_rulenames () in
+  let i1 = get_form_index n1 rulesList in
+  let i2 = get_form_index n2 rulesList in 
+  match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with 
+    (* If the first list is empty, no bipoles could be constructed. *)
+    | ([], _) -> print_endline "0"
+    (* Else if there are no failures the second list should be empty. *)
+    | (pairs, []) -> print_endline "1";
+    (* Else, some permutation was not possible. *)
+    | (_, bipoles) -> print_endline "0";
+;;
+
+
 (* Command line #permute *)
 let permute_cl n1 n2 = 
   let formulas = !Specification.others @ !Specification.introRules in
@@ -415,6 +431,9 @@ match (!check, !fileName, !rule1, !rule2) with
   | ("rulenames", file, _, _) ->
     initAll ();
     if parse file then print_rulenames ()
+  | ("permutebin", file, r1, r2) ->
+    initAll ();
+    if parse file then permute_bin r1 r2
   | (x, y, _, _) -> failwith ("Invalid arguments.")
 ;;
 
