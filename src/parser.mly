@@ -175,7 +175,7 @@ clause:
 /* Define the context type */
 | SUBEXCTX NAME CTXTYPE NAME DOT {
   match (Subexponentials.isSubexponentialDeclared $2) with
-    | true -> if ($3 = "unit") || ($3 = "many") || ($3 = "none") then
+    | true -> if ($3 = "single") || ($3 = "many") || ($3 = "none") then
       begin
 				if ($4 = "lft") || ($4 = "rght") || ($4 = "rghtlft") || (($3 = "none") && ($4 = "")) then
 				  begin

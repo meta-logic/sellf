@@ -1,0 +1,220 @@
+#!/bin/bash
+
+echo "------------------ Testing LL ------------------------";
+echo "------------------ CASE TENSOR LEFT ------------------------";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 tensor_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 tensor_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lolli_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lolli_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 oplus_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 oplus_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 with_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 with_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 par_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 par_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lbang_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lbang_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lquest_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lquest_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lone_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lone_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lbot_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_lft -r2 lbot_lft
+echo "Expected NO";
+
+echo "------------------ CASE TENSOR RIGHT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 tensor_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 tensor_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lolli_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lolli_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 oplus_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 oplus_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 with_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 with_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 par_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 par_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lbang_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lbang_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lquest_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lquest_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lone_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lone_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lbot_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 tensor_rght -r2 lbot_lft
+echo "Expected NO";
+
+echo "------------------ CASE PLUS RIGHT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 tensor_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 tensor_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lolli_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lolli_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 oplus_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 oplus_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 with_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 with_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 par_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 par_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lbang_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lbang_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lquest_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lquest_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lone_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lone_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lbot_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 oplus_rght -r2 lbot_lft
+echo "Expected NO";
+
+echo "------------------ CASE WITH RIGHT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 tensor_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 tensor_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lolli_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lolli_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 oplus_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 oplus_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 with_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 with_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 par_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 par_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lbang_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lbang_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lquest_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lquest_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lone_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lone_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lbot_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 with_rght -r2 lbot_lft
+echo "Expected NO";
+
+echo "------------------ Testing LJ ------------------------";
+
+echo "------------------ CASE IMP LEFT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 imp_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 imp_rght
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 and_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 and_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 or_lft
+echo "Expected NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_lft -r2 or_rght
+echo "Expected YES";
+
+echo "------------------ CASE IMP RIGHT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 imp_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 imp_rght
+echo "Expected NOT EXISTENT";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 and_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 and_rght
+echo "Expected NOT EXISTENT";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 or_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 imp_rght -r2 or_rght
+echo "Expected NOT EXISTENT";
+
+echo "------------------ CASE AND LEFT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 imp_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 imp_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 and_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 and_rght
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 or_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_lft -r2 or_rght
+echo "Expected YES";
+
+echo "------------------ CASE AND RIGHT ------------------------";
+
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 imp_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 imp_rght
+echo "Expected NOT EXISTENT";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 and_lft
+echo "Expected YES";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 and_rght
+echo "Expected NOT EXISTENT";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 or_lft
+echo "Expected YES/NO";
+./sellf -i ../examples/proofsystems/ll -c permutebin -r1 and_rght -r2 or_rght
+echo "Expected NOT EXISTENT";
+
