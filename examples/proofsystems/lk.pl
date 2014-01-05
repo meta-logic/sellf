@@ -21,12 +21,12 @@ rules introduction.
 (not (rght (or A B))) * ((? (rght A)) + (? (rght B))).
 
 % Forall
-(not (lft (forall A))) * (sigma \X (? (lft (A X)))).
-(not (rght (forall A))) *  (pi \X (? (rght (A X)))).
+%(not (lft (forall A))) * (sigma \X (? (lft (A X)))).
+%(not (rght (forall A))) *  (pi \X (? (rght (A X)))).
 
 % Exists
-(not (lft (exists A))) * (pi \X (? (lft (A X)))).
-(not (rght (exists A))) * (sigma \X (? (rght (A X)))).
+%(not (lft (exists A))) * (pi \X (? (lft (A X)))).
+%(not (rght (exists A))) * (sigma \X (? (rght (A X)))).
 
 % False
 (not (lft false)) * top.

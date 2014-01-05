@@ -7,6 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp r lin.
+subexp l unb.
 
 subexpctx r single rght.
 subexpctx l many lft.
@@ -14,24 +15,24 @@ subexpctx l many lft.
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * (? (lft B))).
-(not (rght (imp A B))) *  ((? (lft A)) | ([r]? (rght B))).
+(not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
+(not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
-(not (lft (and A B))) * ((? (lft A)) + (? (lft B))).
+(not (lft (and A B))) * (([l]? (lft A)) + ([l]? (lft B))).
 (not (rght (and A B))) * (([r]? (rght A)) & ([r]? (rght B))).
 
 % Disjunction
-(not (lft (or A B))) * ((? (lft A)) & (? (lft B))).
+(not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
 (not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
 
 % Forall
-(not (lft (forall A))) * (sigma \X (? (lft (A X)))).
-(not (rght (forall A))) *  (pi \X ([r]? (rght (A X)))).
+%(not (lft (forall A))) * (sigma \X ([l]? (lft (A X)))).
+%(not (rght (forall A))) *  (pi \X ([r]? (rght (A X)))).
 
 % Exists
-(not (lft (exists A))) * (pi \X (? (lft (A X)))).
-(not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
+%(not (lft (exists A))) * (pi \X ([l]? (lft (A X)))).
+%(not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
 
 % False
 (not (lft false)) * top.
@@ -43,4 +44,4 @@ rules axiom.
 ((not (lft A)) * (not (rght A))).
 
 rules cut.
-(([r]? (rght A)) * (? (lft A))).
+(([r]? (rght A)) * ([l]? (lft A))).

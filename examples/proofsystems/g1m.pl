@@ -29,12 +29,12 @@ rules introduction.
 (not (rght (or A B))) * ([l]bang ([r]? (rght A))) + ([l]bang ([r]? (rght B))).
 
 % Forall
-(not (lft (forall A))) * sigma \X ([l]? (lft (A X))).
-(not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
+%(not (lft (forall A))) * sigma \X ([l]? (lft (A X))).
+%(not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
 
 % Exists
-(not (lft (exists A))) * pi \X ([l]? (lft (A X))).
-(not (rght (exists A))) * sigma \X ([l]bang ([r]? (rght (A X)))).
+%(not (lft (exists A))) * pi \X ([l]? (lft (A X))).
+%(not (rght (exists A))) * sigma \X ([l]bang ([r]? (rght (A X)))).
 
 rules axiom.
 ((not (lft A)) * (not (rght A))).
