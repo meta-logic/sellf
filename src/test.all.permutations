@@ -377,7 +377,7 @@ echo "------------------ Testing LJ ------------------------";
 # echo "------------------ CASE IMP LEFT ------------------------";
 echo "IMP LEFT over IMP LEFT";
 ./sellf -i ../examples/proofsystems/lj -c permutebin -r1 imp_lft -r2 imp_lft
-echo "Expected NO";
+echo "Expected YES";
 echo ""
 
 echo "IMP LEFT over IMP RIGHT";
