@@ -7,6 +7,8 @@
 (*                                    *)
 (**************************************)
 
+open Term
+
 type subexp = 
 | UNB (* unbounded: contraction and weakening *)
 | AFF (* affine: weakening *)
@@ -16,7 +18,7 @@ type subexp =
 (* Hashtable with subexponentials' types ($gamma is the linear context and
  * $infty holds specifications) 
  *)
-let typeTbl = Hashtbl.create 100 ;;
+let typeTbl = Hashtbl.create 100 ;;  
 
 (* Hashtable with subexponentials' parcial order *)
 (* Each subexponential holds those which are greater than it. *)
@@ -26,6 +28,9 @@ let orderTbl : (string, string) Hashtbl.t = Hashtbl.create 100 ;;
 (* Context type: (formulas description, side) *)
 type ctxType = (string * string) ;;
 let ctxTbl : (string, ctxType) Hashtbl.t = Hashtbl.create 100 ;;
+
+let getCtxType n = try SOME(Hashtbl.find ctxTbl n) with Not_found -> NONE
+
 
 let addType s t = Hashtbl.add typeTbl s t ;;
 

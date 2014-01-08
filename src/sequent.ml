@@ -5,15 +5,6 @@
 open Term
 open Prints
 
-type phase = 
-  | ASYN
-  | SYNC
-
-let print_phase p = match p with
-  | ASYN -> print_string "asyn"
-  | SYNC -> print_string "sync"
-;;
-
 module Sequent = struct
 
   type sequent = {

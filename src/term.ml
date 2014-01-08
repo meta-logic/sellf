@@ -9,6 +9,12 @@ let psBound = ref 10 ;;
 
 type 'a option = NONE | SOME of 'a
 
+  let getFromOption opt = 
+    match opt with
+    | SOME(x) -> x
+    | NONE -> raise (Invalid_argument "Option.get")
+
+
 (* Each logical variable is identified by this number. 
  * A new logical variable should increment one in this identifier. *)
 let varid = ref 0 ;;
@@ -32,6 +38,18 @@ type polarity =
 | POS
 | NEG
 ;;
+
+(* TODO: Think of a better place to put the type phase defined below. *)
+
+type phase = 
+  | ASYN
+  | SYNC
+
+let print_phase p = match p with
+  | ASYN -> print_string "asyn"
+  | SYNC -> print_string "sync"
+;;
+
 
 (*
 type lambdaExp = 

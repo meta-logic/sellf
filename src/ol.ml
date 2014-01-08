@@ -7,6 +7,8 @@
 (*                                                  *)
 (****************************************************)
 
+(* Suggestion: Change the name of these modules to viewer as in the Model-Viewer-Controller design pattern. *)
+
 open Llrules
 open Prints
 open Term
@@ -16,8 +18,24 @@ open Constraints
 open Sequent
 open Subexponentials
 
-module OlContext = struct
-  
+module type OlContext =
+  sig
+    
+    type ctx = (string * int) * Term.terms list
+    type context = { mutable lst : ctx list  }
+    val create : ((string * int) list) -> context
+    val getFormSide : Term.terms -> string
+    val remDolar : string -> string
+    val getStrings : context -> string list
+    val checkSide : string -> string -> bool
+    val toStringForms : (Term.terms list) -> string -> string
+    val toTexString : context -> string -> (string list) -> string 
+    val fixContext : string * int -> (string * int)
+
+  end
+
+module OlContext : OlContext = struct
+
   type ctx = (string * int) * Term.terms list
   
   type context = {
@@ -63,14 +81,11 @@ module OlContext = struct
     | PRED (s, t, pol) -> s
     | CONST (s) -> s
     | _ -> "empty"
-  
-  let getFromOption opt = 
-    match opt with
-    | SOME(x) -> x
-    | NONE -> raise (Invalid_argument "Option.get")
-    
+      
   let remComma str = 
     try String.sub str 0 ((String.length str)-2) with Invalid_argument("String.sub") -> str
+  
+(* TODO: Merge next two function as one   *)
   
   let remNumberSign str = 
     if (String.get str 0) = '#' then 
@@ -93,16 +108,15 @@ module OlContext = struct
 	    else if (String.get n 0) = '$' then (remDolar n) :: acc
 	      else n :: acc
     ) ctx.lst []
-    
-
-  let getCtxType n = try SOME(Hashtbl.find Subexponentials.ctxTbl n) with Not_found -> NONE
-    
+  
   let checkSide n side =
     let ctxType = getCtxType n in
     match ctxType with 
     | SOME(tuple) -> let side' = snd(tuple) in
       (side' = side) || (side' = "rghtlft")
     | NONE -> false
+
+(*TODO: Merge the following two function. Suggestion to include the first as auxiliary for the second.*)        
     
   let checkFormSide f n = 
     let ctxType = getCtxType n in
@@ -119,8 +133,8 @@ module OlContext = struct
       ) formList
     | NONE -> ()
     
-  let getFormString f side = 
-    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) f in
+  let toStringForms fs side = 
+    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) fs in
     (List.fold_right (fun (form, absLst) acc' ->
       if ((getFormSide form) = side) then (termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
       else acc'
@@ -141,7 +155,7 @@ module OlContext = struct
 				  begin
 				    checkFormSide f' n;
 				    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (getFormString f' "lft") ^ acc
+				    initialString ^ (toStringForms f' "lft") ^ acc
 				  end
 				else acc
       | (_, "rght", []) -> 
@@ -153,7 +167,7 @@ module OlContext = struct
 				  begin
 				    checkFormSide f' n;
 				    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (getFormString f' "rght") ^ acc
+				    initialString ^ (toStringForms f' "rght") ^ acc
 				  end
 				else acc
       | (_, _, _) -> acc
@@ -163,11 +177,11 @@ module OlContext = struct
       match (n, side, f) with
       | (_, "lft", f') -> 
 				if n = "#" ^ (remDolar str_ctx) then
-				  (getFormString f' "lft") ^ acc
+				  (toStringForms f' "lft") ^ acc
 				else acc
       | (_, "rght", f') -> 
       	if n = "#" ^ (remDolar str_ctx) then
-	        (getFormString f' "rght") ^ acc
+	        (toStringForms f' "rght") ^ acc
 	      else acc
       | (_, _, _) -> acc
     ) ctx.lst "") in
@@ -194,7 +208,25 @@ module OlContext = struct
   
 end;;
 
-module OlSequent = struct
+module type OlSequent =
+  sig
+
+    type sequent = {
+      mutable ctx : OlContext.context;
+      goals : terms list;
+      mutable pol : phase }
+  
+    val create : OlContext.context -> Term.terms list -> Term.phase -> sequent 
+    val getContext : sequent -> OlContext.context
+    val getMainForm : sequent -> (Term.terms option)
+    val toTexString : sequent -> string list -> string 
+    val getOnlyRule : Term.terms -> Term.terms
+    val formatForm : Term.terms -> Term.terms
+  
+  end
+
+
+module OlSequent : OlSequent = struct
   
   type sequent = {
     mutable ctx : OlContext.context;
@@ -240,7 +272,25 @@ module OlSequent = struct
  
 end;;
 
-module OlProofTree = struct
+module type OlProofTree =
+  sig
+
+    type prooftree = {
+      mutable conclusion : OlSequent.sequent;
+      mutable tree : prooftree list;
+      mutable rule : llrule option}
+    
+    val create : OlSequent.sequent -> llrule option -> prooftree
+    val getConclusion : prooftree -> OlSequent.sequent
+(*     TODO: Function getContextFromPt outdated. The same can be done with the Hashtbl. *)
+    val getContextFromPt : prooftree -> OlContext.context
+    val toPermutationFormat : prooftree -> unit
+    val toTexString : prooftree -> string
+    val toMacroRule : prooftree -> unit
+  
+  end
+
+module OlProofTree : OlProofTree = struct
   
   type prooftree = {
     mutable conclusion : OlSequent.sequent;
@@ -267,7 +317,7 @@ module OlProofTree = struct
   let getListFromOptions lst = 
     List.concat (List.map (fun el ->
       match el with
-      | SOME (el') -> [OlContext.getFromOption el]
+      | SOME (el') -> [Term.getFromOption el]
       | NONE -> []
     ) lst )
  
@@ -283,7 +333,7 @@ module OlProofTree = struct
 	end
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
     let rec getSeq pt' =
-      let pt = OlContext.getFromOption pt' in
+      let pt = Term.getFromOption pt' in
       match pt.tree with
       | [] -> 
 	begin
@@ -298,7 +348,7 @@ module OlProofTree = struct
 	    if (List.exists (fun el -> (getPol el) = SYNC) pt.tree) then
 	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.tree in
 	      nextPt.tree <- List.concat (List.map (fun el -> match el with
-		| SOME (el') -> [OlContext.getFromOption el]
+		| SOME (el') -> [Term.getFromOption el]
 		| NONE -> [] 
 		) (getSeq' nextPt));
 	      [SOME(nextPt)]
@@ -340,7 +390,7 @@ module OlProofTree = struct
       match pt.rule with
       | SOME(r) ->
 	      let seq = getConclusion pt in
-	      let rule = OlContext.getFromOption (OlSequent.getMainForm seq) in
+	      let rule = Term.getFromOption (OlSequent.getMainForm seq) in
 	      let topproof = match pt.tree with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
