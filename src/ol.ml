@@ -9,32 +9,29 @@
 
 (* Suggestion: Change the name of these modules to viewer as in the Model-Viewer-Controller design pattern. *)
 
-open Llrules
-open Prints
-open Term
+open Constraints 
 open ContextSchema
-open ProofTreeSchema
-open Constraints
+open Llrules
+open ProofTreeSchema 
 open Sequent
-open Subexponentials
+open Term
 
-module type OlContext =
+module type OLCONTEXT =
   sig
-    
     type ctx = (string * int) * Term.terms list
     type context = { mutable lst : ctx list  }
-    val create : ((string * int) list) -> context
+    val create : (string * int) list -> context
     val getFormSide : Term.terms -> string
-    val remDolar : string -> string
+    val remFirstChar : string -> string
+    (* List all the different context variables *)
     val getStrings : context -> string list
     val checkSide : string -> string -> bool
-    val toStringForms : (Term.terms list) -> string -> string
-    val toTexString : context -> string -> (string list) -> string 
-    val fixContext : string * int -> (string * int)
-
+    val toStringForms : Term.terms list -> string -> string -> string
+    val toTexString : context -> string -> string list -> string 
+    val fixContext : string * int -> string * int
   end
 
-module OlContext : OlContext = struct
+module OlContext : OLCONTEXT = struct
 
   type ctx = (string * int) * Term.terms list
   
@@ -45,11 +42,6 @@ module OlContext : OlContext = struct
   let create ctxList = {
     lst = List.map (fun ctx -> (ctx, [])) ctxList;
   }
-  
-  (*let rec normalize f i acc =
-    match f with
-    | EXISTS(s, i', t) -> normalize (Norm.hnorm (APP(ABS(s, i', t), [CONS(s ^ (string_of_int i))])) i acc )
-    | _ -> f*)
   
   (* This is necessary because the last formulas are DB(i) *)
   let rec getAbsLst f absLst =
@@ -81,64 +73,48 @@ module OlContext : OlContext = struct
     | PRED (s, t, pol) -> s
     | CONST (s) -> s
     | _ -> "empty"
-      
-  let remComma str = 
-    try String.sub str 0 ((String.length str)-2) with Invalid_argument("String.sub") -> str
-  
-(* TODO: Merge next two function as one   *)
-  
-  let remNumberSign str = 
-    if (String.get str 0) = '#' then 
-      try String.sub str 1 ((String.length str)-1) 
-      with Invalid_argument("index out of bounds") -> str
-    else str
-  
-  let remDolar str = 
-    if (String.get str 0) = '$' then 
+
+  let remFirstChar str = 
+    if (String.get str 0) = '#' || (String.get str 0) = '$' then 
       try String.sub str 1 ((String.length str)-1) 
       with Invalid_argument("index out of bounds") -> str
     else str
     
-  (* List all the different context variables *)
   let getStrings ctx = 
     List.fold_right (fun ((n, i), f) acc ->  
-      if (List.exists (fun el -> el = (remDolar n)) acc) || 
-	(List.exists (fun el -> el = (remNumberSign n)) acc) || n = "#" then acc
-	  else if (String.get n 0) = '#' then (remNumberSign n) :: acc
-	    else if (String.get n 0) = '$' then (remDolar n) :: acc
+      if (List.exists (fun el -> el = (remFirstChar n)) acc) || 
+	(List.exists (fun el -> el = (remFirstChar n)) acc) || n = "#" then acc
+	  else if (String.get n 0) = '#' then (remFirstChar n) :: acc
+	    else if (String.get n 0) = '$' then (remFirstChar n) :: acc
 	      else n :: acc
     ) ctx.lst []
   
   let checkSide n side =
-    let ctxType = getCtxType n in
+    let ctxType = Subexponentials.getCtxType n in
     match ctxType with 
     | SOME(tuple) -> let side' = snd(tuple) in
       (side' = side) || (side' = "rghtlft")
     | NONE -> false
-
-(*TODO: Merge the following two function. Suggestion to include the first as auxiliary for the second.*)        
     
-  let checkFormSide f n = 
-    let ctxType = getCtxType n in
-    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) f in
-    match ctxType with
-    | SOME(tuple) -> List.iter (fun (form, absLst) ->
-	let formSide = getFormSide form in
-	let ctxSide = snd(tuple) in
-	if (formSide <> ctxSide) && (ctxSide <> "rghtlft") then begin
-	  print_string ("\nThe following formula can't belong to the context " ^ n ^ ": " ^ (termToString form) ^ 
-	  "\nPlease verify your especification.\n")
-	  end
-	else ()
-      ) formList
-    | NONE -> ()
-    
-  let toStringForms fs side = 
-    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) fs in
+  let toStringForms formulas side n = 
+    let ctxType = Subexponentials.getCtxType n in
+    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) formulas in
     (List.fold_right (fun (form, absLst) acc' ->
-      if ((getFormSide form) = side) then (termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
-      else acc'
+      let formSide = getFormSide form in
+      let ctxSide = snd(Term.getFromOption(ctxType)) in
+      if (formSide = side) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
+      else begin
+	  if (formSide <> ctxSide) && (ctxSide <> "rghtlft") then 
+	    begin
+	      print_string ("\nThe following formula can't belong to the context "
+	      ^ n ^ ": " ^ (Prints.termToString form) ^ "\nPlease verify your especification.\n");
+	      acc'
+	    end
+	  else acc'
+	end
     ) formList "")
+    
+  let remComma str = try String.sub str 0 ((String.length str) - 2) with Invalid_argument("String.sub") -> str
   
   let toTexString ctx side str_list = 
     let slotToTex ctx side str_ctx =
@@ -148,26 +124,24 @@ module OlContext : OlContext = struct
       match (n, side, f) with
       | (_, "lft", []) -> 
 				if n = str_ctx && correctSide then
-				  "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+				  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 				else acc
       | (_, "lft", f') -> 
 				if n = str_ctx && correctSide then
 				  begin
-				    checkFormSide f' n;
-				    let initialString = "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (toStringForms f' "lft") ^ acc
+				    let initialString = "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
+				    initialString ^ (toStringForms f' "lft" n) ^ acc
 				  end
 				else acc
       | (_, "rght", []) -> 
 				if n = str_ctx && correctSide then 
-				  "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+				  "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
 				else acc
       | (_, "rght", f') ->
 				if n = str_ctx && correctSide then
 				  begin
-				    checkFormSide f' n;
-				    let initialString = "\\Delta_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (toStringForms f' "rght") ^ acc
+				    let initialString = "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
+				    initialString ^ (toStringForms f' "rght" n) ^ acc
 				  end
 				else acc
       | (_, _, _) -> acc
@@ -176,13 +150,13 @@ module OlContext : OlContext = struct
     (List.fold_right (fun ((n, i), f) acc ->
       match (n, side, f) with
       | (_, "lft", f') -> 
-				if n = "#" ^ (remDolar str_ctx) then
-				  (toStringForms f' "lft") ^ acc
+				if n = "#" ^ (remFirstChar str_ctx) then
+				  (toStringForms f' "lft" (remFirstChar n)) ^ acc
 				else acc
       | (_, "rght", f') -> 
-      	if n = "#" ^ (remDolar str_ctx) then
-	        (toStringForms f' "rght") ^ acc
-	      else acc
+				if n = "#" ^ (remFirstChar str_ctx) then
+				  (toStringForms f' "rght" (remFirstChar n)) ^ acc
+				else acc
       | (_, _, _) -> acc
     ) ctx.lst "") in
     (* Print all slots *)
@@ -201,21 +175,20 @@ module OlContext : OlContext = struct
             end
     ) str_list ""
   
-  (* Hack to fix gamma constraints that come without $ *)
+  (* Hack to fix the name of subexponential that come without $ *)
   let fixContext ctx =
     if (fst(ctx) = "gamma" || fst(ctx) = "infty") then (("$" ^ (fst(ctx))), snd(ctx))
     else ctx
   
 end;;
 
-module type OlSequent =
+module type OLSEQUENT =
   sig
 
     type sequent = {
       mutable ctx : OlContext.context;
       goals : terms list;
-      mutable pol : phase }
-  
+      mutable pol : phase }  
     val create : OlContext.context -> Term.terms list -> Term.phase -> sequent 
     val getContext : sequent -> OlContext.context
     val getMainForm : sequent -> (Term.terms option)
@@ -225,8 +198,7 @@ module type OlSequent =
   
   end
 
-
-module OlSequent : OlSequent = struct
+module OlSequent : OLSEQUENT = struct
   
   type sequent = {
     mutable ctx : OlContext.context;
@@ -245,17 +217,17 @@ module OlSequent : OlSequent = struct
   }
   
   let rec formatForm f = 
-      match f with 
-      | EXISTS (s, i, t) -> formatForm t
-      | LOLLI (t1, t2, t3) -> formatForm t2
-      | NOT (t) -> formatForm t
-      | PRED (s, t, pol) -> formatForm t
-      | TENSOR (t1, t2) -> formatForm t1
-      | ADDOR (t1, t2) -> formatForm t1
-      | PARR (t1, t2) -> formatForm t1
-      | WITH (t1, t2) -> formatForm t1
-      | APP (t, tlist) -> List.hd tlist
-      | _ -> f
+    match f with 
+    | EXISTS (s, i, t) -> formatForm t
+    | LOLLI (t1, t2, t3) -> formatForm t2
+    | NOT (t) -> formatForm t
+    | PRED (s, t, pol) -> formatForm t
+    | TENSOR (t1, t2) -> formatForm t1
+    | ADDOR (t1, t2) -> formatForm t1
+    | PARR (t1, t2) -> formatForm t1
+    | WITH (t1, t2) -> formatForm t1
+    | APP (t, tlist) -> List.hd tlist
+    | _ -> f
   
   let getOnlyRule f = 
     match f with
@@ -272,7 +244,7 @@ module OlSequent : OlSequent = struct
  
 end;;
 
-module type OlProofTree =
+module type OLPROOFTREE =
   sig
 
     type prooftree = {
@@ -290,7 +262,7 @@ module type OlProofTree =
   
   end
 
-module OlProofTree : OlProofTree = struct
+module OlProofTree : OLPROOFTREE = struct
   
   type prooftree = {
     mutable conclusion : OlSequent.sequent;
@@ -376,6 +348,10 @@ module OlProofTree : OlProofTree = struct
     let conclusion = getConclusion pt in
     let context = OlSequent.getContext conclusion in
     (OlContext.getStrings context)
+    (*let transformHt h = 
+    Hashtbl.fold (fun (str, ctxType) acc ->  
+      str :: acc
+    ) h []*)
     
   let sideToChar side = 
     match side with
@@ -395,7 +371,7 @@ module OlProofTree : OlProofTree = struct
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
 	      in
-        let ruleNameTex = (termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}" in
+        let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
 	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "} \;\; " ^ ruleNameTex 
       | NONE -> (OlSequent.toTexString (getConclusion pt) str_list) 
@@ -404,9 +380,42 @@ module OlProofTree : OlProofTree = struct
 
 end;;
 
-module Derivation = struct
+module type DERIVATION = 
+  sig
   
-  let rec transformSequent pt =
+    val remakeTree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
+    val remakeBipoles : (ProofTreeSchema.prooftree * Constraints.constraintset) list -> (OlProofTree.prooftree * Constraints.constraintset) list
+    val remakePermutation : ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list -> ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list    
+    val solveElin : OlProofTree.prooftree -> string * int -> Term.terms -> bool
+    val solveEmp : OlProofTree.prooftree -> string * int -> bool
+    val solveUnion : OlProofTree.prooftree -> OlContext.ctx -> OlContext.ctx -> (string * int) * (Term.terms list) -> bool
+    val solveIn : OlProofTree.prooftree -> string * int -> Term.terms -> bool
+    val rewSeqFst : OlProofTree.prooftree -> Constraints.constraintpred -> bool
+    val solveConstraintsFst : Constraints.constraintpred -> OlProofTree.prooftree -> bool
+    val applyConstraints : OlProofTree.prooftree -> Constraints.constraintset -> unit
+    val solveFirstPhaseBpl : (OlProofTree.prooftree * Constraints.constraintset) list -> unit
+    val solveFirstPhasePer : ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list -> unit
+    val rewSeqSnd : OlProofTree.prooftree -> Constraints.constraintpred -> bool
+    val solveConstraintsSnd : Constraints.constraintpred -> OlProofTree.prooftree -> bool
+    val applyConstraints' : OlProofTree.prooftree -> Constraints.constraintset -> unit
+    val solveSndPhaseBpl : (OlProofTree.prooftree * Constraints.constraintset) list -> unit
+    val solveSndPhasePer : ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list -> unit
+    val sameContexts : OlContext.context -> OlContext.context -> string -> bool
+    val getValidCtx : OlContext.context -> string -> (string * int) list
+    val getMaxPair : (string * int) list -> string * int
+    val createContextList : (string * int) list -> (string * int) list -> string * int -> (string * int) list list
+    val getAssocN : (string * int) list -> (string * int) list list -> ((string * int) * ((string * int) list)) list
+    val getAssocM : (string * int) list -> (string * int) list list -> ((string * int) * ((string * int) list)) list
+    val rewriteTree : OlProofTree.prooftree -> (string * int) * OlContext.ctx list -> unit
+    val fixContexts : (string * int) list list -> ((string * int) * ((string * int) list) list) list list
+    val applyNewContexts : OlProofTree.prooftree -> OlSequent.sequent -> OlSequent.sequent -> string -> unit
+    val equatingContexts : OlProofTree.prooftree -> unit  
+  
+  end
+
+module Derivation : DERIVATION = struct
+  
+  let rec remakeTree pt =
     let seq = ProofTreeSchema.getConclusion pt in
     let rule = ProofTreeSchema.getRule pt in
     let ctx = SequentSchema.getContext seq in
@@ -421,16 +430,17 @@ module Derivation = struct
     let olPt = OlProofTree.create sequent rule in
     if pt.premises = [] then olPt else
     begin 
-      olPt.OlProofTree.tree <- List.map transformSequent pt.premises;
+      olPt.OlProofTree.tree <- List.map remakeTree pt.premises;
       olPt
     end 
     
-  let transformTree bplLst = 
-    List.map (fun (pt, model) -> (transformSequent pt, model)) bplLst 
+  let remakeBipoles bplLst = 
+    List.map (fun (pt, model) -> (remakeTree pt, model)) bplLst 
     
-  let transformTree' pair_bpl = 
+  let remakePermutation pair_bpl = 
     List.map (fun ((pt1, model1), (pt2, model2)) ->
-      ((transformSequent pt1, model1), (transformSequent pt2, model2))) pair_bpl
+      ((remakeTree pt1, model1), (remakeTree pt2, model2))) 
+    pair_bpl
     
   (*  IN(F, Γ ): Γ → Γ, F
       EMP(Γ ): Γ → .
@@ -450,7 +460,7 @@ module Derivation = struct
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
     let newPair = List.map (fun (olc, f) -> 
-      if olc = c then ((("#" ^ (OlContext.remDolar (fst(c))), 0), t :: f), true)
+      if olc = c then ((("#" ^ (OlContext.remFirstChar (fst(c))), 0), t :: f), true)
       else ((olc, f), false)
     ) olCtx.OlContext.lst in
     let isDiff = List.exists (fun el -> (snd(el)) = true) newPair in
@@ -546,7 +556,7 @@ module Derivation = struct
       
     | _ -> false
     
-    let applyConstraints pt model = 
+  let applyConstraints pt model = 
     while (List.exists (fun el -> (solveConstraintsFst el pt) = true) model.lst) do
       List.iter (fun cstr -> if solveConstraintsFst cstr pt then () else ()) model.lst
     done
@@ -612,14 +622,14 @@ module Derivation = struct
     if ((String.get s 0) = '#') || s <> str then []
     else [(s, i)]) ctx.OlContext.lst)
     
-  let getMaxPair n = 
+  let getMaxPair (n: (string * int) list) = 
     let rec max_value lst = match lst with
       | [] -> 0
       | hd :: tl -> max hd (max_value tl) in
     let str = fst(List.hd n) in
     let lst' = List.map (fun (s, i) -> i) n in (str, max_value lst')
   
-  let createContextList m n maxPair =
+  let createContextList (m: (string * int) list) (n: (string * int) list) (maxPair: string * int) =
     let ctx_name = fst(maxPair) in
     let i = ref (snd(maxPair)) in
     let counter = (fun () -> i := !i+1; !i) in
@@ -724,7 +734,7 @@ end;;
 (* TODO: make it more modular? *)
 let apply_permute perm_bipoles = begin
   let olPt = ref [] in
-  olPt := Derivation.transformTree' perm_bipoles;
+  olPt := Derivation.remakePermutation perm_bipoles;
   Derivation.solveFirstPhasePer !olPt;
   Derivation.solveSndPhasePer !olPt;
   List.iter (fun ((olt1, model1), (olt2, model2)) -> 
@@ -738,7 +748,7 @@ end ;;
 
 let apply_perm_not_found perm_not_found = begin
   let olPt = ref [] in
-  olPt := Derivation.transformTree perm_not_found;
+  olPt := Derivation.remakeBipoles perm_not_found;
   Derivation.solveFirstPhaseBpl !olPt;
   Derivation.solveSndPhaseBpl !olPt;
   !olPt

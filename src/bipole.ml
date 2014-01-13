@@ -7,6 +7,7 @@
 (*                                    *)
 (**************************************)
 
+open Dlv
 open Sequent
 open Term
 

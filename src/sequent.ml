@@ -5,7 +5,32 @@
 open Term
 open Prints
 
-module Sequent = struct
+module type SEQUENT =
+  sig
+  
+    type sequent = {
+      mutable ctxin : Context.context;
+      mutable ctxout : Context.context;
+      mutable goals : Term.terms list;
+      pol : Term.phase }
+    val getPhase : sequent -> Term.phase
+    val getGoals : sequent -> Term.terms list
+    val create : unit -> sequent
+    val create : Term.phase -> sequent
+    val create : Context.context -> Context.context -> Term.terms list -> Term.phase -> sequent
+    val setGoal : sequent -> Term.terms -> unit
+    val setGoals : sequent -> Term.terms list -> unit
+    val setCtxIn : sequent -> Context.context -> unit
+    val getCtxIn : sequent -> Context.context
+    val setCtxOut : sequent -> Context.context -> unit
+    val getCtxOut : sequent -> Context.context
+    val addGoal : sequent -> Term.terms -> unit
+    val toString : sequent -> string
+    val toTexString : sequent -> string
+    
+  end
+
+module Sequent : SEQUENT = struct
 
   type sequent = {
     mutable ctxin : Context.context;
@@ -34,8 +59,6 @@ module Sequent = struct
   let getPhase seq = seq.pol
 
   let getGoals seq = seq.goals
-
-  let getContextIn seq = seq.ctxin
 
 (* NEW
   let setContextOut seq oc = seq.ctxout <- SOME(oc)
@@ -68,9 +91,6 @@ module Sequent = struct
     pol = ph
   }
 
- 
- 
- 
   let setGoal seq f = seq.goals <- [f]
   let setGoals seq lf = seq.goals <- lf
 
@@ -101,7 +121,24 @@ module Sequent = struct
   end
 ;;
 
-module SequentSchema = struct
+module type SEQUENTSCHEMA = 
+  sig 
+  
+    type sequent = {
+    mutable ctx : ContextSchema.context;
+    goals : terms list;
+    pol : Term.phase }
+    val createSync : ContextSchema.context -> Term.terms -> sequent
+    val createAsyn : ContextSchema.context -> Term.terms list -> sequent
+    val getPhase : sequent -> Term.phase
+    val getGoals : sequent -> Term.terms list
+    val getContext : sequent -> ContextSchema.context
+    val toString : sequent -> string
+    val toTexString : sequent -> string
+    
+  end
+
+module SequentSchema : SEQUENTSCHEMA = struct
  
   (* Sequent has contexts in and out. This has only one generic context. *)
   type sequent = {
@@ -140,4 +177,3 @@ module SequentSchema = struct
 
   end
 ;;
-

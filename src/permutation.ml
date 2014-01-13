@@ -8,8 +8,9 @@
 (*                                    *)
 (**************************************)
 
-open Sequent
+open Dlv
 open Ol
+open Sequent
 
 (* Generates all possible derivations of spec1/spec2 (bottom-up) *)
 let derive2 spec1 spec2 =

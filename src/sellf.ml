@@ -114,7 +114,7 @@ end ;;
 
 let apply_derivation bipoles = begin 
   let olPt = ref [] in
-  olPt := Derivation.transformTree bipoles;
+  olPt := Derivation.remakeBipoles bipoles;
   List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
   Derivation.solveFirstPhaseBpl !olPt;
   Derivation.solveSndPhaseBpl !olPt;
