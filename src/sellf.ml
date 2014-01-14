@@ -1,3 +1,4 @@
+open Context
 open ProofTree
 open Subexponentials
 open Prints

@@ -18,9 +18,11 @@ open Term
 
 module type OLCONTEXT =
   sig
-    type ctx = (string * int) * Term.terms list
+  
+    type subexp = string * int
+    type ctx = subexp * Term.terms list
     type context = { mutable lst : ctx list  }
-    val create : (string * int) list -> context
+    val create : subexp list -> context
     val getFormSide : Term.terms -> string
     val remFirstChar : string -> string
     (* List all the different context variables *)
@@ -28,12 +30,15 @@ module type OLCONTEXT =
     val checkSide : string -> string -> bool
     val toStringForms : Term.terms list -> string -> string -> string
     val toTexString : context -> string -> string list -> string 
-    val fixContext : string * int -> string * int
+    val fixContext : subexp -> subexp
+  
   end
 
 module OlContext : OLCONTEXT = struct
 
-  type ctx = (string * int) * Term.terms list
+  type subexp = string * int
+  
+  type ctx = subexp * Term.terms list
   
   type context = {
     mutable lst : ctx list;
@@ -249,7 +254,7 @@ module type OLPROOFTREE =
 
     type prooftree = {
       mutable conclusion : OlSequent.sequent;
-      mutable tree : prooftree list;
+      mutable premises : prooftree list;
       mutable rule : llrule option}
     
     val create : OlSequent.sequent -> llrule option -> prooftree
@@ -266,16 +271,16 @@ module OlProofTree : OLPROOFTREE = struct
   
   type prooftree = {
     mutable conclusion : OlSequent.sequent;
-    mutable tree : prooftree list;
+    mutable premises : prooftree list;
     mutable rule : llrule option
   }
   
   let create sq rl = {
     conclusion = sq;
-    tree = [];
+    premises = [];
     rule = rl;
   }
-  
+
   let getConclusion pt = pt.conclusion
   
   let getContextFromPt pt = OlSequent.getContext (getConclusion pt) 
@@ -294,9 +299,9 @@ module OlProofTree : OLPROOFTREE = struct
     ) lst )
  
   let toPermutationFormat olPt = 
-    let firstPt = List.hd olPt.tree in
+    let firstPt = List.hd olPt.premises in
     let rec getSeq' pt = 
-      match (pt.tree, getPol pt) with 
+      match (pt.premises, getPol pt) with 
       | ([], ASYN) -> 
 	begin
 	  match pt.rule with 
@@ -306,7 +311,7 @@ module OlProofTree : OLPROOFTREE = struct
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
     let rec getSeq pt' =
       let pt = Term.getFromOption pt' in
-      match pt.tree with
+      match pt.premises with
       | [] -> 
 	begin
 	  match (getRule pt) with 
@@ -317,32 +322,32 @@ module OlProofTree : OLPROOFTREE = struct
 	begin
 	  match (getPol pt) with
 	  | ASYN ->
-	    if (List.exists (fun el -> (getPol el) = SYNC) pt.tree) then
-	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.tree in
-	      nextPt.tree <- List.concat (List.map (fun el -> match el with
+	    if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
+	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
+	      nextPt.premises <- List.concat (List.map (fun el -> match el with
 		| SOME (el') -> [Term.getFromOption el]
 		| NONE -> [] 
 		) (getSeq' nextPt));
 	      [SOME(nextPt)]
-	    else let tree_opt = List.map (fun el -> SOME(el)) pt.tree in
+	    else let tree_opt = List.map (fun el -> SOME(el)) pt.premises in
 	    List.concat (List.map (fun p -> getSeq p) tree_opt)
 	  | SYNC -> 
-	    let tree_opt = List.map (fun el -> SOME(el)) pt.tree in
+	    let tree_opt = List.map (fun el -> SOME(el)) pt.premises in
 	    List.concat (List.map (fun p -> getSeq p) tree_opt)
 	  end in  
     let newPtList = getSeq (SOME(firstPt)) in
-    olPt.tree <- (getListFromOptions newPtList);
+    olPt.premises <- (getListFromOptions newPtList);
     olPt.conclusion <- firstPt.conclusion
     
   let toMacroRule olPt = 
-    let firstPt = List.hd olPt.tree in
+    let firstPt = List.hd olPt.premises in
     let rec getOpenLeaves pt = 
       match pt.rule with
-      | SOME(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.tree)
+      | SOME(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.premises)
       | NONE -> [pt] in
     let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
-    olPt.tree <- newPremises
+    olPt.premises <- newPremises
     
   let collectStrings pt =
     let conclusion = getConclusion pt in
@@ -367,7 +372,7 @@ module OlProofTree : OLPROOFTREE = struct
       | SOME(r) ->
 	      let seq = getConclusion pt in
 	      let rule = Term.getFromOption (OlSequent.getMainForm seq) in
-	      let topproof = match pt.tree with
+	      let topproof = match pt.premises with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
 	      in
@@ -383,38 +388,44 @@ end;;
 module type DERIVATION = 
   sig
   
+    type bipole = ProofTreeSchema.prooftree * Constraints.constraintset
+    type olBipole = OlProofTree.prooftree * Constraints.constraintset
     val remakeTree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
-    val remakeBipoles : (ProofTreeSchema.prooftree * Constraints.constraintset) list -> (OlProofTree.prooftree * Constraints.constraintset) list
-    val remakePermutation : ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list -> ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list    
-    val solveElin : OlProofTree.prooftree -> string * int -> Term.terms -> bool
-    val solveEmp : OlProofTree.prooftree -> string * int -> bool
-    val solveUnion : OlProofTree.prooftree -> OlContext.ctx -> OlContext.ctx -> (string * int) * (Term.terms list) -> bool
-    val solveIn : OlProofTree.prooftree -> string * int -> Term.terms -> bool
+    val remakeBipoles : bipole list -> olBipole list
+    val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list    
+    val solveElin : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
+    val solveEmp : OlProofTree.prooftree -> OlContext.subexp -> bool
+    val solveUnion : OlProofTree.prooftree -> OlContext.ctx -> OlContext.ctx -> OlContext.subexp * (Term.terms list) -> bool
+    val solveIn : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
     val rewSeqFst : OlProofTree.prooftree -> Constraints.constraintpred -> bool
     val solveConstraintsFst : Constraints.constraintpred -> OlProofTree.prooftree -> bool
     val applyConstraints : OlProofTree.prooftree -> Constraints.constraintset -> unit
-    val solveFirstPhaseBpl : (OlProofTree.prooftree * Constraints.constraintset) list -> unit
-    val solveFirstPhasePer : ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list -> unit
+    val solveFirstPhaseBpl : olBipole list -> unit
+    val solveFirstPhasePer : (olBipole * olBipole) list -> unit
     val rewSeqSnd : OlProofTree.prooftree -> Constraints.constraintpred -> bool
     val solveConstraintsSnd : Constraints.constraintpred -> OlProofTree.prooftree -> bool
     val applyConstraints' : OlProofTree.prooftree -> Constraints.constraintset -> unit
-    val solveSndPhaseBpl : (OlProofTree.prooftree * Constraints.constraintset) list -> unit
-    val solveSndPhasePer : ((OlProofTree.prooftree * Constraints.constraintset) * (OlProofTree.prooftree * Constraints.constraintset)) list -> unit
+    val solveSndPhaseBpl : olBipole list -> unit
+    val solveSndPhasePer : (olBipole * olBipole) list -> unit
     val sameContexts : OlContext.context -> OlContext.context -> string -> bool
-    val getValidCtx : OlContext.context -> string -> (string * int) list
-    val getMaxPair : (string * int) list -> string * int
-    val createContextList : (string * int) list -> (string * int) list -> string * int -> (string * int) list list
-    val getAssocN : (string * int) list -> (string * int) list list -> ((string * int) * ((string * int) list)) list
-    val getAssocM : (string * int) list -> (string * int) list list -> ((string * int) * ((string * int) list)) list
-    val rewriteTree : OlProofTree.prooftree -> (string * int) * OlContext.ctx list -> unit
-    val fixContexts : (string * int) list list -> ((string * int) * ((string * int) list) list) list list
+    val getValidCtx : OlContext.context -> string -> OlContext.subexp list
+    val getMaxPair : OlContext.subexp list -> OlContext.subexp
+    val createContextList : OlContext.subexp list -> OlContext.subexp list -> OlContext.subexp -> OlContext.subexp list list
+    val getAssocN : OlContext.subexp list -> OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list)) list
+    val getAssocM : OlContext.subexp list -> OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list)) list
+    val rewriteTree : OlProofTree.prooftree -> OlContext.subexp * OlContext.ctx list -> unit
+    val fixContexts : OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list) list) list list
     val applyNewContexts : OlProofTree.prooftree -> OlSequent.sequent -> OlSequent.sequent -> string -> unit
     val equatingContexts : OlProofTree.prooftree -> unit  
   
   end
 
 module Derivation : DERIVATION = struct
+
+  type bipole = ProofTreeSchema.prooftree * Constraints.constraintset
   
+  type olBipole = OlProofTree.prooftree * Constraints.constraintset
+
   let rec remakeTree pt =
     let seq = ProofTreeSchema.getConclusion pt in
     let rule = ProofTreeSchema.getRule pt in
@@ -428,9 +439,9 @@ module Derivation : DERIVATION = struct
     let polarity = SequentSchema.getPhase seq in
     let sequent = OlSequent.create context goals polarity in
     let olPt = OlProofTree.create sequent rule in
-    if pt.premises = [] then olPt else
+    if pt.ProofTreeSchema.premises = [] then olPt else
     begin 
-      olPt.OlProofTree.tree <- List.map remakeTree pt.premises;
+      olPt.OlProofTree.premises <- List.map remakeTree pt.ProofTreeSchema.premises;
       olPt
     end 
     
@@ -536,21 +547,21 @@ module Derivation : DERIVATION = struct
     | ELIN (t, c) -> 
       let rec rewTreeElin olTree =
 	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeElin olTree.OlProofTree.tree) in
+	List.concat (List.map rewTreeElin olTree.OlProofTree.premises) in
       let boolList = rewTreeElin olProofTree in
       List.exists (fun el -> el = true) boolList
 	
     | EMP (c) -> 
       let rec rewTreeEmp olTree =
 	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeEmp olTree.OlProofTree.tree) in
+	List.concat (List.map rewTreeEmp olTree.OlProofTree.premises) in
       let boolList = rewTreeEmp olProofTree in
       List.exists (fun el -> el = true) boolList
       
     | UNION (c1, c2, c3) ->
       let rec rewTreeUnion olTree = 
 	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeUnion olTree.OlProofTree.tree) in
+	List.concat (List.map rewTreeUnion olTree.OlProofTree.premises) in
       let boolList = rewTreeUnion olProofTree in
       List.exists (fun el -> el = true) boolList
       
@@ -585,7 +596,7 @@ module Derivation : DERIVATION = struct
     | IN (t, c) -> 
       let rec rewTreeIn olTree = 
 	rewSeqSnd olTree cstr ::
-	List.concat (List.map rewTreeIn olTree.OlProofTree.tree) in
+	List.concat (List.map rewTreeIn olTree.OlProofTree.premises) in
       let boolList = rewTreeIn olProofTree in
       List.exists (fun el -> el = true) boolList
     | _ -> false
@@ -622,14 +633,14 @@ module Derivation : DERIVATION = struct
     if ((String.get s 0) = '#') || s <> str then []
     else [(s, i)]) ctx.OlContext.lst)
     
-  let getMaxPair (n: (string * int) list) = 
+  let getMaxPair (n: OlContext.subexp list) = 
     let rec max_value lst = match lst with
       | [] -> 0
       | hd :: tl -> max hd (max_value tl) in
     let str = fst(List.hd n) in
     let lst' = List.map (fun (s, i) -> i) n in (str, max_value lst')
   
-  let createContextList (m: (string * int) list) (n: (string * int) list) (maxPair: string * int) =
+  let createContextList (m: OlContext.subexp list) (n: OlContext.subexp list) (maxPair: OlContext.subexp) =
     let ctx_name = fst(maxPair) in
     let i = ref (snd(maxPair)) in
     let counter = (fun () -> i := !i+1; !i) in
@@ -675,7 +686,7 @@ module Derivation : DERIVATION = struct
       olCtx.OlContext.lst <- !newCtxRef in
     let rec rewTree olTree = 
       solve olTree (fst(nctx)) (snd(nctx));
-      List.iter rewTree olTree.OlProofTree.tree in
+      List.iter rewTree olTree.OlProofTree.premises in
     rewTree pt
     
   let fixContexts lst = 
@@ -702,11 +713,11 @@ module Derivation : DERIVATION = struct
     let rec getSequents' pt = 
       if (List.exists (fun pt' ->
 	  match pt'.OlProofTree.rule with
-	  | SOME(r) -> if (pt'.OlProofTree.tree = []) then true else false
+	  | SOME(r) -> if (pt'.OlProofTree.premises = []) then true else false
 	  | NONE -> false
-	) pt.OlProofTree.tree) then
+	) pt.OlProofTree.premises) then
 	begin
-	  let pt2 = List.find (fun pt' -> pt'.OlProofTree.tree <> []) pt.OlProofTree.tree in
+	  let pt2 = List.find (fun pt' -> pt'.OlProofTree.premises <> []) pt.OlProofTree.premises in
 	  let ctx1 = (OlProofTree.getContextFromPt pt) in
 	  let ctx2 = (OlProofTree.getContextFromPt pt2) in
 	  let seq1 = OlProofTree.getConclusion pt in
@@ -726,7 +737,7 @@ module Derivation : DERIVATION = struct
 	      ) diff_ctx
 	    end
 	end
-      else List.iter (fun p -> getSequents' p) pt.OlProofTree.tree in
+      else List.iter (fun p -> getSequents' p) pt.OlProofTree.premises in
     getSequents' pt
 
 end;;

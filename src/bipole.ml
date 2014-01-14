@@ -8,6 +8,7 @@
 (**************************************)
 
 open Dlv
+open ProofTreeSchema
 open Sequent
 open Term
 

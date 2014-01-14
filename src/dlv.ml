@@ -8,6 +8,7 @@
 (*****************************************)
 
 open Sequent
+open ProofTreeSchema
 
 module type DLV = 
   sig

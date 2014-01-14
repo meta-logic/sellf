@@ -2,6 +2,7 @@
 
 (************************** SEQUENTS ************************)
 
+open Context
 open Term
 open Prints
 

@@ -11,6 +11,7 @@
  *)
 
 open Basic
+open Context
 open Term
 open ProofTree
 open Sequent

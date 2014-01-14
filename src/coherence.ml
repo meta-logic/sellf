@@ -14,6 +14,7 @@
  *                                                                      *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 
+open Context
 open Term
 open Boundedproofsearch
 open Prints

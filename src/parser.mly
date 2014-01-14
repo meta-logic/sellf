@@ -5,6 +5,7 @@
  * Elaine Pimentel and Giselle Reis
 */
 %{
+open Context
 open Term
 open Prints
 open TypeChecker

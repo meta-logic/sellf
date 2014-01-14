@@ -10,6 +10,7 @@
 
 open Dlv
 open Ol
+open ProofTreeSchema
 open Sequent
 
 (* Generates all possible derivations of spec1/spec2 (bottom-up) *)
