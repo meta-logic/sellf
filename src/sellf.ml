@@ -196,8 +196,8 @@ let bipole_cl () = begin
 end;;
   
 let permute formulas i1 i2 = match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with
-  (* If the first list is empty, no bipoles could be constructed. *)
-  | ([], _) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
+  (* If both lists are empty, no bipoles could be constructed. *)
+  | ([], []) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
   (* Else if there are no failures the second list should be empty. *)
   | (pairs, []) -> print_endline "\nThe rules permute.\nPlease type the name of the file to print the permutations: ";
     let fileName = read_line () in
@@ -227,12 +227,12 @@ let permute_bin n1 n2 =
   let i1 = get_form_index n1 rulesList in
   let i2 = get_form_index n2 rulesList in 
   match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with 
-    (* If the first list is empty, no bipoles could be constructed. *)
-    | ([], _) -> print_endline "0"
+    (* If both lists are empty, no bipoles could be constructed. *)
+    | ([], []) -> print_endline "NO (failed constructing bipoles)"
     (* Else if there are no failures the second list should be empty. *)
-    | (pairs, []) -> print_endline "1";
+    | (pairs, []) -> print_endline "YES";
     (* Else, some permutation was not possible. *)
-    | (_, bipoles) -> print_endline "0";
+    | (_, bipoles) -> print_endline "NO (some case is not possible)";
 ;;
 
 
@@ -243,8 +243,8 @@ let permute_cl n1 n2 =
   let i1 = get_form_index n1 rulesList in
   let i2 = get_form_index n2 rulesList in 
   match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with 
-    (* If the first list is empty, no bipoles could be constructed. *)
-    | ([], _) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
+    (* If both lists are empty, no bipoles could be constructed. *)
+    | ([], []) -> print_endline "\nImpossible to build a derivation of the second rule over the first.\n"
     (* Else if there are no failures the second list should be empty. *)
     | (pairs, []) -> print_endline "\nThe rules permute.\nThe permutations are shown below: ";
       let olPt = apply_permute pairs in

@@ -24,7 +24,7 @@ rules introduction.
 (not (rght (and A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % Disjunction
-(not (lft (or A B))) * (([l]? (lft A)) * ([l]? (lft B))).
+(not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
 (not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
 
 % Forall

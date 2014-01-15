@@ -78,8 +78,16 @@ let permute spec1 spec2 =
   let (spec1norm, rest) = instantiate_ex spec1 constLst in
   let (spec2norm, rest2) = instantiate_ex spec2 rest in
 
+  print_endline "Permuting ";
+  print_endline (Prints.termToString spec1norm);
+  print_endline "over";
+  print_endline (Prints.termToString spec2norm);
+
   let bipoles12 = derive2 spec1norm spec2norm in
   let bipoles21 = derive2 spec2norm spec1norm in
+
+  print_endline ("Number of bipoles 1/2: " ^ (string_of_int (List.length bipoles12)));
+  print_endline ("Number of bipoles 2/1: " ^ (string_of_int (List.length bipoles21)));
 
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
   function out of this.*)
