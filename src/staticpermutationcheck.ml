@@ -37,7 +37,7 @@ let rec get_subexp_from_monopole mono =
   | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_) -> []
   | PARR(b1,b2) | WITH(b1,b2) -> 
     List.append (get_subexp_from_monopole b1) (get_subexp_from_monopole b2)
-  | QST(CONST(sub),b2) -> [SOME(sub)]
+  | QST(CONST(sub),b2) -> [Some(sub)]
   | FORALL(_,_,b) -> (get_subexp_from_monopole b)
   | _ -> failwith "Unexpected term in a monopole, while getting subexponentials
 from monopole."
@@ -47,9 +47,9 @@ from monopole."
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) -> 
       List.append (get_subexp_prefix b1) (get_subexp_prefix b2)
-  | BANG(CONST(sub),b) -> [SOME(sub) :: (get_subexp_from_monopole b)]
+  | BANG(CONST(sub),b) -> [Some(sub) :: (get_subexp_from_monopole b)]
   | PARR(_,_) | QST(_,_) | WITH(_,_) | FORALL(_,_,_) -> 
-    [NONE :: (get_subexp_from_monopole rule)]
+    [None :: (get_subexp_from_monopole rule)]
   | ABS(_, _, b) | EXISTS(_,_,b) -> get_subexp_prefix b
   | _ -> failwith "Unexpected term in a rule, while getting subexponentials
 from bipoles."
@@ -58,8 +58,8 @@ from bipoles."
 let rec greater_than_lst_all sub lst = 
   match lst with
   | [] -> true
-  | SOME(s) :: lst1 when greater_than sub s -> greater_than_lst_all sub lst1
-  | SOME(s) :: lst1 -> false
+  | Some(s) :: lst1 when greater_than sub s -> greater_than_lst_all sub lst1
+  | Some(s) :: lst1 -> false
 *)
 
 (* Relation among subexponentials. s1 >= s2 *)
@@ -69,16 +69,16 @@ let geq s1 s2 = Subexponentials.greater_than s1 s2 || s1 = s2
 let rec less_than_lst_all sub lst = 
   match lst with
   | [] -> true
-  | SOME(s) :: lst1 when geq s sub -> less_than_lst_all sub lst1
+  | Some(s) :: lst1 when geq s sub -> less_than_lst_all sub lst1
   | _ -> false
 
 
-(*Simple function that checks whether sub <= s, for some s in lst.*)
+(*Simple function that checks whether sub <= s, for Some s in lst.*)
 let rec less_than_lst_one sub lst = 
   match lst with
   | [] -> false
-  | SOME(s) :: lst1 when geq s sub  -> true
-  | SOME(s) :: lst1 -> less_than_lst_one sub lst1
+  | Some(s) :: lst1 when geq s sub  -> true
+  | Some(s) :: lst1 -> less_than_lst_one sub lst1
   | _ -> failwith "Unexpected case in less_than_lst_one function."
 
 (* This function gets the subexponentials of a cut. 
@@ -93,37 +93,37 @@ let rec get_subexp_cut cut =
     | TENSOR(a,b) ->       
       (match a,b with 
       | QST(CONST(sub2),PRED("lft",_ , _)), QST(CONST(sub4),PRED("rght", _, _)) -> 
-          [NONE, SOME(sub2), NONE, SOME(sub4)]
+          [None, Some(sub2), None, Some(sub4)]
       | QST(CONST(sub2),PRED("mlft",_ , _)), QST(CONST(sub4),PRED("mrght", _, _)) -> 
-          [NONE, SOME(sub2), NONE, SOME(sub4)]
+          [None, Some(sub2), None, Some(sub4)]
       | QST(CONST(sub4),PRED("rght", _, _)), QST(CONST(sub2),PRED("lft",_, _))  -> 
-          [NONE, SOME(sub2), NONE, SOME(sub4)]
+          [None, Some(sub2), None, Some(sub4)]
       | QST(CONST(sub4),PRED("mrght", _, _)), QST(CONST(sub2),PRED("mlft",_, _))  -> 
-          [NONE, SOME(sub2), NONE, SOME(sub4)]
+          [None, Some(sub2), None, Some(sub4)]
       | BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))), QST(CONST(sub4),PRED("rght", _, _)) -> 
-          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+          [Some(sub1), Some(sub2),None, Some(sub4)]
       | BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))), QST(CONST(sub4),PRED("mrght", _, _)) -> 
-          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+          [Some(sub1), Some(sub2),None, Some(sub4)]
       | QST(CONST(sub4),PRED("rght", _, _)), BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))) -> 
-          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+          [Some(sub1), Some(sub2),None, Some(sub4)]
       | QST(CONST(sub4),PRED("mrght", _, _)), BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))) -> 
-          [SOME(sub1), SOME(sub2),NONE, SOME(sub4)]
+          [Some(sub1), Some(sub2),None, Some(sub4)]
       | QST(CONST(sub2),PRED("lft",_, _)), BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))) -> 
-          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+          [None, Some(sub2), Some(sub3), Some(sub4)]
       | QST(CONST(sub2),PRED("mlft",_, _)), BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))) -> 
-          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+          [None, Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))), QST(CONST(sub2),PRED("lft",_, _)) -> 
-          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+          [None, Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))), QST(CONST(sub2),PRED("mlft",_, _)) -> 
-          [NONE, SOME(sub2), SOME(sub3), SOME(sub4)]
+          [None, Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))), BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))) ->
-          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+          [Some(sub1), Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))), BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))) ->
-          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+          [Some(sub1), Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub3),QST(CONST(sub4),PRED("rght", _, _))), BANG(CONST(sub1),QST(CONST(sub2),PRED("lft",_, _))) ->
-          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+          [Some(sub1), Some(sub2), Some(sub3), Some(sub4)]
       | BANG(CONST(sub3),QST(CONST(sub4),PRED("mrght", _, _))), BANG(CONST(sub1),QST(CONST(sub2),PRED("mlft",_, _))) ->
-          [SOME(sub1), SOME(sub2), SOME(sub3), SOME(sub4)]
+          [Some(sub1), Some(sub2), Some(sub3), Some(sub4)]
       | _ -> failwith "Wrong cut")
     | _ -> failwith "Wrong cut")
   | _ -> failwith "Wrong cut"
@@ -133,47 +133,47 @@ let rec get_subexp_cut cut =
 permutes over an introduction rule.*)
 
 let rec cut_permutes_over cut rule = 
-let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
+let [a,Some(b),c,Some(d)] = get_subexp_cut cut in
 let rule_prefix = get_subexp_prefix rule in 
 let check_one_monopole mono_prefix =
   match a,c with 
 (*Case when the cut has two bangs.*)
-  | SOME(a1), SOME(c1) ->
+  | Some(a1), Some(c1) ->
     ( match mono_prefix with
-     | NONE :: rest -> (less_than_lst_all c1 rest) && (less_than_lst_all a1
+     | None :: rest -> (less_than_lst_all c1 rest) && (less_than_lst_all a1
 rest)
-     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+     | Some(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
                             ((not (geq d s) && (not (Subexponentials.weak d)))) -> true 
-     | SOME(s) :: rest when (geq a1 s) && (geq d s) ->  
+     | Some(s) :: rest when (geq a1 s) && (geq d s) ->  
                               (less_than_lst_all c1 rest)
-     | SOME(s) :: rest when (geq b s) && (geq c1 s) ->  
+     | Some(s) :: rest when (geq b s) && (geq c1 s) ->  
                               (less_than_lst_all a1 rest)
      | _ -> false
     )
 (*Cases when the cut has a single bang.*)
-  | SOME(a1), NONE ->
+  | Some(a1), None ->
     ( match mono_prefix with
-     | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+     | None :: rest -> true
+     | Some(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
                             ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
-     | SOME(s) :: rest when (geq d s) && (geq a1 s) -> true
+     | Some(s) :: rest when (geq d s) && (geq a1 s) -> true
      | _ -> false
     )
-  | NONE, SOME(c1) -> 
+  | None, Some(c1) -> 
     ( match mono_prefix with
-     | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+     | None :: rest -> true
+     | Some(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
                             ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
-     | SOME(s) :: rest when (geq b s) && (geq c1 s) -> true
+     | Some(s) :: rest when (geq b s) && (geq c1 s) -> true
      | _ -> false
     )
 (*Case when the cut has no bangs.*)
-  | NONE, NONE -> 
+  | None, None -> 
     ( match mono_prefix with
-     | NONE :: rest -> true
-     | SOME(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
+     | None :: rest -> true
+     | Some(s) :: rest when (not (geq b s) && (not (Subexponentials.weak b))) &&  
                             ((not (geq d s) && (not (Subexponentials.weak d)))) -> true
-     | SOME(s) :: rest -> 
+     | Some(s) :: rest -> 
         Hashtbl.fold (fun key data acc -> if (geq key s) then acc
         else false) Subexponentials.typeTbl true
      | _ -> failwith "Unexpected case when cut has no bangs."
@@ -206,7 +206,7 @@ match rule with
       List.append (collect_quests b1) (collect_quests b2)
   | BANG(CONST(sub),b) -> (collect_quests b)
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests b)
-  | QST(CONST(sub),b2) -> [SOME(sub)]
+  | QST(CONST(sub),b2) -> [Some(sub)]
   | _ -> failwith "Unexpected term in a rule, while collecting quests."
 
 let rec collect_bangs rule = 
@@ -214,7 +214,7 @@ match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
   | TENSOR(b1, b2) | ADDOR(b1,b2) | PARR(b1,b2) | WITH(b1,b2) -> 
       List.append (collect_bangs b1) (collect_bangs b2)
-  | BANG(CONST(sub),b) -> [SOME(sub)]
+  | BANG(CONST(sub),b) -> [Some(sub)]
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_bangs b)
   | QST(CONST(sub),b2) -> []
   | _ -> failwith "Unexpected term in a rule, while collecting bangs."
@@ -254,7 +254,7 @@ match rules with
   let hdStruct = findHead rl in
   begin
     try match unify hdRule hdStruct with
-    | () -> SOME(findQST rl) :: (findEquiv_Aux tail) 
+    | () -> Some(findQST rl) :: (findEquiv_Aux tail) 
     with _ -> findEquiv_Aux tail
   end
 in
@@ -265,15 +265,15 @@ let rec rule_permutes rule1 rule2 strRules =
 let rec condition_equiv sub bangs equiv = 
   match bangs with
   | [] -> true
-  | SOME(s) :: lst when  (geq sub s) || (less_than_lst_one s equiv)
+  | Some(s) :: lst when  (geq sub s) || (less_than_lst_one s equiv)
       -> condition_equiv sub lst equiv
-  | SOME(s) :: lst -> false
+  | Some(s) :: lst -> false
   | _ -> failwith "Unexpected case."
 in
 let rec greater_subexp bangs quests equiv = 
   (match quests with
   | [] -> true 
-  | SOME(sub) :: lst when (condition_equiv sub bangs equiv)
+  | Some(sub) :: lst when (condition_equiv sub bangs equiv)
   (* Check whether there is an equivalence or the body is ok.*)
       -> (greater_subexp bangs lst equiv)
   | _ -> false)
@@ -300,9 +300,9 @@ with
           let rule1Bang = collect_bangs rule1 in 
           let rule2Bang = collect_bangs rule2 in
           (match rule1Bang with
-            | SOME(s) :: lst -> 
+            | Some(s) :: lst -> 
                 let all_bangs = List.append lst rule2Bang in
-                List.fold_left (fun acc (SOME(s1)) -> (s1 = s) & acc) true all_bangs
+                List.fold_left (fun acc (Some(s1)) -> (s1 = s) & acc) true all_bangs
             | _ -> failwith "Unexpected case."
           )
         )
@@ -411,7 +411,7 @@ match rule with
       List.append (collect_quests_aux b1 str) (collect_quests_aux b2 str)
   | BANG(CONST(sub),b) -> (collect_quests_aux b str)
   | ABS(_, _, b) | EXISTS(_,_,b) | FORALL(_,_,b) ->  (collect_quests_aux b str)
-  | QST(CONST(sub),PRED(str1,_,_)) when str = str1 -> [SOME(sub)]
+  | QST(CONST(sub),PRED(str1,_,_)) when str = str1 -> [Some(sub)]
   | QST(CONST(sub),_) -> []
   | _ -> failwith "Unexpected term in a rule, while collecting string quests."
 in
@@ -424,15 +424,15 @@ let all_subs_rght =
     List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] !Specification.introRules 
 in
 let check_lft_subs b lft_subs = 
-  List.fold_left (fun acc (SOME(s)) -> 
+  List.fold_left (fun acc (Some(s)) -> 
     if geq s b then acc else false) true lft_subs
 in
 let check_rght_subs d rght_subs = 
-  List.fold_left (fun acc (SOME(t)) -> 
+  List.fold_left (fun acc (Some(t)) -> 
     if geq t d then acc else false) true rght_subs
 in
 let rec weak_cut_aux cut = 
-  let [a,SOME(b),c,SOME(d)] = get_subexp_cut cut in
+  let [a,Some(b),c,Some(d)] = get_subexp_cut cut in
   (check_lft_subs b all_subs_lft) &&  (check_rght_subs d all_subs_rght)
 in
 let rec weak_cut_aux_lst cuts =      
@@ -468,7 +468,7 @@ let rec test3 () =
     match !introRules with
     | [] -> print_endline "Should not come here!"
     | rule1 :: lst -> let equiv = findEquiv rule1 !structRules in 
-        List.iter (fun (SOME(s)) -> print_endline s) equiv;
+        List.iter (fun (Some(s)) -> print_endline s) equiv;
         print_endline "Found equivalences"
 *)
 

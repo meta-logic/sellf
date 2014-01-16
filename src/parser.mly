@@ -60,15 +60,15 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
 %right QST BANG HBANG
 
 %start types             /* the entry point */
-%type <string Term.option> types 
+%type <string option> types 
 %type <Term.types> typeN
 
 %start clause            /* the entry point */
-%type <string Term.option> clause
+%type <string option> clause
 %type <Term.terms list> terms
 
 %start goal             /* the entry point */
-%type <string Term.option> goal
+%type <string option> goal
 
 %start top             /* the entry point */
 %type <string> top 
@@ -80,12 +80,12 @@ types:
 KIND NAME TYPE DOT { 
   let result = Specification.addKindTbl (TKIND ($2)) in
   match result with
-    | NONE -> if !verbose then begin 
+    | None -> if !verbose then begin 
       print_string (" New kind "^$2^" created.\n")
       end;
-      NONE
-    | SOME (k) -> print_endline ("[ERROR] Kind already declared: "^$2);
-      flush stdout; SOME (k)
+      None
+    | Some (k) -> print_endline ("[ERROR] Kind already declared: "^$2);
+      flush stdout; Some (k)
 }
 | TYPE NAME typeN DOT { 
   let dupChk = Specification.isKindDeclared $2 in
@@ -96,11 +96,11 @@ KIND NAME TYPE DOT {
         print_endline (" New type created: "^$2^" : "^(typeToString $3));
         flush stdout;
       end;
-      NONE
+      None
     | true, _ -> print_string ("[ERROR] Type previously declared as a kind: "^$2);
-      print_newline(); flush stdout; SOME ($2)
+      print_newline(); flush stdout; Some ($2)
     | _, true -> print_string ("[ERROR] Type previously declared as a type: "^$2);
-      print_newline(); flush stdout; SOME($2) 
+      print_newline(); flush stdout; Some($2) 
 }
 ;
 
@@ -132,22 +132,22 @@ clause:
           initSubexp $2;
           Subexponentials.addType $2 LIN;
           if !verbose then print_endline ("New linear subexponential: "^$2);
-          NONE
+          None
         | "aff" -> 
           initSubexp $2;
           Subexponentials.addType $2 AFF;
           if !verbose then print_endline ("New affine subexponential: "^$2);
-          NONE
+          None
         | "rel" -> 
           initSubexp $2;
           Subexponentials.addType $2 REL;
           if !verbose then print_endline ("New relevant subexponential: "^$2);
-          NONE
+          None
         | "unb" -> 
           initSubexp $2;
           Subexponentials.addType $2 UNB;
           if !verbose then print_endline ("New unbounded subexponential: "^$2);
-          NONE
+          None
         | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
     end
     | true -> failwith ("Subexponential name previously declared: "^$2)
@@ -158,7 +158,7 @@ clause:
   match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
     | true, true -> 
       if check_val_subexp $2 $4 then
-        (Hashtbl.add Subexponentials.orderTbl $2 $4; NONE) 
+        (Hashtbl.add Subexponentials.orderTbl $2 $4; None) 
       else failwith ("ERROR: More powerful subexponential "^$2^" cannot be smaller than the less powerful subexponential "^$4)
     | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
     | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
@@ -167,7 +167,7 @@ clause:
   match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
     | true, true -> 
       if check_val_subexp $4 $2 then
-        (Hashtbl.add Subexponentials.orderTbl $4 $2; NONE) 
+        (Hashtbl.add Subexponentials.orderTbl $4 $2; None) 
       else failwith ("ERROR: More powerful subexponential "^$4^" cannot be smaller than the less powerful subexponential "^$2)
     | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
     | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
@@ -188,15 +188,15 @@ clause:
         | "rghtlft" -> RIGHTLEFT
         | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
       in
-      Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); NONE
+      Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
     | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
 }
 
 /* Defines which kind of rules we are specifying now */
-| RULES AXIOM DOT { rules := AXIOM; NONE }
-| RULES CUTRULE DOT { rules := CUT; NONE }
-| RULES INTRODUCTION DOT { rules := INTRO; NONE }
-| RULES STRUCTURAL DOT { rules := STRUCT; NONE }
+| RULES AXIOM DOT { rules := AXIOM; None }
+| RULES CUTRULE DOT { rules := CUT; None }
+| RULES INTRODUCTION DOT { rules := INTRO; None }
+| RULES STRUCTURAL DOT { rules := STRUCT; None }
 
 /* System's specifications must have this form. */
 | body DOT {
@@ -226,7 +226,7 @@ clause:
     print_endline ("New formula: "^(termToString clause));
     flush stdout
   end;
-  NONE
+  None
 }
 ;
 
@@ -245,7 +245,7 @@ body DOT {
     print_endline (" New goal: "^(termToString $1));
     flush stdout
   end;
-  NONE
+  None
 }
 ;
 

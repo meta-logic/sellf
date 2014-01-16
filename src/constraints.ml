@@ -48,6 +48,24 @@ let isIn f subexp ctx =
     | SINGLE -> create [ELIN(f, (subexp, index))]
 ;;
 
+(* Creates the in/elin constraints for the end-sequent.
+   This method takes into account the side the formula is supposed to be and
+   ignores $gamma and $infty. It deduces the possible initial context for the
+   head of a specification.
+*)
+let inEndSequent spec ctx = 
+  let head = Specification.getPred spec in
+  let side = Specification.getSide head in
+  List.fold_right (fun (s, i) acc -> 
+    if s = "$gamma" || s = "$infty" then acc
+    else match getCtxSide s with
+      | RIGHTLEFT -> (isIn head s ctx) :: acc
+      | RIGHT when side = "rght" -> (isIn head s ctx) :: acc
+      | LEFT when side = "lft" -> (isIn head s ctx) :: acc
+      | _ -> acc
+  ) (ContextSchema.getContexts ctx) []
+;;
+
 let requireIn f subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
   create [REQIN(f, (subexp, index))]
@@ -89,13 +107,6 @@ let bang ctx subexp =
 returned *)
 let initial ctx f = 
   let contexts = ContextSchema.getContexts ctx in
-  (* TODO: move this function somewhere else *)
-  let isSameSide s pred = match (Subexponentials.getCtxSide s, Specification.getSide pred) with
-    | (RIGHTLEFT, _) -> true
-    | (RIGHT, "rght") -> true
-    | (LEFT, "lft") -> true
-    | _ -> false
-  in
   (* Suppose the dual of f is in s, generates all the constraints *)
   let isHere (sub, i) dualf = 
     let empty = List.fold_right (fun (s, i) acc ->
@@ -108,8 +119,9 @@ let initial ctx f =
     REQIN(dualf, (sub, i)) :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
+    let formSide = Specification.getSide (nnf (NOT f)) in
   (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
-    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (isSameSide (fst(c)) (nnf (NOT f))) then acc
+    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs

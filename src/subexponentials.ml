@@ -131,4 +131,10 @@ let typeAsString s = match type_of s with
   | REL -> "rel"
   | AFF -> "aff"
 
+(* Checks if a subexponential is on the same side as pred *)
+let isSameSide sub str = match (getCtxSide sub, str) with
+  | (RIGHTLEFT, _) -> true
+  | (RIGHT, "rght") -> true
+  | (LEFT, "lft") -> true
+  | _ -> false
 

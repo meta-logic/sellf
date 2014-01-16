@@ -136,13 +136,14 @@ let get_form_index n rules_lst = begin
   !i
 end ;;
 
-let get_rulenames () = begin
+let get_rulenames () =
   let formulas = !Specification.others @ !Specification.introRules in
-  let rules_lst = List.map (fun f ->
+  List.map (fun f ->
     let rule = termToTexString (OlSequent.getOnlyRule (OlSequent.formatForm (f))) in
-    let side = OlContext.getFormSide f in (rule, side)
-  ) formulas in rules_lst
-end ;;  
+    let side = Specification.getSide (Specification.getPred f) in
+    (rule, side)
+  ) formulas
+;;  
 
 let print_rulenames () = begin
   let rules_lst = get_rulenames () in

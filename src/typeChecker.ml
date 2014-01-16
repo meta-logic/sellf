@@ -164,12 +164,12 @@ let rec unifyTypes gTyp vTyp sub = match (gTyp, vTyp) with
 		(*VN: Not exhaustive yet. Waiting for a better implem. for lists*)
 		(*| (TBASIC (TLIST(TINT)), TBASIC (TLIST(TINT))) -> sub *)
 		| (x, TBASIC (TKIND (y))) -> (match sub (TBASIC (TKIND (y))) with
-			  		| NONE ->  let sub2 z = (match z with
-			  					| TBASIC (TKIND (d)) when d = y ->  SOME (x)  (* *)
+			  		| None ->  let sub2 z = (match z with
+			  					| TBASIC (TKIND (d)) when d = y ->  Some (x)  (* *)
 								| d -> sub d)
 						   in sub2
-					| SOME (x1) when x1 = x -> sub
-					| SOME (_) -> failwith "Failed when unifying type variables.")
+					| Some (x1) when x1 = x -> sub
+					| Some (_) -> failwith "Failed when unifying type variables.")
 		| _ -> print_string (" Type1:"^(typeToString gTyp)^"  Type2:"^(typeToString vTyp)); 
              print_newline (); failwith "Failed when unifying type variables:"
 
@@ -177,10 +177,10 @@ let rec unifyTypes gTyp vTyp sub = match (gTyp, vTyp) with
 let rec applySub sub typ = match typ with 
 			   | ARR (t0, t1) -> ARR (applySub sub t0, applySub sub t1)
 			   | x -> (match sub x with
-				  | NONE -> typ
-				  | SOME (t) -> (match sub t with
-						| NONE -> t
-						| SOME(t2) -> t2))
+				  | None -> typ
+				  | Some (t) -> (match sub t with
+						| None -> t
+						| Some(t2) -> t2))
  
 (*Function that typechecks a term. It takes a term, possibly with variables, a type, a subsitution for the 
 type variables, an environment that given a term variable returns its type, and a number varC with the 
@@ -188,19 +188,19 @@ number of the type variables used. *)
 let rec tCheckAux term typ sub env varC = 
 (*Initialize the substitution for type variables as empty*)
 let subInit x = (match x with 
-		  | _ -> NONE) 
+		  | _ -> None) 
 in 
 (*All variables appearing in a comparison must have type int.*)
 let rec tCheckInt intBody env = 
 match intBody with
    | INT (x) -> (subInit, env)
    | VAR v -> (match env (v.str,v.id) with 
-   		     | NONE -> let env2 z = (match z with
-		     				| (x1,i1) when (x1,i1) = (v.str,v.id) -> SOME (TBASIC(TINT))
+   		     | None -> let env2 z = (match z with
+		     				| (x1,i1) when (x1,i1) = (v.str,v.id) -> Some (TBASIC(TINT))
 		     				| (x1,i1) -> env (x1,i1)) 
 		       in (subInit, env2)
-		     | SOME (TBASIC(TINT)) -> (subInit, env)
-		     | SOME (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
+		     | Some (TBASIC(TINT)) -> (subInit, env)
+		     | Some (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
    | PLUS (int1, int2) -> let (_,env1) = tCheckInt int1 env in
 	 		   let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
    | MINUS (int1, int2) -> let (_,env1) = tCheckInt int1 env in
@@ -237,27 +237,27 @@ match term with
       end
 	| VAR v -> let (x, y) = (v.str, v.id) in 
       (match env (x,y) with
-			| NONE -> let env2 z = (match z with
-					     | (x1,y1) when (x1,y1) = (x,y) -> SOME (typ)
+			| None -> let env2 z = (match z with
+					     | (x1,y1) when (x1,y1) = (x,y) -> Some (typ)
 					     | (x1,y1) -> env (x1,y1))
 				in (typ, sub, env2, varC)
-			| SOME (typ2) -> let sub2 = unifyTypes typ2 typ sub in
+			| Some (typ2) -> let sub2 = unifyTypes typ2 typ sub in
 					 let newTyp = applySub sub2 typ in  
 					 let env2 z = (match z with
-					     | (x1,y1) when (x1,y1) = (x,y) -> SOME (newTyp)
+					     | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
 					     | (x1,y1) -> env (x1,y1))
 					 in 
 					 (newTyp, sub2, env2, varC))
   | ABS (x, y, term2) -> (match typ with
       | ARR(t1, t2) -> (match env (x,y) with
-          | NONE -> let env2 z = (match z with
-               | (x1,y1) when (x1,y1) = (x,y) -> SOME (t1)
+          | None -> let env2 z = (match z with
+               | (x1,y1) when (x1,y1) = (x,y) -> Some (t1)
                | (x1,y1) -> env (x1,y1))
                in tCheckAux term2 t2 sub env2 varC
-          | SOME (typ2) -> let sub2 = unifyTypes typ2 typ sub in
+          | Some (typ2) -> let sub2 = unifyTypes typ2 typ sub in
               let newTyp = applySub sub2 typ in  
               let env2 z = (match z with
-                  | (x1,y1) when (x1,y1) = (x,y) -> SOME (newTyp)
+                  | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
                   | (x1,y1) -> env (x1,y1))
               in 
               tCheckAux term2 t2 sub2 env2 varC)
@@ -324,8 +324,8 @@ let rec grEnvImgTerms sub env terms = match terms with
 					| (x1,i1) when (x1,i1) = (x,i) -> 
             begin
               match env (x1,i1) with
-              | SOME (t) -> SOME (applySub sub t)
-              | _ -> NONE
+              | Some (t) -> Some (applySub sub t)
+              | _ -> None
             end
 					| (x1,i1) -> env (x1,i1)) in env2
 				| APP (x, y) -> 
@@ -352,9 +352,9 @@ let rec grEnvImgProp sub env prop = match prop with
 *)
 let rec typeCheck clause = 
 	let subInit x = (match x with 
-		 	_ -> NONE) in 
+		 	_ -> None) in 
 	let envInit x = (match x with 
-		 	_ -> NONE) in
+		 	_ -> None) in
 	let rec tCheckBody body env = 
     begin match body with
       | PRED(_, x, _) -> let (_, s, e, _) = tCheckAux x (TBASIC (TPRED)) subInit env 0
@@ -370,14 +370,14 @@ let rec typeCheck clause =
           in 
           begin
             match envY (x,i) with
-            | NONE -> let env2 z = 
+            | None -> let env2 z = 
                 begin match z with
-                  | (x1,i1) when (x1,i1) = (x,i) -> SOME (typeY)
+                  | (x1,i1) when (x1,i1) = (x,i) -> Some (typeY)
                   | (x1,i1) -> envY (x1,i1)
                 end
               in (subY, env2)
-            | SOME (typeY1) when typeY1 = typeY -> (subY,envY)
-            | SOME (_) -> failwith "Error: Type variable mismatched"
+            | Some (typeY1) when typeY1 = typeY -> (subY,envY)
+            | Some (_) -> failwith "Error: Type variable mismatched"
           end
       | COMP (_, int1, int2) -> let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
               in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)

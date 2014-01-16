@@ -28,14 +28,14 @@ let addTypeTbl name entry = Hashtbl.add typeTbl name entry
 
 let addKindTbl entry = 
 	match entry with
-	| TINT -> NONE
-	| TPRED -> NONE
+	| TINT -> None
+	| TPRED -> None
 	| TKIND (k) -> (
     match (isKindDeclared k) with
-	    | false -> Hashtbl.add kindTbl k (TKIND (k)); NONE
-			| true -> SOME (k)
+	    | false -> Hashtbl.add kindTbl k (TKIND (k)); None
+			| true -> Some (k)
     )
-	| _ -> NONE
+	| _ -> None
 ;;
 
 (* Info from the .pl file *)
@@ -94,9 +94,10 @@ let getFirstArgName p = match p with
 
 let rec getPred f = match f with 
   | TENSOR(NOT(prd), spc) -> prd
-  | ABS(s, i, t) -> getPred t
+  | EXISTS(s, i, t) -> getPred t
   | NOT(prd) -> prd
-  | _ -> failwith "Not expected formula in specification."
+  | PRED(_, _, _) -> f
+  | _ -> failwith ("Not expected formula in specification: " ^ Prints.termToString f)
 ;;
 
 (* Given a predicate that is a head of a specification, return the side of the

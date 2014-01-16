@@ -23,11 +23,9 @@ module type OLCONTEXT =
     type ctx = subexp * Term.terms list
     type context = { mutable lst : ctx list  }
     val create : subexp list -> context
-    val getFormSide : Term.terms -> string
     val remFirstChar : string -> string
     (* List all the different context variables *)
     val getStrings : context -> string list
-    val checkSide : string -> string -> bool
     val toStringForms : Term.terms list -> string -> string -> string
     val toTexString : context -> string -> string list -> string 
     val fixContext : subexp -> subexp
@@ -49,6 +47,7 @@ module OlContext : OLCONTEXT = struct
   }
   
   (* This is necessary because the last formulas are DB(i) *)
+  (* TODO: I don't think they are anymore... please check. *)
   let rec getAbsLst f absLst =
     match f with
     | ABS (s, i, t) -> getAbsLst t ([s] @ absLst)
@@ -62,22 +61,6 @@ module OlContext : OLCONTEXT = struct
     | PRED (s, t, pol) -> formatForm t
     | APP (t, tlist) -> List.hd tlist
     | _ -> f
-  
-  let rec getFormSide f =
-    match f with
-    | APP (t, tlist) -> getFormSide t
-    | EXISTS (s, i, t) -> getFormSide t
-    | LOLLI (t1, t2, t3) -> getFormSide t2
-    | ABS (s, i, t) -> getFormSide t
-    | TENSOR (t1, t2) -> getFormSide t1
-    | ADDOR (t1, t2) -> getFormSide t1
-    | PARR (t1, t2) -> getFormSide t1
-    | WITH (t1, t2) -> getFormSide t1
-    | BANG (t1, t2) -> getFormSide t1
-    | NOT (t) -> getFormSide t
-    | PRED (s, t, pol) -> s
-    | CONST (s) -> s
-    | _ -> "empty"
 
   let remFirstChar str = 
     if (String.get str 0) = '#' || (String.get str 0) = '$' then 
@@ -94,18 +77,12 @@ module OlContext : OLCONTEXT = struct
 	      else n :: acc
     ) ctx.lst []
   
-  let checkSide n side = match Subexponentials.getCtxSide n with
-    | Subexponentials.RIGHTLEFT -> true
-    | Subexponentials.RIGHT when side = "rght" -> true
-    | Subexponentials.LEFT when side = "lft" -> true
-    | _ -> false
-    
   (* n = '#' ?? *)
   let toStringForms formulas side n = 
     let formList = List.map (fun f' -> (f', (getAbsLst f' []))) formulas in
     (List.fold_right (fun (form, absLst) acc' ->
-      let formSide = getFormSide form in
-      if (checkSide n formSide) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
+      let formSide = Specification.getSide (Specification.getPred form) in
+      if (Subexponentials.isSameSide n formSide) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
       else begin
 	      print_string ("\nThe following formula can't belong to the context "
 	      ^ n ^ ": " ^ (Prints.termToString form) ^ "\nPlease verify your especification.\n");
@@ -119,7 +96,7 @@ module OlContext : OLCONTEXT = struct
     let slotToTex ctx side str_ctx =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = checkSide n side in
+      let correctSide = Subexponentials.isSameSide n side in
       match (n, side, f) with
       | (_, "lft", []) -> 
 				if n = str_ctx && correctSide then
@@ -160,7 +137,7 @@ module OlContext : OLCONTEXT = struct
     ) ctx.lst "") in
     (* Print all slots *)
     List.fold_right (fun str_ctx acc ->
-      match checkSide str_ctx side with 
+      match Subexponentials.isSameSide str_ctx side with
         | false -> acc
         | true ->
           match remComma (slotToTex ctx side str_ctx) with
@@ -291,8 +268,8 @@ module OlProofTree : OLPROOFTREE = struct
       | ([], ASYN) -> 
 				begin
 				  match pt.rule with 
-				  | SOME(r) -> []
-				  | NONE -> [pt]
+				  | Some(r) -> []
+				  | None -> [pt]
 				end
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) 
     in      
@@ -301,8 +278,8 @@ module OlProofTree : OLPROOFTREE = struct
         | [] -> 
           begin
             match (getRule pt) with 
-            | SOME(r) -> []
-            | NONE -> [pt]
+            | Some(r) -> []
+            | None -> [pt]
           end
         | _ -> begin match (getPol pt) with
  	 		    | ASYN ->
@@ -323,8 +300,8 @@ module OlProofTree : OLPROOFTREE = struct
     let firstPt = List.hd olPt.premises in
     let rec getOpenLeaves pt = 
       match pt.rule with
-      | SOME(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.premises)
-      | NONE -> [pt] in
+      | Some(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.premises)
+      | None -> [pt] in
     let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
     olPt.premises <- newPremises
@@ -349,17 +326,19 @@ module OlProofTree : OLPROOFTREE = struct
     let str_list = collectStrings pt in
     let rec toTexString' pt = 
       match pt.rule with
-      | SOME(r) ->
+      | Some(r) ->
 	      let seq = getConclusion pt in
 	      let rule = OlSequent.getMainForm seq in
 	      let topproof = match pt.premises with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
 	      in
-        let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar (OlContext.getFormSide (List.hd seq.OlSequent.goals))) ^ "}" in
+        let pred = List.hd seq.OlSequent.goals in
+        let formSide = Specification.getSide pred in
+        let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar formSide) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
 	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "} \;\; " ^ ruleNameTex 
-      | NONE -> (OlSequent.toTexString (getConclusion pt) str_list) 
+      | None -> (OlSequent.toTexString (getConclusion pt) str_list) 
     in
     toTexString' pt
 
@@ -693,8 +672,8 @@ module Derivation : DERIVATION = struct
     let rec getSequents' pt = 
       if (List.exists (fun pt' ->
 	  match pt'.OlProofTree.rule with
-	  | SOME(r) -> if (pt'.OlProofTree.premises = []) then true else false
-	  | NONE -> false
+	  | Some(r) -> if (pt'.OlProofTree.premises = []) then true else false
+	  | None -> false
 	) pt.OlProofTree.premises) then
 	begin
 	  let pt2 = List.find (fun pt' -> pt'.OlProofTree.premises <> []) pt.OlProofTree.premises in

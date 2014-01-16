@@ -1,3 +1,10 @@
+(**************************************)
+(*                                    *)
+(*       Basic data structure         *)
+(*                                    *)
+(**************************************)
+
+
 (* Verbose on/off *)
 let verbose = ref false ;;
 (* Tabling on/off *)
@@ -6,8 +13,6 @@ let tabling = ref false ;;
 let time = ref false ;;
 (* Bound for the proof search *)
 let psBound = ref 10 ;;
-
-type 'a option = NONE | SOME of 'a
 
 (* Each logical variable is identified by this number. 
  * A new logical variable should increment one in this identifier. *)

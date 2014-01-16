@@ -32,6 +32,8 @@ val isEmpty : constraintset -> bool
 
 val isIn : Term.terms -> string -> ContextSchema.context -> constraintset
 
+val inEndSequent : Term.terms -> ContextSchema.context -> constraintset list
+
 val requireIn : Term.terms -> string -> ContextSchema.context -> constraintset
 
 val insert : Term.terms -> string -> ContextSchema.context -> ContextSchema.context -> constraintset

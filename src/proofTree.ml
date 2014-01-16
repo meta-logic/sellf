@@ -25,7 +25,7 @@ type prooftree = {
 let create sq = {
   conclusion = sq;
   premises = [];
-  rule = NONE;
+  rule = None;
   closed = true (* for printing purposes... fixme later *)
 }
 
@@ -45,7 +45,7 @@ let releaseDown pt =
   let ctx = Context.copy inCtx in
   let premise = Sequent.createAsyn ctx goals in
   let newpt = create premise in
-  pt.rule <- SOME(RELEASEDOWN);
+  pt.rule <- Some(RELEASEDOWN);
   pt.premises <- [newpt];
   newpt
 
@@ -56,7 +56,7 @@ let releaseUp pt f =
   let newgoals = List.filter (fun form -> form != f) goals in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in
-  pt.rule <- SOME(RELEASEUP);
+  pt.rule <- Some(RELEASEUP);
   pt.premises <- [newpt];
   newpt
   
@@ -69,7 +69,7 @@ let applyAddOr1 pt f =
   in
   let premise = Sequent.createSync newctx f1 in
   let newpt = create premise in
-  pt.rule <- SOME(ADDOR1RULE);
+  pt.rule <- Some(ADDOR1RULE);
   pt.premises <- [newpt];
   newpt
 
@@ -82,7 +82,7 @@ let applyAddOr2 pt f =
   in
   let premise = Sequent.createSync newctx f2 in
   let newpt = create premise in
-  pt.rule <- SOME(ADDOR2RULE);
+  pt.rule <- Some(ADDOR2RULE);
   pt.premises <- [newpt];
   newpt
 
@@ -96,7 +96,7 @@ let applyTensor1 pt f =
   let newctx = Context.copy ctx in
   let premise = Sequent.createSync newctx f1 in
   let newpt = create premise in
-  pt.rule <- SOME(TENSORRULE);
+  pt.rule <- Some(TENSORRULE);
   pt.premises <- [newpt];
   newpt
 
@@ -131,11 +131,11 @@ let applyExists pt f =
   let newf = Norm.hnorm (APP (ABS (s, 1, f1), [ptr])) in
   let premise = Sequent.createSync newctx newf in
   let newpt = create premise in
-  pt.rule <- SOME(EXISTSRULE);
+  pt.rule <- Some(EXISTSRULE);
   pt.premises <- [newpt];
   newpt
 
-let applyOne pt = pt.rule <- SOME(ONERULE)
+let applyOne pt = pt.rule <- Some(ONERULE)
 
 let applyBang pt f = 
   let ctx = SequentSchema.getContext pt.conclusion in
@@ -146,7 +146,7 @@ let applyBang pt f =
   let newctx = Context.bangin ctx s in
   let premise = Sequent.createAsyn newctx [f1] in
   let newpt = create premise in
-  pt.rule <- SOME(BANGRULE);
+  pt.rule <- Some(BANGRULE);
   pt.premises <- [newpt];
   newpt 
 
@@ -165,7 +165,7 @@ let applyWith pt f =
   let premise2 = Sequent.createAsyn newctx2 newgoals2 in
   let newpt1 = create premise1 in
   let newpt2 = create premise2 in
-  pt.rule <- SOME(WITHRULE);
+  pt.rule <- Some(WITHRULE);
   pt.premises <- [newpt1; newpt2];
   (newpt1, newpt2)
 
@@ -180,13 +180,13 @@ let applyParr pt f =
   let newgoals = f1 :: f2 :: (List.filter (fun form -> form != f) goals) in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in
-  pt.rule <- SOME(PARRRULE);
+  pt.rule <- Some(PARRRULE);
   pt.premises <- [newpt];
   newpt
 
 let applyTop pt =
   Context.markErasable (Sequent.getContextIn pt.conclusion);
-  pt.rule <- SOME(TOPRULE)
+  pt.rule <- Some(TOPRULE)
 
 let applyBot pt f = 
   let ctx = Sequent.getContextIn pt.conclusion in
@@ -195,7 +195,7 @@ let applyBot pt f =
   let newgoals = List.filter (fun form -> form != f) goals in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in
-  pt.rule <- SOME(BOTRULE);
+  pt.rule <- Some(BOTRULE);
   pt.premises <- [newpt];
   newpt
 
@@ -213,7 +213,7 @@ let applyForall pt f =
   let newgoals = newf :: (List.filter (fun form -> form != f) goals) in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in
-  pt.rule <- SOME(FORALLRULE);
+  pt.rule <- Some(FORALLRULE);
   pt.premises <- [newpt];
   newpt
 
@@ -228,7 +228,7 @@ let applyQst pt f =
   let newgoals = List.filter (fun form -> form != f) goals in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in
-  pt.rule <- SOME(QSTRULE);
+  pt.rule <- Some(QSTRULE);
   pt.premises <- [newpt];
   newpt
 

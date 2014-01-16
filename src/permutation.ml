@@ -19,31 +19,12 @@ let derive2 spec1 spec2 =
   (* Initial configuration *)
   let context = ContextSchema.createFresh () in
   let sequent = SequentSchema.createAsyn context [] in
-  
-  let head1 = Specification.getPred spec1 in
-  let side1 = Specification.getSide head1 in
-  let head2 = Specification.getPred spec2 in
-  let side2 = Specification.getSide head2 in
 
   (* Computing possible initial contexts for F1 (ignoring gamma and infty) *)
-  let in1 = List.fold_right (fun (s, i) acc -> 
-    if s = "$gamma" || s = "$infty" then acc
-    else match Subexponentials.getCtxSide s with
-      | Subexponentials.RIGHTLEFT -> (Constraints.isIn head1 s context) :: acc
-      | Subexponentials.RIGHT when side1 = "rght" -> (Constraints.isIn head1 s context) :: acc
-      | Subexponentials.LEFT when side1 = "lft" -> (Constraints.isIn head1 s context) :: acc
-      | _ -> acc
-  ) (ContextSchema.getContexts context) [] in 
+  let in1 = Constraints.inEndSequent spec1 context in
 
-  (* Computing possible initial contexts for F2 (ignorign gamma and infty) *)
-  let in2 = List.fold_right (fun (s, i) acc -> 
-    if s = "$gamma" || s = "$infty" then acc
-    else match Subexponentials.getCtxSide s with
-      | Subexponentials.RIGHTLEFT -> (Constraints.isIn head2 s context) :: acc
-      | Subexponentials.RIGHT when side2 = "rght" -> (Constraints.isIn head2 s context) :: acc
-      | Subexponentials.LEFT when side2 = "lft" -> (Constraints.isIn head2 s context) :: acc
-      | _ -> acc
-  ) (ContextSchema.getContexts context) [] in
+  (* Computing possible initial contexts for F2 (ignoring gamma and infty) *)
+  let in2 = Constraints.inEndSequent spec2 context in
 
   (* We assume that there are two occurrences of these formulas. The initial
   models generated contain two 'in' clauses, one for each formula. *)
@@ -62,7 +43,12 @@ let derive2 spec1 spec2 =
   (* Try to derive spec2 in each open leaf of each bipole of spec1 *)
   List.fold_right (fun (pt1, mdl) bp ->
     (* This is a list of lists... each open leaf has a list of (proof tree *
-       model) and these lists are the elements of the resulting list. *)
+       model) and these lists are the elements of the resulting list. I.e.:
+       open_leaf_1 : [(proof tree * model)]   
+       open_leaf_2 : [(proof tree * model)]
+       ...
+       open_leaf_n : [(proof tree * model)]   
+    *)
     let leafDerivations2over1 = List.fold_right (fun open_leaf acc ->
       match (Bipole.deriveBipole open_leaf spec2 [mdl]) with
         | [] -> acc
@@ -70,8 +56,39 @@ let derive2 spec1 spec2 =
     ) (ProofTreeSchema.getOpenLeaves pt1) []
     in
 
-    (*let size = List.length leafDerivations2over1 in
-    print_endline ("Leaf derivations: " ^ (string_of_int size));*)
+    (* Combining the derivations
+
+       Let ol1, ol2, ..., oln be the open leaves of derivation. Each open leaf
+       contains a set of pairs (proof tree * model) which are the possible
+       derivations for it. I.e.:
+
+       l1 : [d1,1, ..., d1,k1]
+       l2 : [d2,1, ..., d2,k2]
+       ...
+       ln : [dn,1, ..., dn,kn]
+
+       In order to obtain all possible derivations of both rules we need to find
+       all sets S such that 1 <= |S| <= n and S contains *at most* one element
+       from each open leaf. Note that the cross product of l1, ..., ln will give
+       all such sets of size n, but not smaller. In order to obtain sets with
+       less elements, we add a dummy element in each list which represents that
+       no element from that list was chosen. Then, the cross product gives us
+       exactly what we want once we remove the dummy elements from the sets.    
+    *)
+
+    (* Creating a list of options, in which NONE is the dummy element *)
+    let leafDerivations_opt = List.map (fun lst -> 
+      None :: (List.map (fun p -> Some(p)) lst)
+    ) leafDerivations2over1 in
+
+    (* Computing the cross product and removing the dummy elements *)
+    let allLeafDerivations = List.map ( fun lst ->
+      List.fold_right (fun p acc -> match p with
+        | Some(p) -> p :: acc
+        | None -> acc
+      ) lst []
+    ) (Basic.cartesianProduct leafDerivations_opt) in
+
 
     let bipoles2over1 = List.fold_right (fun leaves bipoles ->
       let unionModels = List.fold_right (fun (proof, m) acc -> 
@@ -81,14 +98,14 @@ let derive2 spec1 spec2 =
       List.fold_right (fun model accBp ->
         match Constraints.isEmpty model with
         | true -> bipoles
-          | false ->
-            let pt1copy = ProofTreeSchema.copy pt1 in
-            let bipole = List.fold_right (fun (leaf, _) pt ->
-              ProofTreeSchema.appendLeaf pt leaf
-            ) leaves pt1copy in
-            (bipole, model) :: accBp
+        | false ->
+          let pt1copy = ProofTreeSchema.copy pt1 in
+          let bipole = List.fold_right (fun (leaf, _) pt ->
+            ProofTreeSchema.appendLeaf pt leaf
+          ) leaves pt1copy in
+          (bipole, model) :: accBp
       ) models bipoles
-    ) (Basic.cartesianProduct leafDerivations2over1) [] in
+    ) allLeafDerivations [] in
   
     bipoles2over1 @ bp
 
