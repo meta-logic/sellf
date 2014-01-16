@@ -19,7 +19,7 @@ module type DLV =
     val emp_clauses_set : string
     val mctx_clauses_set : string
     val addform_clauses_set : string
-    val removed_clauses_set : string
+    (*val removed_clauses_set : string*)
     val aux_clauses_set : string
     val proveIf_clauses : string
     val genFile : Constraints.constraintset -> string -> unit
@@ -76,9 +76,9 @@ module Dlv : DLV = struct
   mctx(F1, G1) :- addform(F, G, G1), mctx(F1, G).\n\n"
 
   (* removed definition *)
-  let removed_clauses_set =
+  (*let removed_clauses_set =
   "% removed(F, G, G1): removing the formula F from context G yields the context G1\n
-  in(F1, G1) :- removed(F, G, G1), in(F1, G), F != F1.\n\n"
+  in(F1, G1) :- removed(F, G, G1), in(F1, G), F != F1.\n\n"*)
 
   (* for consistency *)
   let aux_clauses_set = 
@@ -125,8 +125,8 @@ module Dlv : DLV = struct
     Printf.fprintf file "%s" elin_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     (*Printf.fprintf file "%s" mctx_clauses_set;
-    Printf.fprintf file "%s" addform_clauses_set;*)
-    Printf.fprintf file "%s" removed_clauses_set;
+    Printf.fprintf file "%s" addform_clauses_set;
+    Printf.fprintf file "%s" removed_clauses_set;*)
     Printf.fprintf file "%s" aux_clauses_set;
     Printf.fprintf file "%s" (Constraints.toString cstrSet);
     close_out file
@@ -196,8 +196,8 @@ module Dlv : DLV = struct
     Printf.fprintf file "%s" elin_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     (*Printf.fprintf file "%s" mctx_clauses_set;
-    Printf.fprintf file "%s" addform_clauses_set;*)
-    Printf.fprintf file "%s" removed_clauses_set;
+    Printf.fprintf file "%s" addform_clauses_set;
+    Printf.fprintf file "%s" removed_clauses_set;*)
     Printf.fprintf file "%s" aux_clauses_set;
     Printf.fprintf file "%s" proveIf_clauses;
     Printf.fprintf file "%s" (reflSubexpRel ());

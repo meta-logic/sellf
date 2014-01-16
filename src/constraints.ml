@@ -20,7 +20,8 @@ type constraintpred =
   | ELIN of terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | REQIN of terms * ctx (* printed as ":- not in(term, ctx)."*)
+  | REQIN_UNB of terms * ctx (* printed as ":- not in(term, ctx)."*)
+  | REQIN_LIN of terms * ctx (* printed as ":- not in(term, ctx). :- in(F, G), in(F', G), F != F'."*)
  
 type constraintset = {
   mutable lst : constraintpred list;
@@ -66,10 +67,6 @@ let inEndSequent spec ctx =
   ) (ContextSchema.getContexts ctx) []
 ;;
 
-let requireIn f subexp ctx =
-  let index = ContextSchema.getIndex ctx subexp in
-  create [REQIN(f, (subexp, index))]
-
 let insert f subexp oldctx newctx = 
   let oldindex = ContextSchema.getIndex oldctx subexp in
   let newindex = ContextSchema.getIndex newctx subexp in
@@ -103,6 +100,10 @@ let bang ctx subexp =
   ) contexts [] in
   create cstrlst
 
+let requireIn f (subexp, i) = match type_of subexp with
+  | AFF | LIN -> REQIN_LIN(f, (subexp, i))
+  | REL | UNB -> REQIN_UNB(f, (subexp, i))
+
 (* Several sets of constraints are created and a list of constraint sets is
 returned *)
 let initial ctx f = 
@@ -116,11 +117,7 @@ let initial ctx f =
       end else acc
     ) contexts []
     in
-    begin
-    match type_of sub with
-        | LIN | AFF -> REQIN(dualf, (sub, i)) :: ELIN(dualf,(sub, i)) :: empty
-        | UNB | REL -> REQIN(dualf, (sub, i)) :: empty
-    end
+    (requireIn dualf (sub, i)) :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
     let formSide = Specification.getSide (Specification.getPred (nnf (NOT f))) in
@@ -139,8 +136,11 @@ let predToTexString c = match c with
     "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
     "$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$"
-  | REQIN (t, c) -> 
-    "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in()).$"
+  | REQIN_UNB (t, c) -> 
+    "$requiredInUnb(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in()).$"
+  | REQIN_LIN (t, c) -> 
+    "$requiredInLin(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in(F, G). :- in(F, G), in(F', G), F != F'.).$"
+
 
 let rec toTexString csts = 
   (List.fold_right (fun c str -> (predToTexString c) ^ ", " ^ str) csts.lst "") 
@@ -154,8 +154,11 @@ let predToString c = match c with
     "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
-  | REQIN (t, c) -> 
+  | REQIN_UNB (t, c) -> 
     ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
+  | REQIN_LIN (t, c) -> 
+    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ").\n" ^
+    ":- in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ "), in(F1, " ^ (ContextSchema.ctxToStr c) ^ "), \"" ^ (termToString t) ^ "\" != F1." 
 
 let toString csts = 
   List.fold_right (fun c str -> 

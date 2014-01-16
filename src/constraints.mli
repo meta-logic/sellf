@@ -14,7 +14,8 @@ type constraintpred =
   | ELIN of Term.terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | REQIN of Term.terms * ctx
+  | REQIN_UNB of Term.terms * ctx
+  | REQIN_LIN of Term.terms * ctx
  
 type constraintset = {
   mutable lst : constraintpred list;
@@ -34,7 +35,7 @@ val isIn : Term.terms -> string -> ContextSchema.context -> constraintset
 
 val inEndSequent : Term.terms -> ContextSchema.context -> constraintset list
 
-val requireIn : Term.terms -> string -> ContextSchema.context -> constraintset
+val requireIn : Term.terms -> (string * int) -> constraintpred
 
 val insert : Term.terms -> string -> ContextSchema.context -> ContextSchema.context -> constraintset
 

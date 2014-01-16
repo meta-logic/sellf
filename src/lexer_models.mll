@@ -21,7 +21,6 @@ rule token = parse
   | "elin"       { ELIN }
   | "emp"        { EMP }
   | "union"      { UNION }
-  | "requiredIn" { REQIN }
   | '('          { LPAREN }
   | ')'          { RPAREN }
   | '{'          { LCURLY }
