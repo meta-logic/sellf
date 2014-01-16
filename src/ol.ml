@@ -94,29 +94,23 @@ module OlContext : OLCONTEXT = struct
 	      else n :: acc
     ) ctx.lst []
   
-  let checkSide n side =
-    let ctxType = Subexponentials.getCtxType n in
-    match ctxType with 
-    | SOME(tuple) -> let side' = snd(tuple) in
-      (side' = side) || (side' = "rghtlft")
-    | NONE -> false
+  let checkSide n side = match Subexponentials.getCtxSide n with
+    | Subexponentials.RIGHTLEFT -> true
+    | Subexponentials.RIGHT when side = "rght" -> true
+    | Subexponentials.LEFT when side = "lft" -> true
+    | _ -> false
     
+  (* n = '#' ?? *)
   let toStringForms formulas side n = 
-    let ctxType = Subexponentials.getCtxType n in
     let formList = List.map (fun f' -> (f', (getAbsLst f' []))) formulas in
     (List.fold_right (fun (form, absLst) acc' ->
       let formSide = getFormSide form in
-      let ctxSide = snd(Term.getFromOption(ctxType)) in
-      if (formSide = side) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
+      if (checkSide n formSide) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
       else begin
-	  if (formSide <> ctxSide) && (ctxSide <> "rghtlft") then 
-	    begin
 	      print_string ("\nThe following formula can't belong to the context "
 	      ^ n ^ ": " ^ (Prints.termToString form) ^ "\nPlease verify your especification.\n");
 	      acc'
 	    end
-	  else acc'
-	end
     ) formList "")
     
   let remComma str = try String.sub str 0 ((String.length str) - 2) with Invalid_argument("String.sub") -> str
@@ -196,7 +190,7 @@ module type OLSEQUENT =
       mutable pol : phase }  
     val create : OlContext.context -> Term.terms list -> Term.phase -> sequent 
     val getContext : sequent -> OlContext.context
-    val getMainForm : sequent -> (Term.terms option)
+    val getMainForm : sequent -> Term.terms
     val toTexString : sequent -> string list -> string 
     val getOnlyRule : Term.terms -> Term.terms
     val formatForm : Term.terms -> Term.terms
@@ -239,10 +233,9 @@ module OlSequent : OLSEQUENT = struct
     | APP (t, tlist) -> t
     | _ -> f
     
-  let getMainForm seq = 
-    match seq.goals with
-    | [] -> NONE
-    | _ -> SOME (getOnlyRule (formatForm (List.hd seq.goals)))
+  let getMainForm seq = match seq.goals with
+    | [] -> failwith "Sequent has no goals."
+    | _ -> getOnlyRule (formatForm (List.hd seq.goals))
   
   let toTexString seq str_list = (OlContext.toTexString seq.ctx "lft" str_list)
 				  ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
@@ -290,53 +283,40 @@ module OlProofTree : OLPROOFTREE = struct
   let getPol pt = 
     let conclusion = getConclusion pt in
     conclusion.OlSequent.pol
-    
-  let getListFromOptions lst = 
-    List.concat (List.map (fun el ->
-      match el with
-      | SOME (el') -> [Term.getFromOption el]
-      | NONE -> []
-    ) lst )
- 
+
   let toPermutationFormat olPt = 
     let firstPt = List.hd olPt.premises in
     let rec getSeq' pt = 
       match (pt.premises, getPol pt) with 
       | ([], ASYN) -> 
-	begin
-	  match pt.rule with 
-	  | SOME(r) -> [NONE]
-	  | NONE -> [SOME(pt)]
-	end
-      | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
-    let rec getSeq pt' =
-      let pt = Term.getFromOption pt' in
-      match pt.premises with
-      | [] -> 
-	begin
-	  match (getRule pt) with 
-	  | SOME(r) -> [NONE]
-	  | NONE -> [SOME(pt)]
-	end
-      | _ -> 
-	begin
-	  match (getPol pt) with
-	  | ASYN ->
-	    if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
-	      let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
-	      nextPt.premises <- List.concat (List.map (fun el -> match el with
-		| SOME (el') -> [Term.getFromOption el]
-		| NONE -> [] 
-		) (getSeq' nextPt));
-	      [SOME(nextPt)]
-	    else let tree_opt = List.map (fun el -> SOME(el)) pt.premises in
-	    List.concat (List.map (fun p -> getSeq p) tree_opt)
-	  | SYNC -> 
-	    let tree_opt = List.map (fun el -> SOME(el)) pt.premises in
-	    List.concat (List.map (fun p -> getSeq p) tree_opt)
-	  end in  
-    let newPtList = getSeq (SOME(firstPt)) in
-    olPt.premises <- (getListFromOptions newPtList);
+				begin
+				  match pt.rule with 
+				  | SOME(r) -> []
+				  | NONE -> [pt]
+				end
+      | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) 
+    in      
+    let rec getSeq pt =
+        match pt.premises with
+        | [] -> 
+          begin
+            match (getRule pt) with 
+            | SOME(r) -> []
+            | NONE -> [pt]
+          end
+        | _ -> begin match (getPol pt) with
+ 	 		    | ASYN ->
+ 	 		      if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
+ 	 		        let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
+              nextPt.premises <- getSeq' nextPt;
+ 	 		        [nextPt]
+ 	 		      else List.concat (List.map (fun p -> getSeq p) pt.premises)
+ 	 		    | SYNC -> 
+ 	 		      List.concat (List.map (fun p -> getSeq p) pt.premises)
+ 	 		    end 
+    in  
+    let newPtList = getSeq firstPt in
+    olPt.premises <- newPtList;
     olPt.conclusion <- firstPt.conclusion
     
   let toMacroRule olPt = 
@@ -371,7 +351,7 @@ module OlProofTree : OLPROOFTREE = struct
       match pt.rule with
       | SOME(r) ->
 	      let seq = getConclusion pt in
-	      let rule = Term.getFromOption (OlSequent.getMainForm seq) in
+	      let rule = OlSequent.getMainForm seq in
 	      let topproof = match pt.premises with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 

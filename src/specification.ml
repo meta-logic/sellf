@@ -90,14 +90,26 @@ let getFirstArgName p = match p with
     this is a introduction rule specification?"
   end
   | _ -> failwith "Function is not an application."
+;;
+
+let rec getPred f = match f with 
+  | TENSOR(NOT(prd), spc) -> prd
+  | ABS(s, i, t) -> getPred t
+  | NOT(prd) -> prd
+  | _ -> failwith "Not expected formula in specification."
+;;
+
+(* Given a predicate that is a head of a specification, return the side of the
+sequent that it occurs (left or right) *)
+let rec getSide p = match p with 
+  | PRED("lft", _, _) -> "lft"
+  | PRED("rght", _, _) -> "rght"
+  | PRED("mlft", _, _) -> "lft"
+  | PRED("mrght", _, _) -> "rght"
+  | _ -> failwith ("No side information available (predicate not corresponding to a specification's head or not a predicate): " ^ Prints.termToString p)
+;;
 
 let processIntroRule t = 
-  let rec getPred f = match f with 
-    | TENSOR(NOT(prd), spc) -> prd
-    | ABS(s, i, t) -> getPred t
-    | NOT(prd) -> prd
-    | _ -> failwith "Not expected formula in specification."
-  in
   let rec getSpec f = match f with
     | TENSOR(NOT(prd), spc) -> spc
     | ABS(s, i, t) -> ABS(s, i, getSpec t)

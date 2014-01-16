@@ -15,7 +15,6 @@ type constraintpred =
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | REQIN of Term.terms * ctx
-  | REMOVED of Term.terms * ctx * ctx
  
 type constraintset = {
   mutable lst : constraintpred list;
@@ -34,8 +33,6 @@ val isEmpty : constraintset -> bool
 val isIn : Term.terms -> string -> ContextSchema.context -> constraintset
 
 val requireIn : Term.terms -> string -> ContextSchema.context -> constraintset
-
-val remove : Term.terms -> string -> ContextSchema.context -> ContextSchema.context -> constraintset
 
 val insert : Term.terms -> string -> ContextSchema.context -> ContextSchema.context -> constraintset
 

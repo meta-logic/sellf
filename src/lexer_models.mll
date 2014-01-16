@@ -22,7 +22,6 @@ rule token = parse
   | "emp"        { EMP }
   | "union"      { UNION }
   | "requiredIn" { REQIN }
-  | "removed"    { REMOVED }
   | '('          { LPAREN }
   | ')'          { RPAREN }
   | '{'          { LCURLY }

@@ -15,6 +15,15 @@ type subexp =
 | REL (* relevant: contraction *)
 | LIN (* linear *)
 
+type arity = 
+  | MANY
+  | SINGLE
+
+type side = 
+  | LEFT
+  | RIGHT
+  | RIGHTLEFT
+
 (* Hashtable with subexponentials' types ($gamma is the linear context and
  * $infty holds specifications) 
  *)
@@ -26,11 +35,18 @@ let orderTbl : (string, string) Hashtbl.t = Hashtbl.create 100 ;;
 
 (* Hashtable with subexponentials context types *)
 (* Context type: (formulas description, side) *)
-type ctxType = (string * string) ;;
+type ctxType = (arity * side) ;;
 let ctxTbl : (string, ctxType) Hashtbl.t = Hashtbl.create 100 ;;
 
-let getCtxType n = try SOME(Hashtbl.find ctxTbl n) with Not_found -> NONE
+let getCtxSide s = try match Hashtbl.find ctxTbl s with
+  | (_, side) -> side
+  with Not_found -> failwith ("Subexponential " ^ s ^ " has no type information.")
+;;
 
+let getCtxArity s = try match Hashtbl.find ctxTbl s with
+  | (t, _) -> t
+  with Not_found -> failwith ("Subexponential " ^ s ^ " has no type information.")
+;;
 
 let addType s t = Hashtbl.add typeTbl s t ;;
 

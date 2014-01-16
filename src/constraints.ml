@@ -14,7 +14,6 @@ open Subexponentials
 
 let i = ref 0;;
 
-(* TODO: remove reqIn which is subsumed by remove?d *)
 type ctx = string * int
 type constraintpred = 
   | IN of terms * ctx
@@ -22,7 +21,6 @@ type constraintpred =
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | REQIN of terms * ctx (* printed as ":- not in(term, ctx)."*)
-  | REMOVED of terms * ctx * ctx
  
 type constraintset = {
   mutable lst : constraintpred list;
@@ -45,16 +43,14 @@ let isEmpty cst = (List.length cst.lst) == 0
 
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
-  create [IN(f, (subexp, index))]
+  match Subexponentials.getCtxArity subexp with
+    | MANY -> create [IN(f, (subexp, index))]
+    | SINGLE -> create [ELIN(f, (subexp, index))]
+;;
 
 let requireIn f subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
   create [REQIN(f, (subexp, index))]
-
-let remove f subexp oldctx newctx = 
-  let oldindex = ContextSchema.getIndex oldctx subexp in
-  let newindex = ContextSchema.getIndex newctx subexp in
-  create [REMOVED(f, (subexp, oldindex), (subexp, newindex))]
 
 let insert f subexp oldctx newctx = 
   let oldindex = ContextSchema.getIndex oldctx subexp in
@@ -81,7 +77,6 @@ let split ctx newctx1 newctx2 =
   create cstrlst
 
 (* Creates the emptiness constraints for the bang rule *)
-(* GR TODO: check if this creates the constraint that $gamma should be empty *)
 let bang ctx subexp = 
   let contexts = ContextSchema.getContexts ctx in
   let cstrlst = List.fold_right (fun (s, i) acc ->
@@ -94,25 +89,15 @@ let bang ctx subexp =
 returned *)
 let initial ctx f = 
   let contexts = ContextSchema.getContexts ctx in
-  let checkDiffSide (sub, i) dualf = 
-    let ctxType = try SOME(Hashtbl.find Subexponentials.ctxTbl sub) with Not_found -> NONE in
-    match ctxType with
-    | SOME(tuple) -> begin
-	let side = snd(tuple) in begin
-	match dualf with
-	| PRED(side', _, _) -> (side <> "rghtlft") && (side <> side')
-	| _ -> true
-	end
-      end
-    | NONE -> true
+  (* TODO: move this function somewhere else *)
+  let isSameSide s pred = match (Subexponentials.getCtxSide s, Specification.getSide pred) with
+    | (RIGHTLEFT, _) -> true
+    | (RIGHT, "rght") -> true
+    | (LEFT, "lft") -> true
+    | _ -> false
   in
   (* Suppose the dual of f is in s, generates all the constraints *)
   let isHere (sub, i) dualf = 
-    let c1 = match type_of sub with
-    | LIN | AFF -> ELIN(dualf, (sub, i))
-    (*| UNB | REL -> MCTX(dualf, (sub, i))*)
-    | UNB | REL -> IN(dualf, (sub, i))
-    in
     let empty = List.fold_right (fun (s, i) acc ->
       if s != sub then begin match type_of s with
         | LIN | AFF -> EMP(s, i) :: acc
@@ -120,11 +105,11 @@ let initial ctx f =
       end else acc
     ) contexts []
     in
-    c1 :: empty
+    REQIN(dualf, (sub, i)) :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
   (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
-    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || (checkDiffSide c (nnf (NOT(f)))) then acc
+    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (isSameSide (fst(c)) (nnf (NOT f))) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs
@@ -132,21 +117,14 @@ let initial ctx f =
 let predToTexString c = match c with
   | IN (t, c) -> 
     "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
-  (*| MCTX (t, c) -> 
-    "$mctx(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"*)
   | ELIN (t, c) ->
     "$elin(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
   | EMP (c) -> 
     "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
     "$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$"
-  (*| ADDFORM (t, c1, c2) -> 
-    "$addform(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ").$"
-  *)
   | REQIN (t, c) -> 
     "$requiredIn(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ") (:- not in()).$"
-  | REMOVED (t, c1, c2) -> 
-    "$removed(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ").$"
 
 let rec toTexString csts = 
   (List.fold_right (fun c str -> (predToTexString c) ^ ", " ^ str) csts.lst "") 
@@ -154,21 +132,14 @@ let rec toTexString csts =
 let predToString c = match c with
   | IN (t, c) -> 
     "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
-  (*| MCTX (t, c) -> 
-    "mctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."*)
   | ELIN (t, c) ->
     "elin(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
   | EMP (c) ->
     "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
-  (*| ADDFORM (t, c1, c2) -> 
-    "addform(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ")."
-  *)
   | REQIN (t, c) -> 
     ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
-  | REMOVED (t, c1, c2) -> 
-    "removed(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ")."
 
 let toString csts = 
   List.fold_right (fun c str -> 

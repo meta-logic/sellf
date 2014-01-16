@@ -18,6 +18,7 @@ let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials sta
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
 let ctxtype = "many"  |  "single"
+(*let ctxside = "lft" | "rght" | "rghtlft"*)
 
 rule token = parse 
 
@@ -26,7 +27,7 @@ rule token = parse
 | '\n'                  { incrline lexbuf; token lexbuf }
 | "kind"                { KIND }
 | "type"                { TYPE }
-| "tsub"                {TSUBEX}
+| "tsub"                { TSUBEX }
 | "subexp"              { SUBEX }
 | "subexpctx"           { SUBEXCTX }
 | ctxtype as t          { CTXTYPE(t) }

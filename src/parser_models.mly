@@ -33,7 +33,7 @@ let make_APP lst =
 /* Terminal symbols */
 %token <int> INDEX
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
-%token IN ELIN EMP UNION REQIN REMOVED
+%token IN ELIN EMP UNION REQIN
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
 %token COMMA LBRACKET RBRACKET LCURLY RCURLY LPAREN RPAREN UNDERSCORE DOT NEWLINE QUOTE
 %right FORALL EXISTS
@@ -88,10 +88,6 @@ constraintPred:
   | REQIN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { 
     let f = deBruijn true $4 in
     Constraints.REQIN(f, $7) 
-  }
-  | REMOVED LPAREN QUOTE formula QUOTE COMMA contextVar COMMA contextVar RPAREN { 
-    let f = deBruijn true $4 in  
-    Constraints.REMOVED(f, $7, $9) 
   }
   ;
 

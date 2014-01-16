@@ -9,12 +9,6 @@ let psBound = ref 10 ;;
 
 type 'a option = NONE | SOME of 'a
 
-  let getFromOption opt = 
-    match opt with
-    | SOME(x) -> x
-    | NONE -> raise (Invalid_argument "Option.get")
-
-
 (* Each logical variable is identified by this number. 
  * A new logical variable should increment one in this identifier. *)
 let varid = ref 0 ;;

@@ -176,15 +176,19 @@ clause:
 /* Define the context type */
 | SUBEXCTX NAME CTXTYPE NAME DOT {
   match (Subexponentials.isSubexponentialDeclared $2) with
-    | true -> if ($3 = "single") || ($3 = "many") || ($3 = "none") then
-      begin
-				if ($4 = "lft") || ($4 = "rght") || ($4 = "rghtlft") || (($3 = "none") && ($4 = "")) then
-				  begin
-				    Hashtbl.add Subexponentials.ctxTbl $2 ($3, $4); NONE
-				  end
-				else failwith ("ERROR: Subexpctx invalid side: "^$4)
-      end
-      else failwith ("ERROR: Subexpctx invalid context type: "^$3)
+    | true -> 
+      let arity = match $3 with
+        | "single" -> SINGLE
+        | "many" -> MANY
+        | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
+      in
+      let side = match $4 with 
+        | "lft" -> LEFT
+        | "rght" -> RIGHT
+        | "rghtlft" -> RIGHTLEFT
+        | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
+      in
+      Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); NONE
     | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
 }
 
@@ -330,6 +334,7 @@ logCst:
 | ZERO {ZERO}
 ;
 
+/* TODO update this help text. */
 top: 
 | HELP    { 
   print_endline "There are the following commands available during state ':>':\n";

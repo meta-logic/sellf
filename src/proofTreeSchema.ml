@@ -111,19 +111,13 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
   let decide pt f subexp = 
     let conc = getConclusion pt in
     let ctx = SequentSchema.getContext conc in
-    let reqconstr = Constraints.requireIn f subexp ctx in
-    let newctx = ContextSchema.next ctx subexp in
-    let remconstr = match type_of subexp with
-      | AFF | LIN -> Constraints.remove f subexp ctx newctx
-      (* TODO create a requiredIn constraint here *)
-      | REL | UNB -> Constraints.create []
-    in
     (* Create a new sequent and add this as a premise to the prooftree *)
-    let premise = SequentSchema.createSync newctx f in
+    (*let premise = SequentSchema.createSync newctx f in*)
+    let premise = SequentSchema.createSync ctx f in
     let newpt = create premise in
     pt.rule <- SOME(DECIDE);
     pt.premises <- [newpt];
-    (newpt, Constraints.union reqconstr remconstr) 
+    (newpt, Constraints.create []) 
 
   let releaseDown pt = 
     let conc = getConclusion pt in

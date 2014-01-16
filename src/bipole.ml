@@ -36,11 +36,12 @@ let deriveBipole seq form constr =
   (* GR Note to self: Why don't I just check if the formula is there? Because it
   might be the case that I have to the the reasoning DLV does, namely, check if
   a context is the union of other and check if this formula is in any of the
-  others and bla bla bla. Leaving this for DLV. *)
-  let (pt1, decidecstr) = ProofTreeSchema.decide pt0 form "$gamma" in
+  others and bla bla bla. Leaving this for DLV. 
+  But this is now done in the initial rule, and not in the decide rule. *)
+  let (pt1, decidecstr) = ProofTreeSchema.decide pt0 form "$infty" in
 
   (* Initial constraints *)
-  let constraints : Constraints.constraintset list ref = ref [(Constraints.union decidecstr constr)] in
+  let constraints : Constraints.constraintset list ref = ref constr in
 
   (* Resulting pairs of proofs and constraint sets *)
   let results : (ProofTreeSchema.prooftree * Constraints.constraintset list) list ref = ref [] in
@@ -170,8 +171,9 @@ let bipole f =
   if isBipole f then
     let context = ContextSchema.createFresh () in
     let sequent = SequentSchema.createAsyn context [] in
-    let constraints = Constraints.isIn f "$gamma" context in
-    deriveBipole sequent f constraints 
+    (* TODO: change!! This is not the initial contraints we need. *)
+    let constraints = Constraints.isIn f "$infty" context in
+    deriveBipole sequent f [constraints] 
   else raise Not_bipole
 ;;
 

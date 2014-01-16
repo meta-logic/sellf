@@ -19,10 +19,42 @@ let derive2 spec1 spec2 =
   (* Initial configuration *)
   let context = ContextSchema.createFresh () in
   let sequent = SequentSchema.createAsyn context [] in
-  let in1 = Constraints.isIn spec1 "$gamma" context in
-  let in2 = Constraints.isIn spec2 "$gamma" context in
-  (* TODO: add the constraint that a context should have only one formula?? *)
-  let constraints = Constraints.union in1 in2 in
+  
+  let head1 = Specification.getPred spec1 in
+  let side1 = Specification.getSide head1 in
+  let head2 = Specification.getPred spec2 in
+  let side2 = Specification.getSide head2 in
+
+  (* Computing possible initial contexts for F1 (ignoring gamma and infty) *)
+  let in1 = List.fold_right (fun (s, i) acc -> 
+    if s = "$gamma" || s = "$infty" then acc
+    else match Subexponentials.getCtxSide s with
+      | Subexponentials.RIGHTLEFT -> (Constraints.isIn head1 s context) :: acc
+      | Subexponentials.RIGHT when side1 = "rght" -> (Constraints.isIn head1 s context) :: acc
+      | Subexponentials.LEFT when side1 = "lft" -> (Constraints.isIn head1 s context) :: acc
+      | _ -> acc
+  ) (ContextSchema.getContexts context) [] in 
+
+  (* Computing possible initial contexts for F2 (ignorign gamma and infty) *)
+  let in2 = List.fold_right (fun (s, i) acc -> 
+    if s = "$gamma" || s = "$infty" then acc
+    else match Subexponentials.getCtxSide s with
+      | Subexponentials.RIGHTLEFT -> (Constraints.isIn head2 s context) :: acc
+      | Subexponentials.RIGHT when side2 = "rght" -> (Constraints.isIn head2 s context) :: acc
+      | Subexponentials.LEFT when side2 = "lft" -> (Constraints.isIn head2 s context) :: acc
+      | _ -> acc
+  ) (ContextSchema.getContexts context) [] in
+
+  (* We assume that there are two occurrences of these formulas. The initial
+  models generated contain two 'in' clauses, one for each formula. *)
+  let constraints = Constraints.times in1 in2 in
+
+  (*print_endline "Initial constraints: ";
+  List.iter (fun c ->
+    print_endline "===============================================";
+    print_endline (Constraints.toString c);
+    print_endline "===============================================";
+  ) constraints;*)
 
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
@@ -32,7 +64,7 @@ let derive2 spec1 spec2 =
     (* This is a list of lists... each open leaf has a list of (proof tree *
        model) and these lists are the elements of the resulting list. *)
     let leafDerivations2over1 = List.fold_right (fun open_leaf acc ->
-      match (Bipole.deriveBipole open_leaf spec2 mdl) with
+      match (Bipole.deriveBipole open_leaf spec2 [mdl]) with
         | [] -> acc
         | lst -> lst :: acc
     ) (ProofTreeSchema.getOpenLeaves pt1) []
@@ -78,16 +110,16 @@ let permute spec1 spec2 =
   let (spec1norm, rest) = instantiate_ex spec1 constLst in
   let (spec2norm, rest2) = instantiate_ex spec2 rest in
 
-  print_endline "Permuting ";
+  (*print_endline "Permuting ";
   print_endline (Prints.termToString spec1norm);
   print_endline "over";
-  print_endline (Prints.termToString spec2norm);
+  print_endline (Prints.termToString spec2norm);*)
 
   let bipoles12 = derive2 spec1norm spec2norm in
   let bipoles21 = derive2 spec2norm spec1norm in
 
-  print_endline ("Number of bipoles 1/2: " ^ (string_of_int (List.length bipoles12)));
-  print_endline ("Number of bipoles 2/1: " ^ (string_of_int (List.length bipoles21)));
+  (*print_endline ("Number of bipoles 1/2: " ^ (string_of_int (List.length bipoles12)));
+  print_endline ("Number of bipoles 2/1: " ^ (string_of_int (List.length bipoles21)));*)
 
   (* GR: Prints all possible bipoles/models in a latex file. Make a separate
   function out of this.*)
