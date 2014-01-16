@@ -283,7 +283,7 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
     in
     let newctx = ContextSchema.copy ctx in
     Term.varid := !Term.varid + 1;
-    let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+    let new_var = V ({str = s; id = !varid; tag = Term.CST; ts = 0; lts = 0}) in
     let ptr = PTR {contents = new_var} in
     let newf = Norm.hnorm (APP (ABS (s, 1, f1), [ptr])) in
     let premise = SequentSchema.createSync newctx newf in

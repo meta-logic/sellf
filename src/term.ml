@@ -56,12 +56,13 @@ type lambdaExp =
 (*Propositions are atoms, equalities, and logical connectives.*)
 type terms = 
 | PRED of string * terms * polarity (* G: name of the predicate (string) and head (terms) *)
-| EQU of string * int * terms (* G: equality *)
 | TOP
 | ONE
 | BOT
 | ZERO
 | NOT of terms
+(* Arithmetic *)
+| EQU of string * int * terms (* G: equality *)
 | COMP of compType * terms * terms
 | ASGN of terms * terms
 | PRINT of terms
@@ -82,7 +83,6 @@ type terms =
 | INT of int
 | CONST of string
 | STRING of string
-(*| LIST of lists*)
 | APP of terms * terms list
 | ABS of string * int * terms
 | PLUS  of terms * terms
