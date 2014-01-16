@@ -334,7 +334,7 @@ module OlProofTree : OLPROOFTREE = struct
 	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
 	      in
         let pred = List.hd seq.OlSequent.goals in
-        let formSide = Specification.getSide pred in
+        let formSide = Specification.getSide (Specification.getPred pred) in
         let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar formSide) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
 	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "} \;\; " ^ ruleNameTex 
@@ -354,7 +354,7 @@ module type DERIVATION =
     val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list    
     val solveElin : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
     val solveEmp : OlProofTree.prooftree -> OlContext.subexp -> bool
-    val solveUnion : OlProofTree.prooftree -> OlContext.ctx -> OlContext.ctx -> OlContext.subexp * (Term.terms list) -> bool
+    val solveUnion : OlProofTree.prooftree -> OlContext.subexp -> OlContext.subexp -> OlContext.subexp -> bool
     val solveIn : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
     val rewSeqFst : OlProofTree.prooftree -> Constraints.constraintpred -> bool
     val solveConstraintsFst : Constraints.constraintpred -> OlProofTree.prooftree -> bool
@@ -430,7 +430,7 @@ module Derivation : DERIVATION = struct
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
     let newPair = List.map (fun (olc, f) -> 
-      if olc = c then ((("#" ^ (OlContext.remFirstChar (fst(c))), 0), t :: f), true)
+      if olc = c then ((((OlContext.remFirstChar (fst(c))), -1), t :: f), true)
       else ((olc, f), false)
     ) olCtx.OlContext.lst in
     let isDiff = List.exists (fun el -> (snd(el)) = true) newPair in
@@ -441,36 +441,26 @@ module Derivation : DERIVATION = struct
   let solveEmp olPt c = 
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
-    let newPair = List.map (fun (olc, f) -> 
+    let bChange = ref false in
+    let newCtx = List.fold_left (fun acc (olc, f) ->
+      if olc = c then acc else begin bChange := true; (olc, f) :: acc end)
+    (*List.map (fun (olc, f) -> 
       if olc = c then ((("#", 0), []), true) 
       else ((olc, f), false)
-      ) olCtx.OlContext.lst in
-    let isDiff = List.exists (fun el -> (snd(el)) = true) newPair in
-    let newCtx = List.map (fun el -> fst(el)) newPair in
-    olCtx.OlContext.lst <- newCtx;
-    isDiff
+      )*) 
+      olCtx.OlContext.lst [] in
+    olCtx.OlContext.lst <- newCtx; !bChange
     
-  let solveUnion olPt c1 c2 c3 =
+  let solveUnion olPt c1 c2 cU =
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
     let lctx = olCtx.OlContext.lst in
-    let newCtx = [] in
-    let newCtxRef = ref newCtx in
-    newCtxRef := lctx;
-    let boolList = List.map (fun (olc, f) ->
-      newCtxRef := List.map (fun (olc', f') ->
-      if (olc' = (fst(c3))) then (("#", 0), [])
-      else (olc', f')) !newCtxRef;
-      if (olc = (fst(c3))) then
-	begin
-	  newCtxRef := c1 :: c2 :: !newCtxRef;
-	  true
-        end
-      else false
-    ) lctx in
-    let isDiff = List.exists (fun el -> el = true) boolList in
-    olCtx.OlContext.lst <- !newCtxRef;
-    isDiff
+    let bChange = ref false in
+    let newCtx = List.fold_left (fun acc (olc', f') ->
+		  if (olc' = cU) then 
+		    begin bChange := true; (c1, []) :: (c2, []) :: acc end
+		  else (olc', f') :: acc) lctx [] in
+    olCtx.OlContext.lst <- newCtx; !bChange
     
   let solveIn olPt c t = 
     let olSeq = OlProofTree.getConclusion olPt in
@@ -497,7 +487,7 @@ module Derivation : DERIVATION = struct
 	let c3' = OlContext.fixContext c3 in
 	let c2' = OlContext.fixContext c2 in
 	let c1' = OlContext.fixContext c1 in
-	solveUnion seq (c1', []) (c2', []) (c3', [])
+	solveUnion seq c1' c2' c3'
     (* Any other constraint is despised *)
     | _ -> false
     
@@ -637,7 +627,7 @@ module Derivation : DERIVATION = struct
       let newCtxRef = ref lctx in
       List.iter (fun (olc, f) ->
 	newCtxRef := List.map (fun (olc', f') ->
-	if (olc' = ctx) then (("#" ^ (fst(ctx)), 0), f')
+	if (olc' = ctx) then (((fst(ctx)), -1), f')
 	else (olc', f')) !newCtxRef;
 	if (olc = ctx) then newCtxRef := listOfCtx @ !newCtxRef
 	else ()

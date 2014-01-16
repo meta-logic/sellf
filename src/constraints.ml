@@ -116,10 +116,14 @@ let initial ctx f =
       end else acc
     ) contexts []
     in
-    REQIN(dualf, (sub, i)) :: empty
+    begin
+    match type_of sub with
+        | LIN | AFF -> REQIN(dualf, (sub, i)) :: ELIN(dualf,(sub, i)) :: empty
+        | UNB | REL -> REQIN(dualf, (sub, i)) :: empty
+    end
   in
   let cstrs = List.fold_right (fun c acc ->
-    let formSide = Specification.getSide (nnf (NOT f)) in
+    let formSide = Specification.getSide (Specification.getPred (nnf (NOT f))) in
   (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
     if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 

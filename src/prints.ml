@@ -203,4 +203,3 @@ let remSpecial s = try match  (String.index s '$') with
     String.set cp n ' '; cp
   with Not_found -> s
 ;;
-

@@ -120,6 +120,7 @@ var = {
   lts : int
 }
 
+
 (* Checks if a formula is a bipole *)
 (* 
   Grammar for bipoles and monopoles:

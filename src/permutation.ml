@@ -133,7 +133,15 @@ let permute spec1 spec2 =
   print_endline (Prints.termToString spec2norm);*)
 
   let bipoles12 = derive2 spec1norm spec2norm in
+  print_endline "Bipole 1 2 ";
+  List.iter (fun (p, lcs) -> begin print_endline "start"; 
+                             print_endline (Constraints.toString lcs);
+                             print_endline "end" end) bipoles12;
   let bipoles21 = derive2 spec2norm spec1norm in
+  print_endline "Bipole 2 1 ";
+  List.iter (fun (p, lcs) -> begin print_endline "start"; 
+                             print_endline (Constraints.toString lcs);
+                             print_endline "end" end)  bipoles21;
 
   (*print_endline ("Number of bipoles 1/2: " ^ (string_of_int (List.length bipoles12)));
   print_endline ("Number of bipoles 2/1: " ^ (string_of_int (List.length bipoles21)));*)
