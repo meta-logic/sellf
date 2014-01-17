@@ -24,10 +24,9 @@ module type OLCONTEXT =
     type context = { mutable lst : ctx list  }
     val create : subexp list -> context
     val remFirstChar : string -> string
-    (* List all the different context variables *)
-    val getStrings : context -> string list
+    val getSubs : context -> string list
     val toStringForms : Term.terms list -> string -> string -> string
-    val toTexString : context -> string -> string list -> string 
+    val toTexString : context -> string -> string 
     val fixContext : subexp -> subexp
   
   end
@@ -46,110 +45,75 @@ module OlContext : OLCONTEXT = struct
     lst = List.map (fun ctx -> (ctx, [])) ctxList;
   }
   
-  (* This is necessary because the last formulas are DB(i) *)
-  (* TODO: I don't think they are anymore... please check. *)
-  let rec getAbsLst f absLst =
-    match f with
-    | ABS (s, i, t) -> getAbsLst t ([s] @ absLst)
-    | EXISTS (s, i, t) -> getAbsLst t ([s] @ absLst)
-    | FORALL (s, i, t) -> getAbsLst t ([s] @ absLst)
-    | _ -> absLst
-  
-  let rec formatForm f = 
-    match f with 
-    | ABS (s, i, t) -> formatForm t
-    | PRED (s, t, pol) -> formatForm t
-    | APP (t, tlist) -> List.hd tlist
-    | _ -> f
-
   let remFirstChar str = 
     if (String.get str 0) = '#' || (String.get str 0) = '$' then 
       try String.sub str 1 ((String.length str)-1) 
       with Invalid_argument("index out of bounds") -> str
     else str
-    
-  let getStrings ctx = 
+  
+  let remInvalidSubs str_lst = List.fold_right (fun str acc -> 
+    if str = "$infty" || str = "$gamma" then acc else str :: acc
+    ) str_lst []
+  
+  let getSubs ctx =
     List.fold_right (fun ((n, i), f) acc ->  
-      if (List.exists (fun el -> el = (remFirstChar n)) acc) || 
-	(List.exists (fun el -> el = (remFirstChar n)) acc) || n = "#" then acc
-	  else if (String.get n 0) = '#' then (remFirstChar n) :: acc
-	    else if (String.get n 0) = '$' then (remFirstChar n) :: acc
-	      else n :: acc
+      if (List.exists (fun el -> el = (remFirstChar n)) acc) || n = "#" then acc
+      else if (String.get n 0) = '$' then (remFirstChar n) :: acc
+      else n :: acc
     ) ctx.lst []
   
-  (* n = '#' ?? *)
   let toStringForms formulas side n = 
-    let formList = List.map (fun f' -> (f', (getAbsLst f' []))) formulas in
-    (List.fold_right (fun (form, absLst) acc' ->
-      let formSide = Specification.getSide (Specification.getPred form) in
-      if (Subexponentials.isSameSide n formSide) then (Prints.termToTexString_ (formatForm form) absLst) ^ ", " ^ acc'
+    (List.fold_right (fun f acc ->
+      let formSide = Specification.getSide (Specification.getPred f) in
+      if formSide = side then (Prints.termToTexString (Term.formatForm f)) ^ ", " ^ acc
+      else if (Subexponentials.isSameSide n formSide) then acc
       else begin
 	      print_string ("\nThe following formula can't belong to the context "
-	      ^ n ^ ": " ^ (Prints.termToString form) ^ "\nPlease verify your especification.\n");
-	      acc'
+	      ^ n ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n");
+	      acc
 	    end
-    ) formList "")
+    ) formulas "")
     
   let remComma str = try String.sub str 0 ((String.length str) - 2) with Invalid_argument("String.sub") -> str
   
-  let toTexString ctx side str_list = 
-    let slotToTex ctx side str_ctx =
+  let toTexString ctx side = 
+    let subLst = remInvalidSubs (Subexponentials.getAll ()) in
+    let slotToTex ctx side sub =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = Subexponentials.isSameSide n side in
-      match (n, side, f) with
-      | (_, "lft", []) -> 
-				if n = str_ctx && correctSide then
-				  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-				else acc
-      | (_, "lft", f') -> 
-				if n = str_ctx && correctSide then
-				  begin
-				    let initialString = "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (toStringForms f' "lft" n) ^ acc
-				  end
-				else acc
-      | (_, "rght", []) -> 
-				if n = str_ctx && correctSide then 
-				  "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-				else acc
-      | (_, "rght", f') ->
-				if n = str_ctx && correctSide then
-				  begin
-				    let initialString = "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " in
-				    initialString ^ (toStringForms f' "rght" n) ^ acc
-				  end
-				else acc
-      | (_, _, _) -> acc
+      let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
+      match (side, f, correctSide, i) with
+      | (_, _, _, -1) -> acc
+      | ("lft", [], true, _) ->  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+      | ("lft", f', true, _) ->  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, "
+				 ^ (toStringForms f' "lft" n) ^ acc
+      | ("rght", [], true, _) -> "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
+      | ("rght", f', true, _) -> "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " 
+				 ^ (toStringForms f' "rght" n) ^ acc
+      | (_, _, _, _) -> acc
     ) ctx.lst "") ^
     (* Print formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      match (n, side, f) with
-      | (_, "lft", f') -> 
-				if n = "#" ^ (remFirstChar str_ctx) then
-				  (toStringForms f' "lft" (remFirstChar n)) ^ acc
-				else acc
-      | (_, "rght", f') -> 
-				if n = "#" ^ (remFirstChar str_ctx) then
-				  (toStringForms f' "rght" (remFirstChar n)) ^ acc
-				else acc
+      match (i, side, f) with
+      | (-1, "lft", f')  -> (toStringForms f' "lft" (remFirstChar n)) ^ acc
+      | (-1, "rght", f') -> (toStringForms f' "rght" (remFirstChar n)) ^ acc
       | (_, _, _) -> acc
     ) ctx.lst "") in
     (* Print all slots *)
-    List.fold_right (fun str_ctx acc ->
-      match Subexponentials.isSameSide str_ctx side with
+    List.fold_right (fun sub acc ->
+      match Subexponentials.isSameSide sub side with
         | false -> acc
         | true ->
-          match remComma (slotToTex ctx side str_ctx) with
+          match remComma (slotToTex ctx side sub) with
             | "" -> begin match acc with
               (*| "" -> " \\cdot " ^ acc*)
-              | _ -> "\\ndots{"^ str_ctx ^"} \\cdot " ^ acc
+              | _ -> "\\ndots{"^ sub ^"} \\cdot " ^ acc
             end
             | str -> begin match acc with
               (*| "" -> str ^ " " ^ acc*)
-              | _ -> acc ^ " \\ndots{"^ str_ctx ^"} " ^ str
+              | _ -> acc ^ " \\ndots{"^ sub ^"} " ^ str
             end
-    ) str_list ""
+    ) subLst ""
   
   (* Hack to fix the name of subexponential that come without $ *)
   let fixContext ctx =
@@ -168,9 +132,7 @@ module type OLSEQUENT =
     val create : OlContext.context -> Term.terms list -> Term.phase -> sequent 
     val getContext : sequent -> OlContext.context
     val getMainForm : sequent -> Term.terms
-    val toTexString : sequent -> string list -> string 
-    val getOnlyRule : Term.terms -> Term.terms
-    val formatForm : Term.terms -> Term.terms
+    val toTexString : sequent -> string 
   
   end
 
@@ -192,30 +154,12 @@ module OlSequent : OLSEQUENT = struct
     pol = polarity;
   }
   
-  let rec formatForm f = 
-    match f with 
-    | EXISTS (s, i, t) -> formatForm t
-    | LOLLI (t1, t2, t3) -> formatForm t2
-    | NOT (t) -> formatForm t
-    | PRED (s, t, pol) -> formatForm t
-    | TENSOR (t1, t2) -> formatForm t1
-    | ADDOR (t1, t2) -> formatForm t1
-    | PARR (t1, t2) -> formatForm t1
-    | WITH (t1, t2) -> formatForm t1
-    | APP (t, tlist) -> List.hd tlist
-    | _ -> f
-  
-  let getOnlyRule f = 
-    match f with
-    | APP (t, tlist) -> t
-    | _ -> f
-    
   let getMainForm seq = match seq.goals with
     | [] -> failwith "Sequent has no goals."
     | _ -> getOnlyRule (formatForm (List.hd seq.goals))
   
-  let toTexString seq str_list = (OlContext.toTexString seq.ctx "lft" str_list)
-				  ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" str_list)
+  let toTexString seq = 
+    (OlContext.toTexString seq.ctx "lft") ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght")
  
 end;;
 
@@ -229,7 +173,6 @@ module type OLPROOFTREE =
     
     val create : OlSequent.sequent -> llrule option -> prooftree
     val getConclusion : prooftree -> OlSequent.sequent
-(*     TODO: Function getContextFromPt outdated. The same can be done with the Hashtbl. *)
     val getContextFromPt : prooftree -> OlContext.context
     val toPermutationFormat : prooftree -> unit
     val toTexString : prooftree -> string
@@ -305,16 +248,7 @@ module OlProofTree : OLPROOFTREE = struct
     let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
     olPt.premises <- newPremises
-    
-  let collectStrings pt =
-    let conclusion = getConclusion pt in
-    let context = OlSequent.getContext conclusion in
-    (OlContext.getStrings context)
-    (*let transformHt h = 
-    Hashtbl.fold (fun (str, ctxType) acc ->  
-      str :: acc
-    ) h []*)
-    
+   
   let sideToChar side = 
     match side with
     | "rght" -> "R"
@@ -323,7 +257,6 @@ module OlProofTree : OLPROOFTREE = struct
     
   let toTexString pt =
     (* TODO: simplify this function by not passing str_list as a parameter *)
-    let str_list = collectStrings pt in
     let rec toTexString' pt = 
       match pt.rule with
       | Some(r) ->
@@ -336,9 +269,9 @@ module OlProofTree : OLPROOFTREE = struct
         let pred = List.hd seq.OlSequent.goals in
         let formSide = Specification.getSide (Specification.getPred pred) in
         let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar formSide) ^ "}" in
-	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "}\n{" ^ topproof ^ "}"*)
-	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) str_list) ^ "} \;\; " ^ ruleNameTex 
-      | None -> (OlSequent.toTexString (getConclusion pt) str_list) 
+	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "}\n{" ^ topproof ^ "}"*)
+	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "} \;\; " ^ ruleNameTex 
+      | None -> (OlSequent.toTexString (getConclusion pt)) 
     in
     toTexString' pt
 
@@ -429,14 +362,12 @@ module Derivation : DERIVATION = struct
   let solveElin olPt c t = 
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
-    let newPair = List.map (fun (olc, f) -> 
-      if olc = c then ((((OlContext.remFirstChar (fst(c))), -1), t :: f), true)
-      else ((olc, f), false)
-    ) olCtx.OlContext.lst in
-    let isDiff = List.exists (fun el -> (snd(el)) = true) newPair in
-    let newCtx = List.map (fun el -> fst(el)) newPair in
-    olCtx.OlContext.lst <- newCtx;
-    isDiff
+    let bChange = ref false in
+    let newCtx = List.fold_left (fun acc (olc, f) -> 
+      if olc = c then begin bChange := true; (((OlContext.remFirstChar (fst(c))), -1), t :: f) :: acc end
+      else (olc, f) :: acc
+    ) olCtx.OlContext.lst [] in
+    olCtx.OlContext.lst <- newCtx; !bChange
     
   let solveEmp olPt c = 
     let olSeq = OlProofTree.getConclusion olPt in
@@ -462,22 +393,20 @@ module Derivation : DERIVATION = struct
 		  else (olc', f') :: acc) lctx [] in
     olCtx.OlContext.lst <- newCtx; !bChange
     
-  let solveIn olPt c t = 
+let solveIn olPt c t =
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
-    let newPair = List.map (fun (olc, f) ->  
+    let bChange = ref false in
+    let newCtx = List.map (fun (olc, f) ->  
       if olc = c then
       (* Hack to don't process formulas with the predicate EXISTS *)
       match t with
-	| EXISTS (s, i, t) -> ((olc, f), false)
-	| _ -> if (List.exists (fun el -> el = t) f) then ((olc, f), false)
-	else ((olc, t :: f), true)
-      else ((olc, f), false)
+        | EXISTS (s, i, t) -> (olc, f)
+        | _ -> if (List.exists (fun el -> el = t) f) then (olc, f)
+        else begin bChange := true; (olc, t :: f) end
+      else (olc, f)
     ) olCtx.OlContext.lst in
-    let isDiff = List.exists (fun el -> (snd(el)) = true) newPair in
-    let newCtx = List.map (fun el -> fst(el)) newPair in
-    olCtx.OlContext.lst <- newCtx;
-    isDiff
+    olCtx.OlContext.lst <- newCtx; !bChange
  
   let rewSeqFst seq cstr = 
     match cstr with 
@@ -671,12 +600,12 @@ module Derivation : DERIVATION = struct
 	  let ctx2 = (OlProofTree.getContextFromPt pt2) in
 	  let seq1 = OlProofTree.getConclusion pt in
 	  let seq2 = OlProofTree.getConclusion pt2 in
-	  let ctx_str_lst = OlContext.getStrings ctx1 in
+	  let ctx_str_lst = OlContext.getSubs ctx1 in
 	  if (List.for_all (fun str -> sameContexts ctx1 ctx2 str) ctx_str_lst) then
 	    getSequents' pt2
 	  else 
 	    begin 
-	      let ctx_str_lst = OlContext.getStrings ctx1 in
+	      let ctx_str_lst = OlContext.getSubs ctx1 in
 	      let diff_ctx = List.map (fun el -> (el, (sameContexts ctx1 ctx2 el))) ctx_str_lst in
 	      List.iter (fun (str, bol) -> 
 		if bol = false then

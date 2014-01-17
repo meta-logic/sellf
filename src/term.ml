@@ -637,4 +637,20 @@ let fresh_name name =
   get_name v
 *)
 
-
+let rec formatForm f = 
+  match f with 
+  | EXISTS (s, i, t)   -> formatForm t
+  | LOLLI (t1, t2, t3) -> formatForm t2
+  | NOT (t)            -> formatForm t
+  | PRED (s, t, pol)   -> formatForm t
+  | TENSOR (t1, t2)    -> formatForm t1
+  | ADDOR (t1, t2)     -> formatForm t1
+  | PARR (t1, t2)      -> formatForm t1
+  | WITH (t1, t2)      -> formatForm t1
+  | APP (t, tlist)     -> List.hd tlist
+  | _ -> f
+  
+let getOnlyRule f = match f with
+  | APP (t, tlist) -> t
+  | _ -> f
+  

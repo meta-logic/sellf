@@ -139,7 +139,7 @@ end ;;
 let get_rulenames () =
   let formulas = !Specification.others @ !Specification.introRules in
   List.map (fun f ->
-    let rule = termToTexString (OlSequent.getOnlyRule (OlSequent.formatForm (f))) in
+    let rule = termToTexString (Term.getOnlyRule (Term.formatForm f)) in
     let side = Specification.getSide (Specification.getPred f) in
     (rule, side)
   ) formulas
