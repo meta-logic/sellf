@@ -3,7 +3,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 
-\title{Quati: checking permutation lemmas in sequent calculus}
+\title{Quati: An Automated Tool for Proving Inference Rule Permutations}
+% \title{Quati: checking permutation lemmas in sequent calculus}
 \author{Vivek Nigam\inst{1} \and Giselle Reis\inst{2} \and Leonardo Lima\inst{1}}
 
 \institute{Universidade Federal da Para\'{i}ba, Brazil
@@ -16,7 +17,15 @@
 \maketitle
 
 \begin{abstract}
-TODO: abstract
+The proof of many foundational results in Structural Proof Theory, such as the Admissibility of the Cut Rule and 
+the Completeness of the Focusing Discipline, rely on Permutation Lemmas. It is often a tedious and error prone  
+task to prove such lemmas as they involve many cases. This paper describes the tool Quati which is an automated tool capable of proving
+a wide range of inference rule permutations for a wide number of proof systems. Given a proof system specification 
+in the form of a theory in Linear Logic with Subexponentials, Quati
+outputs in \LaTeX\ the permutation transformations for which it was able to prove correcteness and also the 
+possible derivations for which it was not able to do so. As illustrated in this paper, Quati's output is very similar to 
+proof derivation figures one would normally find in a Proof Theory book. 
+
 \end{abstract}
 
 \section{Introduction}
