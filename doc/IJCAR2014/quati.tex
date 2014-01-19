@@ -3,9 +3,9 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{proof}
+\usepackage{stmaryrd}
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
-% \title{Quati: checking permutation lemmas in sequent calculus}
 \author{Vivek Nigam\inst{1} \and Giselle Reis\inst{2} \and Leonardo Lima\inst{1}}
 
 \institute{Universidade Federal da Para\'{i}ba, Brazil
@@ -30,7 +30,7 @@ a wide range of inference rule
 permutations for a wide number of sequent calculus proof systems. Given a proof system
 specification in the form of a theory in linear logic with subexponentials,
 Quati outputs in \LaTeX\ the permutation transformations for which it was able
-to prove correcteness and also the 
+to prove correctness and also the 
 possible derivations for which it was not able to do so. As illustrated in this
 paper, Quati's output is very similar to proof derivation figures one would
 normally find in a proof theory book. 
@@ -126,8 +126,9 @@ directions of future work.
 
 Given a sequent calculus proof system, it was shown in \cite{ENTCS?} that it
 is possible to encode it, under certain conditions, in linear logic with
-subexponentials. This is a refinement of linear logic that allows and
-arbitrary (finite) number of different types of the modalities $!$ and $?$. In
+subexponentials. This is a refinement of linear logic that allows an
+arbitrary (finite) number of different types of the modalities $!$ and $?$. Each
+one corresponds to a different context in the sequent of the object logic. In
 this encoding, each inference rule of the sequent calculus corresponds to a
 formula in subexponential linear logic. This formula is called a \emph{bipole} because of its
 particular nesting of operators, and its derivation, also called a bipole, is composed by exactly one
@@ -180,8 +181,135 @@ determined via an answer-set program described in \cite{iclp}.
 \section{Quati}
 \label{sec:quati}
 
-% Implementation details and a demo session using the command line
-% Link to the web
+%% TODO: make a release with only the functionalities for quati to work. Put it
+%% in the downloads section of google code so that we can refer to the link here.
+%% Remember to put only the examples that are currently working!!
+%% Write a readme file!!
+
+Quati is implemented in OCaml\footnote{\url{http://ocaml.org/}} and makes use of
+DLV\footnote{\url{http://www.dlvsystem.com/dlv/}} externally to compute minimal models for the
+answer-set programs generated. It is part of a bigger project, called
+\texttt{sellf}\footnote{\url{https://code.google.com/p/sellf/}} which started as an effort to
+implement the focused proof system for linear logic with subexponentials
+\cite{vivek's thesis}. The basic data structure is linear logic formulas,
+defined in the \texttt{Term} module. Figure \ref{fig:modules} is an overview
+of the modules in \texttt{sellf} used by Quati to check for permutations.
+
+\begin{figure}
+TODO: module's figure
+\end{figure}
+
+\textbf{TODO:} wait for the picture to explain in more detail the modules and how they
+interact.
+
+Quati takes as input the SELLF specification of a sequent calculus proof system.
+This is done via two files, one with extension \texttt{.pl} and the other with
+\texttt{.sig}. The former contains the actual specification of the proof system,
+namely, the formulas corresponding to each inference rule, the subexponentials
+used and their properties. The latter contains a signature declaration of the
+connectives of the object logic. For example, if the logic being specified has a
+connective $\wedge$, one needs to declare a predicate, say \texttt{and}, of type
+\texttt{form -> form -> form}. Figure \ref{fig:input} shows an example of these
+input files and Tables \ref{tbl:syntax_ll} and \ref{tbl:syntax} show the syntax of the
+linear logic connectives and some keywords used in specifications.
+
+\begin{figure}
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%% Specification %%%%%%%%%%%%%%%%%%%%
+subexp l unb.
+subexp r unb.
+subexpctx l many lft.
+subexpctx r many rght.
+
+rules introduction.
+% Implication
+(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (rght (imp A B))) * [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
+
+% Forall
+(not (lft (forall A))) * sigma \X ([l]? (lft (A X))).
+(not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
+\end{verbatim}
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%% Signature %%%%%%%%%%%%%%%%%%%%
+type imp form -> form -> form.
+type forall (term -> form) -> form.
+\end{verbatim}
+\caption{Specification and signature files of the multi-conclusion
+calculus for intuitionistic logic \textbf{mLJ}.}
+\label{fig:input}
+\end{figure}
+%
+\begin{table}
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\texttt{*} : $\otimes$ & \texttt{+} : $\oplus$ & \texttt{\&} : $\&$ & \texttt{|} : $\bindnasrepma$ & \texttt{[i]bang} : $!^i$ \\
+\hline
+\texttt{one} : $1$ & \texttt{zero} : $0$ & \texttt{top} : $\top$ & \texttt{bot} : $\bot$ & \texttt{[i]?} : $?^i$ \\
+\hline
+\end{tabular}
+\vspace{0.2cm}
+\caption{Syntax for the linear logic connectives.}
+\label{tbl:syntax_ll}
+\end{table}
+%
+\begin{table}
+\centering
+\begin{tabular}{|c|l|}
+\hline
+Syntax & Meaning \\
+\hline
+\hline
+%% TODO: maybe these deserve a better explanation...
+\texttt{rght A} & $\lceil A \rceil$ (represents a formula $A$ on the right side of the sequent in the object logic)\\
+\hline
+\texttt{lft A} & $\lfloor A \rfloor$ (represents a formula $A$ on the left side of the sequent in the object logic)\\
+\hline
+\texttt{form} & Type for object logic formulas.\\
+\hline
+\texttt{term} & Type for object logic terms.\\
+\hline
+\texttt{subexp} & Keyword to declare contexts.\\
+\hline
+\texttt{unb} or \texttt{lin} & Specifies whether a context allows contraction and weakening of its formulas.\\
+\hline
+\texttt{subexpctx} & Keyword to declare contexts' properties.\\
+\hline
+\texttt{many} or \texttt{single} & Specifies the number of formulas a context can hold.\\
+\hline
+\texttt{lft} or \texttt{rght} & Specifies whether a context occurs on the left or on the right side of the sequent.\\
+\hline
+\end{tabular}
+\vspace{0.2cm}
+\caption{Syntax reference for specification of systems.}
+\label{tbl:syntax}
+\end{table}
+%
+%% put the grammar of the syntax instead???
+There are already a few proof systems specified in Quati, such as \textbf{LK},
+\textbf{LJ}, \textbf{mLJ}, \textbf{LL}, etc. They were used for testing purposed
+and are available for the user as examples. Quati can be downloaded at
+\url{[TODO: link of the release]} as a zip containing its source code, the
+examples and installation instructions. Alternatively, it can be tested using a
+limited web interface at \url{https://www.logic.at/staff/giselle/quati/}.
+
+\subsection{An example session}
+
+We will illustrate the features of Quati using a sample run on the command line
+interface. This is preferred over the web interface because it provides extra
+functionality.
+
+%% TODO: demo session on the command line
+% load file
+% type bipoles to print the rules
+% show the latex code that's printed for one rule as the object logic rule and
+% the linear logic bipole
+% type permute to check permutation of two rules
+%   one example that permute
+%   - show the permutations as object logic rules
+%   one example that does not permute
+%   - show the successful and failed cases as ol rules
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -191,6 +319,5 @@ determined via an answer-set program described in \cite{iclp}.
 - cite the work with ramyaa about automating the specifications
 
 - cite the automatic discovery of focusing systems
-
 
 \end{document}
