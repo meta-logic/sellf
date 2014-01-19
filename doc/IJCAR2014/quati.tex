@@ -124,10 +124,63 @@ directions of future work.
 % Explain briefly the method and cite other papers.
 % This section should be small or even merged to the introduction.
 
+Given a sequent calculus proof system, it was shown in \cite{ENTCS?} that it
+is possible to encode it, under certain conditions, in linear logic with
+subexponentials. This is a refinement of linear logic that allows and
+arbitrary (finite) number of different types of the modalities $!$ and $?$. In
+this encoding, each inference rule of the sequent calculus corresponds to a
+formula in subexponential linear logic. This formula is called a \emph{bipole} because of its
+particular nesting of operators, and its derivation, also called a bipole, is composed by exactly one
+negative and one positive phase in the \emph{focusing} discipline. The details
+of the encoding and the format of these derivations is out of the scope of this
+paper and we refer the curious reader to \cite{llinda} and \cite{JLC paper} for
+a deeper explanation. For the moment, it is enough to know that this encoding
+has the highest level of adequacy \cite{adequacy??}, meaning that one inference
+rule in the sequent calculus corresponds exactly to one bipole derivation in
+focused linear logic with subexponentials (SELLF).
+
+This correspondence allows the use of SELLF as a framework to reason
+uniformly over a range of different proof systems for different logics. In
+\cite{JLC?}, the authors show how to prove the admissibility of cut and atomic
+initial rules\footnote{This method was implemented and released as the tool
+TATU (\url{https://www.logic.at/staff/giselle/tatu/}).}, and in \cite{iclp
+paper} it is shown how to use SELLF and answer-set programming to verify proof
+transformations. Quati implements the ideas on the latter work to check
+automatically whether two inference rules permute. 
+
+\begin{definition}
+Let $\alpha$ and $\beta$ be two inference rules in a sequent calculus proof
+system. We say that $\alpha$ permutes over $\beta$ if \emph{every} possible
+derivation that has an application of $\beta$ immediately followed by and
+application of $\alpha$ (i.e. $\beta$ is above $\alpha$) can be transformed into
+a derivation where $\alpha$ is followed by $\beta$.
+\end{definition}
+
+Using the SELLF specification of a rule, generic contexts and answer-set
+programming, we can determine all the instances of an inference rule
+application to a sequent \cite{iclp}. It is worth noting that this reasoning is
+actually done on the linear logic level. So the derivation with generic contexts
+is done in SELLF, and the models of the answer-set program specify bipole
+derivations. But because of the specifications' high level of adequacy, we can
+directly translate the bipole derivations to rules of the specified logic. A
+rewriting system is presented in \cite{iclp} for this translation.
+
+Given this algorithm, it is possible to specify all instances of $\alpha$ on a
+generic sequent containing main formulas for $\alpha$ and $\beta$. For each of
+these instances, we can also specify how $\beta$ can be applied on its premises.
+Taking all possible combinations, we have the set $\mathcal{S}_1$ of
+derivations in which $\beta$ is immediately above $\alpha$. Repeating the
+procedure with the rules switched, we have the set $\mathcal{S}_2$ of
+derivations in which $\alpha$ is immediately above $\beta$. To check the
+permutation of $\alpha$ over $\beta$, one needs to check if a proof of each
+derivation $d \in \mathcal{S}_1$ implies in a proof of some derivation $d' \in
+\mathcal{S}_2$. The provability implication of derivations can also be
+determined via an answer-set program described in \cite{iclp}.
+
 \section{Quati}
 \label{sec:quati}
 
-% Implementation details and a demo session (?)
+% Implementation details and a demo session using the command line
 % Link to the web
 
 \section{Conclusion}
