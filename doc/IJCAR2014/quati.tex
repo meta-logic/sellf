@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
+\usepackage{proof}
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
 % \title{Quati: checking permutation lemmas in sequent calculus}
@@ -13,36 +14,130 @@
 
 %% NOTE: 7 pages tops
 
+%% TODO: references
+
 \begin{document}
 \maketitle
 
 \begin{abstract}
-The proof of many foundational results in Structural Proof Theory, such as the Admissibility of the Cut Rule and 
-the Completeness of the Focusing Discipline, rely on Permutation Lemmas. It is often a tedious and error prone  
-task to prove such lemmas as they involve many cases. This paper describes the tool Quati which is an automated tool capable of proving
-a wide range of inference rule permutations for a wide number of proof systems. Given a proof system specification 
-in the form of a theory in Linear Logic with Subexponentials, Quati
-outputs in \LaTeX\ the permutation transformations for which it was able to prove correcteness and also the 
-possible derivations for which it was not able to do so. As illustrated in this paper, Quati's output is very similar to 
-proof derivation figures one would normally find in a Proof Theory book. 
-
+The proof of many foundational results in structural proof theory, such as the
+admissibility of the cut rule and the completeness of the focusing discipline,
+rely on permutation lemmas. It is often a tedious and error prone task to prove
+such lemmas as they involve many cases. This paper describes the tool Quati
+which can automatically prove
+%is an automated tool capable of proving 
+a wide range of inference rule
+permutations for a wide number of sequent calculus proof systems. Given a proof system
+specification in the form of a theory in linear logic with subexponentials,
+Quati outputs in \LaTeX\ the permutation transformations for which it was able
+to prove correcteness and also the 
+possible derivations for which it was not able to do so. As illustrated in this
+paper, Quati's output is very similar to proof derivation figures one would
+normally find in a proof theory book. 
 \end{abstract}
 
 \section{Introduction}
 
-\section{Theoretical Background}
+Permutation lemmas play an important role in proof theory. Many foundational
+results about sequent calculus proof systems rely on the fact that some rules
+permute over others. The most well-known of those is probably the admissibility of
+the cut rule, which was proved for the systems \textbf{LK} and \textbf{LJ} by
+Gentzen in 1934 \cite{gentzen}, and until today the same method is used to prove
+cut elimination of various systems. Other important results that rely on the
+permutability of rules are the mid-sequent theorem (or Herbrand's theorem)
+\cite{herbrand} and the completeness of proof search strategies such as uniform
+provability \cite{} and focusing \cite{andreoli}. Nevertheless, it is hard to
+find complete proofs of these results with all the permutation cases listed.
 
-% Explain briefly
+As an example, consider the case of permuting $\vee_l$ over $\rightarrow_l$ in
+the intuitionistic calculus \textbf{LJ}. In order to show whether these two
+rules permute, one needs to check \emph{every possible case} in which
+$\rightarrow_l$ occurs above $\vee_l$ in a derivation. When using a
+multiplicative calculus, there are four possibilities for such derivation, two
+allow a permutation of the rules while the other two don't\footnote{In an
+additive calculus there are three possibilities, only one of them allow a
+permutation.}. Here's one of each:
+%% -> l / v l
+{\scriptsize
+\[
+\infer[\vee_l]{\Gamma, \Gamma', \Gamma'', A \rightarrow B , P \vee Q \vdash F}{
+  \deduce{\Gamma, P \vdash F}{\varphi_1\vspace{0.2cm}}
+  &
+  \infer[\rightarrow_l]{\Gamma', \Gamma'', A \rightarrow B , Q \vdash F}{
+    \deduce{\Gamma' \vdash A}{\varphi_2\vspace{0.2cm}}
+    &
+    \deduce{\Gamma'', Q, B \vdash F}{\varphi_3\vspace{0.2cm}}
+  }
+}
+\quad\rightsquigarrow\quad
+\infer[\rightarrow_l]{\Gamma, \Gamma', \Gamma'', P \vee Q, A \rightarrow B
+\vdash F}{
+  \deduce{\Gamma' \vdash A}{\varphi_2\vspace{0.2cm}}
+  &
+  \infer[\vee_l]{\Gamma, \Gamma'', P \vee Q, B \vdash F}{
+    \deduce{\Gamma, P \vdash F}{\varphi_1\vspace{0.2cm}}
+    &
+    \deduce{\Gamma'', B, Q \vdash F}{\varphi_3\vspace{0.2cm}}
+  }
+}
+\]
+}
+%% -> l / v l
+{\scriptsize
+\[
+\infer[\vee_l]{\Gamma, \Gamma', \Gamma'', A \rightarrow B , P \vee Q \vdash F}{
+  \deduce{\Gamma, P \vdash F}{\varphi_1\vspace{0.2cm}}
+  &
+  \infer[\rightarrow_l]{\Gamma', \Gamma'', A \rightarrow B , Q \vdash F}{
+    \deduce{\Gamma', Q \vdash A}{\varphi_2\vspace{0.2cm}}
+    &
+    \deduce{\Gamma'', B \vdash F}{\varphi_3\vspace{0.2cm}}
+  }
+}
+\quad\rightsquigarrow\quad
+?
+\]
+}
+%
+The combinatorial nature of permutation lemmas can be observed in this example.
+While this illustrates only one case, proving the focusing discipline, for
+instance, requires that the permutation of every pair of rules is checked. For a
+system with $n$ rules, this amounts to $2^n$ cases.
 
-\subsection{Linear Logic and specification of systems}
+The checking of all cases is a tedious task which can be error prone. And the
+fact that the cases are rarely documented makes it hard for others to check the
+correctness of the transformations. The cut-elimination result for
+bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
+was later found to be incorrect \cite{crolard01tcs} exactly because one of the
+permutation lemmas was not true. An automated tool to check for these lemmas
+would be therefore of great help.
 
-\subsection{Answer set programming}
+In this paper we describe such a tool. Section \ref{sec:checking} explains
+briefly the theoretical background that was implemented. Section \ref{sec:quati}
+describes the actual implementation and explains, with an example, how to use
+it. Section \ref{sec:conclusion} summarizes the results obtained and point the
+directions of future work.
+
+\section{Checking proof transformations}
+\label{sec:checking}
+
+% Explain briefly the method and cite other papers.
+% This section should be small or even merged to the introduction.
 
 \section{Quati}
+\label{sec:quati}
 
 % Implementation details and a demo session (?)
 % Link to the web
 
 \section{Conclusion}
+\label{sec:conclusion}
+
+- mention the systems implemented and interesting cases of permutation
+
+- cite the work with ramyaa about automating the specifications
+
+- cite the automatic discovery of focusing systems
+
 
 \end{document}
