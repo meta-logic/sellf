@@ -59,7 +59,7 @@ normally find in a proof theory book.
 Permutation lemmas play an important role in proof theory. Many foundational
 results about proof systems rely on the fact that some rules
 permute over others. For instance, permutation lemmas are used in the Gentzen-style 
-cut-elimination proofs~\cite{gentzen}, the completeness of focusing disciplines~\cite{andreoli,miller}, 
+cut-elimination proofs~\cite{gentzen}, the completeness of focusing disciplines~\cite{miller07cslb,miller}, 
 and the mid-sequent theorem (or Herbrand's theorem)~\cite{herbrand}.
 
 Proving permutation lemmas is often a tedious and error-prone task as there are normally many 
@@ -114,7 +114,9 @@ permutation.} Here's one of each:
 ?
 \]
 }%
-The combinatorial nature of permutation lemmas can be observed in this example.
+The combinatorial nature of the proof of permutation lemmas can be observed in this example. There are four cases to consider
+only for these pair of rules. For proving the completeness of the focusing discipline, 
+one needs to study which permutations are allowed; thus one needs to consider all pairs of rules~\cite{miller07cslb}. 
 Therefore, an automated tool to check for these lemmas
 would be therefore of great help. This paper introduces such a tool called Quati.
 
@@ -132,7 +134,7 @@ the paper~\cite{nigam.jlc}. This paper shows that a great number of proof system
 with Subexponentials seems to be a suitable language for specifying proof systems. 
 
 In the workshop paper~\cite{nigam14ebl}, we showed how to intergrate the material in \cite{nigam13iclp} and \cite{nigam.jlc}.
-In particular, we show how to reduce to an Answer-Set Program the problem of checking whether a rule permutes over another when given 
+In particular, we show how to reduce to solving an Answer-Set Program the problem of checking whether a rule permutes over another when given 
 a proof system specified as a Linear Logic with Subexponentials. Moreover, we also discuss in \cite{nigam14ebl} how to extract proof derivation 
 figures similar to those shown in standard proof theory books~\cite{troelstra} from the 
 answers of the generated Answer-Set programs. 
