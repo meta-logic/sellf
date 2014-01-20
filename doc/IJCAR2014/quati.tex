@@ -116,19 +116,12 @@ The combinatorial nature of permutation lemmas can be observed in this example.
 Therefore, an automated tool to check for these lemmas
 would be therefore of great help. This paper introduces such a tool called Quati.
 
-
-% For example, the cut-elimination result for
-% bi-intuitionistic logic given by Rauszer \cite{rauszer74studia}
-% was later found to be incorrect \cite{crolard01tcs} exactly because one of the
-% permutation lemmas was not true. 
-
-% \paragraph{Theoretical Background}
 While here we will restrict ourselves to simply illustrate Quati's funcionalities and implementation design, 
 we observe that its underlying theory is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. 
  
-In \cite{nigam13iclp}, we showed how to reduce the problem of proving permutation lemmas to an Answer-Set
+In \cite{nigam13iclp}, we showed how to reduce the problem of proving permutation lemmas to solving an Answer-Set
 Program~\cite{gelfond}. That is given a proof system, $\Pscr$, satisfying some properties, we reduced the problem 
-of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in $\Pscr$ to an Answer-Set Program.
+of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in $\Pscr$ to solving an Answer-Set Program.
 Each solution of the Answer-Set Program corresponds to one possible permutation case. 
 
 The exact language in which proof systems are specified was not dealt in~\cite{nigam13iclp}, but was subject of 
