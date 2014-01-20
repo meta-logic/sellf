@@ -24,10 +24,8 @@ The proof of many foundational results in structural proof theory, such as the
 admissibility of the cut rule and the completeness of the focusing discipline,
 rely on permutation lemmas. It is often a tedious and error prone task to prove
 such lemmas as they involve many cases. This paper describes the tool Quati
-which can automatically prove
-%is an automated tool capable of proving 
-a wide range of inference rule
-permutations for a wide number of sequent calculus proof systems. Given a proof system
+which is an automated tool capable of proving a wide range of inference rule
+permutations for a wide number of proof systems. Given a proof system
 specification in the form of a theory in linear logic with subexponentials,
 Quati outputs in \LaTeX\ the permutation transformations for which it was able
 to prove correctness and also the 
@@ -104,7 +102,7 @@ While this illustrates only one case, proving the focusing discipline, for
 instance, requires that the permutation of every pair of rules is checked. For a
 system with $n$ rules, this amounts to $2^n$ cases.
 
-The checking of all cases is a tedious task which can be error prone. And the
+The checking of all cases is a tedious and error prone task. Moreover, the
 fact that the cases are rarely documented makes it hard for others to check the
 correctness of the transformations. The cut-elimination result for
 bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
@@ -129,7 +127,7 @@ is possible to encode it, under certain conditions, in linear logic with
 subexponentials. This is a refinement of linear logic that allows an
 arbitrary (finite) number of different types of the modalities $!$ and $?$. Each
 one corresponds to a different context in the sequent of the object logic. In
-this encoding, each inference rule of the sequent calculus corresponds to a
+this encoding, each inference rule of the object logic corresponds to a
 formula in subexponential linear logic. This formula is called a \emph{bipole} because of its
 particular nesting of operators, and its derivation, also called a bipole, is composed by exactly one
 negative and one positive phase in the \emph{focusing} discipline. The details
@@ -137,7 +135,7 @@ of the encoding and the format of these derivations is out of the scope of this
 paper and we refer the curious reader to \cite{llinda} and \cite{JLC paper} for
 a deeper explanation. For the moment, it is enough to know that this encoding
 has the highest level of adequacy \cite{adequacy??}, meaning that one inference
-rule in the sequent calculus corresponds exactly to one bipole derivation in
+rule in the object logic corresponds exactly to one bipole derivation in
 focused linear logic with subexponentials (SELLF).
 
 This correspondence allows the use of SELLF as a framework to reason
