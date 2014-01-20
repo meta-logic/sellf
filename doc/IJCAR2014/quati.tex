@@ -4,6 +4,26 @@
 \usepackage{amsfonts}
 \usepackage{proof}
 \usepackage{stmaryrd}
+\usepackage[textsize=scriptsize, textwidth=2.2cm]{todonotes}
+
+\newcommand\tsl[1]{#1}
+\newcommand{\elin}[2]{\ensuremath{{\tsl{unitctx}(\ensuremath{#1}, \ensuremath{#2})}}}
+\newcommand{\emp}[1]{\ensuremath{{\tsl{emp}(\ensuremath{#1})}}}
+\newcommand{\eqctx}[2]{\ensuremath{{\tsl{eqctx}(\ensuremath{#1},\ensuremath{#2})}}}
+\newcommand{\union}[3]{\ensuremath{{\tsl{union}(\ensuremath{#1},\ensuremath{#2},\ensuremath{ #3})}}}
+\newcommand{\In}[2]{\ensuremath{\tsl{in}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\Equ}[2]{\ensuremath{\tsl{Equ}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\unions}[2]{\ensuremath{\tsl{Unions}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\equal}[2]{\ensuremath{\tsl{Equal}(\ensuremath{#1},\ensuremath{#2})}}
+\newcommand{\equalCtx}[2]{\ensuremath{\tsl{EqualCtx}(\ensuremath{#1},\ensuremath{#2})}}
+
+\newcommand\Pscr{\mathcal{P}}
+\newcommand{\eg}{{\em e.g.}}
+\newcommand{\ie}{{\em i.e.}}
+\newcommand{\etal}{\emph{et al.}}
+\newcommand{\cf}{{\em cf.}}
+
+
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
 \author{Vivek Nigam\inst{1} \and Giselle Reis\inst{2} \and Leonardo Lima\inst{1}}
@@ -37,17 +57,13 @@ normally find in a proof theory book.
 \section{Introduction}
 
 Permutation lemmas play an important role in proof theory. Many foundational
-results about sequent calculus proof systems rely on the fact that some rules
-permute over others. The most well-known of those is probably the admissibility of
-the cut rule, which was proved for the systems \textbf{LK} and \textbf{LJ} by
-Gentzen in 1934 \cite{gentzen}, and until today the same method is used to prove
-cut elimination of various systems. Other important results that rely on the
-permutability of rules are the mid-sequent theorem (or Herbrand's theorem)
-\cite{herbrand} and the completeness of proof search strategies such as uniform
-provability \cite{} and focusing \cite{andreoli}. Nevertheless, it is hard to
-find complete proofs of these results with all the permutation cases listed.
+results about proof systems rely on the fact that some rules
+permute over others. For instance, permutation lemmas are used in the Gentzen-style 
+cut-elimination proofs~\cite{gentzen}, the completeness of focusing disciplines~\cite{andreoli,miller}, 
+and the mid-sequent theorem (or Herbrand's theorem)~\cite{herbrand}.
 
-As an example, consider the case of permuting $\vee_l$ over $\rightarrow_l$ in
+Proving permutation lemmas is often a tedious and error-prone task as there are normally many 
+cases to consider. As an example, consider the case of permuting $\vee_l$ over $\rightarrow_l$ in
 the intuitionistic calculus \textbf{LJ}. In order to show whether these two
 rules permute, one needs to check \emph{every possible case} in which
 $\rightarrow_l$ occurs above $\vee_l$ in a derivation. When using a
@@ -95,86 +111,128 @@ permutation.}. Here's one of each:
 \quad\rightsquigarrow\quad
 ?
 \]
-}
-%
+}%
 The combinatorial nature of permutation lemmas can be observed in this example.
-While this illustrates only one case, proving the focusing discipline, for
-instance, requires that the permutation of every pair of rules is checked. For a
-system with $n$ rules, this amounts to $2^n$ cases.
+Therefore, an automated tool to check for these lemmas
+would be therefore of great help. This paper introduces such a tool called Quati.
 
-The checking of all cases is a tedious and error prone task. Moreover, the
-fact that the cases are rarely documented makes it hard for others to check the
-correctness of the transformations. The cut-elimination result for
-bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
-was later found to be incorrect \cite{crolard01tcs} exactly because one of the
-permutation lemmas was not true. An automated tool to check for these lemmas
-would be therefore of great help.
 
-In this paper we describe such a tool. Section \ref{sec:checking} explains
-briefly the theoretical background that was implemented. Section \ref{sec:quati}
-describes the actual implementation and explains, with an example, how to use
-it. Section \ref{sec:conclusion} summarizes the results obtained and point the
-directions of future work.
+% For example, the cut-elimination result for
+% bi-intuitionistic logic given by Rauszer \cite{rauszer74studia}
+% was later found to be incorrect \cite{crolard01tcs} exactly because one of the
+% permutation lemmas was not true. 
 
-\section{Checking proof transformations}
-\label{sec:checking}
+% \paragraph{Theoretical Background}
+While here we will restrict ourselves to simply illustrate Quati's funcionalities and implementation design, 
+we observe that its underlying theory is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. 
+ 
+In \cite{nigam13iclp}, we showed how to reduce the problem of proving permutation lemmas to an Answer-Set
+Program~\cite{gelfond}. That is given a proof system, $\Pscr$, satisfying some properties, we reduced the problem 
+of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in $\Pscr$ to an Answer-Set Program.
+Each solution of the Answer-Set Program corresponds to one possible permutation case. 
 
-% Explain briefly the method and cite other papers.
-% This section should be small or even merged to the introduction.
+The exact language in which proof systems are specified was not dealt in~\cite{nigam13iclp}, but was subject of 
+the paper~\cite{nigam.jlc}. This paper shows that a great number of proof systems for different logics,
+\eg, linear, intuitionistic, classical, modal logics, can be specified as theories in Linear Logic with Subexponential~\cite{nigam09ppdp}. Moreover, these specifications are shown to have a strong adequacy (on the level of derivations~\cite{nigam10jar}). Thus, Linear Logic
+with Subexponentials seems to be a suitable language for specifying proof systems. 
 
-Given a sequent calculus proof system, it was shown in \cite{ENTCS?} that it
-is possible to encode it, under certain conditions, in linear logic with
-subexponentials. This is a refinement of linear logic that allows an
-arbitrary (finite) number of different types of the modalities $!$ and $?$. Each
-one corresponds to a different context in the sequent of the object logic. In
-this encoding, each inference rule of the object logic corresponds to a
-formula in subexponential linear logic. This formula is called a \emph{bipole} because of its
-particular nesting of operators, and its derivation, also called a bipole, is composed by exactly one
-negative and one positive phase in the \emph{focusing} discipline. The details
-of the encoding and the format of these derivations is out of the scope of this
-paper and we refer the curious reader to \cite{llinda} and \cite{JLC paper} for
-a deeper explanation. For the moment, it is enough to know that this encoding
-has the highest level of adequacy \cite{adequacy??}, meaning that one inference
-rule in the object logic corresponds exactly to one bipole derivation in
-focused linear logic with subexponentials (SELLF).
+In the workshop paper~\cite{nigam14ebl}, we showed how to intergrate the material in \cite{nigam13iclp} and \cite{nigam.jlc}.
+In particular, we show how to reduce to an Answer-Set Program the problem of checking whether a rule permutes over another when given 
+a proof system specified as a Linear Logic with Subexponentials. Moreover, we also discuss in \cite{nigam14ebl} how to extract proof derivation 
+figures similar to those shown in standard proof theory books~\cite{troelstra} from the 
+answers of the generated Answer-Set programs. 
 
-This correspondence allows the use of SELLF as a framework to reason
-uniformly over a range of different proof systems for different logics. In
-\cite{JLC?}, the authors show how to prove the admissibility of cut and atomic
-initial rules\footnote{This method was implemented and released as the tool
-TATU (\url{https://www.logic.at/staff/giselle/tatu/}).}, and in \cite{iclp
-paper} it is shown how to use SELLF and answer-set programming to verify proof
-transformations. Quati implements the ideas on the latter work to check
-automatically whether two inference rules permute. 
+Quati is the result of these series of papers. In the following Sections we illustrate its use 
+with examples.
 
-\begin{definition}
-Let $\alpha$ and $\beta$ be two inference rules in a sequent calculus proof
-system. We say that $\alpha$ permutes over $\beta$ if \emph{every} possible
-derivation that has an application of $\beta$ immediately followed by and
-application of $\alpha$ (i.e. $\beta$ is above $\alpha$) can be transformed into
-a derivation where $\alpha$ is followed by $\beta$.
-\end{definition}
+\section{Example}
 
-Using the SELLF specification of a rule, generic contexts and answer-set
-programming, we can determine all the instances of an inference rule
-application to a sequent \cite{iclp}. It is worth noting that this reasoning is
-actually done on the linear logic level. So the derivation with generic contexts
-is done in SELLF, and the models of the answer-set program specify bipole
-derivations. But because of the specifications' high level of adequacy, we can
-directly translate the bipole derivations to rules of the specified logic. A
-rewriting system is presented in \cite{iclp} for this translation.
+\todo{VN: Select a proof system to use as running example.}
 
-Given this algorithm, it is possible to specify all instances of $\alpha$ on a
-generic sequent containing main formulas for $\alpha$ and $\beta$. For each of
-these instances, we can also specify how $\beta$ can be applied on its premises.
-Taking all possible combinations, we have the set $\mathcal{S}_1$ of
-derivations in which $\beta$ is immediately above $\alpha$. Repeating the
-procedure with the rules switched, we have the set $\mathcal{S}_2$ of
-derivations in which $\alpha$ is immediately above $\beta$. To check the
-permutation of $\alpha$ over $\beta$, one needs to check if a proof of each
-derivation $d \in \mathcal{S}_1$ implies in a proof of some derivation $d' \in
-\mathcal{S}_2$. The provability implication of derivations can also be
-determined via an answer-set program described in \cite{iclp}.
+\section{Quati at Work}
+
+\section{Implementation Details}
+
+\section{Conclusions and Future Work}
+
+
+% While this illustrates only one case, proving the focusing discipline, for
+% instance, requires that the permutation of every pair of rules is checked. For a
+% system with $n$ rules, this amounts to $2^n$ cases.
+% 
+% The checking of all cases is a tedious and error prone task. Moreover, the
+% fact that the cases are rarely documented makes it hard for others to check the
+% correctness of the transformations. The cut-elimination result for
+% bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
+% was later found to be incorrect \cite{crolard01tcs} exactly because one of the
+% permutation lemmas was not true. An automated tool to check for these lemmas
+% would be therefore of great help.
+% 
+% In this paper we describe such a tool. Section \ref{sec:checking} explains
+% briefly the theoretical background that was implemented. Section \ref{sec:quati}
+% describes the actual implementation and explains, with an example, how to use
+% it. Section \ref{sec:conclusion} summarizes the results obtained and point the
+% directions of future work.
+
+% \section{Checking proof transformations}
+% \label{sec:checking}
+% 
+% % Explain briefly the method and cite other papers.
+% % This section should be small or even merged to the introduction.
+% 
+% Given a sequent calculus proof system, it was shown in \cite{ENTCS?} that it
+% is possible to encode it, under certain conditions, in linear logic with
+% subexponentials. This is a refinement of linear logic that allows an
+% arbitrary (finite) number of different types of the modalities $!$ and $?$. Each
+% one corresponds to a different context in the sequent of the object logic. In
+% this encoding, each inference rule of the object logic corresponds to a
+% formula in subexponential linear logic. This formula is called a \emph{bipole} because of its
+% particular nesting of operators, and its derivation, also called a bipole, is composed by exactly one
+% negative and one positive phase in the \emph{focusing} discipline. The details
+% of the encoding and the format of these derivations is out of the scope of this
+% paper and we refer the curious reader to \cite{llinda} and \cite{JLC paper} for
+% a deeper explanation. For the moment, it is enough to know that this encoding
+% has the highest level of adequacy \cite{adequacy??}, meaning that one inference
+% rule in the object logic corresponds exactly to one bipole derivation in
+% focused linear logic with subexponentials (SELLF).
+% 
+% This correspondence allows the use of SELLF as a framework to reason
+% uniformly over a range of different proof systems for different logics. In
+% \cite{JLC?}, the authors show how to prove the admissibility of cut and atomic
+% initial rules\footnote{This method was implemented and released as the tool
+% TATU (\url{https://www.logic.at/staff/giselle/tatu/}).}, and in \cite{iclp
+% paper} it is shown how to use SELLF and answer-set programming to verify proof
+% transformations. Quati implements the ideas on the latter work to check
+% automatically whether two inference rules permute. 
+% 
+% \begin{definition}
+% Let $\alpha$ and $\beta$ be two inference rules in a sequent calculus proof
+% system. We say that $\alpha$ permutes over $\beta$ if \emph{every} possible
+% derivation that has an application of $\beta$ immediately followed by and
+% application of $\alpha$ (i.e. $\beta$ is above $\alpha$) can be transformed into
+% a derivation where $\alpha$ is followed by $\beta$.
+% \end{definition}
+% 
+% Using the SELLF specification of a rule, generic contexts and answer-set
+% programming, we can determine all the instances of an inference rule
+% application to a sequent \cite{iclp}. It is worth noting that this reasoning is
+% actually done on the linear logic level. So the derivation with generic contexts
+% is done in SELLF, and the models of the answer-set program specify bipole
+% derivations. But because of the specifications' high level of adequacy, we can
+% directly translate the bipole derivations to rules of the specified logic. A
+% rewriting system is presented in \cite{iclp} for this translation.
+% 
+% Given this algorithm, it is possible to specify all instances of $\alpha$ on a
+% generic sequent containing main formulas for $\alpha$ and $\beta$. For each of
+% these instances, we can also specify how $\beta$ can be applied on its premises.
+% Taking all possible combinations, we have the set $\mathcal{S}_1$ of
+% derivations in which $\beta$ is immediately above $\alpha$. Repeating the
+% procedure with the rules switched, we have the set $\mathcal{S}_2$ of
+% derivations in which $\alpha$ is immediately above $\beta$. To check the
+% permutation of $\alpha$ over $\beta$, one needs to check if a proof of each
+% derivation $d \in \mathcal{S}_1$ implies in a proof of some derivation $d' \in
+% \mathcal{S}_2$. The provability implication of derivations can also be
+% determined via an answer-set program described in \cite{iclp}.
 
 \section{Quati}
 \label{sec:quati}
