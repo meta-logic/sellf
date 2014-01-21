@@ -1,7 +1,9 @@
 \documentclass{llncs}
 \usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{latexsym}
 \usepackage{amsmath}
-\usepackage{amsfonts}
 \usepackage{proof}
 \usepackage{stmaryrd}
 \usepackage[textsize=scriptsize, textwidth=2.2cm]{todonotes}
@@ -23,6 +25,10 @@
 \newcommand{\etal}{\emph{et al.}}
 \newcommand{\cf}{{\em cf.}}
 \newcommand{\tup}[1]{\langle#1\rangle}
+
+\newcommand{\nbang}[1]{\hbox{$!^{#1}$}}
+\newcommand{\nquest}[1]{\hbox{$?^{#1}$}}
+
 
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
@@ -153,9 +159,74 @@ with examples.
 
 \section{Quati at Work}
 
-As discussed above, the specification of proof systems is a theory in Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp}. 
-A Quati program is therefore such a theory with some more annotations. We explain in detail the syntax of Quati programs 
+\begin{figure}[t]
+\begin{tabular}{ll}
+$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght}  \quad $CtxType$ ::=  \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::=  \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
+$SubSig$ ::= & 
+{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
+\\
+& {$\mid $ \texttt{subexprel} $\tup{String}$ \texttt{<} $\tup{String}$ .}\\[2pt]
+$Atoms$ & ::=  $\tup{Side}$ $\tup{Term}$ \quad $MarkAtoms$ ::=  \texttt{[}$\tup{String}$\texttt{]?} $\tup{Atoms}$ \\[2pt]
+$Bipoles$ ::= & {\texttt{not} $\tup{Atoms}$ \texttt{*} $\tup{BodyPos}$} \\[2pt]
+$BodyPos$ ::= & \texttt{one} $\mid$ $BodyNeg$ $\mid$ \texttt{[}$\tup{String}$\texttt{]!} $BodyNeg$ $\mid$ $BodyPos$ \texttt{*} $BodyPos$ $\mid$ \\[2pt]
+$BodyNeg$ ::= & 
+{\texttt{top}  $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \& \tup{BodyNeg}$ }
+\end{tabular}
+\textbf{VN: We need to add more constructs}
+\caption{Here $Term$ is a term of type \texttt{form}.} 
+\label{fig:syntax}
+\end{figure}
+
+Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp} is a powerful framework for the specification of a proof systems. 
+Subexponentials, written $\nbang{\ell}$, $\nquest{\ell}$, arise from the observation that the linear logic exponentials are not canonical (see \cite{nigam.jlc} for an extensive
+discussion). It is known  that subexponentials greatly increases
+the expressiveness of the system when compared to linear logic. For instance,
+subexponentials can be used to represent contexts of proof
+systems~\cite{nigam.jlc}, to mark the epistemic state of
+agents~\cite{nigam12lics}, or to specify locations in sequential
+computations~\cite{nigam09ppdp}. 
+The main feature of subexponentials is that they can be organized into a pre-order, $\preceq$, which specifies
+the provability relation among them. 
+In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
+modal logics can be specified in SELL with a strong level of adequacy. 
+
+A Quati program is a SELL theory with some more annotations. The syntax of Quati programs is given in Figure~\cite{fig:syntax}. 
+We explain in detail the syntax of Quati programs 
 by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
+A Quati program consists basically of a set of subexponential signature commands, $SubSig$, specifying the subexponentials 
+used and their relation, and a set of $Bipoles$, specifying the proof rules of the proof system. The following set of subexponential 
+signatures is used for specifying the proof system 
+
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%%%%
+subexp l unb.            subexp r unb.            subexprel l > r
+subexpctx l many lft.    subexpctx r many rght.
+\end{verbatim}
+
+This signature specifies two subexponentials \texttt{l} and \texttt{r}, which are both unbounded, \ie, they 
+behave as classical logic, the subexponential \texttt{l} is greater than \texttt{r} in the pre-order. Intuitively, 
+one subexponential corresponds to one context of the object logic sequent. In this case, as MLJ has only two
+contexts one to left-hand-side and another to the right-hand-side of the sequent, we use two subexponentials. 
+As in this system, these contexts behave classically, the subexponentials are assigned to be unbounded. In contrast, 
+the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right-hand-side of LJ's 
+sequents behaves linearly.
+
+The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not needed in SELL, but as discussed 
+in \cite{nigam14ebl}, they are needed in order to improve the visualization of the proof rules specified by the Quati 
+program. In particular, the former specifies that the context corresponding to the subexponential \texttt{l} contains 
+only formulas on the left-hand-side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
+by \texttt{many}. In constrast, as the context to the right-hand-side of LJ sequents has only one formula, the 
+subexponential \texttt{r} would be anotated with \texttt{single}.
+
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%%%%%%%%% Proof Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Implication
+(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (rght (imp A B))) * [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
+\end{verbatim}
+
+
+
 
 % Quati programs are composed by two files, the first one with the subexponential declarations and SELL theories specifying proof systems, 
 % while the second file simply contains the type declarations of the constants used. Quati uses the type \texttt{term} for object logic terms. For example, in the following, we declare two constants, \texttt{imp}, for implication, and \texttt{and}, for conjunction symbol. 
@@ -164,19 +235,8 @@ by using as running example the inference rules of the multiconclusion sequent c
 % type and form -> form -> form.
 %   \end{verbatim}
 
-\begin{tabular}{ll}
-$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght}  \quad $CtxType$ ::=  \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::=  \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
-$SubSig$ ::= & 
-{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
-\\
-& {$\mid $ \texttt{subexprel} $\tup{String}$ \texttt{<} $\tup{String}$ .}\\[2pt]
-$Bipoles$ ::= & {\texttt{not} $\tup{Atom}$ \texttt{*} $\tup{Body}$}  \quad $Atoms$ ::=  $\tup{Side}$ $\tup{Term}$\\[2pt]
-$Body$ ::= & 
-{\texttt{top} $\mid$ \texttt{one} $\mid$ $\tup{Atom}$ $\mid$ $\tup{Body} | \tup{Body}$ $\mid$ $\tup{Body} \& \tup{Body}$ }
-\end{tabular}
-\todo{add other constructs}
 
-where $Term$ is a term of type \texttt{form}.
+
 
 \section{Implementation Details}
 
