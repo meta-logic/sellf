@@ -3,6 +3,7 @@ open ProofTree
 open Subexponentials
 open Prints
 open Ol
+open ProofTreeSchema
 
 module TestUnify = 
   Unify.Make(struct
@@ -83,21 +84,21 @@ let parse file_name = begin
         let _ = Parser.types Lexer.token lexbuf in ();
       done; true
     with 
-      |  Lexer.Eof -> 
-          let file_prog = open_in (file_name^".pl") in 
-          let lexbuf = Lexing.from_channel file_prog in
-            begin
-            try
-              while true do
-                let _ = Parser.clause Lexer.token lexbuf in ();
-              done; true 
-            with
-              | Lexer.Eof -> true
-              | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
-              | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
-            end
-      |  Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
-      |  Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
+      | Lexer.Eof -> 
+         let file_prog = open_in (file_name^".pl") in 
+         let lexbuf = Lexing.from_channel file_prog in
+           begin
+           try
+             while true do
+               let _ = Parser.clause Lexer.token lexbuf in ();
+             done; true 
+           with
+             | Lexer.Eof -> true
+             | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
+             | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+           end
+      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
+      | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
     end
 end ;;
 
@@ -113,6 +114,9 @@ let get_bipoles () = begin
   ) formulas in (all_bipoles, !bpl_lst)
 end ;;
 
+(* TODO: this function should be somewhere else and olPt should not be a mutable
+object. *)
+(* Ask Leo about this function. [Giselle] *)
 let apply_derivation bipoles = begin 
   let olPt = ref [] in
   olPt := Derivation.remakeBipoles bipoles;
@@ -152,45 +156,51 @@ let print_rulenames () = begin
   ) rules_lst
 end ;;
 
-let bipole () = 
-  print_endline "Please type the name of the file: ";
-  let olPt = ref [] in
-  let fileName = read_line () in
+let printOLrules bipoles fileName = 
   let file = open_out (filePrefix ^ fileName ^ ".tex") in
-  let pair_bpl = get_bipoles () in
-  let all_bipoles = fst(pair_bpl) in
-  let bpl_lst = snd(pair_bpl) in
-  if all_bipoles then begin
-    Printf.fprintf file "%s" Prints.texFileHeader;
-    List.iter (fun bipoles ->
-      olPt := apply_derivation bipoles;
-      List.iter (fun (olt, model) ->
-				Printf.fprintf file "%s" "{\\scriptsize";
-				Printf.fprintf file "%s" "\\[";
-				Printf.fprintf file "%s" (OlProofTree.toTexString olt);
-				Printf.fprintf file "%s" "\\]";
-				Printf.fprintf file "%s" "}";
-      ) !olPt;
-    ) bpl_lst;
-    Printf.fprintf file "%s" Prints.texFileFooter;
-    close_out file;
-    end
-  else print_endline "This specification is not a bipole!";;
-  
+  Printf.fprintf file "%s" Prints.texFileHeader;
+  List.iter (fun bipole ->
+    (* Why is the result of this method a list?? *)
+    let olPt = apply_derivation bipole in
+    List.iter (fun (olt, model) ->
+  		Printf.fprintf file "%s" "{\\scriptsize";
+  		Printf.fprintf file "%s" "\\[";
+  		Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+  		Printf.fprintf file "%s" "\\]";
+  		Printf.fprintf file "%s" "}";
+    ) olPt;
+  ) bipoles;
+  Printf.fprintf file "%s" Prints.texFileFooter;
+  close_out file
+;;
+
+let printBipoles bipoles fileName = 
+  let file = open_out (filePrefix ^ fileName ^ ".tex") in
+  Printf.fprintf file "%s" Prints.texFileHeader;
+  List.iter (fun bipole ->
+    Printf.fprintf file "%s" "{\\scriptsize";
+    Printf.fprintf file "%s" "\\[";
+    Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(bipole)));
+    Printf.fprintf file "%s" "\\]";
+    Printf.fprintf file "%s" "}";
+  ) bipoles;
+  Printf.fprintf file "%s" Prints.texFileFooter;
+  close_out file
+;;
+
 (* Command line #bipole *)
 let bipole_cl () = begin
-  let olPt = ref [] in
   let pair_bpl = get_bipoles () in
   let all_bipoles = fst(pair_bpl) in
   let bpl_lst = snd(pair_bpl) in begin
   if all_bipoles then
   List.iter (fun bipoles ->
-    olPt := apply_derivation bipoles;
+    let olPt = apply_derivation bipoles in
     List.iter (fun (olt, model) ->
       print_endline "\\[";
       print_endline (OlProofTree.toTexString olt);
       print_endline "\\]";
-    ) !olPt;
+    ) olPt;
   ) bpl_lst
   else print_endline "This specification is not a bipole!"
   end
@@ -266,6 +276,16 @@ let permute_cl n1 n2 =
 				print_endline "\\]";
       ) olPt 
 ;;
+
+let print_formulas formulas = 
+  let i = ref 0 in
+  print_endline "\nThese are the formulas available: ";
+  List.iter ( fun f ->
+    print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
+    i := !i + 1
+  ) formulas;
+  print_newline ()
+;;
  
 let rec start () =
   initAll ();
@@ -298,7 +318,29 @@ solve_query () =
   let query_string = read_line() in
   if query_string = "#done" then samefile := false      
   else begin
-  match query_string with 
+  match query_string with
+
+    (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
+    | "#bipole" -> 
+      let formulas = !Specification.others @ !Specification.introRules in
+      print_formulas formulas;
+      print_endline "The bipoles for the chosen formula will be generated and \
+      printed to a LaTeX file.\nPlease choose a formula by its number:";
+      let i1 = int_of_string (read_line ()) in
+      print_endline "Please choose a name for the file:\n";
+      let f = read_line () in
+      let bp = Bipole.bipole (List.nth formulas i1) in
+      printBipoles bp f
+
+    (* Generates all bipoles of all rules of the object logic and prints a latex file with them *)
+    | "#bipoles" ->
+      print_newline ();
+      print_endline "All the bipoles of the specification will be generated \
+      and printed in a latex file.\nPlease choose a name for the file:";
+      let f = read_line () in
+      let formulas = !Specification.others @ !Specification.introRules in
+      let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
+      printBipoles bipoles f
 
     (* Check if all rules are bipoles *)
     | "#check_rules" -> 
@@ -308,23 +350,33 @@ solve_query () =
         | false -> print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f))
       ) formulas
 
-    (* Generates the bipole of a rule and prints a latex file with it *)
-    | "#bipole" ->
+    (* Generates a rule of the object logic and prints a latex file with it *)
+    | "#rule" -> 
+      let formulas = !Specification.others @ !Specification.introRules in
+      print_formulas formulas;
+      print_endline "The object logic rule of the chosen formula will be generated and \
+      printed to a LaTeX file.\nPlease choose a formula by its number:";
+      let i1 = int_of_string (read_line ()) in
+      print_endline "Please choose a name for the file:\n";
+      let f = read_line () in
+      let bp = Bipole.bipole (List.nth formulas i1) in
+      printOLrules [bp] f
+
+    (* Generates all rules of the object logic and prints a latex file with them *)
+    | "#rules" ->
       print_newline ();
-      print_endline "SELLF will generate all the bipoles of the especification and print them in a latex file.";
-      bipole ()
+      print_endline "The object logic rules of all the formulas of the specification \
+      will be generated and printed in a latex file.\nPlease choose a name for the file:";
+      let f = read_line () in
+      let formulas = !Specification.others @ !Specification.introRules in
+      let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
+      printOLrules bipoles f
 
     (* Check if two rules permute *)
     | "#permute" -> 
-      let i = ref 0 in
       let formulas = !Specification.others @ !Specification.introRules in
-      print_endline "\nThese are the formulas available: ";
-      List.iter ( fun f ->
-        print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
-        i := !i + 1
-      ) formulas;
-      print_newline ();
-      print_endline "SELLF will check the permutation of one formula F1 over \
+      print_formulas formulas;
+      print_endline "Checking the permutation of one formula F1 over \
       another F2 (i.e., can a derivation where F1 is below F2 be transformed \
       into a derivation where F2 is below F1?) \n";
       print_endline "Please type the number of F1: ";
@@ -343,8 +395,9 @@ solve_query () =
         List.fold_right (fun f2 acc2 ->
           match Permutation.permute f1 f2 with
             | ([], _) -> 
+              print_endline "----------------------------------";
               print_endline (Prints.termToString f1);
-              print_endline "\ndoes NOT permute over\n";
+              print_endline "does NOT permute over";
               print_endline (Prints.termToString f2);
               acc2
             | (perm_bipoles, _) -> perm_bipoles @ acc2
@@ -365,6 +418,7 @@ solve_query () =
 
     | "#principalcut" -> check_principalcut ()
 
+    (* Query *)
     | _ -> begin
       let query = Lexing.from_string query_string in
       begin
@@ -405,7 +459,7 @@ match (!check, !fileName, !rule1, !rule2) with
       print_endline "Version 0.5.\n";
       print_endline ("The file: " ^ file ^ " was loaded.\n");
       while true do
-	solve_query ()
+	      solve_query ()
       done
     end
   (* Running in batch mode *)

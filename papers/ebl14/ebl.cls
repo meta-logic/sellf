@@ -67,4 +67,4 @@ pdfview = {XYZ null null null}
 }
 
 %References
-\bibliographystyle{ebl}
+%\bibliographystyle{ebl}

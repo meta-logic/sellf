@@ -1,0 +1,45 @@
+\documentclass{ebl}
+
+% Use this command to insert the title of your work.
+\title{Usage Example}
+
+% Use this command to insert authors names and identify the affiliations.
+% After each author insert a \inst{} with a number to identify the institution.
+% Authors with the same affiliation must have the same number.
+\author{Bruno Lopes\inst{1} \and Petrucio Viana\inst{2} \and Renata Freitas\inst{2}}
+
+% Use this command to insert the affiliation details.
+% To break lines use \\
+% After an institute if you need to insert an other institute use the command \nextinstitute inside the \institute{}.
+% To insert the email of each author use the command \email{} inside the \institute{}.
+\institute{Departamento de Inform\'atica\\
+Pontif\'\i cia Univerisidade Cat\'olica do Rio de Janeiro
+\email{bvieira@inf.puc-rio.br}
+\nextinstitute
+Departamento de An\'alise\\
+Instituto de Matem\'atica e Estat\'\i stica\\
+Universidade Federal Fluminense
+\email{petrucio@cos.ufrj.br}
+\email{renatafreitas@id.uff.br}
+}
+
+% To insert an acknowledgement use this command.
+% If you would not like to have acknowledgements, please remove the following line.
+\acknowledgement{The author thanks to\dots}
+
+\begin{document}
+
+% This command is mandatory to generate the headers of your work.
+\maketitle
+
+%Here you can insert the text of your work,
+This is an usage example of EBL proceedings class.
+Citations may be contextualised as~\citet{Prawitz2006} or between parenthesises as~\citep{vanDalen2008}.
+
+% Use this command if you need bibliographic references.
+% You must replace ref by the name of your BibTeX file which contains the information of your references.
+% To construct your BibTeX file you should use JabRef, a manager for BibTeX entries.
+% JabRef is freely available at http://jabref.sourceforge.net.
+\bibliography{ref}
+
+\end{document}

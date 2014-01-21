@@ -345,9 +345,15 @@ top:
   measurement of the permutation checking is always on);";*)
   print_endline "#exit command terminates the program.";
   print_endline "#help displays this message;\n";
+  (* TODO: separate the commands in TATU, QUATI and helper functions *)
   print_endline "There are the following commands available during state '?>':\n";
-  print_endline "#check_rules: checks if all the rules of a file are bipoles.";
+  print_endline "#rule";
+  print_endline "#rules";
+  print_endline "#bipole";
+  print_endline "#bipoles";
   print_endline "#permute: checks if two rules of your choice permute.";
+  print_endline "#permute_all: checks if two rules of your choice permute.";
+  print_endline "#check_rules: checks if all the rules of a file are bipoles.";
   print_endline "#bipole: generates the bipole of a rule in linear logic (with generic context and constraints) and prints this to a latex file.";
   print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
   print_endline "#cutcoherence: checks whether the system specified on the file loaded is cut-coherent.";

@@ -343,12 +343,13 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
   let rec toTexString pt = match pt.rule with
     | Some(r) ->
       let topproof = match pt.premises with
-	| [] -> ""
-	| hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> (*"\n&\n"^*)(toTexString el)) tl "") 
+        | [] -> ""
+        | hd::tl -> (toTexString hd)^(List.fold_right (fun el acc -> (*"\n&\n"^*)(toTexString el)) tl "") 
       in
       (*"\\infer{"^(SequentSchema.toTexString (getConclusion pt))^"}\n{"^topproof^"}"*)
       "\\cfrac{"^topproof^"}\n{"^(SequentSchema.toTexString (getConclusion pt))^"}"
     | None -> (SequentSchema.toTexString (getConclusion pt))
 
-end;;
+end
+;;
 
