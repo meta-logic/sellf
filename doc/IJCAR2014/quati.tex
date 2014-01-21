@@ -164,17 +164,19 @@ by using as running example the inference rules of the multiconclusion sequent c
 % type and form -> form -> form.
 %   \end{verbatim}
 
-\begin{tabular}{lllllll}
-$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght} & \quad $CtxType$ ::= & \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::= & \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
+\begin{tabular}{ll}
+$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght}  \quad $CtxType$ ::=  \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::=  \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
 $SubSig$ ::= & 
-\multicolumn{5}{l}{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
-\\[2pt]
-$Bipoles$ ::= & {\texttt{not} $\tup{Atom}$ \texttt{*} $\tup{Body}$} & \quad $Atoms$ ::= & $\tup{Side}$ $\tup{Terms}$\\[2pt]
+{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
+\\
+& {$\mid $ \texttt{subexprel} $\tup{String}$ \texttt{<} $\tup{String}$ .}\\[2pt]
+$Bipoles$ ::= & {\texttt{not} $\tup{Atom}$ \texttt{*} $\tup{Body}$}  \quad $Atoms$ ::=  $\tup{Side}$ $\tup{Term}$\\[2pt]
 $Body$ ::= & 
-\multicolumn{5}{l}{\texttt{top} $\mid$ \texttt{one} $\mid$ $\tup{Atom}$ $\mid$ $\tup{Body} | \tup{Body}$ $\mid$ $\tup{Body} \& \tup{Body}$ }
+{\texttt{top} $\mid$ \texttt{one} $\mid$ $\tup{Atom}$ $\mid$ $\tup{Body} | \tup{Body}$ $\mid$ $\tup{Body} \& \tup{Body}$ }
 \end{tabular}
 \todo{add other constructs}
 
+where $Term$ is a term of type \texttt{form}.
 
 \section{Implementation Details}
 
