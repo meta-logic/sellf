@@ -22,7 +22,7 @@
 \newcommand{\ie}{{\em i.e.}}
 \newcommand{\etal}{\emph{et al.}}
 \newcommand{\cf}{{\em cf.}}
-
+\newcommand{\tup}[1]{\langle#1\rangle}
 
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
@@ -116,8 +116,13 @@ permutation.} Here's one of each:
 }%
 The combinatorial nature of the proof of permutation lemmas can be observed in this example. There are four cases to consider
 only for these pair of rules. For proving the completeness of the focusing discipline, 
-one needs to study which permutations are allowed; thus one needs to consider all pairs of rules~\cite{miller07cslb}. 
-Therefore, an automated tool to check for these lemmas
+one needs to study which permutations are allowed; thus one needs to consider all pairs of rules~\cite{miller07cslb}.
+Moreover, the
+fact that the cases are rarely documented makes it hard for others to check the
+correctness of the transformations. The cut-elimination result for
+bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
+was later found to be incorrect \cite{crolard01tcs} exactly because one of the
+permutation lemmas was not true. An automated tool to check for these lemmas
 would be therefore of great help. This paper introduces such a tool called Quati.
 
 While here we will restrict ourselves to simply illustrate Quati's funcionalities and implementation design, 
@@ -142,11 +147,34 @@ answers of the generated Answer-Set programs.
 Quati is the result of these series of papers. In the following Sections we illustrate its use 
 with examples.
 
-\section{Example}
-
-\todo{VN: Select a proof system to use as running example.}
+% \section{Example}
+% 
+% \todo{VN: Select a proof system to use as running example.}
 
 \section{Quati at Work}
+
+As discussed above, the specification of proof systems is a theory in Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp}. 
+A Quati program is therefore such a theory with some more annotations. We explain in detail the syntax of Quati programs 
+by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
+
+% Quati programs are composed by two files, the first one with the subexponential declarations and SELL theories specifying proof systems, 
+% while the second file simply contains the type declarations of the constants used. Quati uses the type \texttt{term} for object logic terms. For example, in the following, we declare two constants, \texttt{imp}, for implication, and \texttt{and}, for conjunction symbol. 
+% \begin{verbatim} 
+% type imp form -> form -> form.
+% type and form -> form -> form.
+%   \end{verbatim}
+
+\begin{tabular}{lllllll}
+$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght} & \quad $CtxType$ ::= & \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::= & \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
+$SubSig$ ::= & 
+\multicolumn{5}{l}{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
+\\[2pt]
+$Bipoles$ ::= & {\texttt{not} $\tup{Atom}$ \texttt{*} $\tup{Body}$} & \quad $Atoms$ ::= & $\tup{Side}$ $\tup{Terms}$\\[2pt]
+$Body$ ::= & 
+\multicolumn{5}{l}{\texttt{top} $\mid$ \texttt{one} $\mid$ $\tup{Atom}$ $\mid$ $\tup{Body} | \tup{Body}$ $\mid$ $\tup{Body} \& \tup{Body}$ }
+\end{tabular}
+\todo{add other constructs}
+
 
 \section{Implementation Details}
 
