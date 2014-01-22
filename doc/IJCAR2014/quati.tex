@@ -203,11 +203,14 @@ subexp l unb.            subexp r unb.            subexprel l > r
 subexpctx l many lft.    subexpctx r many rght.
 \end{verbatim}
 
-This signature specifies two subexponentials \texttt{l} and \texttt{r}, which are both unbounded, \ie, they 
-behave as classical logic, the subexponential \texttt{l} is greater than \texttt{r} in the pre-order. Intuitively, 
-one subexponential corresponds to one context of the object logic sequent. In this case, as MLJ has only two
-contexts one to left-hand-side and another to the right-hand-side of the sequent, we use two subexponentials. 
-As in this system, these contexts behave classically, the subexponentials are assigned to be unbounded. In contrast, 
+Intuitively, one subexponential corresponds to one context of the object logic sequent.\footnote{There are 
+some specifications where the subexponential is used as to capture the structural properties of the proof 
+system and therefore does not necessarily correspond to a context in the object logic. See \cite{nigam.jlc}
+for more on this.}
+In this case, as MLJ has only two
+contexts one to left-hand-side and another to the right-hand-side of the sequent, we use two subexponentials
+\texttt{l} and \texttt{r}. Moreover, as both contexts (to the left and right) behave classically, 
+we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. In contrast, 
 the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right-hand-side of LJ's 
 sequents behaves linearly.
 
@@ -221,7 +224,7 @@ subexponential \texttt{r} would be anotated with \texttt{single}.
 %%%%%%%%%%%%%%%%%%%%%%%%%% Proof Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
 (not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
-(not (rght (imp A B))) * [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
+(not (rght (imp A B))) * [l]bang (([l]? (lft A)) | ([r]? (rght B))).
 \end{verbatim}
 
 
@@ -356,22 +359,6 @@ input files and Tables \ref{tbl:syntax_ll} and \ref{tbl:syntax} show the syntax 
 linear logic connectives and some keywords used in specifications.
 
 \begin{figure}
-\begin{verbatim}
-%%%%%%%%%%%%%%%%%%% Specification %%%%%%%%%%%%%%%%%%%%
-subexp l unb.
-subexp r unb.
-subexpctx l many lft.
-subexpctx r many rght.
-
-rules introduction.
-% Implication
-(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
-(not (rght (imp A B))) * [l]bang ( ([l]? (lft A)) | ([r]? (rght B))).
-
-% Forall
-(not (lft (forall A))) * sigma \X ([l]? (lft (A X))).
-(not (rght (forall A))) * [l]bang (pi \X ([r]? (rght (A X)))).
-\end{verbatim}
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%% Signature %%%%%%%%%%%%%%%%%%%%
 type imp form -> form -> form.
