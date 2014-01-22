@@ -364,8 +364,8 @@ module Derivation : DERIVATION = struct
   let solveElin olPt c t = 
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
-    print_endline "ELIN FUN";
-    print_subexp c;
+(*     print_endline "ELIN FUN"; *)
+(*     print_subexp c; *)
 (*     print_endline "OLD CONTEXT"; *)
 (*     print_endline ("Size" ^ (string_of_int (List.length olCtx.OlContext.lst))); *)
 (*     List.map (fun (olc, f) -> print_subexp olc) olCtx.OlContext.lst;  *)
