@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{proof}
 \usepackage{stmaryrd}
+\usepackage{comment}
 \usepackage[textsize=scriptsize, textwidth=2.2cm]{todonotes}
 \usepackage{booktabs}
 %\bibliographystyle{alpha}
@@ -124,60 +125,108 @@ permutation.} Here's one of each:
 ?
 \]
 }%
-The combinatorial nature of the proof of permutation lemmas can be observed in this example. There are four cases to consider
-only for these pair of rules. For proving the completeness of the focusing discipline, 
-one needs to study which permutations are allowed; thus one needs to consider all pairs of rules~\cite{miller07cslb}.
-Moreover, the
-fact that the cases are rarely documented makes it hard for others to check the
+The combinatorial nature of the proof of permutation lemmas can be observed in
+this example. There are four cases to consider only for this pair of rules. For
+proving the completeness of the focusing discipline, one needs to study which
+permutations are allowed; thus all pairs of rules need to be
+considered~\cite{miller07cslb}.
+Moreover, the fact that the cases are rarely documented makes it hard for others to check the
 correctness of the transformations. The cut-elimination result for
 bi-intuitionistic logic, for example, given by Rauszer \cite{rauszer74studia}
 was later found to be incorrect \cite{crolard01tcs} exactly because one of the
 permutation lemmas was not true. An automated tool to check for these lemmas
 would be therefore of great help. This paper introduces such a tool called Quati.
 
-While here we will restrict ourselves to simply illustrate Quati's funcionalities and implementation design, 
-we observe that its underlying theory is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. 
+While here we will restrict ourselves to simply illustrate Quati's
+functionalities and implementation design, we observe that its underlying theory
+is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. Here we
+summarize the results of these works.
  
-In \cite{nigam13iclp}, we showed how to reduce the problem of proving permutation lemmas to solving an Answer-Set
-Program~\cite{gelfond}. That is given a proof system, $\Pscr$, satisfying some properties, we reduced the problem 
-of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in $\Pscr$ to solving an Answer-Set Program.
-Each solution of the Answer-Set Program corresponds to one possible permutation case. 
+In \cite{nigam13iclp}, we show how to reduce the problem of proving permutation
+lemmas to solving an answer-set program~\cite{gelfond}. That is given a proof
+system, $\Pscr$, satisfying some properties, we reduce the problem 
+of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in
+$\Pscr$ to solving an answer-set program. Each solution of this program
+corresponds to one possible permutation case. 
 
-The exact language in which proof systems are specified was not dealt in~\cite{nigam13iclp}, but was subject of 
-the paper~\cite{nigam.jlc}. This paper shows that a great number of proof systems for different logics,
-\eg, linear, intuitionistic, classical, modal logics, can be specified as theories in Linear Logic with Subexponential~\cite{nigam09ppdp}. Moreover, these specifications are shown to have a strong adequacy (on the level of derivations~\cite{nigam10jar}). Thus, Linear Logic
-with Subexponentials seems to be a suitable language for specifying proof systems. 
+The exact language in which proof systems are specified was not dealt
+in~\cite{nigam13iclp}, but was subject of the paper~\cite{nigam.jlc}. This paper
+shows that a great number of proof systems for different logics (\eg, linear,
+intuitionistic, classical, modal logics) can be specified as theories in linear
+logic with subexponentials~\cite{nigam09ppdp}. These specifications are shown to
+have a strong adequacy, namely, \emph{on the level of
+derivations}~\cite{nigam10jar}, meaning that there is a one to one
+correspondence of derivations in the specified logic (object logic) to derivations in linear
+logic with subexponentials. Therefore, linear logic with subexponentials seems
+to be a suitable language for specifying proof systems. 
 
-In the workshop paper~\cite{nigam14ebl}, we showed how to intergrate the material in \cite{nigam13iclp} and \cite{nigam.jlc}.
-In particular, we show how to reduce to solving an Answer-Set Program the problem of checking whether a rule permutes over another when given 
-a proof system specified as a Linear Logic with Subexponentials. Moreover, we also discuss in \cite{nigam14ebl} how to extract proof derivation 
-figures similar to those shown in standard proof theory books~\cite{troelstra} from the 
-answers of the generated Answer-Set programs. 
+In the workshop paper~\cite{nigam14ebl}, we show how to integrate the material
+in \cite{nigam13iclp} and \cite{nigam.jlc}. In particular, we show how to reduce
+to solving an answer-set program the problem of checking whether a rule permutes
+over another when given a proof system specified as a linear logic with
+subexponentials. Moreover, we also discuss in \cite{nigam14ebl} how to extract
+proof derivation figures similar to those shown in standard proof theory
+books~\cite{troelstra} from the answers of the generated answer-set programs. 
 
-Quati is the result of these series of papers. In the following Sections we illustrate its use 
+Quati is the result of this series of papers. In the following sections we illustrate its use 
 with examples.
 
 % \section{Example}
 % 
 % \todo{VN: Select a proof system to use as running example.}
 
+% TODO: change executable file name for quati in the release
 \section{Quati at Work}
 
+% TODO: add installation instructions and system requirements, explain where the
+% examples are.
+
+Once the system in installed, it can be called by simply typing the command:
+\texttt{./quati}. This will start an interactive command line where the user can
+call the functions we will demonstrate now. If one wants to see a list of all
+the functionalities available, just type \texttt{\#help}. We start by loading a
+file. Throughout this example session, we will use the specification for the
+intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara}.
+
+% TODO: change the directory path for the release
+{\footnotesize
+\begin{verbatim}
+:> #load ../examples/proofsystems/mlj
+\end{verbatim}
+}
+
+%% TODO: describe the functionalities:
+% construct OL rule (for one and for all)
+% construct bipole (for one and for all)
+% permute (for two and for all)
+
+%By using the following command: \todo{Add command}
+%
+%Quati constructs the corresponding proof rule of a bipole as described in \cite{nigam14ebl}. It 
+
+
+\subsection{Input format}
+
+% TODO: fix this table one everything is there.
 \begin{figure}[t]
-\begin{tabular}{ll}
-$Side$ ::= & \texttt{lft} $\mid$ \texttt{rght}  \quad $CtxType$ ::=  \texttt{many} $\mid$ \texttt{single} \quad $SubType$ ::=  \texttt{unb} $\mid$ \texttt{lin} \\[2pt]
-$SubSig$ ::= & 
-{\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
-\\
-& {$\mid $ \texttt{subexprel} $\tup{String}$ \texttt{<} $\tup{String}$ .}\\[2pt]
-$Atoms$ ::= & $\tup{Side}$ $\tup{Term}$ \quad $MarkAtoms$ ::=  \texttt{[}$\tup{String}$\texttt{]?} $\tup{Atoms}$ \\[2pt]
-$Bipoles$ ::= & ({\texttt{not} $\tup{Atoms}$) \texttt{*} $\tup{BodyPos}$} . \\[2pt]
-$BodyPos$ ::= & \texttt{one} $\mid$ $BodyNeg$ $\mid$ \texttt{[}$\tup{String}$\texttt{]bang} $BodyNeg$ $\mid$ $BodyPos$ \texttt{*} $BodyPos$ \\ & $\mid$ $BodyPos$ \texttt{+} $BodyPos$ \\[2pt]
-$BodyNeg$ ::= & 
-{\texttt{top} $\mid$ \texttt{bot} $\mid$ $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \texttt{\&} \tup{BodyNeg}$ }
-\end{tabular}
+\begin{align*}
+SubSig &::= SubDecl \;\; SubSpec \;\; SubRel \\
+SubDecl &::= \texttt{subexp} \tup{String} \tup{SubType}.\\
+SubSpec &::= \texttt{subexpctx} \tup{String} \tup{CtxType} \tup{Side}.\\
+SubRel &::= \texttt{subexprel} \tup{String} \texttt{<} \tup{String}. \\
+Side &::= \texttt{lft} \;\;|\;\; \texttt{rght} \\
+CtxType &::=  \texttt{many} \;\;|\;\; \texttt{single} \\
+SubType &::=  \texttt{unb} \;\;|\;\; \texttt{lin} \\
+Bipoles &::= (\texttt{not} \tup{Atoms}) \texttt{*} \tup{BodyPos}. \\
+Atoms &::= \tup{Side} \tup{Form} \\
+BodyPos &::= \texttt{one} \;\;|\;\; BodyNeg \;\;|\;\; \texttt{[}\tup{String}\texttt{]bang} BodyNeg \;\;|\;\;\\ 
+        & BodyPos \texttt{*} BodyPos \;\;|\;\; BodyPos \texttt{+} BodyPos \\
+BodyNeg &::= \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|\;\; \tup{BodyNeg}|\tup{BodyNeg} \;\;|\;\; \\
+        & \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\
+MarkAtoms &::= \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} \\
+\end{align*}
 \textbf{VN: We need to add more constructs}
-\caption{Here $Term$ is a term of type \texttt{form}.} 
+\caption{Here $Form$ is a term of type \texttt{form}.} 
 \label{fig:syntax}
 \begin{center}
 \begin{tabular}{c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c}
@@ -192,107 +241,145 @@ $BodyNeg$ ::= &
 \label{fig:syntax_ll}
 \end{figure}
 
-Quati's underlying logic, Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp}, is a powerful framework for specification of proof systems. 
-Subexponentials, written $\nbang{\ell}$, $\nquest{\ell}$, arise from the observation that the linear logic exponentials are not canonical (see \cite{nigam.jlc} for an extensive
-discussion). It is known  that subexponentials greatly increases
+Quati's underlying logic, linear logic with subexponentials
+(SELL)~\cite{nigam09ppdp}, is a powerful framework for the specification of proof systems. 
+Subexponentials, written $\nbang{\ell}$, $\nquest{\ell}$, arise from the
+observation that the linear logic exponentials are not canonical (see
+\cite{nigam.jlc} for an extensive discussion). It is known that these operators
+greatly increase
 the expressiveness of the system when compared to linear logic. For instance,
 subexponentials can be used to represent contexts of proof
 systems~\cite{nigam.jlc}, to mark the epistemic state of
 agents~\cite{nigam12lics}, or to specify locations in sequential
 computations~\cite{nigam09ppdp}. 
-The main feature of subexponentials is that they can be organized into a pre-order, $\preceq$, which specifies
+The main feature of subexponentials is that they can be organized in a pre-order, $\preceq$, which specifies
 the provability relation among them. 
 In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
 modal logics can be specified in SELL with a strong level of adequacy. 
 
-A Quati program is a SELL theory with some more annotations. The syntax of Quati programs is given in Figure~\ref{fig:syntax}. 
-We explain in detail the syntax of Quati programs 
-by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
-A Quati program consists of three parts: (1) the term and kind declarations, specifying hte constants in the $Term$ set; (2) the 
-subexponential signature declaration, $SubSig$, specifying the subexponentials 
-used and their relation, $\preceq$; and (3) a set of $Bipoles$, specifying the proof rules of the proof system. 
+A Quati program is a SELL theory with some more annotations. Its syntax is given
+in Figure~\ref{fig:syntax} and explained in detail  
+by using as running example the inference rules of the multiconclusion sequent
+calculus for intuitionistic logic~\cite{maehara}, or MLJ.
+%A Quati program consists of three parts: (1) the term and kind declarations,
+%specifying the constants in the $Term$ set; (2) the 
+%subexponential signature declaration, $SubSig$, specifying the subexponentials 
+%used and their relation, $\preceq$; and (3) a set of $Bipoles$, specifying the proof rules of the proof system. 
+%
+A Quati program consists of two files: (1) a \emph{type signature} file, with
+suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consisting of two parts: (a) a
+\emph{subexponential signature} and (b) the rules' specifications or
+\emph{bipoles}.
 
-\paragraph{Term and Kind Declaration}
-\todo{To be completed}
+\paragraph{Type signature}
+
+The \emph{type signature} file contains type and kind declarations of the object
+logic's elements. The kinds \texttt{term} and \texttt{form} are built-in and
+represent the types of terms and formulas of the object logic. In general, only
+the types of the connectives need to be declared in this file. Here is an
+example:
+
+{\footnotesize
 \begin{verbatim}
-%%%%%%%%%%%%%%%%%%% Term Signature %%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%% Signature %%%%%%%%%%%%%%%%%%%%
 type imp form -> form -> form.
+type forall (term -> form) -> form.
 \end{verbatim}
+}
 
+\paragraph{Subexponential signature}
 
-\paragraph{Subexponential Signature} The following set of subexponential signatures is used for specifying the proof system MLJ:
+The following subexponential signature is used for specifying the proof system MLJ:
 
+{\footnotesize
 \begin{verbatim}
 %%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%
-subexp l unb.            subexp r unb.            
-subexpctx l many lft.    subexpctx r many rght.
+subexp l unb.            
+subexp r unb.            
+subexpctx l many lft.    
+subexpctx r many rght.
 subexprel l > r
 \end{verbatim}
+}
 
 Intuitively, one subexponential corresponds to one context of the object logic sequent.\footnote{There are 
-some specifications where the subexponential is used as to capture the structural properties of the proof 
+some specifications where a subexponential is used to capture the structural properties of the proof 
 system and therefore does not necessarily correspond to a context in the object logic. See \cite{nigam.jlc}
 for more on this.}
 In this case, as MLJ has only two
-contexts one to left-hand-side and another to the right-hand-side of the sequent, we use two subexponentials
+contexts, one to the left and another to the right side of the sequent, we use two subexponentials
 \texttt{l} and \texttt{r}. Moreover, as both contexts (to the left and right) behave classically, 
 we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. In contrast, 
-the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right-hand-side of LJ's 
+the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right side of LJ's 
 sequents behaves linearly.
 
 The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not formally needed for specifying proof systems, 
 but as discussed 
 in \cite{nigam14ebl}, they are needed in order to improve the visualization of the proof rules. 
 In particular, the former specifies that the context corresponding to the subexponential \texttt{l} contains 
-only formulas on the left-hand-side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
-by \texttt{many}. In constrast, as the context to the right-hand-side of LJ sequents has only one formula, the 
-subexponential \texttt{r} for that system would be anotated with \texttt{single}.
+only formulas of the left side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
+by \texttt{many}. In contrast, as the context to the right side of LJ sequents has only one formula, the 
+subexponential \texttt{r} for that system would be annotated with \texttt{single}.
+
+The pre-order among the subexponentials is specified on the last line using the
+keyword \texttt{subexprel}.
 
 \paragraph{Bipoles}
-The second part of the Quati is composed by $Bipoles$. The concrete syntax for SELL connectives
-is depicted in Figure~\ref{fig:syntax_ll}. The class of $Bipoles$ formulas often appear in Proof Theory
-Literature due to its good Focusing behaviour~\cite{andreoli}. The following Bipoles specify, 
+
+The second part of the \texttt{.pl} file is composed by $bipoles$. The concrete syntax for SELL connectives
+is depicted in Figure~\ref{fig:syntax_ll}. The class of $bipole$ formulas often
+appear in proof theory literature due to its good focusing
+behaviour~\cite{andreoli}. The following bipoles specify, 
 respectively, the left and right implication introduction rules~\cite{nigam.jlc}. The capital 
 letters are assumed to be existentially quantified.
+
+% TODO: explain the division into rule types???
+{\footnotesize
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%% Bipoles %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
 (not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
 (not (rght (imp A B))) * [l]bang (([l]? (lft A)) | ([r]? (rght B))).
 \end{verbatim}
-The head of these bipoles, the formula \texttt{(not (lft (imp A B)))} and
+}
+
+The head of these bipoles, the formulas \texttt{(not (lft (imp A B)))} and
 \texttt{(not (rght (imp A B)))}, specify that an implication formula to, respectively, 
 the left and right-hand-side are introduced. The body specifies the premises of these
 rules. For instance, the first one has two premises because of the branching caused by the  
-tensor \texttt{*} appearing in the Body of its rule, while
+tensor \texttt{*} appearing in the body of its rule, while
 the second has only one premise as no branching is required. 
 The interesting bit is the bang \texttt{[l]bang} in second bipole specifying that the 
 context of the subexponential \texttt{r} should be weakened as \texttt{l > r}. (More details
 in \cite{nigam.jlc}.) 
 
-\paragraph{Feature 1: Proof Rule Construction}
-By using the following command: \todo{Add command}
-
-Quati constructs the corresponding proof rule of a bipole as described in \cite{nigam14ebl}. It 
-
-
-
-
-
-% Quati programs are composed by two files, the first one with the subexponential declarations and SELL theories specifying proof systems, 
-% while the second file simply contains the type declarations of the constants used. Quati uses the type \texttt{term} for object logic terms. For example, in the following, we declare two constants, \texttt{imp}, for implication, and \texttt{and}, for conjunction symbol. 
-% \begin{verbatim} 
-% type imp form -> form -> form.
-% type and form -> form -> form.
-%   \end{verbatim}
-
-
-
-
 \section{Implementation Details}
+
+Quati is implemented in OCaml\footnote{\url{http://ocaml.org/}} and makes use of
+DLV\footnote{\url{http://www.dlvsystem.com/dlv/}} externally to compute minimal models for the
+answer-set programs generated. It is part of a bigger project, called
+\texttt{sellf}\footnote{\url{https://code.google.com/p/sellf/}} which started as an effort to
+implement the focused proof system for linear logic with subexponentials
+\cite{vivek's thesis}. The basic data structure is linear logic formulas,
+defined in the \texttt{Term} module. Figure \ref{fig:modules} is an overview
+of the modules in \texttt{sellf} used by Quati to check for permutations.
+
+\begin{figure}
+TODO: module's figure
+\end{figure}
+
+\textbf{TODO:} wait for the picture to explain in more detail the modules and how they
+interact.
 
 \section{Conclusions and Future Work}
 
+- mention the systems implemented and interesting cases of permutation
+
+- cite the work with ramyaa about automating the specifications
+
+- cite the automatic discovery of focusing systems
+
+%%%%%%%%%%%%%%%%%%%%%%% OLD STUFF, COMMENTED OUT %%%%%%%%%%%%%%%%%%%%%%%%%
 
 % While this illustrates only one case, proving the focusing discipline, for
 % instance, requires that the permutation of every pair of rules is checked. For a
@@ -372,6 +459,7 @@ Quati constructs the corresponding proof rule of a bipole as described in \cite{
 % \mathcal{S}_2$. The provability implication of derivations can also be
 % determined via an answer-set program described in \cite{iclp}.
 
+\begin{comment}
 \section{Quati}
 \label{sec:quati}
 
@@ -479,5 +567,7 @@ functionality.
 - cite the work with ramyaa about automating the specifications
 
 - cite the automatic discovery of focusing systems
+
+\end{comment}
 
 \end{document}

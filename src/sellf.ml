@@ -168,7 +168,7 @@ let printOLrules bipoles fileName =
   		Printf.fprintf file "%s" (OlProofTree.toTexString olt);
   		Printf.fprintf file "%s" "\\]";
   		Printf.fprintf file "%s" "}";
-      Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);
+      (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);*)
     ) olPt;
   ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;
@@ -184,7 +184,7 @@ let printBipoles bipoles fileName =
     Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(bipole)));
     Printf.fprintf file "%s" "\\]";
     Printf.fprintf file "%s" "}";
-    Printf.fprintf file "Constraints: %s" (Constraints.toTexString (snd(bipole)));
+    (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString (snd(bipole)));*)
   ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
