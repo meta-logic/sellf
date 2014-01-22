@@ -7,6 +7,10 @@
 \usepackage{proof}
 \usepackage{stmaryrd}
 \usepackage[textsize=scriptsize, textwidth=2.2cm]{todonotes}
+\usepackage{booktabs}
+%\bibliographystyle{alpha}
+% \bibliographystyle{abbrv}
+\usepackage{times}
 
 \newcommand\tsl[1]{#1}
 \newcommand{\elin}[2]{\ensuremath{{\tsl{unitctx}(\ensuremath{#1}, \ensuremath{#2})}}}
@@ -170,14 +174,25 @@ $Atoms$ ::= & $\tup{Side}$ $\tup{Term}$ \quad $MarkAtoms$ ::=  \texttt{[}$\tup{S
 $Bipoles$ ::= & ({\texttt{not} $\tup{Atoms}$) \texttt{*} $\tup{BodyPos}$} . \\[2pt]
 $BodyPos$ ::= & \texttt{one} $\mid$ $BodyNeg$ $\mid$ \texttt{[}$\tup{String}$\texttt{]bang} $BodyNeg$ $\mid$ $BodyPos$ \texttt{*} $BodyPos$ \\ & $\mid$ $BodyPos$ \texttt{+} $BodyPos$ \\[2pt]
 $BodyNeg$ ::= & 
-{\texttt{top} $\mid$ \texttt{bot} $\mid$ $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \& \tup{BodyNeg}$ }
+{\texttt{top} $\mid$ \texttt{bot} $\mid$ $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \texttt{\&} \tup{BodyNeg}$ }
 \end{tabular}
 \textbf{VN: We need to add more constructs}
 \caption{Here $Term$ is a term of type \texttt{form}.} 
 \label{fig:syntax}
+\begin{center}
+\begin{tabular}{c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c@{\quad}c}
+\toprule
+\texttt{*} : $\otimes$ & \texttt{+} : $\oplus$ & \texttt{\&} : $\&$ & \texttt{|} : $\bindnasrepma$ & \texttt{[i]bang} : $!^i$ &
+\texttt{one} : $1$ &  \texttt{top} : $\top$ & \texttt{bot} : $\bot$ & \texttt{[i]?} : $?^i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+% \vspace{0.2cm}
+\caption{Syntax for the linear logic connectives.}
+\label{fig:syntax_ll}
 \end{figure}
 
-Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp} is a powerful framework for the specification of a proof systems. 
+Quati's underlying logic, Linear Logic with Subexponentials (SELL)~\cite{nigam09ppdp}, is a powerful framework for specification of proof systems. 
 Subexponentials, written $\nbang{\ell}$, $\nquest{\ell}$, arise from the observation that the linear logic exponentials are not canonical (see \cite{nigam.jlc} for an extensive
 discussion). It is known  that subexponentials greatly increases
 the expressiveness of the system when compared to linear logic. For instance,
@@ -193,14 +208,25 @@ modal logics can be specified in SELL with a strong level of adequacy.
 A Quati program is a SELL theory with some more annotations. The syntax of Quati programs is given in Figure~\ref{fig:syntax}. 
 We explain in detail the syntax of Quati programs 
 by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
-A Quati program consists basically of a set of subexponential signature commands, $SubSig$, specifying the subexponentials 
-used and their relation, $\preceq$, and a set of $Bipoles$, specifying the proof rules of the proof system. The following set of subexponential 
-signatures is used for specifying the proof system MLJ:
+A Quati program consists of three parts: (1) the term and kind declarations, specifying hte constants in the $Term$ set; (2) the 
+subexponential signature declaration, $SubSig$, specifying the subexponentials 
+used and their relation, $\preceq$; and (3) a set of $Bipoles$, specifying the proof rules of the proof system. 
+
+\paragraph{Term and Kind Declaration}
+\todo{To be completed}
+\begin{verbatim}
+%%%%%%%%%%%%%%%%%%% Term Signature %%%%%%%%%%%%%%%%%%%%
+type imp form -> form -> form.
+\end{verbatim}
+
+
+\paragraph{Subexponential Signature} The following set of subexponential signatures is used for specifying the proof system MLJ:
 
 \begin{verbatim}
-%%%%%%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%%%%
-subexp l unb.            subexp r unb.            subexprel l > r
+%%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%
+subexp l unb.            subexp r unb.            
 subexpctx l many lft.    subexpctx r many rght.
+subexprel l > r
 \end{verbatim}
 
 Intuitively, one subexponential corresponds to one context of the object logic sequent.\footnote{There are 
@@ -214,19 +240,41 @@ we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. I
 the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right-hand-side of LJ's 
 sequents behaves linearly.
 
-The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not formally needed for specifying MLJ proof rules, 
+The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not formally needed for specifying proof systems, 
 but as discussed 
 in \cite{nigam14ebl}, they are needed in order to improve the visualization of the proof rules. 
 In particular, the former specifies that the context corresponding to the subexponential \texttt{l} contains 
 only formulas on the left-hand-side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
 by \texttt{many}. In constrast, as the context to the right-hand-side of LJ sequents has only one formula, the 
 subexponential \texttt{r} for that system would be anotated with \texttt{single}.
+
+\paragraph{Bipoles}
+The second part of the Quati is composed by $Bipoles$. The concrete syntax for SELL connectives
+is depicted in Figure~\ref{fig:syntax_ll}. The class of $Bipoles$ formulas often appear in Proof Theory
+Literature due to its good Focusing behaviour~\cite{andreoli}. The following Bipoles specify, 
+respectively, the left and right implication introduction rules~\cite{nigam.jlc}. The capital 
+letters are assumed to be existentially quantified.
 \begin{verbatim}
-%%%%%%%%%%%%%%%%%%%%%%%%%% Proof Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% Bipoles %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
 (not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
 (not (rght (imp A B))) * [l]bang (([l]? (lft A)) | ([r]? (rght B))).
 \end{verbatim}
+The head of these bipoles, the formula \texttt{(not (lft (imp A B)))} and
+\texttt{(not (rght (imp A B)))}, specify that an implication formula to, respectively, 
+the left and right-hand-side are introduced. The body specifies the premises of these
+rules. For instance, the first one has two premises because of the branching caused by the  
+tensor \texttt{*} appearing in the Body of its rule, while
+the second has only one premise as no branching is required. 
+The interesting bit is the bang \texttt{[l]bang} in second bipole specifying that the 
+context of the subexponential \texttt{r} should be weakened as \texttt{l > r}. (More details
+in \cite{nigam.jlc}.) 
+
+\paragraph{Feature 1: Proof Rule Construction}
+By using the following command: \todo{Add command}
+
+Quati constructs the corresponding proof rule of a bipole as described in \cite{nigam14ebl}. It 
+
 
 
 
@@ -360,29 +408,10 @@ input files and Tables \ref{tbl:syntax_ll} and \ref{tbl:syntax} show the syntax 
 linear logic connectives and some keywords used in specifications.
 
 \begin{figure}
-\begin{verbatim}
-%%%%%%%%%%%%%%%%%%% Signature %%%%%%%%%%%%%%%%%%%%
-type imp form -> form -> form.
-type forall (term -> form) -> form.
-\end{verbatim}
 \caption{Specification and signature files of the multi-conclusion
 calculus for intuitionistic logic \textbf{mLJ}.}
 \label{fig:input}
 \end{figure}
-%
-\begin{table}
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-\texttt{*} : $\otimes$ & \texttt{+} : $\oplus$ & \texttt{\&} : $\&$ & \texttt{|} : $\bindnasrepma$ & \texttt{[i]bang} : $!^i$ \\
-\hline
-\texttt{one} : $1$ & \texttt{zero} : $0$ & \texttt{top} : $\top$ & \texttt{bot} : $\bot$ & \texttt{[i]?} : $?^i$ \\
-\hline
-\end{tabular}
-\vspace{0.2cm}
-\caption{Syntax for the linear logic connectives.}
-\label{tbl:syntax_ll}
-\end{table}
 %
 \begin{table}
 \centering
