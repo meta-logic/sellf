@@ -358,28 +358,42 @@ module Derivation : DERIVATION = struct
       else (olc, f)
     ) olCtx.OlContext.lst in
     olCtx.OlContext.lst <- newCtx*)
+
+  let print_subexp (str, i) = print_endline (str ^ (string_of_int i))
     
   let solveElin olPt c t = 
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
+    print_endline "ELIN FUN";
+    print_subexp c;
+(*     print_endline "OLD CONTEXT"; *)
+(*     print_endline ("Size" ^ (string_of_int (List.length olCtx.OlContext.lst))); *)
+(*     List.map (fun (olc, f) -> print_subexp olc) olCtx.OlContext.lst;  *)
     let bChange = ref false in
-    let newCtx = List.fold_left (fun acc (olc, f) -> 
-      if olc = c then begin bChange := true; (((OlContext.remFirstChar (fst(c))), -1), t :: f) :: acc end
-      else (olc, f) :: acc
-    ) olCtx.OlContext.lst [] in
-    olCtx.OlContext.lst <- newCtx; !bChange
+    let newCtx = (List.fold_left (fun acc (olc, f) ->  
+      if olc = c then begin 
+		      if snd(olc) = -1 then (olc, f) :: acc else
+                      begin bChange := true; (((OlContext.remFirstChar (fst c)), -1), t :: f) :: acc end end
+      else begin (olc, f) :: acc end
+    ) [] olCtx.OlContext.lst) in
+    olCtx.OlContext.lst <- newCtx; 
+(*     print_endline (string_of_bool !bChange);  *)
+(*     print_endline (string_of_int !iChange); *)
+(*     print_endline "New Context"; *)
+(*     List.map (fun (olc, f) -> print_subexp olc) newCtx;  *)
+    !bChange
     
   let solveEmp olPt c = 
     let olSeq = OlProofTree.getConclusion olPt in
     let olCtx = OlSequent.getContext olSeq in
     let bChange = ref false in
     let newCtx = List.fold_left (fun acc (olc, f) ->
-      if olc = c then acc else begin bChange := true; (olc, f) :: acc end)
+      if olc = c then begin bChange := true; acc end else (olc, f) :: acc)
     (*List.map (fun (olc, f) -> 
       if olc = c then ((("#", 0), []), true) 
       else ((olc, f), false)
       )*) 
-      olCtx.OlContext.lst [] in
+      [] olCtx.OlContext.lst in
     olCtx.OlContext.lst <- newCtx; !bChange
     
   let solveUnion olPt c1 c2 cU =
@@ -390,7 +404,7 @@ module Derivation : DERIVATION = struct
     let newCtx = List.fold_left (fun acc (olc', f') ->
 		  if (olc' = cU) then 
 		    begin bChange := true; (c1, []) :: (c2, []) :: acc end
-		  else (olc', f') :: acc) lctx [] in
+		  else (olc', f') :: acc) [] lctx in
     olCtx.OlContext.lst <- newCtx; !bChange
     
 let solveIn olPt c t =
