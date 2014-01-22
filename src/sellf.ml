@@ -343,7 +343,6 @@ solve_query () =
       print_endline "The object logic rule of the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
       let i1 = int_of_string (read_line ()) in
-      print_endline ("Rule chosen: " ^ (string_of_int i1));
       print_endline "Please choose a name for the file:";
       let f = read_line () in
       let bp = Bipole.bipole (List.nth formulas i1) in
