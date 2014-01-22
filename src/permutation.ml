@@ -30,13 +30,6 @@ let derive2 spec1 spec2 =
   models generated contain two 'in' clauses, one for each formula. *)
   let constraints = Constraints.times in1 in2 in
 
-  (*print_endline "Initial constraints: ";
-  List.iter (fun c ->
-    print_endline "===============================================";
-    print_endline (Constraints.toString c);
-    print_endline "===============================================";
-  ) constraints;*)
-
   (* Compute possible bipoles for spec1 *)
   let bipoles1 = Bipole.deriveBipole sequent spec1 constraints in
 
@@ -112,6 +105,13 @@ let derive2 spec1 spec2 =
   ) bipoles1 []
 ;;
 
+(* The return value of this function is a pair: 
+   ( [(a_1, a_2), ..., (a_{n-1}, a_n)], [b_1, ..., b_k] )
+
+   in which the first element is a list of pairs of permutations found, and the
+   secont element are the configurations of the rule for which no permutations
+   were found.
+*)
 let permute spec1 spec2 =
 
   (* TODO: normalize the specifications. Do this in a more elegant way!! *)
@@ -127,59 +127,8 @@ let permute spec1 spec2 =
   let (spec1norm, rest) = instantiate_ex spec1 constLst in
   let (spec2norm, rest2) = instantiate_ex spec2 rest in
 
-  (*print_endline "Permuting ";
-  print_endline (Prints.termToString spec1norm);
-  print_endline "over";
-  print_endline (Prints.termToString spec2norm);*)
-
   let bipoles12 = derive2 spec1norm spec2norm in
-  (*print_endline "Bipole 1 2 ";
-  List.iter (fun (p, lcs) -> begin print_endline "start"; 
-                             print_endline (Constraints.toString lcs);
-                             print_endline "end" end) bipoles12;*)
   let bipoles21 = derive2 spec2norm spec1norm in
-  (*print_endline "Bipole 2 1 ";
-  List.iter (fun (p, lcs) -> begin print_endline "start"; 
-                             print_endline (Constraints.toString lcs);
-                             print_endline "end" end)  bipoles21;*)
-
-  (*print_endline ("Number of bipoles 1/2: " ^ (string_of_int (List.length bipoles12)));
-  print_endline ("Number of bipoles 2/1: " ^ (string_of_int (List.length bipoles21)));*)
-
-  (* GR: Prints all possible bipoles/models in a latex file. Make a separate
-  function out of this.*)
-  (*print_endline "\\documentclass[a4paper, 11pt]{article}\n\n\
-  \\usepackage{amsmath}\n\
-  \\usepackage{stmaryrd}\n\
-  \\usepackage[margin=1cm]{geometry}\n\
-  \\usepackage{proof}\n\n\
-  \\begin{document}\n\n";
-
-  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec1) ^ "$ / $" ^ (Prints.termToTexString spec2) ^ "$:} \n");
-  List.iter (fun (pt, model) ->
-    print_endline "{\\small";
-    print_endline "\\[";
-    print_endline (ProofTreeSchema.toTexString pt);
-    print_endline "\\]";
-    print_endline "}";
-    print_endline "CONSTRAINTS\n";
-    print_endline (Constraints.toTexString model);
-  ) bipoles12;
-
-  print_endline ("\\section{Possible bipoles for $" ^ (Prints.termToTexString spec2) ^ "$ / $" ^ (Prints.termToTexString spec1) ^ "$:} \n");
-  List.iter (fun (pt, model) ->
-    print_endline "{\\small";
-    print_endline "\\[";
-    print_endline (ProofTreeSchema.toTexString pt);
-    print_endline "\\]";
-    print_endline "}";
-    print_endline "CONSTRAINTS\n";
-    print_endline (Constraints.toTexString model);
-  ) bipoles21;
-  
-
-  print_endline "\\end{document}";*)
-
 
 (*
   For every bipole12 there exists a bipole21 such that for all open leaves of
@@ -194,21 +143,31 @@ let permute spec1 spec2 =
 
 ;;
 
-(* Prints the permutations of rules to a latex file *)
-let printPermutations fileName perm_bipoles = 
-  let file = open_out ("proofsTex/"^fileName^".tex") in
-  let olPt = apply_permute perm_bipoles in
-  Printf.fprintf file "%s" Prints.texFileHeader;
-  List.iter (fun (b12, b21) ->
- 	  Printf.fprintf file "%s" "{\\scriptsize";
- 	  Printf.fprintf file "%s" "\\[";
- 	  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b12)));
- 	  Printf.fprintf file "\n\\quad\\rightsquigarrow\\quad\n";
- 	  Printf.fprintf file "%s" (OlProofTree.toTexString (fst(b21)));
- 	  Printf.fprintf file "%s" "\\]";
- 	  Printf.fprintf file "%s" "}";
- 	  Printf.fprintf file "%s" "\\\[0.7cm]";
-  ) olPt;
-  Printf.fprintf file "%s" Prints.texFileFooter;
-  close_out file
+let permutationsToTexString lst = 
+  let olPt = apply_permute lst in
+  List.fold_right (fun (b12, b21) acc ->
+    "{\\scriptsize\n" ^ 
+    "\\[\n" ^
+    OlProofTree.toTexString (fst(b12)) ^
+    "\n\\quad\\rightsquigarrow\\quad\n" ^
+    OlProofTree.toTexString (fst(b21)) ^
+    "\n\\]" ^
+    "\n}" ^
+    "\n\\\\[0.7cm]\n\n" ^ acc
+  ) olPt ""
 ;;
+
+let nonPermutationsToTexString lst = 
+  let olPt = apply_perm_not_found lst in
+  List.fold_right (fun (olt, mdl) acc ->
+    OlProofTree.toPermutationFormat olt;
+    "{\\scriptsize\n" ^ 
+    "\\[\n" ^
+    OlProofTree.toTexString olt ^
+    "\n\\]" ^
+    "\n}" ^
+    "\n\\\\[0.7cm]\n\n" ^ acc
+  ) olPt ""
+;;
+
+

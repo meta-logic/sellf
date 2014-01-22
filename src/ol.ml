@@ -270,7 +270,7 @@ module OlProofTree : OLPROOFTREE = struct
         let formSide = Specification.getSide (Specification.getPred pred) in
         let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar formSide) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "}\n{" ^ topproof ^ "}"*)
-	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "} \;\; " ^ ruleNameTex 
+	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "} \\;\\; " ^ ruleNameTex 
       | None -> (OlSequent.toTexString (getConclusion pt)) 
     in
     toTexString' pt
@@ -413,10 +413,10 @@ let solveIn olPt c t =
     | ELIN (t, c) -> solveElin seq (OlContext.fixContext c) t
     | EMP (c) -> solveEmp seq (OlContext.fixContext c)
     | UNION (c1, c2, c3) ->
-	let c3' = OlContext.fixContext c3 in
-	let c2' = OlContext.fixContext c2 in
-	let c1' = OlContext.fixContext c1 in
-	solveUnion seq c1' c2' c3'
+			let c3' = OlContext.fixContext c3 in
+			let c2' = OlContext.fixContext c2 in
+			let c1' = OlContext.fixContext c1 in
+			solveUnion seq c1' c2' c3'
     (* Any other constraint is despised *)
     | _ -> false
     
@@ -621,6 +621,7 @@ let solveIn olPt c t =
 end;;
 
 (* TODO: make it more modular? *)
+(* Discuss it with Leo. [Giselle]*)
 let apply_permute perm_bipoles = begin
   let olPt = ref [] in
   olPt := Derivation.remakePermutation perm_bipoles;

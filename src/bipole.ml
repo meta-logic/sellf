@@ -164,10 +164,21 @@ exception Not_bipole
 (* Considering the formula is chosen from gamma *)
 let bipole f =
   if isBipole f then
+    (* TODO: normalize the specifications. Do this in a more elegant way!! *)
+    (* Note: there is a copy of this code in permutation.ml *)
+    let rec instantiate_ex spec constLst = match spec with
+      | Term.EXISTS(s, i, f) ->
+        let constant = Term.CONST (List.hd constLst) in
+        let newf = Norm.hnorm (Term.APP (Term.ABS (s, 1, f), [constant])) in
+        instantiate_ex newf (List.tl constLst)
+      | _ -> (spec, constLst)
+    in
+    let constLst = ["b"; "a"; "d"; "c"; "e"] in
+    let (fnorm, _) = instantiate_ex f constLst in
     let context = ContextSchema.createFresh () in
     let sequent = SequentSchema.createAsyn context [] in
-    let constraints = Constraints.inEndSequent f context in
-    deriveBipole sequent f constraints
+    let constraints = Constraints.inEndSequent fnorm context in
+    deriveBipole sequent fnorm constraints
   else raise Not_bipole
 ;;
 

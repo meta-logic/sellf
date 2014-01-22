@@ -143,7 +143,7 @@ let predToTexString c = match c with
 
 
 let rec toTexString csts = 
-  (List.fold_right (fun c str -> (predToTexString c) ^ ", " ^ str) csts.lst "") 
+  (List.fold_right (fun c str -> (predToTexString c) ^ "\n\n" ^ str) csts.lst "") 
 
 let predToString c = match c with
   | IN (t, c) -> 
