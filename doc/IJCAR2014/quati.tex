@@ -194,8 +194,8 @@ A Quati program is a SELL theory with some more annotations. The syntax of Quati
 We explain in detail the syntax of Quati programs 
 by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
 A Quati program consists basically of a set of subexponential signature commands, $SubSig$, specifying the subexponentials 
-used and their relation, and a set of $Bipoles$, specifying the proof rules of the proof system. The following set of subexponential 
-signatures is used for specifying the proof system 
+used and their relation, $\preceq$, and a set of $Bipoles$, specifying the proof rules of the proof system. The following set of subexponential 
+signatures is used for specifying the proof system MLJ:
 
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%%%%
@@ -214,12 +214,13 @@ we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. I
 the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right-hand-side of LJ's 
 sequents behaves linearly.
 
-The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not needed in SELL, but as discussed 
-in \cite{nigam14ebl}, they are needed in order to improve the visualization of the proof rules specified by the Quati 
-program. In particular, the former specifies that the context corresponding to the subexponential \texttt{l} contains 
+The commands \texttt{subexpctx l many lft.} and  \texttt{subexpctx r many rght.} are not formally needed for specifying MLJ proof rules, 
+but as discussed 
+in \cite{nigam14ebl}, they are needed in order to improve the visualization of the proof rules. 
+In particular, the former specifies that the context corresponding to the subexponential \texttt{l} contains 
 only formulas on the left-hand-side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
 by \texttt{many}. In constrast, as the context to the right-hand-side of LJ sequents has only one formula, the 
-subexponential \texttt{r} would be anotated with \texttt{single}.
+subexponential \texttt{r} for that system would be anotated with \texttt{single}.
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%% Proof Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
