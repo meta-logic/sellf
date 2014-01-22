@@ -92,9 +92,11 @@ let getFirstArgName p = match p with
   | _ -> failwith "Function is not an application."
 ;;
 
+(* TODO: if there are existential quantifiers, the DB indices are messed up with
+this method... *)
 let rec getPred f = match f with 
   | TENSOR(NOT(prd), spc) -> prd
-  | EXISTS(s, i, t) -> getPred t
+  | EXISTS(s, i, t) -> getPred t      
   | NOT(prd) -> prd
   | PRED(_, _, _) -> f
   | _ -> failwith ("Not expected formula in specification: " ^ Prints.termToString f)

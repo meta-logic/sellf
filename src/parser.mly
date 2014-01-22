@@ -336,7 +336,7 @@ logCst:
 
 top: 
 | HELP    { 
-  print_endline "There are the following commands available during state ':>':\n";
+  print_endline "\nThe following commands are available during state ':>':\n";
   print_endline "#load location-of-file (without extensions .sig nor .pl): loads \
     the corresponding program (the location is relative to the place the \
     executable file was launched);";
@@ -348,7 +348,7 @@ top:
   print_endline "#exit command terminates the program.";
   print_endline "#help displays this message.";
   
-  print_endline "\nThere are the following commands available during state '?>':\n";
+  print_endline "\nThe following commands are available during state '?>':";
   
   print_endline "\n** Helper commands **";
   print_endline "#check_rules: checks if all the rules of a file are bipoles.";

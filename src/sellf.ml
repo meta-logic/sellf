@@ -225,13 +225,18 @@ let permutationTex f1 f2 = match Permutation.permute f1 f2 with
     (Permutation.nonPermutationsToTexString notok);
 ;;
 
-let permute forms_lst fileName = 
+(* TODO: a function that, given a specification, returns the name of the rule *)
+let permute forms_lst fileName =
   let file = open_out (filePrefix ^ fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun (f1, f2) -> 
-    let pred1 = Specification.getPred f1 in
-    let pred2 = Specification.getPred f2 in
-    Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" (Prints.termToTexString pred1) (Prints.termToTexString pred2);
+    let rule1 = termToTexString (Term.getOnlyRule (Term.formatForm f1)) in
+    let side1 = Specification.getSide (Specification.getPred f1) in
+    let pred1 = rule1 ^ "_{" ^ side1 ^ "}" in
+    let rule2 = termToTexString (Term.getOnlyRule (Term.formatForm f2)) in
+    let side2 = Specification.getSide (Specification.getPred f2) in
+    let pred2 = rule2 ^ "_{" ^ side2 ^ "}" in
+    Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" pred1 pred2;
     Printf.fprintf file "%s" (permutationTex f1 f2);
   ) forms_lst;
   Printf.fprintf file "%s" Prints.texFileFooter;

@@ -7,6 +7,7 @@
 \usepackage{proof}
 \usepackage{stmaryrd}
 \usepackage{comment}
+\usepackage{pdflscape}
 \usepackage[textsize=scriptsize, textwidth=2.2cm]{todonotes}
 \usepackage{booktabs}
 %\bibliographystyle{alpha}
@@ -34,7 +35,9 @@
 \newcommand{\nbang}[1]{\hbox{$!^{#1}$}}
 \newcommand{\nquest}[1]{\hbox{$?^{#1}$}}
 
-
+% For Quati's latex output
+\newcommand{\ndots}[1]{\stackrel{\vcenter{\hbox{$\scriptstyle :$}\vskip-.35ex}}
+   {\hbox {$ \scriptstyle {#1}$}}}
 
 \title{Quati: An Automated Tool for Proving Permutation Lemmas}
 \author{Vivek Nigam\inst{1} \and Giselle Reis\inst{2} \and Leonardo Lima\inst{1}}
@@ -171,44 +174,146 @@ books~\cite{troelstra} from the answers of the generated answer-set programs.
 Quati is the result of this series of papers. In the following sections we illustrate its use 
 with examples.
 
-% \section{Example}
-% 
-% \todo{VN: Select a proof system to use as running example.}
-
-% TODO: change executable file name for quati in the release
 \section{Quati at Work}
 
 % TODO: add installation instructions and system requirements, explain where the
-% examples are.
+% examples are? Or just refer the reader to the download and add these things to
+% a readme file...
 
+% TODO: change executable file name for quati in the release
+% load a file
 Once the system in installed, it can be called by simply typing the command:
 \texttt{./quati}. This will start an interactive command line where the user can
 call the functions we will demonstrate now. If one wants to see a list of all
 the functionalities available, just type \texttt{\#help}. We start by loading a
 file. Throughout this example session, we will use the specification for the
 intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara}.
-
+%
 % TODO: change the directory path for the release
-{\footnotesize
+{\scriptsize
 \begin{verbatim}
 :> #load ../examples/proofsystems/mlj
 \end{verbatim}
 }
 
-%% TODO: describe the functionalities:
 % construct OL rule (for one and for all)
-% construct bipole (for one and for all)
-% permute (for two and for all)
-
-%By using the following command: \todo{Add command}
+After a file is loaded, the state of the command line will change from
+\texttt{:>} to \texttt{?>}. This indicates that the user can use the commands
+operating on a specification. The first command we show is \texttt{\#rule} or
+\texttt{\#rules}. It allows the user to see the rules specified in the file
+loaded as regular sequent calculus rules. In both cases, the system prints the
+rule or rules in a \LaTeX\ file whose name is chosen by the user. By using the
+command \texttt{\#rule}, the user is presented with the list of bipoles of the
+loaded specification and asked to choose one. The object logic rule for this
+bipole is then printed to a file. By using the command \texttt{\#rules}, the
+object logic rules of all bipoles are printed to the output file. In the example
+below, we asked Quati to print the rule for $\rightarrow_r$ of the MLJ system.
 %
-%Quati constructs the corresponding proof rule of a bipole as described in \cite{nigam14ebl}. It 
+{\scriptsize
+\begin{verbatim}
+?> #rule
+These are the formulas available: 
+0. (sigma \B (sigma \A (not ( lft ( imp A B  )  ))  * 
+   ( [r]? ( rght A  ) ) * ( [l]? ( lft B  ) )))
+1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
+   ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
+The object logic rule of the chosen formula will be generated and printed to a LaTeX file.
+Please choose a formula by its number: 1
+Please choose a name for the file: imp_r_mlj
+\end{verbatim}
+}
 
+This is the output (after compiling with \LaTeX):
+%
+{\scriptsize
+\[
+\cfrac{ \ndots{l} \Gamma_{l}^{0}, a \vdash  \ndots{r} b}
+{ \ndots{l} \Gamma_{l}^{0} \vdash  \ndots{r} \Delta_{r}^{0}, imp (a) (b) } \;\; imp_{R}
+\]
+}
+
+Note that the rule has the expected behavior of weakening the formulas of the
+context on the right, and it is very similar to the way it is presented in text
+books.
+
+% construct bipole (for one and for all)
+The user has also the option of seeing the actual bipole derivations in linear
+logic with subexponentials which correspond to a rule specification. The
+commands \texttt{\#bipole} and \texttt{\#bipoles} are used for that. They work
+analogously to the previous commands. The example below shows how to use
+\texttt{\#bipole} to print the bipole corresponding to the $\rightarrow_r$ rule
+of MLJ.
+%
+{\scriptsize
+\begin{verbatim}
+?> #bipole 
+These are the formulas available: 
+0. (sigma \B (sigma \A (not ( lft ( imp A B  )  ))  * 
+   ( [r]? ( rght A  ) ) * ( [l]? ( lft B  ) )))
+1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
+   ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
+The bipoles for the chosen formula will be generated and printed to a LaTeX file.
+Please choose a formula by its number: 1
+Please choose a name for the file: bipole_imp_r_mlj
+\end{verbatim}
+}
+
+The output of this command generates the following proof tree:
+%
+{\scriptsize\[\cfrac{\cfrac{\cfrac{}
+{\Gamma_{ gamma}^{4} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (a) (b) )  :: }\cfrac{\cfrac{\cfrac{\cfrac{\Gamma_{ gamma}^{5} ; \Gamma_{r}^{7} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow }
+{\Gamma_{ gamma}^{5} ; \Gamma_{r}^{5} ; \Gamma_{l}^{5} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{r} rght (b)  :: }}
+{\Gamma_{ gamma}^{5} ; \Gamma_{r}^{5} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (a)  ::  ?^{r} rght (b)  :: }}
+{\Gamma_{ gamma}^{5} ; \Gamma_{r}^{5} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Uparrow  ?^{l} lft (a)  \bindnasrepma  ?^{r} rght (b)  :: }}
+{\Gamma_{ gamma}^{5} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow  !^{l}  ?^{l} lft (a)  \bindnasrepma  ?^{r} rght (b)  :: }}
+{\Gamma_{ gamma}^{3} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (a) (b) )  \otimes  !^{l}  ?^{l} lft (a)  \bindnasrepma  ?^{r} rght (b)  :: }}
+{\Gamma_{ gamma}^{3} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ; \Uparrow }\]}
+
+By using the rewrite system introduced in \cite{nigam13iclp}, Quati is able to
+translate this bipole into the previous inference rule.
+
+% permute (for two and for all)
+Now let's show how to actually check if two of these rules permute. The commands
+to do that are \texttt{\#permute} and \texttt{\#permute\_all}. As one can
+imagine, the former will check the permutation of two rules that are chosen by
+the user, while the latter will check the permutation of every pair of rules in
+the specification file. The output of this command is also a \LaTeX\ file. It
+contains the cases in which a permutation was found as well as the cases in
+which a permutation was not found. Let's try a permutation in our example:
+%
+{\scriptsize
+\begin{verbatim}
+?> #permute
+These are the formulas available: 
+0. (sigma \B (sigma \A (not ( lft ( imp A B  )  ))  * 
+   ( [r]? ( rght A  ) ) * ( [l]? ( lft B  ) )))
+1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
+   ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
+Checking the permutation of one formula F1 over another F2 
+(i.e., can a derivation where F1 is below F2 be transformed into a derivation 
+where F2 is below F1?) 
+Please type the number of F1: 0
+Please type the number of F2: 1
+Please type a file name for the results: imp_l_imp_r
+\end{verbatim}
+}
+
+The output file of this command indicates the these rules might not permute.
+Quati identifies permutation for two cases but fails to find for the third one.
+Its output for the permutation case is shown in the Appendix.
+%
+%\begin{figure}
+%\includegraphics[scale=0.6]{imp_l_imp_r.pdf}
+%\caption{Output file for the permutation of $\rightarrow_l$ over $\rightarrow_r$
+%of the system MLJ.}
+%\label{fig:perm_output}
+%\end{figure}
 
 \subsection{Input format}
 
-% TODO: fix this table one everything is there.
+% TODO: fix this table once everything is there.
 \begin{figure}[t]
+{\small
 \begin{align*}
 SubSig &::= SubDecl \;\; SubSpec \;\; SubRel \\
 SubDecl &::= \texttt{subexp} \tup{String} \tup{SubType}.\\
@@ -225,6 +330,7 @@ BodyNeg &::= \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|
         & \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\
 MarkAtoms &::= \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} \\
 \end{align*}
+}
 \textbf{VN: We need to add more constructs}
 \caption{Here $Form$ is a term of type \texttt{form}.} 
 \label{fig:syntax}
@@ -236,7 +342,6 @@ MarkAtoms &::= \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} \\
 \bottomrule
 \end{tabular}
 \end{center}
-% \vspace{0.2cm}
 \caption{Syntax for the linear logic connectives.}
 \label{fig:syntax_ll}
 \end{figure}
@@ -261,37 +366,31 @@ A Quati program is a SELL theory with some more annotations. Its syntax is given
 in Figure~\ref{fig:syntax} and explained in detail  
 by using as running example the inference rules of the multiconclusion sequent
 calculus for intuitionistic logic~\cite{maehara}, or MLJ.
-%A Quati program consists of three parts: (1) the term and kind declarations,
-%specifying the constants in the $Term$ set; (2) the 
-%subexponential signature declaration, $SubSig$, specifying the subexponentials 
-%used and their relation, $\preceq$; and (3) a set of $Bipoles$, specifying the proof rules of the proof system. 
-%
 A Quati program consists of two files: (1) a \emph{type signature} file, with
 suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consisting of two parts: (a) a
 \emph{subexponential signature} and (b) the rules' specifications or
 \emph{bipoles}.
 
 \paragraph{Type signature}
-
+%
 The \emph{type signature} file contains type and kind declarations of the object
-logic's elements. The kinds \texttt{term} and \texttt{form} are built-in and
-represent the types of terms and formulas of the object logic. In general, only
+logic's elements. The kind \texttt{form} is built-in and
+represent the type of formulas of the object logic. In general, only
 the types of the connectives need to be declared in this file. Here is an
 example:
-
-{\footnotesize
+%
+{\scriptsize
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%% Signature %%%%%%%%%%%%%%%%%%%%
 type imp form -> form -> form.
-type forall (term -> form) -> form.
 \end{verbatim}
 }
 
 \paragraph{Subexponential signature}
-
+%
 The following subexponential signature is used for specifying the proof system MLJ:
-
-{\footnotesize
+%
+{\scriptsize
 \begin{verbatim}
 %%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%
 subexp l unb.            
@@ -325,16 +424,16 @@ The pre-order among the subexponentials is specified on the last line using the
 keyword \texttt{subexprel}.
 
 \paragraph{Bipoles}
-
+%
 The second part of the \texttt{.pl} file is composed by $bipoles$. The concrete syntax for SELL connectives
 is depicted in Figure~\ref{fig:syntax_ll}. The class of $bipole$ formulas often
 appear in proof theory literature due to its good focusing
 behaviour~\cite{andreoli}. The following bipoles specify, 
 respectively, the left and right implication introduction rules~\cite{nigam.jlc}. The capital 
 letters are assumed to be existentially quantified.
-
-% TODO: explain the division into rule types???
-{\footnotesize
+%
+% TODO: explain the division into rule types??? No. No space.
+{\scriptsize
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%% Bipoles %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
@@ -353,7 +452,7 @@ The interesting bit is the bang \texttt{[l]bang} in second bipole specifying tha
 context of the subexponential \texttt{r} should be weakened as \texttt{l > r}. (More details
 in \cite{nigam.jlc}.) 
 
-\section{Implementation Details}
+\subsection{Implementation Details}
 
 Quati is implemented in OCaml\footnote{\url{http://ocaml.org/}} and makes use of
 DLV\footnote{\url{http://www.dlvsystem.com/dlv/}} externally to compute minimal models for the
@@ -378,6 +477,11 @@ interact.
 - cite the work with ramyaa about automating the specifications
 
 - cite the automatic discovery of focusing systems
+
+\appendix
+\begin{landscape}
+\input{imp_l_imp_r}
+\end{landscape}
 
 %%%%%%%%%%%%%%%%%%%%%%% OLD STUFF, COMMENTED OUT %%%%%%%%%%%%%%%%%%%%%%%%%
 

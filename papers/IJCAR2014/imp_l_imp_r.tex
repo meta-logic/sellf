@@ -1,0 +1,65 @@
+%\documentclass[a4paper]{article}
+%\usepackage[utf8]{inputenc}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{stmaryrd}
+%\usepackage{proof}
+
+%\usepackage[paperwidth=25cm, paperheight=13cm, margin=1cm]{geometry}
+%\usepackage[landscape, margin=1cm]{geometry}
+
+%\newcommand{\ndots}[1]{\stackrel{\vcenter{\hbox{$\scriptstyle :$}\vskip-.35ex}}
+%   {\hbox {$ \scriptstyle {#1}$}}}
+
+%\begin{document}
+\pagestyle{empty}
+\section{Permutation of $imp_{lft}$ and $imp_{rght}$}
+
+The rules might not permute. These are the configurations for which a permutation was found:
+{\scriptsize
+\[
+\cfrac{\cfrac{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , c \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) , a} \;\; imp_{R}
+\quad
+ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , b \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) }
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) } \;\; imp_{L}
+\quad\rightsquigarrow\quad
+\cfrac{\cfrac{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c \vdash  \ndots{r} a, d
+\quad
+ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c, b \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c \vdash  \ndots{r} d} \;\; imp_{L}}
+{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{9}, imp (c) (d) } \;\; imp_{R}
+\]
+}
+\\[0.7cm]
+
+{\scriptsize
+\[
+\cfrac{\cfrac{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , c \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) , a} \;\; imp_{R}
+\quad
+\cfrac{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , c, b \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , b \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) } \;\; imp_{R}}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) } \;\; imp_{L}
+\quad\rightsquigarrow\quad
+\cfrac{\cfrac{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c \vdash  \ndots{r} a, d
+\quad
+ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c, b \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b) , c \vdash  \ndots{r} d} \;\; imp_{L}}
+{ \ndots{l} \Gamma_{l}^{7}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{9}, imp (c) (d) } \;\; imp_{R}
+\]
+}
+\\[0.7cm]
+
+These are the configurations for which a permutation was not found:
+{\scriptsize
+\[
+\cfrac{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) , a
+\quad
+\cfrac{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , c, b \vdash  \ndots{r} d}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b) , b \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) } \;\; imp_{R}}
+{ \ndots{l} \Gamma_{l}^{0}, imp (a) (b)  \vdash  \ndots{r} \Delta_{r}^{0}, imp (c) (d) } \;\; imp_{L}
+\]
+}
+\\[0.7cm]
+%\end{document}

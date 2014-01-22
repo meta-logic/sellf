@@ -40,7 +40,9 @@ let rec termToString_ term absList = match term with
 		(*if v.tag = EIG then 
 			( (v.str)^"EIG_"^(string_of_int v.id) ) 
 		else ( (v.str)^"LOG_"^(string_of_int v.id) )*)
-  | DB (i) -> List.nth absList (i-1)
+  | DB (i) -> 
+    if (List.length absList) < i then failwith "Fail printing DB indices."
+    else List.nth absList (i-1)
   | INT (x) -> string_of_int x
   | CONST (x) -> x
   | STRING (x) -> x
@@ -115,7 +117,9 @@ let rec termToTexString_ term absList = match term with
 		(*if v.tag = EIG then 
 			( (v.str)^"EIG-"^(string_of_int v.id) ) 
 		else ( (v.str)^"LOG-"^(string_of_int v.id) )*)
-  | DB (i) -> List.nth absList (i-1)
+  | DB (i) ->
+    if (List.length absList) < i then failwith "Fail printing DB indices."
+    else List.nth absList (i-1)
   | INT (x) -> string_of_int x
   | CONST (x) -> x
   | STRING (x) -> x 
