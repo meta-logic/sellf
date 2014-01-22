@@ -166,11 +166,11 @@ $SubSig$ ::= &
 {\texttt{subexp} $\tup{String}$ $\tup{SubType}$ .  $\mid$  \texttt{subexpctx} $\tup{String}$ $\tup{CtxType}$ $\tup{Side}$ .}
 \\
 & {$\mid $ \texttt{subexprel} $\tup{String}$ \texttt{<} $\tup{String}$ .}\\[2pt]
-$Atoms$ & ::=  $\tup{Side}$ $\tup{Term}$ \quad $MarkAtoms$ ::=  \texttt{[}$\tup{String}$\texttt{]?} $\tup{Atoms}$ \\[2pt]
-$Bipoles$ ::= & {\texttt{not} $\tup{Atoms}$ \texttt{*} $\tup{BodyPos}$} \\[2pt]
-$BodyPos$ ::= & \texttt{one} $\mid$ $BodyNeg$ $\mid$ \texttt{[}$\tup{String}$\texttt{]!} $BodyNeg$ $\mid$ $BodyPos$ \texttt{*} $BodyPos$ $\mid$ \\[2pt]
+$Atoms$ ::= & $\tup{Side}$ $\tup{Term}$ \quad $MarkAtoms$ ::=  \texttt{[}$\tup{String}$\texttt{]?} $\tup{Atoms}$ \\[2pt]
+$Bipoles$ ::= & ({\texttt{not} $\tup{Atoms}$) \texttt{*} $\tup{BodyPos}$} . \\[2pt]
+$BodyPos$ ::= & \texttt{one} $\mid$ $BodyNeg$ $\mid$ \texttt{[}$\tup{String}$\texttt{]bang} $BodyNeg$ $\mid$ $BodyPos$ \texttt{*} $BodyPos$ \\ & $\mid$ $BodyPos$ \texttt{+} $BodyPos$ \\[2pt]
 $BodyNeg$ ::= & 
-{\texttt{top}  $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \& \tup{BodyNeg}$ }
+{\texttt{top} $\mid$ \texttt{bot} $\mid$ $\tup{MarkAtoms}$ $\mid$ $\tup{BodyNeg} | \tup{BodyNeg}$ $\mid$ $\tup{BodyNeg} \& \tup{BodyNeg}$ }
 \end{tabular}
 \textbf{VN: We need to add more constructs}
 \caption{Here $Term$ is a term of type \texttt{form}.} 
@@ -190,7 +190,7 @@ the provability relation among them.
 In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
 modal logics can be specified in SELL with a strong level of adequacy. 
 
-A Quati program is a SELL theory with some more annotations. The syntax of Quati programs is given in Figure~\cite{fig:syntax}. 
+A Quati program is a SELL theory with some more annotations. The syntax of Quati programs is given in Figure~\ref{fig:syntax}. 
 We explain in detail the syntax of Quati programs 
 by using as running example the inference rules of the multiconclusion sequent calculus for intuitionistic logic~\cite{maehara}.
 A Quati program consists basically of a set of subexponential signature commands, $SubSig$, specifying the subexponentials 
@@ -217,7 +217,6 @@ program. In particular, the former specifies that the context corresponding to t
 only formulas on the left-hand-side of the sequent, denoted by \texttt{lft}, and may contain many formulas, denoted 
 by \texttt{many}. In constrast, as the context to the right-hand-side of LJ sequents has only one formula, the 
 subexponential \texttt{r} would be anotated with \texttt{single}.
-
 \begin{verbatim}
 %%%%%%%%%%%%%%%%%%%%%%%%%% Proof Rules %%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Implication
