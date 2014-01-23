@@ -51,10 +51,6 @@ module OlContext : OLCONTEXT = struct
       with Invalid_argument("index out of bounds") -> str
     else str
   
-  let remInvalidSubs str_lst = List.fold_right (fun str acc -> 
-    if str = "$infty" || str = "$gamma" then acc else str :: acc
-    ) str_lst []
-  
   let getSubs ctx =
     List.fold_right (fun ((n, i), f) acc ->  
       if (List.exists (fun el -> el = (remFirstChar n)) acc) || n = "#" then acc
@@ -77,7 +73,7 @@ module OlContext : OLCONTEXT = struct
   let remComma str = try String.sub str 0 ((String.length str) - 2) with Invalid_argument("String.sub") -> str
   
   let toTexString ctx side = 
-    let subLst = remInvalidSubs (Subexponentials.getAll ()) in
+    let subLst = Subexponentials.getAllValid () in
     let slotToTex ctx side sub =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->

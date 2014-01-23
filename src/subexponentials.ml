@@ -64,6 +64,9 @@ let initialize () =
 (* Returns the names of all subexponentials *)
 let getAll () = Hashtbl.fold (fun key data acc -> key :: acc) typeTbl [] ;;
 
+(* Returns the names of all subexponentials that are specified to be printed *)
+let getAllValid () = Hashtbl.fold (fun key data acc -> key :: acc) ctxTbl [] ;;
+
 (* Returns the type of a subexponential *)
 let type_of s = try 
   Hashtbl.find typeTbl s
