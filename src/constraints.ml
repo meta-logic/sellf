@@ -44,9 +44,10 @@ let isEmpty cst = (List.length cst.lst) == 0
 
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
-  match Subexponentials.getCtxArity subexp with
+  try match Subexponentials.getCtxArity subexp with
     | MANY -> create [IN(f, (subexp, index))]
     | SINGLE -> create [ELIN(f, (subexp, index))]
+    with _ -> failwith "Not applicable: cannot insert formula in context."
 ;;
 
 (* Creates the in/elin constraints for the end-sequent.
@@ -54,16 +55,18 @@ let isIn f subexp ctx =
    ignores $gamma and $infty. It deduces the possible initial context for the
    head of a specification.
 *)
+(* TODO: decent error handling. *)
 let inEndSequent spec ctx = 
   let head = Specification.getPred spec in
   let side = Specification.getSide head in
   List.fold_right (fun (s, i) acc -> 
     if s = "$gamma" || s = "$infty" then acc
-    else match getCtxSide s with
+    else try match getCtxSide s with
       | RIGHTLEFT -> (isIn head s ctx) :: acc
       | RIGHT when side = "rght" -> (isIn head s ctx) :: acc
       | LEFT when side = "lft" -> (isIn head s ctx) :: acc
       | _ -> acc
+      with _ -> acc
   ) (ContextSchema.getContexts ctx) []
 ;;
 
