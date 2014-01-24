@@ -68,6 +68,7 @@ paper, Quati's output is very similar to proof derivation figures one would
 normally find in a proof theory book. 
 \end{abstract}
 
+\vspace{-2mm}
 \section{Introduction}
 
 Permutation lemmas play an important role in proof theory. Many foundational
@@ -78,7 +79,7 @@ and the mid-sequent theorem (or Herbrand's theorem)~\cite{herbrand30phd}.
 
 Proving permutation lemmas is often a tedious and error-prone task as there are normally many 
 cases to consider. As an example, consider the case of permuting $\vee_l$ over $\rightarrow_l$ in
-the intuitionistic calculus \textbf{LJ}. In order to show whether these two
+the intuitionistic calculus LJ. In order to show whether these two
 rules permute, one needs to check \emph{every possible case} in which
 $\rightarrow_l$ occurs above $\vee_l$ in a derivation. When using a
 multiplicative calculus, there are four possibilities for such derivation, two
@@ -186,48 +187,48 @@ intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara54nmj} as our 
 example. First we specify Quati's syntax and then its Features. In the Appendix
 you can find step-by-step use of the Quati system for this example. 
 
+\vspace{-2mm}
+
 \subsection{Syntax}
 
 % TODO: fix this table once everything is there.
 \begin{figure}[t]
-% \[
-% \begin{array}{rcl}
-% SubSig &::= & SubDecl \;\; SubSpec \;\; SubRel \\
-% SubDecl &::= & \texttt{subexp} \tup{String} \tup{SubType}.\\
-% SubSpec &::= & \texttt{subexpctx} \tup{String} \tup{CtxType} \tup{Side}.\\
-% SubRel &::= & \texttt{subexprel} \tup{String} \texttt{<} \tup{String}. \\
-% Side &::= & \texttt{lft} \;\;|\;\; \texttt{rght} \\
-% CtxType &::=&  \texttt{many} \;\;|\;\; \texttt{single} \\
-% SubType &::=&  \texttt{unb} \;\;|\;\; \texttt{lin} \\
-% Bipoles &::=& (\texttt{not} \tup{Atoms}) \texttt{*} \tup{BodyPos}. \\
-% Atoms &::= &\tup{Side} \tup{Form} \\
-% BodyPos &::= &\texttt{one} \;\;|\;\; BodyNeg \;\;|\;\; \texttt{[}\tup{String}\texttt{]bang} BodyNeg \;\;|\;\;\\ 
-%         & & BodyPos \texttt{*} BodyPos \;\;|\;\; BodyPos \texttt{+} BodyPos \\
-% BodyNeg &::=& \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|\;\; \tup{BodyNeg}|\tup{BodyNeg} \;\;|\;\; \\
-%         && \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\
-% MarkAtoms &::=&  \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} \\
-%  
-% \end{array}
-% \]
 {\small
-\begin{align*}
-SubSig &::= SubDecl \;\; SubSpec \;\; SubRel \\
-SubDecl &::= \texttt{subexp} \tup{String} \tup{SubType}.\\
-SubSpec &::= \texttt{subexpctx} \tup{String} \tup{CtxType} \tup{Side}.\\
-SubRel &::= \texttt{subexprel} \tup{String} \texttt{<} \tup{String}. \\
-Side &::= \texttt{lft} \;\;|\;\; \texttt{rght} \\
-CtxType &::=  \texttt{many} \;\;|\;\; \texttt{single} \\
-SubType &::=  \texttt{unb} \;\;|\;\; \texttt{lin} \\
-Bipoles &::= (\texttt{not} \tup{Atoms}) \texttt{*} \tup{BodyPos}. \\
-Atoms &::= \tup{Side} \tup{Form} \\
-BodyPos &::= \texttt{one} \;\;|\;\; BodyNeg \;\;|\;\; \texttt{[}\tup{String}\texttt{]bang} BodyNeg \;\;|\;\;\\ 
-        & BodyPos \texttt{*} BodyPos \;\;|\;\; BodyPos \texttt{+} BodyPos \\
-BodyNeg &::= \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|\;\; \tup{BodyNeg}|\tup{BodyNeg} \;\;|\;\; \\
-        & \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\
-MarkAtoms &::= \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} 
-\end{align*}
+\[
+\begin{array}{lcl}
+Side ::= \texttt{lft} \;\;|\;\; \texttt{rght} \quad 
+CtxType ::=  \texttt{many} \;\;|\;\; \texttt{single} \quad
+SubType ::=  \texttt{unb} \;\;|\;\; \texttt{lin} \\[2pt]
+SubSig ::= SubDecl \;\; SubSpec \;\; SubRel \\[2pt]
+SubDecl ::= \texttt{subexp} \tup{String} \tup{SubType}.\\[2pt]
+SubSpec ::= \texttt{subexpctx} \tup{String} \tup{CtxType} \tup{Side}.\\[2pt]
+SubRel ::= \texttt{subexprel} \tup{String} \texttt{<} \tup{String}. \\[2pt]
+Bipoles ::= (\texttt{not} \tup{Atoms}) \texttt{*} \tup{BodyPos}. \\[2pt]
+BodyPos ::=\texttt{one} \;\;|\;\; BodyNeg \;\;|\;\; \texttt{[}\tup{String}\texttt{]bang} BodyNeg \;\;|\;\;\\ 
+        \qquad\qquad BodyPos \texttt{*} BodyPos \;\;|\;\; BodyPos \texttt{+} BodyPos \\[2pt]
+BodyNeg ::= \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|\;\; \tup{BodyNeg}|\tup{BodyNeg} \;\;|\;\; \\
+        \qquad \qquad \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\[2pt]
+Atoms ::=\tup{Side} \tup{Form} \qquad MarkAtoms ::=  \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} \\
+\end{array}
+\]
+% \begin{align*}
+% SubSig &::= SubDecl \;\; SubSpec \;\; SubRel \\
+% SubDecl &::= \texttt{subexp} \tup{String} \tup{SubType}.\\
+% SubSpec &::= \texttt{subexpctx} \tup{String} \tup{CtxType} \tup{Side}.\\
+% SubRel &::= \texttt{subexprel} \tup{String} \texttt{<} \tup{String}. \\
+% Side &::= \texttt{lft} \;\;|\;\; \texttt{rght} \\
+% CtxType &::=  \texttt{many} \;\;|\;\; \texttt{single} \\
+% SubType &::=  \texttt{unb} \;\;|\;\; \texttt{lin} \\
+% Bipoles &::= (\texttt{not} \tup{Atoms}) \texttt{*} \tup{BodyPos}. \\
+% Atoms &::= \tup{Side} \tup{Form} \\
+% BodyPos &::= \texttt{one} \;\;|\;\; BodyNeg \;\;|\;\; \texttt{[}\tup{String}\texttt{]bang} BodyNeg \;\;|\;\;\\ 
+%         & BodyPos \texttt{*} BodyPos \;\;|\;\; BodyPos \texttt{+} BodyPos \\
+% BodyNeg &::= \texttt{top} \;\;|\;\; \texttt{bot} \;\;|\;\; \tup{MarkAtoms} \;\;|\;\; \tup{BodyNeg}|\tup{BodyNeg} \;\;|\;\; \\
+%         & \tup{BodyNeg} \texttt{\&} \tup{BodyNeg}\\
+% MarkAtoms &::= \texttt{[}\tup{String}\texttt{]?} \tup{Atoms} 
+% \end{align*}
 }
-\vspace{-8mm}
+\vspace{-4mm}
 % \textbf{VN: We need to add more constructs}
 \caption{Here $Form$ is a term of type \texttt{form}.} 
 \label{fig:syntax}
@@ -260,6 +261,10 @@ The main feature of subexponentials is that they can be organized in a pre-order
 the provability relation among them. 
 In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
 modal logics can be specified in SELL with a strong level of adequacy. 
+
+Another important reason for using SELL as specification language is that one can also use 
+other available tools, such as the tool TATU\footnote{\url{https://www.logic.at/staff/giselle/tatu/}.} which is capable to check whether a proof system 
+specified in SELL admits cut-elimination.
 
 A Quati program is a SELL theory with some more annotations. Its syntax is given
 in Figure~\ref{fig:syntax} and explained in detail  
@@ -295,10 +300,8 @@ The following subexponential signature is used for specifying the proof system M
 {\small
 \begin{verbatim}
 %%%%%%%%%%%%%%% Subexponential Signature %%%%%%%%%%%%%%%%%
-subexp l unb.                       
-subexp r unb.            
-subexpctx l many lft.               
-subexpctx r many rght.
+subexp l unb.                       subexp r unb.            
+subexpctx l many lft.               subexpctx r many rght.
 subexprel l > r
 \end{verbatim}
 }
@@ -358,7 +361,7 @@ In fact, by using advanced proof theoretic machinery, namely Focusing~\cite{andr
 we can make this intuition precise in the sense. We refer to~\cite{nigam.jlc} for more details
 of encodings.
 
-\vspace{-2mm}
+% \vspace{-3mm}
 
 \subsection{Features}
 
@@ -393,8 +396,9 @@ delimit the contexts for the subexponentials \texttt{l} and \texttt{r}, respecti
 specification to infer that the context for \texttt{l} (resp. for \texttt{r}) should only to the left-hand-side (resp. 
 right-hand-side) of the sequent.
 
-Under the hood, Quati is using the focusing discipline constructing the focused derivation that introduces such 
-a SELL bipole. This can be observed by using the command \texttt{bipole}. For the same SELL bipole, Quati returns
+Under the hood, Quati is constructing the focused derivation~\cite{andreoli92jlc} that introduces such 
+a SELL bipole as described in \cite{nigam.jlc}. This can be observed by using the command 
+\texttt{bipole}. For the same SELL bipole used above, Quati returns
 the \LaTeX\ code for the following figure, corresponding to the focused derivation of the SELL bipole:
 \vspace{-4mm}
 
@@ -444,9 +448,10 @@ more discussion on how this).
 Quati is implemented in OCaml\footnote{\url{http://ocaml.org/}} and makes use of
 DLV\footnote{\url{http://www.dlvsystem.com/dlv/}} externally to compute minimal models for the
 answer-set programs generated. It is part of a bigger project, called
-\texttt{sellf}\footnote{\url{https://code.google.com/p/sellf/}} which started as an effort to
-implement the focused proof system for linear logic with subexponentials
-\cite{nigam09ppdp}. The basic data structure is linear logic formulas,
+\texttt{sellf}\footnote{\url{https://code.google.com/p/sellf/}} which also includes the
+machinery for TATU mentioned above. 
+
+The basic data structure is linear logic formulas,
 defined in the \texttt{Term} module. Figure \ref{fig:modules} is an overview
 of the modules in \texttt{sellf} used by Quati to check for permutations.
 
@@ -459,11 +464,15 @@ interact.
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
-- mention the systems implemented and interesting cases of permutation
+This paper introduced Quati an automated tool for proving permutation lemmas. Besides briefly 
+comenting on its implementation, we illustrated its syntax, usage and features. Besides MLJ, in the release
+one can find a number of implemented systems, such as systems for linear logic, intuitionistic logic, s4, 
+and others. 
 
-- cite the work with ramyaa about automating the specifications
-
-- cite the automatic discovery of focusing systems
+There is a number of directions that we are currently investigating. One direction is to come up with 
+more graphical ways of writing proof systems and how to translate such representations into SELL specifications. 
+Since the proof of the completeness theorem of focusing strategies heavily rely on permutation lemmas, we are 
+currently investigating ways to derive such theorems in an automated fashion.
 
 \bibliographystyle{abbrv}
 \bibliography{../master}
@@ -773,7 +782,7 @@ Syntax & Meaning \\
 %
 %% put the grammar of the syntax instead???
 There are already a few proof systems specified in Quati, such as \textbf{LK},
-\textbf{LJ}, \textbf{mLJ}, \textbf{LL}, etc. They were used for testing purposed
+LJ, \textbf{mLJ}, \textbf{LL}, etc. They were used for testing purposed
 and are available for the user as examples. Quati can be downloaded at
 \url{[TODO: link of the release]} as a zip containing its source code, the
 examples and installation instructions. Alternatively, it can be tested using a
