@@ -73,19 +73,21 @@ normally find in a proof theory book.
 
 Permutation lemmas play an important role in proof theory. Many foundational
 results about proof systems rely on the fact that some rules
-permute over others. For instance, permutation lemmas are used in the Gentzen-style 
-cut-elimination proofs~\cite{gentzen35}, the completeness of focusing disciplines~\cite{andreoli92jlc,miller07cslb,miller91apal}, 
-and the mid-sequent theorem (or Herbrand's theorem)~\cite{herbrand30phd}.
+permute over others. For instance, permutation lemmas are used in Gentzen-style 
+cut-elimination proofs~\cite{gentzen35}, 
+the completeness proof of focusing disciplines~\cite{andreoli92jlc,miller07cslb}, 
+and the proof of Herbrand's theorem~\cite{herbrand30phd}.
 
-Proving permutation lemmas is often a tedious and error-prone task as there are normally many 
+Proving permutation lemmas, however, is often a tedious and error-prone task as there are normally many 
 cases to consider. As an example, consider the case of permuting $\vee_l$ over $\rightarrow_l$ in
 the intuitionistic calculus LJ. In order to show whether these two
 rules permute, one needs to check \emph{every possible case} in which
 $\rightarrow_l$ occurs above $\vee_l$ in a derivation. When using a
 multiplicative calculus, there are four possibilities for such derivation, two
-allow a permutation of the rules while the other two do not.\footnote{In an
-additive calculus there are three possibilities, only one of them allow a
-permutation.} Here's one of each:
+allow a permutation of the rules while the other two do not.
+% \footnote{In an additive calculus there are three possibilities, only one of them allow a
+% permutation.} 
+Here's one of each:
 %% -> l / v l
 \vspace{-4mm}
 
@@ -114,6 +116,7 @@ permutation.} Here's one of each:
 \]
 }
 %% -> l / v l
+% \vspace{-2mm}
 {\scriptsize
 \[
 \infer[\vee_l]{\Gamma, \Gamma', \Gamma'', A \rightarrow B , P \vee Q \vdash F}{
@@ -130,9 +133,9 @@ permutation.} Here's one of each:
 \]
 }%
 The combinatorial nature of the proof of permutation lemmas can be observed in
-this example. There are four cases to consider only for this pair of rules. For
+this example. While there are ``only'' four cases to consider for this pair of rules, for
 proving the completeness of the focusing discipline, one needs to study which
-permutations are allowed; thus all pairs of rules need to be
+permutations are allowed and therefore all pairs of rules need to be
 considered~\cite{miller07cslb}.
 Moreover, the fact that the cases are rarely documented makes it hard for others to check the
 correctness of the transformations. For instance, the cut-elimination result for
@@ -143,37 +146,39 @@ would be of great help. This paper introduces such a tool called Quati.
 
 While here we will restrict ourselves to simply illustrate Quati's
 functionalities and implementation design, we observe that its underlying theory
-is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. Here we
-summarize the results of these works.  
+is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. We briefly
+review this body of work.  
  
 In~\cite{nigam13iclp}, we show how to reduce the problem of proving permutation
 lemmas to solving an answer-set program~\cite{gelfond90iclp}. That is given a proof
 system, $\Pscr$, satisfying some properties, we reduce the problem 
 of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in
 $\Pscr$ to solving an answer-set program. Each solution of this program
-corresponds to one possible permutation case. This result provides the main 
-foundational theory for the implementation of Quati.
+corresponds to one possible permutation case. This result sets the foundations 
+for Quati.
 
 However, the exact language in which proof systems are specified was not dealt
 in~\cite{nigam13iclp}. It was subject of the paper~\cite{nigam.jlc} which
 shows that a great number of proof systems for different logics (\eg, linear,
 intuitionistic, classical, modal logics) can be specified as theories in linear
-logic with subexponentials~\cite{nigam09ppdp}. These specifications are shown to
+logic with subexponentials (SELL)~\cite{nigam09ppdp}. These specifications are shown to
 have a strong adequacy, namely, \emph{on the level of
 derivations}~\cite{nigam10jar}, meaning that there is a one to one
 correspondence of derivations in the specified logic (object logic) to derivations in linear
-logic with subexponentials. Therefore, linear logic with subexponentials seems
-to be a suitable language for specifying proof systems. 
+logic with subexponentials. Moreover, \cite{nigam.jlc} also shows how to check whether 
+proof systems specified in SELL admit cut-elimination. This lead to the tool 
+TATU\footnote{\url{https://www.logic.at/staff/giselle/tatu/}.} Therefore, SELL is
+a suitable framework for specifying proof systems. 
 
 Finally, in the workshop paper~\cite{nigam14ebl}, we show how to integrate the material
-in \cite{nigam13iclp} and \cite{nigam.jlc}. In particular, we show how to reduce
-to solving an answer-set program the problem of checking whether a rule permutes
-over another when given a proof system specified as a linear logic with
-subexponentials. Moreover, we also discuss in \cite{nigam14ebl} how to extract
+in \cite{nigam13iclp} and \cite{nigam.jlc}. In particular, we show how to reduce,
+to solving an answer-set program, the problem of checking whether a rule permutes
+over another when given a proof system specified in SELL. 
+Moreover, we also discuss in \cite{nigam14ebl} how to extract
 proof derivation figures similar to those shown in a standard proof theory
-book~\cite{troelstra96bpt} from the answers of the generated answer-set programs. 
+book~\cite{troelstra96bpt} from the solutions of the generated answer-set programs. 
 
-Quati is the result of this series of papers. Section~\ref{sec:quati} describes
+Quati is the result of this series of papers. This paper is organized as follows: Section~\ref{sec:quati} describes
 Quati's syntax and its features, while Section~\ref{sec:impl} describes its implementation.
 In Section~\ref{sec:conc} we end by pointing out future work.
 
@@ -184,8 +189,8 @@ In Section~\ref{sec:conc} we end by pointing out future work.
 
 Throughout this section, we will use the specification for the
 intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara54nmj} as our running 
-example. First we specify Quati's syntax and then its Features. In the Appendix
-you can find step-by-step use of the Quati system for this example. 
+example. First we specify Quati's syntax and then its features. In the Appendix
+you can find step-by-step use of the Quati system for this example as well as the proof system MLJ. 
 
 \vspace{-2mm}
 
@@ -263,7 +268,7 @@ In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linea
 modal logics can be specified in SELL with a strong level of adequacy. 
 
 Another important reason for using SELL as specification language is that one can also use 
-other available tools, such as the tool TATU\footnote{\url{https://www.logic.at/staff/giselle/tatu/}.} which is capable to check whether a proof system 
+other available tools, such as the tool TATU which is capable to check whether a proof system 
 specified in SELL admits cut-elimination.
 
 A Quati program is a SELL theory with some more annotations. Its syntax is given
@@ -275,6 +280,8 @@ A Quati program consists of two files: (1) a \emph{type signature} file, with
 suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consisting of two parts: (a) a
 \emph{subexponential signature} and (b) the rules' specifications or
 \emph{bipoles}.
+
+\vspace{-2mm}
 
 \paragraph{Type signature}
 %
@@ -310,9 +317,9 @@ Intuitively, one subexponential corresponds to one context of the object logic s
 some specifications where a subexponential is used to capture the structural properties of the proof 
 system and therefore does not necessarily correspond to a context in the object logic. See \cite{nigam.jlc}
 for more on this.}
-In this case, as MLJ has only two
+For MLJ, as it has only two
 contexts, one to the left and another to the right side of the sequent, we use two subexponentials
-\texttt{l} and \texttt{r}. Moreover, as both contexts (to the left and right) behave classically, 
+\texttt{l} and \texttt{r}. Moreover, as both contexts (to the left and right) behave classically in MLJ, 
 we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. In contrast, 
 the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right side of LJ's 
 sequents behaves linearly.
@@ -327,6 +334,8 @@ subexponential \texttt{r} for that system would be annotated with \texttt{single
 
 The pre-order among the subexponentials is specified on the last line using the
 keyword \texttt{subexprel}.
+
+\vspace{-2mm}
 
 \paragraph{Bipoles}
 %
@@ -359,18 +368,20 @@ The interesting bit is the bang \texttt{[l]bang} in second bipole specifying tha
 context of the subexponential \texttt{r} should be weakened as \texttt{l > r}.
 In fact, by using advanced proof theoretic machinery, namely Focusing~\cite{andreoli92jlc}, 
 we can make this intuition precise in the sense. We refer to~\cite{nigam.jlc} for more details
-of encodings.
+on encodings.
 
 % \vspace{-3mm}
 
 \subsection{Features}
 
 Quati has two main features: (1) It can construct the corresponding inference rule(s) associated
-to a SELL formula; and (2) It can prove permutation lemmas. We illustrate these features with 
+to a SELL formula; and (2) it can prove permutation lemmas. We illustrate these features with 
 the specification of MLJ implication introduction rules described above.
 
+\vspace{-2mm}
+
 \paragraph{Rule Construction} Proving the adequacy theorems of a given SELL specification is also 
-effor-prone. As detailed~\cite{nigam.jlc}, to prove (strong) adequacy we need to show that all 
+error-prone. As detailed~\cite{nigam.jlc}, to prove (strong) adequacy we need to show that all 
 the possible focused derivations that introduce a formula in the specification corresponds to 
 an inference rule of the proof system being specified. Quati automates the proof of such 
 adequacy theorems by constructing from a bipole the corresponding inference rule formulas. 
@@ -411,6 +422,9 @@ the \LaTeX\ code for the following figure, corresponding to the focused derivati
 {\Gamma_{ gamma}^{5} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow  !^{l}  ?^{l} lft (a)  \bindnasrepma  ?^{r} rght (b)  }}
 {\Gamma_{ gamma}^{3} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ;  \Downarrow \neg rght (imp (a) (b) )  \otimes  !^{l}  ?^{l} lft (a)  \bindnasrepma  ?^{r} rght (b) }}
 {\Gamma_{ gamma}^{3} ; \Gamma_{r}^{4} ; \Gamma_{l}^{3} ; \Gamma_{ infty}^{1} ; \Uparrow }\]}
+
+
+\vspace{-2mm}
 
 \paragraph{Rule Permutation}
 As described in the Introduction, Quati can be used to prove permutation lemmas. The command \texttt{\#permute} in the command 
@@ -459,6 +473,8 @@ of the modules in \texttt{sellf} used by Quati to check for permutations.
 TODO: module's figure
 \end{figure}
 
+\textbf{Add a paragraph on the results, such as time to compute, which systems, etc.}
+
 \textbf{TODO:} wait for the picture to explain in more detail the modules and how they
 interact.
 
@@ -478,8 +494,72 @@ currently investigating ways to derive such theorems in an automated fashion.
 \bibliography{../master}
 
 
+% \section{A Multiconclusion Sequent Calculus for Intuitionistic Logic}
+
+
+
 \newpage
 \appendix
+
+\begin{figure}
+\[
+\begin{array} {r@{\quad}l}
+\infer[{\supset_L}]{\Gamma, A\supset B \longrightarrow \Delta}{\Gamma,
+A\supset B \longrightarrow A, \Delta \quad \Gamma,A\supset B, B \longrightarrow
+\Delta }
+&
+\infer[{\supset_R}]{\Gamma \longrightarrow A \supset B, \Delta}{\Gamma, A
+\longrightarrow B}
+\\[5pt]
+\infer[{\land_L}]{\Gamma, A \land B \longrightarrow \Delta}{\Gamma, A \land
+B, A,B \longrightarrow \Delta }
+&
+\infer[{\land_R}]{\Gamma \longrightarrow A \land B, \Delta}{\Gamma \longrightarrow
+A \land B, A, \Delta \quad \Gamma \longrightarrow A \land B,B, \Delta}
+\\
+[5pt]
+\infer[{\lor_L}]{\Gamma, A \lor B \longrightarrow  \Delta}{\Gamma, A \lor B,
+A, \longrightarrow \Delta \quad \Gamma, A \lor B,B \longrightarrow  \Delta}
+&
+\infer[{\lor_R}]{\Gamma \longrightarrow A \lor B, \Delta}{\Gamma \longrightarrow A
+\lor B, A,B, \Delta }
+\\
+[5pt]
+\infer[{\forall_L}]{\Gamma, \forall x\,A \longrightarrow \Delta}{\Gamma,
+\forall x\,A, A\{t/x\} \longrightarrow \Delta} 
+&
+\infer[{\forall_R}]{\Gamma \longrightarrow \Delta, \forall x\,A}{\Gamma
+\longrightarrow A\{c/x\}}
+\\
+[5pt]
+\infer[{\exists_L}]{\Gamma, \exists x\, A \longrightarrow
+\Delta}{\Gamma, \exists x\, A , A\{c/ x\} \longrightarrow \Delta} 
+&
+\infer[{\exists_R}]{\Gamma \longrightarrow \Delta, \exists x\, A}
+{\Gamma \longrightarrow \Delta, \exists x\, A, A \{t/x\}}
+\end{array}
+\]
+%\end{small}
+% \vspace{-4mm}
+%\begin{small}
+\[
+\begin{array}{c@{\qquad}c@{\qquad}c}
+ \infer[{\textrm{Init}}]{\Gamma,A \longrightarrow A, \Delta}{} 
+&
+\infer[{\textrm{Cut}}]{\Gamma \longrightarrow \Delta}{\Gamma
+\longrightarrow B,\Delta \quad \Gamma, B \longrightarrow \Delta}
+&
+\infer[{\bot_L}]{\Gamma,\bot \longrightarrow \Delta}{} 
+\end{array}
+\]
+%\end{small}
+% \vspace{-4mm}
+\caption{The multi-conclusion intuitionistic sequent calculus, MLJ,
+with additive rules.}\label{Fig:mLJ}
+% \vspace{-4mm}
+\end{figure}
+
+
 \section{A sample session of Quati}
 % TODO: add installation instructions and system requirements, explain where the
 % examples are? Or just refer the reader to the download and add these things to
