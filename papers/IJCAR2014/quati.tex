@@ -376,11 +376,11 @@ on encodings.
 
 Quati has two main features: (1) It can construct the corresponding inference rule(s) associated
 to a SELL formula; and (2) it can prove permutation lemmas. We illustrate these features with 
-the specification of MLJ implication introduction rules described above.
+the specification of MLJ implication introduction rules shown above.
 
 \vspace{-2mm}
 
-\paragraph{Rule Construction} Proving the adequacy theorems of a given SELL specification is also 
+\paragraph{Rule Construction} Proving the adequacy theorems for a given SELL specification is also 
 error-prone. As detailed~\cite{nigam.jlc}, to prove (strong) adequacy we need to show that all 
 the possible focused derivations that introduce a formula in the specification corresponds to 
 an inference rule of the proof system being specified. Quati automates the proof of such 
@@ -432,7 +432,7 @@ line checks whether the permutation of two selected rules is always allowed or n
 which it was able to find the permutation and the cases for which it was not able to find a permutation. For example, when Quati 
 checks whether MLJ's implication left introduction rule permutes over MLJ's implication right introduction, Quati correctly finds two possible
 permutation cases and it cannot find one of the cases for which is indeed not possible. We show one of the cases (reformated to fit the page margins):
-\vspace{-2mm}
+\vspace{-3mm}
 
 {\scriptsize
 \[
@@ -488,7 +488,8 @@ and others.
 There is a number of directions that we are currently investigating. One direction is to come up with 
 more graphical ways of writing proof systems and how to translate such representations into SELL specifications. 
 Since the proof of the completeness theorem of focusing strategies heavily rely on permutation lemmas, we are 
-currently investigating ways to derive such theorems in an automated fashion.
+currently investigating ways to derive such theorems in an automated fashion. Finally, we are investigating
+ways to construct machine-readable proof objects for permutation lemmas.
 
 \bibliographystyle{abbrv}
 \bibliography{../master}
@@ -560,14 +561,15 @@ with additive rules.}\label{Fig:mLJ}
 \end{figure}
 
 
-\section{A sample session of Quati}
+\section{A sample Quati session}
 % TODO: add installation instructions and system requirements, explain where the
 % examples are? Or just refer the reader to the download and add these things to
 % a readme file...
 
 % TODO: change executable file name for quati in the release
 % load a file
-Once the system in installed, it can be called by simply typing the command:
+Once the system in build,\footnote{Notice that one needs Ocaml and DLV systems installed to make
+Quati work.} it can be called by simply typing the command:
 \texttt{./quati}. This will start an interactive command line where the user can
 call the functions we will demonstrate now. If one wants to see a list of all
 the functionalities available, just type \texttt{\#help}. We start by loading a
@@ -576,7 +578,7 @@ intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara54nmj}.
 %
 \vspace{-1mm}
 
-{\scriptsize
+{\small
 \begin{verbatim}
 :> #load ../examples/proofsystems/mlj
 \end{verbatim}
@@ -596,7 +598,7 @@ object logic rules of all bipoles are printed to the output file. In the example
 below, we asked Quati to print the rule for $\rightarrow_r$ of the MLJ system.
 \vspace{-1mm}
 
-{\scriptsize
+{\small
 \begin{verbatim}
 ?> #rule
 These are the formulas available: 
@@ -604,7 +606,8 @@ These are the formulas available:
    ( [r]? ( rght A  ) ) * ( [l]? ( lft B  ) )))
 1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
    ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
-The object logic rule of the chosen formula will be generated and printed to a LaTeX file.
+The object logic rule of the chosen formula will be generated 
+and printed to a LaTeX file.
 Please choose a formula by its number: 1
 Please choose a name for the file: imp_r_mlj
 \end{verbatim}
@@ -612,7 +615,7 @@ Please choose a name for the file: imp_r_mlj
 
 This is the output (after compiling with \LaTeX):
 %
-{\scriptsize
+{\small
 \[
 \cfrac{ \ndots{l} \Gamma_{l}^{0}, a \vdash  \ndots{r} b}
 { \ndots{l} \Gamma_{l}^{0} \vdash  \ndots{r} \Delta_{r}^{0}, imp (a) (b) } \;\; imp_{R}
@@ -632,7 +635,7 @@ analogously to the previous commands. The example below shows how to use
 of MLJ.
 \vspace{-1mm}
 
-{\scriptsize
+{\small
 \begin{verbatim}
 ?> #bipole 
 These are the formulas available: 
@@ -680,7 +683,7 @@ These are the formulas available:
    ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
 Checking the permutation of one formula F1 over another F2 
 (i.e., can a derivation where F1 is below F2 be transformed into a derivation 
-where F2 is below F1?) 
+where F2 is below F1) 
 Please type the number of F1: 0
 Please type the number of F2: 1
 Please type a file name for the results: imp_l_imp_r
