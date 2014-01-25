@@ -1,7 +1,7 @@
 
 (* Giselle Machado Reis - 2012 *)
 
-open Term
+open Types
 
 (* Functions to transform formulas to string *)
 

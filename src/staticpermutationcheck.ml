@@ -9,13 +9,13 @@ by Vivek Nigam, Elaine Pimentel, and Giselle Reis"
 
 *)
 open Basic
-open Term
+open Types
 
 let unify = 
   let module Unify = 
     Unify.Make ( struct
-      let instantiatable = Term.LOG
-      let constant_like = Term.EIG
+      let instantiatable = LOG
+      let constant_like = EIG
     end )
   in Unify.pattern_unify
 ;;
@@ -224,14 +224,14 @@ let rec findHead rule =
 match rule with 
 | NOT(PRED(_,b,_)) -> b
 | ABS(s, i, b) -> 
-      varid := !varid + 1;
-      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      Term.varid := !Term.varid + 1;
+      let new_var = V ({str = s; id = !Term.varid; tag = LOG; ts = 0; lts = 0}) in
       let ptr = PTR {contents = new_var} in
       let newf = Norm.hnorm (APP (rule, [ptr])) in
         findHead newf
 | EXISTS(s,i,b) ->
-      varid := !varid + 1;
-      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      Term.varid := !Term.varid + 1;
+      let new_var = V ({str = s; id = !Term.varid; tag = LOG; ts = 0; lts = 0}) in
       let ptr = PTR {contents = new_var} in
       let newf = Norm.hnorm (APP (ABS (s, 1, b), [ptr])) in
         findHead newf
@@ -386,7 +386,7 @@ let rulesCutNotPermute = not_permute cut rules in
 (* This function check whether a list of rules contains only bipoles *)
 let rec areBipoles rules = match rules with 
 | [] -> true
-| rl :: lst when isBipole rl -> areBipoles lst
+| rl :: lst when Term.isBipole rl -> areBipoles lst
 | rl :: lst -> 
     print_endline ("The following clause is NOT a bipole -> \n"^Prints.termToString rl); 
     false

@@ -12,16 +12,15 @@
 
 open Basic
 open Context
-open Term
+open Types
 open ProofTree
 open Sequent
-(*open Prints*)
 
 let unify = 
   let module Unify = 
     Unify.Make ( struct
-      let instantiatable = Term.LOG
-      let constant_like = Term.EIG
+      let instantiatable = LOG
+      let constant_like = EIG
     end )
   in Unify.pattern_unify
 ;;
@@ -78,7 +77,7 @@ let rec prove formula h suc fail =
       suc ()
     end
     else begin
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline ("Failed because out context is not empty...");
         print_endline (Context.toString ctxout);
       end;
@@ -244,25 +243,25 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
   | (ctxin, ctxout, f::goals, ASYN) -> let f = Term.observe f in begin match f with
 
     | LOLLI (sub, f1, f2) -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Lolli:"; 
         print_endline (Prints.termToString (LOLLI(sub, f1, f2)));
         print_endline (Context.toString ctxin);
       end;
-      let newctx = Context.add ctxin (nnf (NOT(f2))) (extract_str sub) in
+      let newctx = Context.add ctxin (Term.nnf (NOT(f2))) (Term.extract_str sub) in
       let sq = Sequent.create newctx ctxout (f1::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
  
     (* Solves f1 and f2 with the same context *)
     | WITH (f1, f2) -> begin
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- With 1st:"; 
         print_endline (Prints.termToString (WITH(f1, f2)));
         print_endline (Context.toString ctxin);
       end;
       let sq = Sequent.create ctxin ctxout (f1::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> 
-        if !verbose then begin
+        if !Term.verbose then begin
           print_endline "-- With 2nd:"; 
           print_endline (Prints.termToString (WITH(f1, f2)));
           print_endline (Context.toString ctxin);
@@ -284,7 +283,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     end
  
     | PARR (f1, f2) -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Parr:"; 
         print_endline (Prints.termToString (PARR(f1, f2)));
         print_endline (Context.toString ctxin);
@@ -293,7 +292,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
  
     | QST (s, f) -> begin
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Question mark:"; 
         print_endline (Prints.termToString (QST(s, f)));
         print_endline (Context.toString ctxin);
@@ -308,19 +307,19 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       end
  
     | FORALL (s, i, f) ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Forall:"; 
         print_endline (Prints.termToString (FORALL(s, i, f)));
         print_endline (Context.toString ctxin);
       end;
-      varid := !varid + 1;
-      let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
+      Term.varid := !Term.varid + 1;
+      let new_var = VAR ({str = s; id = !Term.varid; tag = EIG; ts = 0; lts = 0}) in
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [new_var])) in
       let sq = Sequent.create ctxin ctxout (newf::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
    
     | TOP -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Top:"; 
         print_endline (Prints.termToString TOP);
         print_endline (Context.toString ctxin);
@@ -331,7 +330,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       suc ()
  
     | BOT -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Bottom:"; 
         print_endline (Prints.termToString BOT);
         print_endline (Context.toString ctxin);
@@ -341,7 +340,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
 (*
     | NEW (s, t1) -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- New subexponential:"; 
         print_endline (Prints.termToString (NEW(s, t1)));
         print_endline (Context.toString ctxin);
@@ -371,7 +370,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | PRINT (_)
     | NOT(PRED(_, _, _))
     | PRED(_, _, _) ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- R arrow up:"; 
         print_endline (Prints.termToString (Term.observe f));
         print_endline (Context.toString ctxin);
@@ -383,7 +382,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     (* Negated formulas *)
     (* Transform to negated normal form and try to prove them. *)
     | NOT(f) ->
-      let negf = nnf (NOT(f)) in
+      let negf = Term.nnf (NOT(f)) in
       let sq = Sequent.create ctxin ctxout (negf::goals) ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
  
@@ -435,7 +434,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     (* If a negative formula was found, go back to async phase *)     
     | LOLLI (sub, f1, f2) -> 
       begin 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- R arrow down:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
@@ -454,7 +453,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | BOT
     | PRED (_, _, _) (* All atoms are negative *)
     | NEW (_, _) ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- R arrow down:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
@@ -466,7 +465,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
  
     (* No rule for zero. Top must be in the context, decide on it and finish. *)
     | ZERO ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Zero:";
         print_endline (Prints.termToString ZERO);
         print_endline (Context.toString ctxin);
@@ -478,7 +477,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       *)
 
     | ADDOR (f1, f2) -> begin
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- O plus 1st:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
@@ -486,7 +485,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
       (* Updates the proof tree for one in which the conclusion is f1 *)
       let sq = Sequent.create ctxin ctxout [f1] SYNC in
       Stack.push (fun () -> (
-        if !verbose then begin
+        if !Term.verbose then begin
           print_endline "-- O plus 2st:"; 
           print_endline (Prints.termToString (Term.observe goal));
           print_endline (Context.toString ctxin);
@@ -499,7 +498,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     end
  
     | TENSOR (f1, f2) ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Tensor 1st:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
@@ -511,7 +510,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
           | [p] -> begin
             let ctxin2 = Sequent.getCtxOut (ProofTree.getConclusion p) in
             let sq2 = Sequent.create ctxin2 ctxout [f2] SYNC in
-            if !verbose then begin
+            if !Term.verbose then begin
               print_endline "-- Tensor 2nd:"; 
               print_endline (Prints.termToString (Term.observe goal));
               print_endline (Context.toString ctxin2);
@@ -531,7 +530,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
           | pa::pb::[] -> begin
             let ctxin2 = Sequent.getCtxOut (ProofTree.getConclusion pb) in
             let sq2 = Sequent.create ctxin2 ctxout [f2] SYNC in
-            if !verbose then begin
+            if !Term.verbose then begin
               print_endline "-- Tensor 2nd: another attempt"; 
               print_endline (Prints.termToString (Term.observe goal));
               print_endline (Context.toString ctxin2);
@@ -551,13 +550,13 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         ) 
  
     | EXISTS (s, i, f) ->
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Exists:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
       end;
-      varid := !varid + 1;
-      let new_var = V ({str = s; id = !varid; tag = Term.LOG; ts = 0; lts = 0}) in
+      Term.varid := !Term.varid + 1;
+      let new_var = V ({str = s; id = !Term.varid; tag = LOG; ts = 0; lts = 0}) in
       let ptr = PTR {contents = new_var} in
       let newf = Norm.hnorm (APP (ABS (s, 1, f), [ptr])) in
       let sq = Sequent.create ctxin ctxout [newf] SYNC in
@@ -565,7 +564,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     
     | BANG (sub, f) -> 
       begin
-        if !verbose then begin
+        if !Term.verbose then begin
           print_endline "-- Bang:"; 
           print_endline (Prints.termToString (Term.observe goal));
           print_endline (Context.toString ctxin);
@@ -591,24 +590,24 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 
 (* TODO implement this when I have time
     | HBANG (sub, f) -> begin
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- Hat bang:"; 
         print_endline (Prints.termToString (Term.observe goal));
       end;
       match Term.observe sub with
         | CONST (s) -> ( try match Hashtbl.find !context s with
           | [] -> 
-            if !verbose then print_endline ("Solved hbang "^s^".\n"); 
+            if !Term.verbose then print_endline ("Solved hbang "^s^".\n"); 
             goals := f :: t; 
             let sq = SEQ(!context, !goals, SYNC) in
             activeseq := ProofTree.update !activeseq sq;
             prove_asyn h suc fail 
           | _ -> 
-            if !verbose then print_endline ("Failed in hbang rule "^s^".\n"); 
+            if !Term.verbose then print_endline ("Failed in hbang rule "^s^".\n"); 
             fail
           with Not_found -> failwith ("Hbang applied on non-existing
           subexponential: "^s^"\n") 
-            (*if !verbose then print_endline ("Solved hbang "^s^".\n"); 
+            (*if !Term.verbose then print_endline ("Solved hbang "^s^".\n"); 
             goals := f :: t; 
             let sq = SEQ(!context, !goals, SYNC) in
             activeseq := ProofTree.update !activeseq sq;
@@ -619,7 +618,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 *)
 
     | ONE -> 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline "-- ONE:"; 
         print_endline (Prints.termToString (Term.observe goal));
         print_endline (Context.toString ctxin);
@@ -697,7 +696,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
 (* ctx is the context in the form of a list of pairs. *)
 and decide h ctx proof suc = 
   if (h <= 0) then begin
-    if !verbose then print_endline "Failed because it's bounded.";
+    if !Term.verbose then print_endline "Failed because it's bounded.";
     ProofTree.setPremises proof [];
     (Stack.pop failStack) ()
   end
@@ -711,7 +710,7 @@ and decide h ctx proof suc =
         let ctxout = Sequent.getCtxOut conc in
         let newctxin = Context.remove ctxin form s in
         let goals = (Term.observe form)::[] in
-        if !verbose then begin
+        if !Term.verbose then begin
           print_endline "-- Decide:";
           print_int h; print_newline();
           print_endline (Prints.termToString (List.hd goals));
@@ -720,7 +719,7 @@ and decide h ctx proof suc =
         let sq = Sequent.create newctxin ctxout goals SYNC in
         let h1 = h - 1 in
         Stack.push (fun () -> 
-          if !verbose then begin
+          if !Term.verbose then begin
             print_endline "Failed, deciding again...";
             print_endline "Available options: ";
             List.iter (fun (s, f) -> print_string ((Prints.termToString f)^" :: ")) tl;
@@ -738,15 +737,15 @@ and initial f ctx proof suc = match ctx with
   | (s, f1) :: tl -> 
     match (f, f1) with
     | (PRED(str, t, p), PRED(str1, t1, p1)) when str = str1 -> begin
-      let bl = save_state () in
+      let bl = Term.save_state () in
       try match unify t t1 with
         | () -> begin
           let conc = ProofTree.getConclusion proof in
           let ctxin = Sequent.getCtxIn conc in
           let newctx = Context.remove ctxin f1 s in
           Sequent.setCtxOut conc newctx;
-          Stack.push (fun () -> restore_state bl; initial f tl proof suc) failStack;
-          if !verbose then begin
+          Stack.push (fun () -> Term.restore_state bl; initial f tl proof suc) failStack;
+          if !Term.verbose then begin
             print_endline "-- Initial:"; 
             print_endline (Prints.termToString (Term.observe f));
             print_endline (Context.toString (Sequent.getCtxIn (ProofTree.getConclusion proof)));

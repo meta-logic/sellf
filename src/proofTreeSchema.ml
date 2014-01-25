@@ -12,7 +12,7 @@ open Sequent
 open Constraints
 open Context
 open ContextSchema
-open Term
+open Types
 open Subexponentials
 open Llrules
 
@@ -30,22 +30,22 @@ module type PROOFTREESCHEMA =
     val appendLeaf : prooftree -> prooftree -> prooftree
     val getConclusion : prooftree -> SequentSchema.sequent
     val getOpenLeaves : prooftree -> SequentSchema.sequent list
-    val decide : prooftree -> Term.terms -> string -> prooftree * Constraints.constraintset
-    val releaseDown : prooftree -> prooftree * Constraints.constraintset
-    val releaseUp : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyWith : prooftree -> Term.terms -> (prooftree * prooftree) * Constraints.constraintset
-    val applyParr : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyQst : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyForall : prooftree -> Term.terms -> prooftree * Constraints.constraintset
+    val decide : prooftree -> terms -> string -> prooftree * constraintset
+    val releaseDown : prooftree -> prooftree * constraintset
+    val releaseUp : prooftree -> terms -> prooftree * constraintset
+    val applyWith : prooftree -> terms -> (prooftree * prooftree) * constraintset
+    val applyParr : prooftree -> terms -> prooftree * constraintset
+    val applyQst : prooftree -> terms -> prooftree * constraintset
+    val applyForall : prooftree -> terms -> prooftree * constraintset
     val applyTop : prooftree -> unit
-    val applyBot : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyOne : prooftree -> Constraints.constraintset
-    val applyInitial : prooftree -> Term.terms -> Constraints.constraintset list
-    val applyAddOr1 : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyAddOr2 : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyExists : prooftree -> Term.terms -> prooftree * Constraints.constraintset
-    val applyTensor : prooftree -> Term.terms -> (prooftree * prooftree) * Constraints.constraintset
-    val applyBang : prooftree -> Term.terms -> prooftree * Constraints.constraintset
+    val applyBot : prooftree -> terms -> prooftree * constraintset
+    val applyOne : prooftree -> constraintset
+    val applyInitial : prooftree -> terms -> constraintset list
+    val applyAddOr1 : prooftree -> terms -> prooftree * constraintset
+    val applyAddOr2 : prooftree -> terms -> prooftree * constraintset
+    val applyExists : prooftree -> terms -> prooftree * constraintset
+    val applyTensor : prooftree -> terms -> (prooftree * prooftree) * constraintset
+    val applyBang : prooftree -> terms -> prooftree * constraintset
     val toTexString : prooftree -> string
     
   end
@@ -214,7 +214,7 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
     in
     let newctx = ContextSchema.copy ctx in
     Term.varid := !Term.varid + 1;
-    let new_var = VAR ({str = s; id = !varid; tag = Term.EIG; ts = 0; lts = 0}) in
+    let new_var = VAR ({str = s; id = !Term.varid; tag = EIG; ts = 0; lts = 0}) in
     let newf = Norm.hnorm (APP (ABS (s, 1, f1), [new_var])) in
     let newgoals = newf :: (List.filter (fun form -> form != f) goals) in
     let premise = SequentSchema.createAsyn newctx newgoals in
@@ -298,7 +298,7 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
     in
     let newctx = ContextSchema.copy ctx in
     Term.varid := !Term.varid + 1;
-    let new_var = V ({str = s; id = !varid; tag = Term.CST; ts = 0; lts = 0}) in
+    let new_var = V ({str = s; id = !Term.varid; tag = CST; ts = 0; lts = 0}) in
     let ptr = PTR {contents = new_var} in
     let newf = Norm.hnorm (APP (ABS (s, 1, f1), [ptr])) in
     let premise = SequentSchema.createSync newctx newf in

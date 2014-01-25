@@ -4,8 +4,17 @@
 
 open Context
 open ContextSchema
-open Term
+open Types
 open Prints
+
+type phase = 
+  | ASYN
+  | SYNC
+
+let print_phase p = match p with
+  | ASYN -> print_string "asyn"
+  | SYNC -> print_string "sync"
+;;
 
 module type SEQUENT =
   sig
@@ -13,20 +22,20 @@ module type SEQUENT =
     type sequent = {
       mutable ctxin : Context.context;
       mutable ctxout : Context.context;
-      mutable goals : Term.terms list;
-      pol : Term.phase }
-    val getPhase : sequent -> Term.phase
-    val getGoals : sequent -> Term.terms list
+      mutable goals : terms list;
+      pol : phase }
+    val getPhase : sequent -> phase
+    val getGoals : sequent -> terms list
     val create : unit -> sequent
-    val create : Term.phase -> sequent
-    val create : Context.context -> Context.context -> Term.terms list -> Term.phase -> sequent
-    val setGoal : sequent -> Term.terms -> unit
-    val setGoals : sequent -> Term.terms list -> unit
+    val create : phase -> sequent
+    val create : Context.context -> Context.context -> terms list -> phase -> sequent
+    val setGoal : sequent -> terms -> unit
+    val setGoals : sequent -> terms list -> unit
     val setCtxIn : sequent -> Context.context -> unit
     val getCtxIn : sequent -> Context.context
     val setCtxOut : sequent -> Context.context -> unit
     val getCtxOut : sequent -> Context.context
-    val addGoal : sequent -> Term.terms -> unit
+    val addGoal : sequent -> terms -> unit
     val toString : sequent -> string
     val toTexString : sequent -> string
     
@@ -129,11 +138,11 @@ module type SEQUENTSCHEMA =
     type sequent = {
     mutable ctx : ContextSchema.context;
     goals : terms list;
-    pol : Term.phase }
-    val createSync : ContextSchema.context -> Term.terms -> sequent
-    val createAsyn : ContextSchema.context -> Term.terms list -> sequent
-    val getPhase : sequent -> Term.phase
-    val getGoals : sequent -> Term.terms list
+    pol : phase }
+    val createSync : ContextSchema.context -> terms -> sequent
+    val createAsyn : ContextSchema.context -> terms list -> sequent
+    val getPhase : sequent -> phase
+    val getGoals : sequent -> terms list
     val getContext : sequent -> ContextSchema.context
     val toString : sequent -> string
     val toTexString : sequent -> string

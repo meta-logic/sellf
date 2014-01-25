@@ -10,35 +10,35 @@
 (* TODO organize the context module! *)
 
 open Basic
-open Term
+open Types
 open Subexponentials
 open Prints
 
 module type CONTEXT = sig
-    type context = { hash : (string, Term.terms list) Hashtbl.t; }
-    val initial : (string, Term.terms list) Hashtbl.t 
-    val erasableByTop : (string, Term.terms list) Hashtbl.t ref
+    type context = { hash : (string, terms list) Hashtbl.t; }
+    val initial : (string, terms list) Hashtbl.t 
+    val erasableByTop : (string, terms list) Hashtbl.t ref
     val initSubexp : string -> unit
-    val store : Term.terms -> string -> unit
+    val store : terms -> string -> unit
     val clearInitial : unit -> unit
     val createCutCoherenceContext : unit -> unit
     val createInitialCoherenceContext : unit -> unit
     val createProofSearchContext : unit -> unit
     val createEmpty : unit -> context
-    val create : (string, Term.terms list) Hashtbl.t -> context
+    val create : (string, terms list) Hashtbl.t -> context
     val copy : context -> context
     val getInitial : unit -> context
     val initialize : unit -> unit
-    val add : context -> Term.terms -> string -> context
-    val remove : context -> Term.terms -> string -> context
-    val delete : context -> Term.terms -> string -> context
+    val add : context -> terms -> string -> context
+    val remove : context -> terms -> string -> context
+    val delete : context -> terms -> string -> context
     val bangin : context -> string -> context
     val bangout : context -> string -> context
     val equals : context -> context -> bool
     val isLinearEmpty : context -> bool
     val markErasable : context -> unit
     val merge : context -> context -> context
-    val toPairs : context -> (string * Term.terms) list
+    val toPairs : context -> (string * terms) list
     val toString : context -> string
   end
 

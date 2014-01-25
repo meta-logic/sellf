@@ -15,7 +15,7 @@
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 
 open Context
-open Term
+open Types
 open Boundedproofsearch
 open Prints
 open TypeChecker
@@ -45,7 +45,7 @@ let checkInitCoher str (t1, t2) =
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(bt1, bt2)) in
   (* Replace abstractions by universal quantifiers *)
-  let f = abs2forall f0 in
+  let f = Term.abs2forall f0 in
   prove f 4 (fun () ->
           print_string ("====> Connective "^str^" is initial-coherent.\n"); ()
         )  
@@ -60,15 +60,15 @@ let checkDuality str (t1, t2) =
   (* Put cut formulas on the context *)
   Context.createCutCoherenceContext ();
   
-  let nt1 = nnf (NOT(t1)) in
-  let nt2 = nnf (NOT(t2)) in
+  let nt1 = Term.nnf (NOT(t1)) in
+  let nt2 = Term.nnf (NOT(t2)) in
   (* print_endline "Proving cut coherence of:";
   print_endline (termToString nt1);
   print_endline (termToString nt2); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn true (PARR(nt1, nt2)) in 
   (* Replace abstractions by universal quantifiers *)
-  let f = abs2forall f0 in
+  let f = Term.abs2forall f0 in
   prove f 4 (fun () ->
           print_string ("====> Connective "^str^" has dual specification.\n"); ()
         )  

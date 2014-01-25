@@ -1,6 +1,7 @@
 
-open Term 
+open Types
 open Prints
+open Term
 
 (*VN: This function introduces deBruijn indices to a raw clause parsed. However, there are two 
 modes according to flag. When flag is true then in the clause returned the variables binded

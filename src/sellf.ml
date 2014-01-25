@@ -9,8 +9,8 @@ open Permutation
 
 module TestUnify = 
   Unify.Make(struct
-    let instantiatable = Term.LOG
-    let constant_like = Term.EIG
+    let instantiatable = Types.LOG
+    let constant_like = Types.EIG
   end)
 
 let position lexbuf =

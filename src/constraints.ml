@@ -9,6 +9,7 @@
 (*****************************************)
 
 open ContextSchema
+open Types
 open Term
 open Prints
 open Subexponentials

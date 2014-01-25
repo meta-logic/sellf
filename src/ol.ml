@@ -14,18 +14,18 @@ open ContextSchema
 open Llrules
 open ProofTreeSchema 
 open Sequent
-open Term
+open Types
 
 module type OLCONTEXT =
   sig
   
     type subexp = string * int
-    type ctx = subexp * Term.terms list
+    type ctx = subexp * terms list
     type context = { mutable lst : ctx list  }
     val create : subexp list -> context
     val remFirstChar : string -> string
     val getSubs : context -> string list
-    val toStringForms : Term.terms list -> string -> string -> string
+    val toStringForms : terms list -> string -> string -> string
     val toTexString : context -> string -> string 
     val fixContext : subexp -> subexp
   
@@ -35,7 +35,7 @@ module OlContext : OLCONTEXT = struct
 
   type subexp = string * int
   
-  type ctx = subexp * Term.terms list
+  type ctx = subexp * terms list
   
   type context = {
     mutable lst : ctx list;
@@ -125,9 +125,9 @@ module type OLSEQUENT =
       mutable ctx : OlContext.context;
       goals : terms list;
       mutable pol : phase }  
-    val create : OlContext.context -> Term.terms list -> Term.phase -> sequent 
+    val create : OlContext.context -> terms list -> phase -> sequent 
     val getContext : sequent -> OlContext.context
-    val getMainForm : sequent -> Term.terms
+    val getMainForm : sequent -> terms
     val toTexString : sequent -> string 
   
   end
@@ -152,7 +152,7 @@ module OlSequent : OLSEQUENT = struct
   
   let getMainForm seq = match seq.goals with
     | [] -> failwith "Sequent has no goals."
-    | _ -> getOnlyRule (formatForm (List.hd seq.goals))
+    | _ -> Term.getOnlyRule (Term.formatForm (List.hd seq.goals))
   
   let toTexString seq = 
     (OlContext.toTexString seq.ctx "lft") ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght")

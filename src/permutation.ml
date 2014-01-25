@@ -8,6 +8,7 @@
 (*                                    *)
 (**************************************)
 
+open Types
 open Basic
 open Bipole
 open ContextSchema
@@ -18,8 +19,8 @@ open Sequent
 
 module type PERMUTATION = 
   sig
-    val derive2 : Term.terms -> Term.terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val permute : Term.terms -> Term.terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val permutationsToTexString : (Ol.Derivation.bipole * Ol.Derivation.bipole) list -> string
     val nonPermutationsToTexString : Ol.Derivation.bipole list -> string
   end
@@ -129,10 +130,10 @@ module Permutation : PERMUTATION = struct
 
     (* TODO: normalize the specifications. Do this in a more elegant way!! *)
     let rec instantiate_ex spec constLst = match spec with
-      | Term.EXISTS(s, i, f) ->
-	let constant = Term.CONST (List.hd constLst) in
-	let newf = Norm.hnorm (Term.APP (Term.ABS (s, 1, f), [constant])) in
-	instantiate_ex newf (List.tl constLst)
+      | EXISTS(s, i, f) ->
+        let constant = CONST (List.hd constLst) in
+      	let newf = Norm.hnorm (APP (ABS (s, 1, f), [constant])) in
+      	instantiate_ex newf (List.tl constLst)
       | _ -> (spec, constLst)
     in
     (* We shouldn't have more than 4 existentially quantified variables... *)

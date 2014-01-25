@@ -6,7 +6,7 @@
 */
 %{
 open Context
-open Term
+open Types
 open Prints
 open TypeChecker
 open Coherence
@@ -61,11 +61,11 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
 
 %start types             /* the entry point */
 %type <string option> types 
-%type <Term.types> typeN
+%type <types> typeN
 
 %start clause            /* the entry point */
 %type <string option> clause
-%type <Term.terms list> terms
+%type <terms list> terms
 
 %start goal             /* the entry point */
 %type <string option> goal
@@ -80,7 +80,7 @@ types:
 KIND NAME TYPE DOT { 
   let result = Specification.addKindTbl (TKIND ($2)) in
   match result with
-    | None -> if !verbose then begin 
+    | None -> if !Term.verbose then begin 
       print_string (" New kind "^$2^" created.\n")
       end;
       None
@@ -92,7 +92,7 @@ KIND NAME TYPE DOT {
   let dupChk2 = Specification.isTypeDeclared $2 in
   match dupChk, dupChk2 with
     | false, false -> Specification.addTypeTbl $2 $3; 
-      if !verbose then begin
+      if !Term.verbose then begin
         print_endline (" New type created: "^$2^" : "^(typeToString $3));
         flush stdout;
       end;
@@ -131,22 +131,22 @@ clause:
         | "lin" ->
           initSubexp $2;
           Subexponentials.addType $2 LIN;
-          if !verbose then print_endline ("New linear subexponential: "^$2);
+          if !Term.verbose then print_endline ("New linear subexponential: "^$2);
           None
         | "aff" -> 
           initSubexp $2;
           Subexponentials.addType $2 AFF;
-          if !verbose then print_endline ("New affine subexponential: "^$2);
+          if !Term.verbose then print_endline ("New affine subexponential: "^$2);
           None
         | "rel" -> 
           initSubexp $2;
           Subexponentials.addType $2 REL;
-          if !verbose then print_endline ("New relevant subexponential: "^$2);
+          if !Term.verbose then print_endline ("New relevant subexponential: "^$2);
           None
         | "unb" -> 
           initSubexp $2;
           Subexponentials.addType $2 UNB;
-          if !verbose then print_endline ("New unbounded subexponential: "^$2);
+          if !Term.verbose then print_endline ("New unbounded subexponential: "^$2);
           None
         | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
     end
@@ -222,7 +222,7 @@ clause:
     | NORULE -> Specification.addOthers clause
   );
 
-  if !verbose then begin
+  if !Term.verbose then begin
     print_endline ("New formula: "^(termToString clause));
     flush stdout
   end;
@@ -240,8 +240,8 @@ body DOT {
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
   
-  goal := clause;
-  if !verbose then begin
+  Term.goal := clause;
+  if !Term.verbose then begin
     print_endline (" New goal: "^(termToString $1));
     flush stdout
   end;
@@ -304,7 +304,7 @@ body:
 | LPAREN body RPAREN    { $2 }
 | NEW body              { NEW ($1, $2) }
 | LCURLY body RCURLY    { BRACKET($2) }
-| NOT body              {nnf (NOT($2)) }
+| NOT body              { Term.nnf (NOT($2)) }
 ;
 
 terms:

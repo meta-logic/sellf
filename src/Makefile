@@ -27,7 +27,7 @@
 # Usage of this Makefile:
 # To incrementally recompile the system, type
 #     make
-# To recompute dependancies between modules, type
+# To recompute dependencies between modules, type
 #     make depend
 # To remove the executable and all the compiled files, type
 #     make clean
@@ -69,11 +69,14 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml ol.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
+SOURCES = types.mli term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml ol.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
 # The executable file to generate
-
 EXEC = sellf
+
+# The documentation file
+DOC = sellfdoc.tex
+DOT = dependencies.gv
 
 
 ########################## Advanced user's variables #####################
@@ -86,6 +89,8 @@ CAMLOPT = ocamlopt
 CAMLDEP = ocamldep
 CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
+CAMLDOC = ocamldoc -latex
+CAMLDOT = ocamldoc -dot
 
 # The list of Caml libraries needed by the program
 # For instance:
@@ -127,7 +132,11 @@ WITHDBM =dbm.cma -cclib -lmldbm -cclib -lndbm
 
 all:: .depend.input .depend $(EXEC)
 
-opt : $(EXEC)-opt
+opt:: $(EXEC)-opt
+
+doc:: $(EXEC)-doc
+
+dot:: $(EXEC)-dot
 
 #ocamlc -custom other options graphics.cma other files -cclib -lgraphics -cclib -lX11
 #ocamlc -thread -custom other options threads.cma other files -cclib -lthreads
@@ -147,6 +156,12 @@ $(EXEC): $(OBJS)
 
 $(EXEC)-opt: $(OPTOBJS)
 	$(CAMLOPT) -o $(EXEC) $(LIBS:.cma=.cmxa) $(OPTOBJS)
+
+$(EXEC)-doc: 
+	$(CAMLDOC) -o ../doc/$(DOC) $(SMLIYL)
+
+$(EXEC)-dot: 
+	$(CAMLDOT) -o ../doc/$(DOT) $(SMLIYL)
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly 
 

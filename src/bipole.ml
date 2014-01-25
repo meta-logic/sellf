@@ -11,14 +11,14 @@ open ContextSchema
 open Dlv
 open ProofTreeSchema
 open Sequent
-open Term
+open Types
 
 module type BIPOLE = 
   sig
     val toPairsProofModel : (ProofTreeSchema.prooftree * Constraints.constraintset list) list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val deriveBipole : SequentSchema.sequent -> Term.terms -> Constraints.constraintset list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val deriveBipole : SequentSchema.sequent -> terms -> Constraints.constraintset list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     exception Not_bipole
-    val bipole : Term.terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val bipole : terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
   end
 
 module Bipole : BIPOLE = struct
@@ -173,13 +173,13 @@ module Bipole : BIPOLE = struct
   (* Generates the bipole of a formula from a generic initial sequent *)
   (* Considering the formula is chosen from gamma *)
   let bipole f =
-    if isBipole f then
+    if Term.isBipole f then
       (* TODO: normalize the specifications. Do this in a more elegant way!! *)
       (* Note: there is a copy of this code in permutation.ml *)
       let rec instantiate_ex spec constLst = match spec with
-	| Term.EXISTS(s, i, f) ->
-	  let constant = Term.CONST (List.hd constLst) in
-	  let newf = Norm.hnorm (Term.APP (Term.ABS (s, 1, f), [constant])) in
+	| EXISTS(s, i, f) ->
+	  let constant = CONST (List.hd constLst) in
+	  let newf = Norm.hnorm (APP (ABS (s, 1, f), [constant])) in
 	  instantiate_ex newf (List.tl constLst)
 	| _ -> (spec, constLst)
       in

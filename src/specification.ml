@@ -9,6 +9,7 @@
 (*                                      *)
 (****************************************)
 
+open Types
 open Term
 
 (* Info from the .sig file *)

@@ -11,7 +11,7 @@
   
 (* Header (OCaml code) *)
 
-open Term
+open Types
 open TypeChecker
 
 let parse_error s = 
@@ -114,7 +114,7 @@ formula:
   | formula LBRACKET subexp RBRACKET LOLLI formula { LOLLI ($3, $6, $1)}
   | LPAREN formula RPAREN    { $2 }
   | NEW formula              { NEW ($1, $2) }
-  | NOT formula              { nnf (NOT($2)) }
+  | NOT formula              { Term.nnf (NOT($2)) }
 ;
 
 pred:
