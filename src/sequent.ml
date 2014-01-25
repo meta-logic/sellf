@@ -3,6 +3,7 @@
 (************************** SEQUENTS ************************)
 
 open Context
+open ContextSchema
 open Term
 open Prints
 

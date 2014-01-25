@@ -9,7 +9,9 @@
 (**************************************)
 
 open Sequent
+open Constraints
 open Context
+open ContextSchema
 open Term
 open Subexponentials
 open Llrules
@@ -23,13 +25,11 @@ module type PROOFTREESCHEMA =
       mutable rule : llrule option 
     }
     val create : SequentSchema.sequent -> prooftree
-    val getConclusion : prooftree -> SequentSchema.sequent
     val getRule : prooftree -> Llrules.llrule option
     val copy : prooftree -> prooftree
-    val getOpenLeaves : prooftree -> SequentSchema.sequent list
-    val printOpenLeaves : prooftree -> unit
-    val getSubTree : prooftree -> SequentSchema.sequent -> prooftree list
     val appendLeaf : prooftree -> prooftree -> prooftree
+    val getConclusion : prooftree -> SequentSchema.sequent
+    val getOpenLeaves : prooftree -> SequentSchema.sequent list
     val decide : prooftree -> Term.terms -> string -> prooftree * Constraints.constraintset
     val releaseDown : prooftree -> prooftree * Constraints.constraintset
     val releaseUp : prooftree -> Term.terms -> prooftree * Constraints.constraintset

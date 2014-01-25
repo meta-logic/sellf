@@ -7,6 +7,7 @@
 (*                                       *)
 (*****************************************)
 
+open ContextSchema
 open Sequent
 open ProofTreeSchema
 

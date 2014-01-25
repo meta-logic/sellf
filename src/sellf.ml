@@ -1,9 +1,11 @@
+open Bipole
 open Context
 open ProofTree
 open Subexponentials
 open Prints
 open Ol
 open ProofTreeSchema
+open Permutation
 
 module TestUnify = 
   Unify.Make(struct

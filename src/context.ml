@@ -14,8 +14,7 @@ open Term
 open Subexponentials
 open Prints
 
-module type CONTEXT = 
-  sig
+module type CONTEXT = sig
     type context = { hash : (string, Term.terms list) Hashtbl.t; }
     val initial : (string, Term.terms list) Hashtbl.t 
     val erasableByTop : (string, Term.terms list) Hashtbl.t ref
@@ -121,7 +120,7 @@ module Context : CONTEXT = struct
 	let newctx = Hashtbl.copy ctx.hash in
 	let forms = Hashtbl.find newctx subexp in
 	(* Removes the first occurence of form on the list. This can be implemented better *)
-	let newforms = remove form forms in
+	let newforms = Basic.remove form forms in
 	Hashtbl.replace newctx subexp newforms;
 	create newctx
       | UNB | REL -> create (Hashtbl.copy ctx.hash)

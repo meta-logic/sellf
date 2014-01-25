@@ -1,29 +1,31 @@
 (*****************************************)
 (*                                       *)
-(*  Constraint set for reasoning about   *)
-(*  context variables - interface file   *)
+(* Constraint set for reasoning about    *)
+(* context variables - interface file    *)
 (*                                       *)
-(*  Giselle Machado Reis                 *)
-(*  2013                                 *)
+(* Giselle Machado Reis                  *)
+(* 2013                                  *)
 (*                                       *)
 (*****************************************)
 
+open ContextSchema
+
 type ctx = string * int
-type constraintpred = 
+type constraintpred =
   | IN of Term.terms * ctx
   | ELIN of Term.terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | REQIN_UNB of Term.terms * ctx
   | REQIN_LIN of Term.terms * ctx
- 
+
 type constraintset = {
   mutable lst : constraintpred list;
 }
 
 val create : constraintpred list -> constraintset
 
-val union : constraintset -> constraintset -> constraintset 
+val union : constraintset -> constraintset -> constraintset
 
 val times : constraintset list -> constraintset list -> constraintset list
 
@@ -54,5 +56,3 @@ val toTexString : constraintset -> string
 val predToString : constraintpred -> string
 
 val toString : constraintset -> string
-
-

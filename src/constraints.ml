@@ -8,6 +8,7 @@
 (*                                       *)
 (*****************************************)
 
+open ContextSchema
 open Term
 open Prints
 open Subexponentials

@@ -278,32 +278,12 @@ module type DERIVATION =
   
     type bipole = ProofTreeSchema.prooftree * Constraints.constraintset
     type olBipole = OlProofTree.prooftree * Constraints.constraintset
-    val remakeTree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
     val remakeBipoles : bipole list -> olBipole list
-    val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list    
-    val solveElin : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
-    val solveEmp : OlProofTree.prooftree -> OlContext.subexp -> bool
-    val solveUnion : OlProofTree.prooftree -> OlContext.subexp -> OlContext.subexp -> OlContext.subexp -> bool
-    val solveIn : OlProofTree.prooftree -> OlContext.subexp -> Term.terms -> bool
-    val rewSeqFst : OlProofTree.prooftree -> Constraints.constraintpred -> bool
-    val solveConstraintsFst : Constraints.constraintpred -> OlProofTree.prooftree -> bool
-    val applyConstraints : OlProofTree.prooftree -> Constraints.constraintset -> unit
+    val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list
     val solveFirstPhaseBpl : olBipole list -> unit
     val solveFirstPhasePer : (olBipole * olBipole) list -> unit
-    val rewSeqSnd : OlProofTree.prooftree -> Constraints.constraintpred -> bool
-    val solveConstraintsSnd : Constraints.constraintpred -> OlProofTree.prooftree -> bool
-    val applyConstraints' : OlProofTree.prooftree -> Constraints.constraintset -> unit
     val solveSndPhaseBpl : olBipole list -> unit
     val solveSndPhasePer : (olBipole * olBipole) list -> unit
-    val sameContexts : OlContext.context -> OlContext.context -> string -> bool
-    val getValidCtx : OlContext.context -> string -> OlContext.subexp list
-    val getMaxPair : OlContext.subexp list -> OlContext.subexp
-    val createContextList : OlContext.subexp list -> OlContext.subexp list -> OlContext.subexp -> OlContext.subexp list list
-    val getAssocN : OlContext.subexp list -> OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list)) list
-    val getAssocM : OlContext.subexp list -> OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list)) list
-    val rewriteTree : OlProofTree.prooftree -> OlContext.subexp * OlContext.ctx list -> unit
-    val fixContexts : OlContext.subexp list list -> (OlContext.subexp * (OlContext.subexp list) list) list list
-    val applyNewContexts : OlProofTree.prooftree -> OlSequent.sequent -> OlSequent.sequent -> string -> unit
     val equatingContexts : OlProofTree.prooftree -> unit  
   
   end
@@ -321,7 +301,7 @@ module Derivation : DERIVATION = struct
     let ctxListRef = Hashtbl.fold (fun str1 int1 acc -> 
       if str1 = "$gamma" || str1 = "$infty" then acc
       else (str1, int1) :: acc
-    ) ctx.hash [] in
+    ) ctx.ContextSchema.hash [] in
     let context = OlContext.create ctxListRef in
     let goals = SequentSchema.getGoals seq in
     let polarity = SequentSchema.getPhase seq in
