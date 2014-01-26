@@ -10,10 +10,10 @@
 open Term
 
 type subexp = 
-| UNB (* unbounded: contraction and weakening *)
-| AFF (* affine: weakening *)
-| REL (* relevant: contraction *)
-| LIN (* linear *)
+  | UNB (* unbounded: contraction and weakening *)
+  | AFF (* affine: weakening *)
+  | REL (* relevant: contraction *)
+  | LIN (* linear *)
 
 type arity = 
   | MANY
@@ -24,16 +24,15 @@ type side =
   | RIGHT
   | RIGHTLEFT
 
-(* Hashtable with subexponentials' types ($gamma is the linear context and
- * $infty holds specifications) 
- *)
+(** Hashtable with subexponentials' types ($gamma is the linear context and
+    $infty holds specifications) *)
 let typeTbl = Hashtbl.create 100 ;;  
 
-(* Hashtable with subexponentials' parcial order *)
+(** Hashtable with subexponentials' parcial order *)
 (* Each subexponential holds those which are greater than it. *)
 let orderTbl : (string, string) Hashtbl.t = Hashtbl.create 100 ;;
 
-(* Hashtable with subexponentials context types *)
+(** Hashtable with subexponentials context types *)
 (* Context type: (formulas description, side) *)
 type ctxType = (arity * side) ;;
 let ctxTbl : (string, ctxType) Hashtbl.t = Hashtbl.create 100 ;;
@@ -61,20 +60,20 @@ let initialize () =
   Hashtbl.clear orderTbl 
 ;;
 
-(* Returns the names of all subexponentials *)
+(** Returns the names of all subexponentials *)
 let getAll () = Hashtbl.fold (fun key data acc -> key :: acc) typeTbl [] ;;
 
-(* Returns the names of all subexponentials that are specified to be printed *)
+(** Returns the names of all subexponentials that are specified to be printed *)
 let getAllValid () = Hashtbl.fold (fun key data acc -> key :: acc) ctxTbl [] ;;
 
-(* Returns the type of a subexponential *)
+(** Returns the type of a subexponential *)
 let type_of s = try 
   Hashtbl.find typeTbl s
   with Not_found -> failwith ("[ERROR] Subexponential "^s^" has no type defined.")
 ;;
 
-(* Gets all the unbounded subexponentials and make them greater then s 
- * (put in s' order list) *)
+(** Gets all the unbounded subexponentials and make them greater then s 
+    (put in s' order list) *)
 let lt_unbounded s =
   let rec get_unbounded lst = match lst with
     | [] -> ()
@@ -85,19 +84,19 @@ let lt_unbounded s =
   in get_unbounded (getAll ())
 ;;
 
-(* Checks if a subexponential s1 > s2 *)
 let rec bfs root queue goal = match queue with
   | [] -> false
   | h :: t when h = root -> failwith "Circular dependency on subexponential order."
   | h :: t when h = goal -> true
   | h :: t -> bfs root (t @ Hashtbl.find_all orderTbl h) goal
 ;;
+(** Checks if a subexponential s1 > s2 *)
 let greater_than s1 s2 = 
   (* $infty should be greater than everyone *)
   if s1 = "$infty" then true
   else bfs s2 (Hashtbl.find_all orderTbl s2) s1 ;;
 
-(* Returns a list with all subexponentials from idxs that will have their 
+(** Returns a list with all subexponentials from idxs that will have their 
  * formulas erased if !s is applied. *)
 let rec erased s idxs = match idxs with
   | [] -> []
@@ -108,8 +107,10 @@ let rec erased s idxs = match idxs with
         else i::(erased s t)
       | _ -> erased s t
 ;;
+
 let erased_bang s = erased s (getAll ()) ;;
-(* Returns a list with all subexponentials from idxs that will be checked 
+
+(** Returns a list with all subexponentials from idxs that will be checked 
  * for emptiness if !s is applied. *)
 let rec checked_empty s idxs = match idxs with
   | [] -> []
@@ -122,7 +123,7 @@ let rec checked_empty s idxs = match idxs with
 ;;
 let empty_bang s = checked_empty s (getAll ()) ;;
 
-(* Checks whether or not a subexponential can suffer weakening *)
+(** Checks whether or not a subexponential can suffer weakening *)
 let weak i = match type_of i with
   | UNB | AFF -> true
   | REL | LIN -> false
@@ -134,7 +135,8 @@ let typeAsString s = match type_of s with
   | REL -> "rel"
   | AFF -> "aff"
 
-(* Checks if a subexponential is on the same side as pred *)
+(** Checks if a subexponential is on the same side as predicate using lft and
+    rght *)
 let isSameSide sub str = try match (getCtxSide sub, str) with
   | (RIGHTLEFT, _) -> true
   | (RIGHT, "rght") -> true

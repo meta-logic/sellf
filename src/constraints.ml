@@ -35,11 +35,11 @@ let create predlst = {
 
 let union set1 set2 = create (set1.lst @ set2.lst)
 
-(* Cross product between two sets of sets of constraints *)
 let times set1 set2 = List.concat (List.map (fun cst1 ->
   List.map (fun cst2 -> union cst1 cst2) set2
 ) set1)
 
+(* TODO: check is this method is actually needed *)
 let copy cst = create cst.lst
 
 let isEmpty cst = (List.length cst.lst) == 0
@@ -52,11 +52,6 @@ let isIn f subexp ctx =
     with _ -> failwith "Not applicable: cannot insert formula in context."
 ;;
 
-(* Creates the in/elin constraints for the end-sequent.
-   This method takes into account the side the formula is supposed to be and
-   ignores $gamma and $infty. It deduces the possible initial context for the
-   head of a specification.
-*)
 (* TODO: decent error handling. *)
 let inEndSequent spec ctx = 
   let head = Specification.getPred spec in

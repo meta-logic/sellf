@@ -1,4 +1,4 @@
-
+(**/**)
 open Types
 
 (* Verbose on/off *)
@@ -394,34 +394,6 @@ let div l = match l with
   | [t1;t2] -> DIV(t1,t2)
   | _ -> failwith "ERROR: Expected two elements in a times."
 
-
-(*let get_nablas x =
-  let rec nb l t = match observe t with
-    | Var _ -> l
-    | App (h,ts) -> List.fold_left nb (nb l h) ts
-    | Lam (n,t') -> nb l t'
-    | DB _ -> l
-    | NB i -> if List.mem i l then l else i::l
-    | Susp _ | Ptr _ -> assert false
-  in
-    nb [] x*)
-
-(*
-module Notations =
-struct
-  let (%=) = eq
-  let (!!) = observe
-  let (//) = lambda
-  let (^^) = app
-end
-*)
-
-(*
-let fresh_name name =
-  let v = fresh ~name:name CONST ~lts:0 ~ts:0 in
-  get_name v
-*)
-
 let rec formatForm f = 
   match f with 
   | EXISTS (s, i, t)   -> formatForm t
@@ -439,3 +411,4 @@ let getOnlyRule f = match f with
   | APP (t, tlist) -> t
   | _ -> f
   
+(**/**) 

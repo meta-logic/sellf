@@ -71,6 +71,8 @@
 
 SOURCES = types.mli term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml ol.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
+QUATI = types.mli subexponentials.ml specification.ml contextSchema.ml constraints.ml constraints.mli sequent.ml proofTreeSchema.ml dlv.ml bipole.ml ol.ml permutation.ml sellf.ml 
+
 # The executable file to generate
 EXEC = sellf
 
@@ -151,6 +153,10 @@ SMLYL = $(filter %.ml,$(SMLIYL))
 OBJS = $(SMLYL:.ml=.cmo)
 OPTOBJS = $(SMLYL:.ml=.cmx)
 
+SMLIYDOC = $(QUATI:.mly=.ml)
+SMLIYLDOC = $(SMLIYDOC:.mll=.ml)
+SMLYLDOC = $(filter %.ml,$(SMLIYLDOC))
+
 $(EXEC): $(OBJS) 
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(LIBS) $(OBJS)
 
@@ -158,10 +164,10 @@ $(EXEC)-opt: $(OPTOBJS)
 	$(CAMLOPT) -o $(EXEC) $(LIBS:.cma=.cmxa) $(OPTOBJS)
 
 $(EXEC)-doc: 
-	$(CAMLDOC) -o ../doc/$(DOC) $(SMLIYL)
+	$(CAMLDOC) -o ../doc/$(DOC) $(SMLIYLDOC)
 
 $(EXEC)-dot: 
-	$(CAMLDOT) -o ../doc/$(DOT) $(SMLIYL)
+	$(CAMLDOT) -o ../doc/$(DOT) $(SMLIYLDOC)
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly 
 
