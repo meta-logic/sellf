@@ -473,13 +473,15 @@ TODO: module's figure
 
 The basic data structure, defined in the module \texttt{Types}, is linear logic
 formulas with subexponentials. The bipoles in Quati are represented by
-\emph{proof tree schemas}, defined in the module \texttt{ProofTreeSchema} and
-using the modules \texttt{SequentSchema} and \texttt{ContextSchema}. As the name
+\emph{proof tree schemas}, defined in the module \texttt{ProofTreeSchema}, which
+uses the modules \texttt{SequentSchema} and \texttt{ContextSchema}. As the name
 suggests, these are schematic representations of proof trees, sequents and
 contexts that use generic contexts~\cite{nigam13iclp} to represent possibly
-non-empty sets of formulas. The generic contexts are implemented as pairs
-\texttt{string * int}, where the first element is the name of the context (or
-subexponential) and the second is a unique identifier. The constraints that will
+non-empty sets of formulas. 
+%The generic contexts are implemented as pairs
+%\texttt{string * int}, where the first element is the name of the context (or
+%subexponential) and the second is a unique identifier. 
+The constraints that will
 later compose the answer-set program are implemented in the module \texttt{Constraints}.
 The application of linear logic rules with constraints is implemented in the
 \texttt{ProofTreeSchema} module.
