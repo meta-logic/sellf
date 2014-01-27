@@ -48,8 +48,6 @@
 
 %% NOTE: 7 pages tops
 
-%% TODO: references
-
 \begin{document}
 \maketitle
 
@@ -188,7 +186,7 @@ In Section~\ref{sec:conc} we end by pointing out future work.
 \label{sec:quati}
 
 Throughout this section, we will use the specification for the
-intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara54nmj} as our running 
+intuitionistic logic's multi-conclusion calculus MLJ~\cite{maehara54nmj} as our running 
 example. First we specify Quati's syntax and then its features. In the Appendix
 you can find step-by-step use of the Quati system for this example as well as the proof system MLJ. 
 
@@ -196,7 +194,6 @@ you can find step-by-step use of the Quati system for this example as well as th
 
 \subsection{Syntax}
 
-% TODO: fix this table once everything is there.
 \begin{figure}[t]
 {\small
 \[
@@ -266,16 +263,17 @@ The main feature of subexponentials is that they can be organized in a pre-order
 the provability relation among them. 
 In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
 modal logics can be specified in SELL with a strong level of adequacy. 
-
+%
 Another important reason for using SELL as specification language is that one can also use 
-other available tools, such as the tool TATU which is capable to check whether a proof system 
+other available tools, such as the tool TATU which is capable of checking whether a proof system 
 specified in SELL admits cut-elimination.
 
 A Quati program is a SELL theory with some more annotations. Its syntax is given
 in Figure~\ref{fig:syntax} and explained in detail  
-by using as running example the inference rules of the multiconclusion sequent
-calculus for intuitionistic logic~\cite{maehara54nmj}, or MLJ.
-
+by using our running example MLJ.
+%the inference rules of the multiconclusion sequent
+%calculus for intuitionistic logic~\cite{maehara54nmj}, or MLJ.
+%
 A Quati program consists of two files: (1) a \emph{type signature} file, with
 suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consisting of two parts: (a) a
 \emph{subexponential signature} and (b) the rules' specifications or
@@ -285,10 +283,10 @@ suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consi
 
 \paragraph{Type signature}
 %
-The \emph{type signature} file contains type and kind declarations of the object
+This file contains type and kind declarations of the object
 logic's elements. The kind \texttt{form} is built-in and
 represent the type of formulas of the object logic. In general, only
-the types of the connectives need to be declared in this file. Here is an
+the types of connectives need to be declared in this file. Here is an
 example:
 \vspace{-1mm}
 
@@ -409,7 +407,7 @@ right-hand-side) of the sequent.
 
 Under the hood, Quati is constructing the focused derivation~\cite{andreoli92jlc} that introduces such 
 a SELL bipole as described in \cite{nigam.jlc}. This can be observed by using the command 
-\texttt{bipole}. For the same SELL bipole used above, Quati returns
+\texttt{\#bipole}. For the same SELL bipole used above, Quati returns
 the \LaTeX\ code for the following figure, corresponding to the focused derivation of the SELL bipole:
 \vspace{-4mm}
 
@@ -427,10 +425,11 @@ the \LaTeX\ code for the following figure, corresponding to the focused derivati
 \vspace{-2mm}
 
 \paragraph{Rule Permutation}
-As described in the Introduction, Quati can be used to prove permutation lemmas. The command \texttt{\#permute} in the command 
-line checks whether the permutation of two selected rules is always allowed or not. Quati outputs, again in \LaTeX, the cases for
+As described in the Introduction, Quati can be used to prove permutation lemmas. The command \texttt{\#permute} 
+checks whether the permutation of two selected rules is always allowed or not. Quati outputs, again in \LaTeX, the cases for
 which it was able to find the permutation and the cases for which it was not able to find a permutation. For example, when Quati 
-checks whether MLJ's implication left introduction rule permutes over MLJ's implication right introduction, Quati correctly finds two possible
+checks whether MLJ's implication left introduction rule permutes over MLJ's
+implication right introduction, it correctly finds two possible
 permutation cases and it cannot find one of the cases for which is indeed not possible. We show one of the cases (reformated to fit the page margins):
 \vspace{-3mm}
 
@@ -463,20 +462,45 @@ Quati is implemented in OCaml\footnote{\url{http://ocaml.org/}} and makes use of
 DLV\footnote{\url{http://www.dlvsystem.com/dlv/}} externally to compute minimal models for the
 answer-set programs generated. It is part of a bigger project, called
 \texttt{sellf}\footnote{\url{https://code.google.com/p/sellf/}} which also includes the
-machinery for TATU mentioned above. 
-
-The basic data structure is linear logic formulas,
-defined in the \texttt{Term} module. Figure \ref{fig:modules} is an overview
-of the modules in \texttt{sellf} used by Quati to check for permutations.
+machinery for TATU mentioned above. Figure \ref{fig:modules} is an overview of
+the modules in \texttt{sellf} used by Quati to check for permutations.
 
 \begin{figure}
 TODO: module's figure
+\caption{}
+\label{fig:modules}
 \end{figure}
 
-\textbf{Add a paragraph on the results, such as time to compute, which systems, etc.}
+The basic data structure, defined in the module \texttt{Types}, is linear logic
+formulas with subexponentials. The bipoles in Quati are represented by
+\emph{proof tree schemas}, defined in the module \texttt{ProofTreeSchema} and
+using the modules \texttt{SequentSchema} and \texttt{ContextSchema}. As the name
+suggests, these are schematic representations of proof trees, sequents and
+contexts that use generic contexts~\cite{nigam13iclp} to represent possibly
+non-empty sets of formulas. The generic contexts are implemented as pairs
+\texttt{string * int}, where the first element is the name of the context (or
+subexponential) and the second is a unique identifier. The constraints that will
+later compose the answer-set program are implemented in the module \texttt{Constraints}.
+The application of linear logic rules with constraints is implemented in the
+\texttt{ProofTreeSchema} module.
+%
+The computation of possible bipoles of a formula is in the module
+\texttt{Bipole}. The \texttt{Permutation} module makes use of the bipole
+generation to construct the derivations of two rules. Given the
+constraints of a derivation, module \texttt{Dlv} contains the code
+for executing DLV externally, parsing the result and returning the minimal
+models. 
+%
+The translation of a proof tree schema and constraints into an object logic
+derivation is done in the \texttt{Ol} module. It contains data structures to
+represent proof trees, sequents and contexts of an object logic and the
+rewriting algorithm described in~\cite{nigam13iclp} (module \texttt{Derivation}).
 
-\textbf{TODO:} wait for the picture to explain in more detail the modules and how they
-interact.
+%\textbf{Add a paragraph on the results, such as time to compute, which systems, etc.}
+Quati was tested using the following proof systems: LK, LJ, MLJ, LL, S4, G1m. On
+most cases, each permutation lemma can be checked in less than one second. The
+implementation can be downloaded at \url{\textbf{LINK!!!}}.
+% TODO: add the web interface address????
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
@@ -562,11 +586,7 @@ with additive rules.}\label{Fig:mLJ}
 
 
 \section{A sample Quati session}
-% TODO: add installation instructions and system requirements, explain where the
-% examples are? Or just refer the reader to the download and add these things to
-% a readme file...
 
-% TODO: change executable file name for quati in the release
 % load a file
 Once the system in build,\footnote{Notice that one needs Ocaml and DLV systems installed to make
 Quati work.} it can be called by simply typing the command:
@@ -580,7 +600,7 @@ intuitionistic logic's multi-conclusion calculus MLJ \cite{maehara54nmj}.
 
 {\small
 \begin{verbatim}
-:> #load ../examples/proofsystems/mlj
+:> #load examples/proofsystems/mlj
 \end{verbatim}
 }
 
@@ -643,7 +663,8 @@ These are the formulas available:
    ( [r]? ( rght A  ) ) * ( [l]? ( lft B  ) )))
 1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
    ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
-The bipoles for the chosen formula will be generated and printed to a LaTeX file.
+The bipoles for the chosen formula will be generated
+and printed to a LaTeX file.
 Please choose a formula by its number: 1
 Please choose a name for the file: bipole_imp_r_mlj
 \end{verbatim}
@@ -682,8 +703,8 @@ These are the formulas available:
 1. (sigma \B (sigma \A (not ( rght ( imp A B  )  ))  * 
    ( [l]bang ( [l]? ( lft A  ) ) | ( [r]? ( rght B  ) ) )))
 Checking the permutation of one formula F1 over another F2 
-(i.e., can a derivation where F1 is below F2 be transformed into a derivation 
-where F2 is below F1) 
+(i.e., can a derivation where F1 is below F2 be transformed 
+into a derivation where F2 is below F1) 
 Please type the number of F1: 0
 Please type the number of F2: 1
 Please type a file name for the results: imp_l_imp_r
