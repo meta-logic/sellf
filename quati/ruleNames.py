@@ -24,7 +24,7 @@ def submit():
         print "No system specified."
         return
 
-    cmd = Popen('./sellf -c rulenames -i examples/' + system, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = Popen('./quati -c rulenames -i examples/' + system, shell=True, stdout=PIPE, stderr=PIPE)
     stdout, stderr = cmd.communicate()
 
     print stdout

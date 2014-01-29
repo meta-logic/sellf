@@ -48,7 +48,7 @@ function genBipoles(sysName) {
     if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
       var response = xmlhttp.responseText
       document.getElementById('bipoles').style.display = 'block'
-      setText(document.getElementById('bipolesTex'), "The bipoles for " + sysName + " are:\n" + response)
+      setText(document.getElementById('bipolesTex'), response)
       var math = document.getElementById("bipolesTex");
       MathJax.Hub.Queue(["Typeset",MathJax.Hub,math]);
     }
@@ -107,7 +107,7 @@ function checkPermutation() {
     if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
       var response = xmlhttp.responseText
       document.getElementById('result').style.display = 'block'
-      setText(document.getElementById('permutationsTex'), "The permutation of rules " + r1 + " and " + r2 + " of the system " + system + " are:\n" + response)
+      setText(document.getElementById('permutationsTex'), response)
       var math = document.getElementById("permutationsTex");
       MathJax.Hub.Queue(["Typeset",MathJax.Hub,math]);
     }

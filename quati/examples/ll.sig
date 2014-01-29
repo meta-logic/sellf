@@ -11,6 +11,3 @@ type lbot  form.
 type lone form.
 type lzero form.
 type ltop form.
-
-type forall (term -> form) -> form.
-type exists (term -> form) -> form.

@@ -12,6 +12,16 @@
 </script>
 
 <!-- MathJax to display LaTeX code -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    TeX: {
+      Macros: {
+        ndots: ["{\\stackrel{\\vcenter{\\hbox{$\\scriptstyle :$}}}{\\hbox{$\\scriptstyle {#1}$}}}", 1]
+      }
+    }
+  });
+</script>
+
 <script type="text/javascript"
   src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
 </script>
@@ -50,6 +60,7 @@ Online system for checking permutation of sequent calculus rules.<br>
 Developed by: Giselle Reis, Vivek Nigam and Leonardo Lima<br>
 Contact: giselle [at] logic [dot] at <br>
 Based on the theoretical work: Checking Proof Transformations with ASP [<a href="references/paper.pdf">pdf</a>|<a href="http://prezi.com/nuq4a8cqb-kj/checking-proof-transformations-with-asp/" target="_blank">presentation</a>]- Vivek Nigam, Giselle Reis and Leonardo Lima <br>
+This web-interface provides only limited funtionality. The full system can be downloaded <a href="quati_1.0.tar.gz">here</a>.<br>
 </p>
 
 <hr>
@@ -65,14 +76,14 @@ Based on the theoretical work: Checking Proof Transformations with ASP [<a href=
       <label>Choose a system<sup style="font-size: 8pt">1</sup>:</label>
       <select id="select" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon" onchange="genBipoles(this.value)">
         <option value="">--</option>
-        <option value="mlj"> mLJ </option>
-        <option value="s4"> S4 </option>
-        <option value="lax"> Lax Logic </option>
-        <option value="g3k"> G3k </option>
-        <option value="lal"> Linear Authorization Logic </option>
         <option value="lk"> Classical Logic </option>
-        <option value="lj_mult"> Intuitionistic Logic </option>
+        <option value="lj"> Intuitionistic Logic </option>
+        <option value="mlj"> mLJ </option>
         <option value="ll"> Linear Logic </option>
+        <option value="s4"> S4 </option>
+        <option value="g1m"> G1m </option>
+        <option value="lax"> Lax Logic </option>
+        <option value="ljqstar"> LJQ* </option>
       </select>
       <p style="font-size: 10pt"><sup style="font-size: 8pt">1</sup> We are still working on an easy way for you to input your own systems.</p>
     </div>
@@ -86,7 +97,7 @@ Based on the theoretical work: Checking Proof Transformations with ASP [<a href=
 
       <p style="font-size: 10pt"><sup style="font-size: 8pt">2</sup> We are also working on improving this visualization.</p>
 
-      I want to check wether the rule 
+      I want to check whether the rule 
       <select id="r1" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon">
       </select> 
       permutes over the rule 

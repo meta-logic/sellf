@@ -28,7 +28,7 @@ def submit():
         print "No system specified."
         return
 
-    cmd = Popen('./sellf -c permute -i examples/' + system + ' -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = Popen('./quati -c permute -i examples/' + system + ' -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE)
     stdout, stderr = cmd.communicate()
 
     print stdout
