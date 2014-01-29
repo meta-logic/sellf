@@ -149,7 +149,11 @@ correctness of the transformations. For instance, the cut-elimination result for
 bi-intuitionistic logic given by Rauszer \cite{rauszer74studia}
 was later found to be incorrect \cite{crolard01tcs} exactly because one of the
 permutation lemmas was not true. Therefore, an automated tool to check for these lemmas
-would be of great help. This paper introduces such a tool called Quati.
+would be of great help. This paper introduces such a tool called
+Quati
+\footnote{Quati is a mammal from the raccoon family native to
+South America. Its name comes from the Tupi-guarani, a language
+spoken by native indians in Brazil, and means ``long nose''.}.
 
 While here we will restrict ourselves to simply illustrate Quati's
 functionalities and implementation design, we observe that its underlying theory
@@ -516,7 +520,7 @@ for executing DLV externally, parsing the result and returning the minimal
 models. 
 %
 The translation of a proof tree schema and constraints into an object logic
-derivation is done in the \texttt{Ol} module. It contains data structures to
+derivation is done in the \texttt{OlRule} module. It contains data structures to
 represent proof trees, sequents and contexts of an object logic and the
 rewriting algorithm described in~\cite{nigam13iclp} (module \texttt{Derivation}).
 
@@ -963,8 +967,6 @@ This is done via two files, one with extension \texttt{.pl} and the other with
 \texttt{.sig}. The former contains the actual specification of the proof system,
 namely, the formulas corresponding to each inference rule, the subexponentials
 used and their properties. The latter contains a signature declaration of the
-connectives of the object logic. For example, if the logic being specified has a
-connective $\wedge$, one needs to declare a predicate, say \texttt{and}, of type
 \texttt{form -> form -> form}. Figure \ref{fig:input} shows an example of these
 input files and Tables \ref{tbl:syntax_ll} and \ref{tbl:syntax} show the syntax of the
 linear logic connectives and some keywords used in specifications.
