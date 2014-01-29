@@ -57,7 +57,7 @@ admissibility of the cut rule and the completeness of the focusing discipline,
 rely on permutation lemmas. It is often a tedious and error prone task to prove
 such lemmas as they involve many cases. This paper describes the tool Quati
 which is an automated tool capable of proving a wide range of inference rule
-permutations for a wide number of proof systems. Given a proof system
+permutations for a great number of proof systems. Given a proof system
 specification in the form of a theory in linear logic with subexponentials,
 Quati outputs in \LaTeX\ the permutation transformations for which it was able
 to prove correctness and also the 
@@ -130,7 +130,7 @@ Here's one of each:
 ?
 \]
 }%
-The combinatorial nature of the proof of permutation lemmas can be observed in
+The combinatorial nature of proving permutation lemmas can be observed in
 this example. While there are ``only'' four cases to consider for this pair of rules, for
 proving the completeness of the focusing discipline, one needs to study which
 permutations are allowed and therefore all pairs of rules need to be
@@ -148,8 +148,8 @@ is described in the papers~\cite{nigam.jlc,nigam13iclp,nigam14ebl}. We briefly
 review this body of work.  
  
 In~\cite{nigam13iclp}, we show how to reduce the problem of proving permutation
-lemmas to solving an answer-set program~\cite{gelfond90iclp}. That is given a proof
-system, $\Pscr$, satisfying some properties, we reduce the problem 
+lemmas to solving an answer-set program~\cite{gelfond90iclp}. That is, given a proof
+system $\Pscr$ satisfying some properties, we reduce the problem 
 of checking whether a rule $r_1$ in $\Pscr$ always permutes over $r_2$ in
 $\Pscr$ to solving an answer-set program. Each solution of this program
 corresponds to one possible permutation case. This result sets the foundations 
@@ -165,14 +165,18 @@ derivations}~\cite{nigam10jar}, meaning that there is a one to one
 correspondence of derivations in the specified logic (object logic) to derivations in linear
 logic with subexponentials. Moreover, \cite{nigam.jlc} also shows how to check whether 
 proof systems specified in SELL admit cut-elimination. This lead to the tool 
-TATU\footnote{\url{https://www.logic.at/staff/giselle/tatu/}.} Therefore, SELL is
+TATU\footnote{\url{https://www.logic.at/staff/giselle/tatu/}}. Therefore, SELL is
 a suitable framework for specifying proof systems. 
 
 Finally, in the workshop paper~\cite{nigam14ebl}, we show how to integrate the material
-in \cite{nigam13iclp} and \cite{nigam.jlc}. In particular, we show how to reduce,
-to solving an answer-set program, the problem of checking whether a rule permutes
-over another when given a proof system specified in SELL. 
-Moreover, we also discuss in \cite{nigam14ebl} how to extract
+in \cite{nigam13iclp} and \cite{nigam.jlc}. Given a proof system specified in
+SELL, we reduce the problem of checking whether a rule permutes over another to
+an answer-set program.
+%In particular, we show how to reduce,
+%to solving an answer-set program, the problem of checking whether a rule permutes
+%over another when given a proof system specified in SELL. 
+%Moreover, we also discuss in \cite{nigam14ebl} how to extract
+In the same paper, we also discuss how to extract
 proof derivation figures similar to those shown in a standard proof theory
 book~\cite{troelstra96bpt} from the solutions of the generated answer-set programs. 
 
@@ -188,7 +192,7 @@ In Section~\ref{sec:conc} we end by pointing out future work.
 Throughout this section, we will use the specification for the
 intuitionistic logic's multi-conclusion calculus MLJ~\cite{maehara54nmj} as our running 
 example. First we specify Quati's syntax and then its features. In the Appendix
-you can find step-by-step use of the Quati system for this example as well as the proof system MLJ. 
+you can find a step-by-step user session of the Quati system for this example as well as the proof system MLJ. 
 
 \vspace{-2mm}
 
@@ -261,7 +265,7 @@ agents~\cite{nigam12lics}, or to specify locations in sequential
 computations~\cite{nigam09ppdp}. 
 The main feature of subexponentials is that they can be organized in a pre-order, $\preceq$, which specifies
 the provability relation among them. 
-In \cite{nigam.jlc}, we have shown that a wide number of proof systems for linear, classic, intuitionistic and 
+In \cite{nigam.jlc}, we have shown that a great number of proof systems for linear, classic, intuitionistic and 
 modal logics can be specified in SELL with a strong level of adequacy. 
 %
 Another important reason for using SELL as specification language is that one can also use 
@@ -286,8 +290,8 @@ suffix \texttt{.sig} and (2) a specification file with suffix \texttt{.pl} consi
 This file contains type and kind declarations of the object
 logic's elements. The kind \texttt{form} is built-in and
 represent the type of formulas of the object logic. In general, only
-the types of connectives need to be declared in this file. Here is an
-example:
+the connectives' types need to be declared in this file:
+%Here is an example:
 \vspace{-1mm}
 
 {\small
@@ -315,8 +319,8 @@ Intuitively, one subexponential corresponds to one context of the object logic s
 some specifications where a subexponential is used to capture the structural properties of the proof 
 system and therefore does not necessarily correspond to a context in the object logic. See \cite{nigam.jlc}
 for more on this.}
-For MLJ, as it has only two
-contexts, one to the left and another to the right side of the sequent, we use two subexponentials
+MLJ has only two contexts, one to the left and another to the right side of the
+sequent, thus we use two subexponentials
 \texttt{l} and \texttt{r}. Moreover, as both contexts (to the left and right) behave classically in MLJ, 
 we specify \texttt{l} and \texttt{r} to be unbounded, denoted by \texttt{unb}. In contrast, 
 the specification of LJ would specify the subexponential \texttt{r} to be linear, as the right side of LJ's 
@@ -355,16 +359,16 @@ letters are assumed to be existentially quantified.
 \end{verbatim}
 }
 
-The head of these bipoles, the formulas \texttt{(not (lft (imp A B)))} and
+The head of these bipoles, formulas \texttt{(not (lft (imp A B)))} and
 \texttt{(not (rght (imp A B)))}, specify that an implication formula to, respectively, 
 the left and right-hand-side is introduced. The body specifies the premises of these
 rules. For instance, the first bipole specifies that its corresponding inference rules
 has two premises because of the branching caused by the  
 tensor \texttt{*} appearing in the body of its rule, while
 the second has only one premise as no branching is required. 
-The interesting bit is the bang \texttt{[l]bang} in second bipole specifying that the 
+The interesting bit is the $!^l$ (\texttt{[l]bang}) in the second bipole specifying that the 
 context of the subexponential \texttt{r} should be weakened as \texttt{l > r}.
-In fact, by using advanced proof theoretic machinery, namely Focusing~\cite{andreoli92jlc}, 
+In fact, by using advanced proof theoretic machinery, namely focusing~\cite{andreoli92jlc}, 
 we can make this intuition precise in the sense. We refer to~\cite{nigam.jlc} for more details
 on encodings.
 
@@ -379,16 +383,16 @@ the specification of MLJ implication introduction rules shown above.
 \vspace{-2mm}
 
 \paragraph{Rule Construction} Proving the adequacy theorems for a given SELL specification is also 
-error-prone. As detailed~\cite{nigam.jlc}, to prove (strong) adequacy we need to show that all 
-the possible focused derivations that introduce a formula in the specification corresponds to 
+error-prone. As detailed in~\cite{nigam.jlc}, to prove (strong) adequacy we need to show that all 
+the possible focused derivations that introduce a formula in the specification correspond to 
 an inference rule of the proof system being specified. Quati automates the proof of such 
-adequacy theorems by constructing from a bipole the corresponding inference rule formulas. 
+adequacy theorems by constructing from a bipole the corresponding inference rule. 
 To do so, Quati uses the machinery described in \cite{nigam13iclp,nigam14ebl} reducing
 this problem to the problem of solving answer-set programs. 
 
 For the MLJ specification given above, one can use the command \texttt{\#rule} in the command 
-line and select a SELL bipole in the loaded specification. Then Quati generates all possible 
-inference rules that correspond to that bipole written in \LaTeX. If we select the bipole used to specify 
+line and select a SELL bipole in the loaded specification. Then Quati generates
+a \LaTeX of all possible inference rules that correspond to that bipole. If we select the bipole used to specify 
 MLJ's implication right rule, Quati outputs the \LaTeX\ code for the following figure:
 \vspace{-3mm}
 
@@ -402,13 +406,15 @@ MLJ's implication right rule, Quati outputs the \LaTeX\ code for the following f
 Notice that this rule looks very similar to MLJ's implication right introduction rule shown in any proof theory 
 textbook. The context $\Delta_{r}^{0}$ is erased in the premise. The $\ndots{l}$ and $\ndots{r}$ are used to 
 delimit the contexts for the subexponentials \texttt{l} and \texttt{r}, respectively. Quati uses the subexponential 
-specification to infer that the context for \texttt{l} (resp. for \texttt{r}) should only to the left-hand-side (resp. 
-right-hand-side) of the sequent.
+specification to infer that the context for \texttt{l} (resp. for \texttt{r})
+should only be on the left-hand-side (resp. right-hand-side) of the sequent.
 
 Under the hood, Quati is constructing the focused derivation~\cite{andreoli92jlc} that introduces such 
 a SELL bipole as described in \cite{nigam.jlc}. This can be observed by using the command 
 \texttt{\#bipole}. For the same SELL bipole used above, Quati returns
-the \LaTeX\ code for the following figure, corresponding to the focused derivation of the SELL bipole:
+the \LaTeX\ code for the following figure, corresponding to its focused
+derivation:
+%of the SELL bipole:
 \vspace{-4mm}
 
 
@@ -430,7 +436,7 @@ checks whether the permutation of two selected rules is always allowed or not. Q
 which it was able to find the permutation and the cases for which it was not able to find a permutation. For example, when Quati 
 checks whether MLJ's implication left introduction rule permutes over MLJ's
 implication right introduction, it correctly finds two possible
-permutation cases and it cannot find one of the cases for which is indeed not possible. We show one of the cases (reformated to fit the page margins):
+permutation cases and it cannot find one of the cases for which is indeed not possible. We show one of the cases (reformatted to fit the page margins):
 \vspace{-3mm}
 
 {\scriptsize
@@ -452,7 +458,8 @@ permutation cases and it cannot find one of the cases for which is indeed not po
 }
 
 Once again, this proof figure is very similar to the proof figure that one would find in a standard proof theory textbook.
-Notice that it uses the fact that the contexts are unbounded to infer the permutation above (see \cite{nigam13iclp} for 
+Notice that it uses the fact that the contexts are unbounded, i.e. formulas can
+be contracted or weakened, to infer the permutation above (see \cite{nigam13iclp} for 
 more discussion on how this).
 
 \section{Implementation Details}
@@ -508,16 +515,21 @@ implementation can be downloaded at
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
-This paper introduced Quati an automated tool for proving permutation lemmas. Besides briefly 
-comenting on its implementation, we illustrated its syntax, usage and features. Besides MLJ, in the release
-one can find a number of implemented systems, such as systems for linear logic, intuitionistic logic, s4, 
-and others. 
+This paper introduced Quati, an automated tool for proving permutation lemmas. Besides briefly 
+commenting on its implementation, we illustrated its syntax, usage and features. Besides MLJ, in the download
+one can find the specification of all proof systems tested, as well as system
+requirements and installation instructions.
+%a number of implemented systems, such as systems for linear logic, intuitionistic logic, s4, 
+%and others. 
 
-There is a number of directions that we are currently investigating. One direction is to come up with 
+There are several directions we are currently investigating for continuing this work. One is to come up with 
 more graphical ways of writing proof systems and how to translate such representations into SELL specifications. 
-Since the proof of the completeness theorem of focusing strategies heavily rely on permutation lemmas, we are 
-currently investigating ways to derive such theorems in an automated fashion. Finally, we are investigating
-ways to construct machine-readable proof objects for permutation lemmas.
+Another possibility is the derivation of completeness of focusing
+strategies in an automated fashion, since such theorems rely heavily on
+permutation lemmas.
+%Since the proof of the completeness theorem of focusing strategies rely heavily on permutation lemmas, we are 
+%currently investigating ways to derive such theorems in an automated fashion. 
+Finally, we are investigating ways to construct machine-readable proof objects for permutation lemmas.
 
 \bibliographystyle{abbrv}
 \bibliography{../master}
