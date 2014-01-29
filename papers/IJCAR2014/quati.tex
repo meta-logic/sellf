@@ -472,11 +472,16 @@ answer-set programs generated. It is part of a bigger project, called
 machinery for TATU mentioned above. Figure \ref{fig:modules} is an overview of
 the modules in \texttt{sellf} used by Quati to check for permutations.
 
-\begin{figure}
-TODO: module's figure
-\caption{}
-\label{fig:modules}
-\end{figure}
+\begin{center}
+\includegraphics[width=7.5cm]{figures/modulos.pdf} 
+\end{center}
+
+% 
+% \begin{figure}
+% TODO: module's figure
+% \caption{}
+% \label{fig:modules}
+% \end{figure}
 
 The basic data structure, defined in the module \texttt{Types}, is linear logic
 formulas with subexponentials. The bipoles in Quati are represented by
@@ -506,12 +511,14 @@ represent proof trees, sequents and contexts of an object logic and the
 rewriting algorithm described in~\cite{nigam13iclp} (module \texttt{Derivation}).
 
 %\textbf{Add a paragraph on the results, such as time to compute, which systems, etc.}
-Quati was tested using the following proof systems: LK, LJ, MLJ, LL, S4, G1m and
+Quati was tested using some proof systems including LK, LJ, MLJ, LL, S4, G1m and
 LAX. On
 most cases, each permutation lemma can be checked in less than one second. The
 implementation can be downloaded at
 \url{http://www.logic.at/staff/giselle/quati/quati\_1.0.tar.gz}.
 % TODO: add the web interface address????
+
+\vspace{-2mm}
 
 \section{Conclusions and Future Work}
 \label{sec:conc}
@@ -531,8 +538,95 @@ permutation lemmas.
 %currently investigating ways to derive such theorems in an automated fashion. 
 Finally, we are investigating ways to construct machine-readable proof objects for permutation lemmas.
 
+\vspace{-2mm}
+
 \bibliographystyle{abbrv}
-\bibliography{../master}
+% \bibliography{../master}
+\begin{thebibliography}{10}
+
+\bibitem{andreoli92jlc}
+J.-M. Andreoli.
+\newblock Logic programming with focusing proofs in linear logic.
+\newblock {\em J. of Logic and Computation}, 2(3):297--347, 1992.
+
+\bibitem{crolard01tcs}
+T.~Crolard.
+\newblock Subtractive logic.
+\newblock {\em Theor. Comput. Sci.}, 254(1-2):151--185, 2001.
+
+\bibitem{gelfond90iclp}
+M.~Gelfond and V.~Lifschitz.
+\newblock Logic programs with classical negation.
+\newblock In {\em ICLP}, 1990.
+
+\bibitem{gentzen35}
+G.~Gentzen.
+\newblock Investigations into logical deductions.
+\newblock In {\em {The Collected Papers of Gerhard
+  Gentzen}}, 1969.
+
+\bibitem{herbrand30phd}
+J.~Herbrand.
+\newblock {\em Recherches sur la Th{\'e}orie de la {D}{\'e}monstration}.
+\newblock PhD thesis, 1930.
+
+\bibitem{maehara54nmj}
+S.~Maehara.
+\newblock Eine darstellung der intuitionistischen logik in der klassischen.
+\newblock {\em Nagoya Mathematical Journal}, pages 45--64, 1954.
+
+\bibitem{miller07cslb}
+D.~Miller and A.~Saurin.
+\newblock From proofs to focused proofs: a modular proof of focalization in
+  linear logic.
+\newblock In {\em CSL}, 2007.
+
+\bibitem{nigam.jlc}
+V.~Nigam, , E.~Pimentel, and G.~Reis.
+\newblock An extended framework for specifying and reasoning about proof
+  systems.
+\newblock Accepted to Journal of Logic and Computation. Available on Nigam's
+  homepage.
+
+\bibitem{nigam14ebl}
+V.~Nigam, , G.~Reis, and L.~Lima.
+\newblock Quati: From linear logic specifications to inference rules (extended
+  abstract).
+\newblock Accepted to the Brazilian Logic Conference. Available on Nigam's
+  homepage.
+
+\bibitem{nigam12lics}
+V.~Nigam.
+\newblock On the complexity of linear authorization logics.
+\newblock In {\em LICS}, 2012.
+
+\bibitem{nigam09ppdp}
+V.~Nigam and D.~Miller.
+\newblock Algorithmic specifications in linear logic with subexponentials.
+\newblock In PPDP, 2009.
+
+\bibitem{nigam10jar}
+V.~Nigam and D.~Miller.
+\newblock A framework for proof systems.
+\newblock {\em J. Autom. Reasoning}, 45(2):157--188, 2010.
+
+\bibitem{nigam13iclp}
+V.~Nigam, G.~Reis, and L.~Lima.
+\newblock Checking proof transformations with {ASP}.
+\newblock In {\em ICLP (Technical Communications)}, 2013.
+
+\bibitem{rauszer74studia}
+C.~Rauszer.
+\newblock A formalization of the propositional calculus h-b logic.
+\newblock {\em Studia Logica}, 1974.
+
+\bibitem{troelstra96bpt}
+A.~S. Troelstra and H.~Schwichtenberg.
+\newblock {\em Basic Proof Theory}.
+\newblock 1996.
+
+\end{thebibliography}
+
 
 
 % \section{A Multiconclusion Sequent Calculus for Intuitionistic Logic}
