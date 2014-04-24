@@ -405,7 +405,7 @@ this problem to the problem of solving answer-set programs.
 
 For the MLJ specification given above, one can use the command \texttt{\#rule} in the command 
 line and select a SELL bipole in the loaded specification. Then Quati generates
-a \LaTeX of all possible inference rules that correspond to that bipole. If we select the bipole used to specify 
+a \LaTeX\ document containing all possible inference rules that correspond to that bipole. If we select the bipole used to specify 
 MLJ's implication right rule, Quati outputs the \LaTeX\ code for the following figure:
 \vspace{-3mm}
 
@@ -473,7 +473,7 @@ permutation cases and it cannot find one of the cases for which is indeed not po
 Once again, this proof figure is very similar to the proof figure that one would find in a standard proof theory textbook.
 Notice that it uses the fact that the contexts are unbounded, i.e. formulas can
 be contracted or weakened, to infer the permutation above (see \cite{nigam13iclp} for 
-more discussion on how this).
+more discussion on how this works).
 
 \section{Implementation Details}
 \label{sec:impl}
@@ -600,15 +600,15 @@ D.~Miller and A.~Saurin.
 V.~Nigam, , E.~Pimentel, and G.~Reis.
 \newblock An extended framework for specifying and reasoning about proof
   systems.
-\newblock Accepted to Journal of Logic and Computation. Available on Nigam's
-  homepage.
+\newblock Accepted to Journal of Logic and Computation. Available at 
+\url{http://www.nigam.info/docs/modal-sellf.pdf}
 
 \bibitem{nigam14ebl}
 V.~Nigam, , G.~Reis, and L.~Lima.
 \newblock Quati: From linear logic specifications to inference rules (extended
   abstract).
-\newblock Accepted to the Brazilian Logic Conference. Available on Nigam's
-  homepage.
+\newblock Brazilian Logic Conference (EBL), 2014. Available at
+\url{http://www.nigam.info/docs/ebl14.pdf}
 
 \bibitem{nigam12lics}
 V.~Nigam.
@@ -713,7 +713,7 @@ with additive rules.}\label{Fig:mLJ}
 \section{A sample Quati session}
 
 % load a file
-Once the system in build,\footnote{Notice that one needs Ocaml and DLV systems installed to make
+Once the system is built,\footnote{Notice that one needs OCaml and DLV systems installed to make
 Quati work.} it can be called by simply typing the command:
 \texttt{./quati}. This will start an interactive command line where the user can
 call the functions we will demonstrate now. If one wants to see a list of all
