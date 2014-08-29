@@ -8,7 +8,7 @@
 (*                                       *)
 (*****************************************)
 
-open ContextSchema
+open ContextSchema (* Remove this dependency *)
 open Types
 open Term
 open Prints
@@ -56,12 +56,18 @@ let isIn f subexp ctx =
 let inEndSequent spec ctx = 
   let head = Specification.getPred spec in
   let side = Specification.getSide head in
+  let main = Prints.termToTexString(Term.getOnlyRule(Term.formatForm head)) in
+  let conDeclared s = Hashtbl.mem Subexponentials.conTbl s in
   List.fold_right (fun (s, i) acc -> 
+    let conList = try Hashtbl.find Subexponentials.conTbl s with Not_found -> [] in
     if s = "$gamma" || s = "$infty" then acc
-    else try match getCtxSide s with
-      | RIGHTLEFT -> (isIn head s ctx) :: acc
-      | RIGHT when side = "rght" -> (isIn head s ctx) :: acc
-      | LEFT when side = "lft" -> (isIn head s ctx) :: acc
+    else try match (getCtxSide s, conDeclared s, conList) with
+      | (RIGHTLEFT, false, _) -> (isIn head s ctx) :: acc
+      | (RIGHT, false, _) when side  = "rght" -> (isIn head s ctx) :: acc
+      | (LEFT, false, _) when side = "lft" -> (isIn head s ctx) :: acc
+      | (RIGHTLEFT, true, lst) when List.mem main lst ->(isIn head s ctx) :: acc
+      | (RIGHT, true, lst) when side  = "rght" && List.mem main lst -> (isIn head s ctx) :: acc
+      | (LEFT, true, lst) when side = "lft" && List.mem main lst ->(isIn head s ctx) :: acc
       | _ -> acc
       with _ -> acc
   ) (ContextSchema.getContexts ctx) []

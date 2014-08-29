@@ -14,8 +14,8 @@ subexp e  unb.
 
 subexpctx l many lft.
 subexpctx r many rght.
-subexpctx nl many lft.
-subexpctx pr many rght.
+subexpctx nl many lft [nec].
+subexpctx pr many rght [poss].
 
 subexprel r < pr.
 subexprel l < nl.

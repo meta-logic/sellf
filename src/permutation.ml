@@ -13,7 +13,7 @@ open Basic
 open Bipole
 open ContextSchema
 open Dlv
-open Ol
+open OlRule
 open ProofTreeSchema
 open Sequent
 
@@ -21,8 +21,8 @@ module type PERMUTATION =
   sig
     val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val permutationsToTexString : (Ol.Derivation.bipole * Ol.Derivation.bipole) list -> string
-    val nonPermutationsToTexString : Ol.Derivation.bipole list -> string
+    val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
+    val nonPermutationsToTexString : Derivation.bipole list -> string
   end
 
 module Permutation : PERMUTATION = struct
@@ -158,6 +158,18 @@ module Permutation : PERMUTATION = struct
   ;;
 
   let permutationsToTexString lst = 
+    (*List.fold_right (fun (b12, b21) acc ->
+      "{\\scriptsize\n" ^ 
+      "\\[\n" ^
+      ProofTreeSchema.toTexString (fst(b12)) ^
+      "\n\\quad\\rightsquigarrow\\quad\n" ^
+      ProofTreeSchema.toTexString (fst(b21)) ^
+      "\n\\]" ^
+      "\n}" ^
+      "\n\\\\[0.7cm]\n\n" ^ "CONSTRAINTS1\n" ^ (Constraints.toTexString (snd(b12))) ^ "CONSTRAINTS2\n" ^ (Constraints.toTexString (snd(b21)))
+      
+      ^ acc
+    ) lst ""*)
     let olPt = apply_permute lst in
     List.fold_right (fun (b12, b21) acc ->
       "{\\scriptsize\n" ^ 

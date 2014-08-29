@@ -7,6 +7,8 @@
 (*                                    *)
 (**************************************)
 
+(** Subexponentials implementation and related functions *)
+
 open Term
 
 type subexp = 
@@ -33,9 +35,15 @@ let typeTbl = Hashtbl.create 100 ;;
 let orderTbl : (string, string) Hashtbl.t = Hashtbl.create 100 ;;
 
 (** Hashtable with subexponentials context types *)
-(* Context type: (formulas description, side) *)
+(* Context type: ((formulas description, side), connective list) *)
 type ctxType = (arity * side) ;;
 let ctxTbl : (string, ctxType) Hashtbl.t = Hashtbl.create 100 ;;
+
+(** Hashtable with connectives, conTbl: (subexponential, connectiveName list)) *)
+let conTbl : (string, string list) Hashtbl.t = Hashtbl.create 100;;
+
+(** Hashtable with connectives, conTbl: (connective, connectiveTex)) *)
+let conTexTbl : (string, string) Hashtbl.t = Hashtbl.create 100;;
 
 let getCtxSide s = try match Hashtbl.find ctxTbl s with
   | (_, side) -> side
@@ -57,7 +65,8 @@ let initialize () =
   Hashtbl.clear typeTbl;
   addType "$gamma" LIN;
   addType "$infty" UNB;
-  Hashtbl.clear orderTbl 
+  Hashtbl.clear orderTbl;
+  Hashtbl.clear ctxTbl
 ;;
 
 (** Returns the names of all subexponentials *)

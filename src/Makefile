@@ -69,7 +69,7 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = types.mli term.ml prints.ml basic.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml llrules.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml ol.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
+SOURCES = types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
 QUATI = types.mli subexponentials.ml specification.ml contextSchema.ml constraints.ml constraints.mli sequent.ml proofTreeSchema.ml dlv.ml bipole.ml ol.ml permutation.ml sellf.ml 
 

@@ -15,6 +15,7 @@ open Llrules
 open ProofTreeSchema 
 open Sequent
 open Types
+open Subexponentials
 
 module type OLCONTEXT =
   sig
@@ -25,8 +26,8 @@ module type OLCONTEXT =
     val create : subexp list -> context
     val remFirstChar : string -> string
     val getSubs : context -> string list
-    val toStringForms : terms list -> string -> string -> string
-    val toTexString : context -> string -> string 
+    val toStringForms : terms list -> string -> string -> int -> string -> string
+    val toTexString : context -> string -> int -> string -> int -> string
     val fixContext : subexp -> subexp
   
   end
@@ -51,65 +52,90 @@ module OlContext : OLCONTEXT = struct
       with Invalid_argument("index out of bounds") -> str
     else str
   
+  let colorizeForm f actualHeight =
+    match (actualHeight mod 2) with
+    | 0 -> "{\color{red}" ^ (Prints.termToTexString (Term.formatForm f)) ^ "}"
+    | 1 -> "{\color{blue}" ^ (Prints.termToTexString (Term.formatForm f)) ^ "}"
+  
   let getSubs ctx =
     List.fold_right (fun ((n, i), f) acc ->  
       if (List.exists (fun el -> el = (remFirstChar n)) acc) || n = "#" then acc
       else if (String.get n 0) = '$' then (remFirstChar n) :: acc
       else n :: acc
     ) ctx.lst []
+    
+  let toStringVariable sub i maxIndex side = 
+    let k = ref maxIndex in
+    let counter = (fun () -> k := !k+1; !k) in
+    let conList = try Hashtbl.find Subexponentials.conTbl sub with Not_found -> [] in
+    match (conList, side) with
+    | ([], "lft") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl sub in
+		     if arity = MANY then "\\Gamma_{" ^ (Prints.remSpecial sub) ^ "}^{" ^ (string_of_int i) ^ "}, "
+		     else "C^{" ^ (string_of_int i) ^ "}_{" ^ (Prints.remSpecial sub) ^ "}, "
+    | ([], "rght") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl sub in
+		      if arity = MANY then "\\Delta_{" ^ (Prints.remSpecial sub) ^ "}^{" ^ (string_of_int i) ^ "}, "
+		      else "C^{" ^ (string_of_int i) ^ "}_{" ^ (Prints.remSpecial sub) ^ "}, "
+    | (lst, "lft") -> List.fold_right (fun con acc -> 
+			let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found -> failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
+			conTex ^ "\\Gamma_{" ^ (Prints.remSpecial sub) ^ "}^{" ^ (string_of_int(counter())) ^ "}, " ^ acc
+		      ) lst ""
+    | (lst, "rght") -> List.fold_right (fun con acc -> 
+			let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found -> failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
+			conTex ^ "\\Delta_{" ^ (Prints.remSpecial sub) ^ "}^{" ^ (string_of_int(counter())) ^ "}, " ^ acc
+		      ) lst ""
+    | _ -> failwith ("Error: the subexponential " ^ sub ^ " can not be printed.")
   
-  let toStringForms formulas side n = 
+  let toStringForms formulas side n actualHeight mainRule = 
     (List.fold_right (fun f acc ->
       let formSide = Specification.getSide (Specification.getPred f) in
-      if formSide = side then (Prints.termToTexString (Term.formatForm f)) ^ ", " ^ acc
-      else if (Subexponentials.isSameSide n formSide) then acc
-      else begin
-	      print_string ("\nThe following formula can't belong to the context "
-	      ^ n ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n");
-	      acc
-	    end
+      let sameSide = Subexponentials.isSameSide n formSide in
+      match sameSide with
+      | true -> if formSide = side then begin
+		  let rule = Prints.termToTexString (Term.formatForm (f)) in
+		  if rule = mainRule then (colorizeForm f actualHeight) ^ ", " ^ acc
+		  else (Prints.termToTexString (Term.formatForm f)) ^ ", " ^ acc end
+		else acc
+      | false -> begin print_string ("\nWarning: the following formula can't belong to the context "
+		^ n ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc end
     ) formulas "")
     
   let remComma str = try String.sub str 0 ((String.length str) - 2) with Invalid_argument("String.sub") -> str
   
-  let toTexString ctx side = 
+  let toTexString ctx side maxIndex mainRule actualHeight = 
     let subLst = Subexponentials.getAllValid () in
-    let slotToTex ctx side sub =
+    let slotToTex ctx side sub actualHeight =
     (* Print context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
       let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
-      match (side, f, correctSide, i) with
-      | (_, _, _, -1) -> acc
-      | ("lft", [], true, _) ->  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-      | ("lft", f', true, _) ->  "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, "
-				 ^ (toStringForms f' "lft" n) ^ acc
-      | ("rght", [], true, _) -> "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " ^ acc
-      | ("rght", f', true, _) -> "\\Delta_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "}, " 
-				 ^ (toStringForms f' "rght" n) ^ acc
-      | (_, _, _, _) -> acc
+      match (f, correctSide, i) with
+      | (_, _, -1) -> acc
+      | ([], true, _) -> (toStringVariable n i maxIndex side) ^ acc
+      | (f', true, _) -> (toStringVariable n i maxIndex side) ^ (toStringForms f' side n actualHeight mainRule) ^ acc
+      | _ -> acc
     ) ctx.lst "") ^
     (* Print formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
       match (i, side, f) with
-      | (-1, "lft", f')  -> (toStringForms f' "lft" (remFirstChar n)) ^ acc
-      | (-1, "rght", f') -> (toStringForms f' "rght" (remFirstChar n)) ^ acc
-      | (_, _, _) -> acc
+      | (-1, "lft", f')  -> (toStringForms f' "lft" (remFirstChar n) actualHeight mainRule) ^ acc
+      | (-1, "rght", f') -> (toStringForms f' "rght" (remFirstChar n) actualHeight mainRule) ^ acc
+      | _ -> acc
     ) ctx.lst "") in
     (* Print all slots *)
-    List.fold_right (fun sub acc ->
+    let slotString = List.fold_right (fun sub acc ->
       match Subexponentials.isSameSide sub side with
         | false -> acc
         | true ->
-          match remComma (slotToTex ctx side sub) with
+          match remComma (slotToTex ctx side sub actualHeight) with
             | "" -> begin match acc with
               (*| "" -> " \\cdot " ^ acc*)
-              | _ -> "\\ndots{"^ sub ^"} \\cdot " ^ acc
+              | _ -> "; {}\cdot{} " ^ acc
             end
             | str -> begin match acc with
               (*| "" -> str ^ " " ^ acc*)
-              | _ -> acc ^ " \\ndots{"^ sub ^"} " ^ str
+              | _ -> ";{} " ^ str ^ acc
             end
-    ) subLst ""
+    ) subLst "" in
+    String.sub slotString 1 ((String.length slotString) - 1)
   
   (* Hack to fix the name of subexponential that come without $ *)
   let fixContext ctx =
@@ -128,7 +154,7 @@ module type OLSEQUENT =
     val create : OlContext.context -> terms list -> phase -> sequent 
     val getContext : sequent -> OlContext.context
     val getMainForm : sequent -> terms
-    val toTexString : sequent -> string 
+    val toTexString : sequent -> int -> string -> int -> string
   
   end
 
@@ -154,9 +180,9 @@ module OlSequent : OLSEQUENT = struct
     | [] -> failwith "Sequent has no goals."
     | _ -> Term.getOnlyRule (Term.formatForm (List.hd seq.goals))
   
-  let toTexString seq = 
-    (OlContext.toTexString seq.ctx "lft") ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght")
- 
+  let toTexString seq index mainRule actualHeight = 
+    (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" index mainRule actualHeight)
+
 end;;
 
 module type OLPROOFTREE =
@@ -195,6 +221,10 @@ module OlProofTree : OLPROOFTREE = struct
   let getContextFromPt pt = OlSequent.getContext (getConclusion pt) 
   
   let getRule pt = pt.rule
+  
+  let actualHeight = ref (-1)
+  
+  let counter () = if (!actualHeight + 1) > 1 then actualHeight := 0 else actualHeight := !actualHeight + 1; !actualHeight
   
   let getPol pt = 
     let conclusion = getConclusion pt in
@@ -251,25 +281,38 @@ module OlProofTree : OLPROOFTREE = struct
     | "lft" -> "L"
     | _ -> ""
     
+  let maxIndex pt = 
+    let index = ref (-1) in
+    let rec getSeq pt = 
+      match pt.rule with
+      | Some(rule) -> if pt.premises = [] then [pt] else List.concat (List.map (fun p -> getSeq p) pt.premises)
+      | None -> [pt] in
+    let olPt = List.hd (getSeq pt) in
+    let olSeq = getConclusion olPt in
+    let olCtx = OlSequent.getContext olSeq in
+    List.iter (fun ((s, i), l) -> if i > !index then index := i else ()) olCtx.OlContext.lst;
+    !index
+    
   let toTexString pt =
-    (* TODO: simplify this function by not passing str_list as a parameter *)
-    let rec toTexString' pt = 
+    let index = maxIndex pt in
+    let rec toTexString' pt level = 
       match pt.rule with
       | Some(r) ->
 	      let seq = getConclusion pt in
 	      let rule = OlSequent.getMainForm seq in
+	      let mainRule = Term.formatForm (List.hd seq.OlSequent.goals) in
 	      let topproof = match pt.premises with
 	        | [] -> ""
-	        | hd::tl -> (toTexString' hd)^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el)) tl "") 
+	        | hd::tl -> (toTexString' hd (level + 1))^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el (level + 1))) tl "") 
 	      in
         let pred = List.hd seq.OlSequent.goals in
         let formSide = Specification.getSide (Specification.getPred pred) in
         let ruleNameTex = (Prints.termToTexString rule) ^ "_{" ^ (sideToChar formSide) ^ "}" in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "}\n{" ^ topproof ^ "}"*)
-	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "} \\;\\; " ^ ruleNameTex 
-      | None -> (OlSequent.toTexString (getConclusion pt)) 
+	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) index (Prints.termToTexString mainRule) level) ^ "} \\;\\; " ^ ruleNameTex 
+      | None -> (OlSequent.toTexString (getConclusion pt) index "#" level) 
     in
-    toTexString' pt
+    toTexString' pt 0
 
 end;;
 
@@ -393,7 +436,12 @@ let solveIn olPt c t =
       match t with
         | EXISTS (s, i, t) -> (olc, f)
         | _ -> if (List.exists (fun el -> el = t) f) then (olc, f)
-        else begin bChange := true; (olc, t :: f) end
+        else begin bChange := true;
+		     match Subexponentials.type_of (fst olc) with
+					  | LIN | AFF -> 
+		              (((OlContext.remFirstChar (fst c)), -1), t :: f)
+					  | UNB | REL -> (olc, t :: f) 
+		     end
       else (olc, f)
     ) olCtx.OlContext.lst in
     olCtx.OlContext.lst <- newCtx; !bChange

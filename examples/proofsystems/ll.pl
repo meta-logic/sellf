@@ -40,14 +40,6 @@ rules introduction.
 (not (lft (lquest A))) * (bang (lft A)).
 (not (rght (lquest A))) * (? (rght A)).
 
-% Forall
-%(not (lft (forall A))) * (sigma \X ([lr]? (lft (A X)))).
-%(not (rght (forall A))) *  (pi \X ([lr]? (rght (A X)))).
-
-% Exists
-%(not (lft (exists A))) * (pi \X ([lr]? (lft (A X)))).
-%(not (rght (exists A))) * (sigma \X ([lr]? (rght (A X)))).
-
 % One
 (not (lft lone)) * bot.
 (not (rght lone)) * one.

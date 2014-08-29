@@ -192,6 +192,7 @@ let texFileHeader = (
   "\\usepackage{amssymb}\n"^ 
   "\\usepackage{stmaryrd}\n"^ 
   "\\usepackage{proof}\n\n"^
+  "\\usepackage{color}\n\n"^
   "\\usepackage[landscape, margin=1cm]{geometry}\n\n"^ 
   "\\newcommand{\\ndots}[1]{\\stackrel{\\vcenter{\\hbox{$\\scriptstyle :$}\\vskip-.35ex}}
    {\\hbox {$ \\scriptstyle {#1}$}}}\n\n"^

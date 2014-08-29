@@ -12,6 +12,7 @@ let incrline lexbuf =
     pos_lnum = 1 + lexbuf.lex_curr_p.pos_lnum }
 }
 let nameString = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']* (* types and terms start with lower case letters *)
+let connectiveTex = ['\\']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '*']* (* LaTeX code to rewrite the connective in a proper way *)
 let commentString = ['%'] [^'\n']* '\n' (* comments start with % *)
 let instring = [^'"'] *
 let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
@@ -24,6 +25,7 @@ rule token = parse
 
 [' ' '\t' '\r']         { token lexbuf }
 | commentString         { incrline lexbuf; token lexbuf }
+| connectiveTex as ct   { CONNTEX(ct) }
 | '\n'                  { incrline lexbuf; token lexbuf }
 | "kind"                { KIND }
 | "type"                { TYPE }

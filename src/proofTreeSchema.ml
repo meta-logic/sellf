@@ -10,7 +10,6 @@
 
 open Sequent
 open Constraints
-open Context
 open ContextSchema
 open Types
 open Subexponentials

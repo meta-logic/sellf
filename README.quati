@@ -1,0 +1,52 @@
+
+Thank you for downloading Quati!!
+
+I) Requirements:
+
+These tools must be installed for 'quati' to work.
+- ocaml (http://caml.inria.fr/)
+- dlv (http://www.dlvsystem.com/dlv/)
+
+NOTE: The system was implemented and tested in Linux/Ubuntu. It was also
+installed and executed succesfully on MacOS. Other operating systems were not
+yet tried.
+
+II) Installation:
+
+Execute the installation script:
+
+./install.sh
+
+It will create a binary called 'quati' in the current directory. To start the
+program, execute this binary. It also creates a documentation of the main
+modules implemented. This is a pdf file in the folder 'doc'.
+
+III) Syntax
+
+The operators of linear logic with subexponentials and its syntax are:
+
+tensor -> *
+plus   -> +
+with   -> &
+par    -> |
+!l     -> [l]bang
+?l     -> [l]?
+one    -> one
+zero   -> zero
+top    -> top
+bottom -> bot
+
+To comment some line in your file, start it with the symbol '%'.
+Signature files have sufix '.sig' and the program file has sufix '.pl' (both
+must have the same name).
+
+IV) Running:
+
+After compilation, an executable file called 'sellf' will be created in the
+current folder. To execute it, just type:
+
+./quati
+
+and press enter. A command line prompt will appear with the symbol ':>'. For a
+list of commands available, you can type '#help'.
+

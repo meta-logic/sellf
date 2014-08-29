@@ -3,7 +3,7 @@ open Context
 open ProofTree
 open Subexponentials
 open Prints
-open Ol
+open OlRule
 open ProofTreeSchema
 open Permutation
 
@@ -186,6 +186,8 @@ let printBipoles bipoles fileName =
     Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(bipole)));
     Printf.fprintf file "%s" "\\]";
     Printf.fprintf file "%s" "}";
+    Printf.fprintf file "%s" "CONSTRAINTS\n";
+    Printf.fprintf file "%s" (Constraints.toTexString (snd(bipole)));
     (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString (snd(bipole)));*)
   ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;

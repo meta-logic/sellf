@@ -46,8 +46,8 @@ let check_val_subexp sub1 sub2 =
 %token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
 LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
-QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
-%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE ABS NEW FILE
+QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX HASH
+%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE ABS NEW FILE CONNTEX
 %token <int> INT
 %right ARR  
 %left TIMES
@@ -73,6 +73,8 @@ QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
 %start top             /* the entry point */
 %type <string> top 
 
+%type <string list> conList
+
 %%  
 
 /* G: Saves the kinds and types declared in hash tables. */
@@ -86,6 +88,22 @@ KIND NAME TYPE DOT {
       None
     | Some (k) -> print_endline ("[ERROR] Kind already declared: "^$2);
       flush stdout; Some (k)
+}
+| TYPE NAME typeN CONNTEX DOT {
+  let dupChk = Specification.isKindDeclared $2 in
+  let dupChk2 = Specification.isTypeDeclared $2 in
+  match dupChk, dupChk2 with
+    | false, false -> Specification.addTypeTbl $2 $3; 
+      Hashtbl.add Subexponentials.conTexTbl $2 $4;
+      if !Term.verbose then begin
+        print_endline (" New type created: "^$2^" : "^(typeToString $3));
+        flush stdout;
+      end;
+      None
+    | true, _ -> print_string ("[ERROR] Type previously declared as a kind: "^$2);
+      print_newline(); flush stdout; Some ($2)
+    | _, true -> print_string ("[ERROR] Type previously declared as a type: "^$2);
+      print_newline(); flush stdout; Some($2) 
 }
 | TYPE NAME typeN DOT { 
   let dupChk = Specification.isKindDeclared $2 in
@@ -102,6 +120,11 @@ KIND NAME TYPE DOT {
     | _, true -> print_string ("[ERROR] Type previously declared as a type: "^$2);
       print_newline(); flush stdout; Some($2) 
 }
+;
+
+conList: 
+NAME { [$1] }
+| NAME SEMICOLON conList { $1 :: $3 }
 ;
 
 /* G: Checks whether the types declared are valid and of existing kinds. */
@@ -188,6 +211,27 @@ clause:
         | "rghtlft" -> RIGHTLEFT
         | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
       in
+      Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
+    | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
+}
+| SUBEXCTX NAME CTXTYPE NAME LBRACKET conList RBRACKET DOT {
+  match (Subexponentials.isSubexponentialDeclared $2) with
+    | true -> 
+      let arity = match $3 with
+        | "single" -> SINGLE
+        | "many" -> MANY
+        | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
+      in
+      let side = match $4 with 
+        | "lft" -> LEFT
+        | "rght" -> RIGHT
+        | "rghtlft" -> RIGHTLEFT
+        | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
+      in
+      List.iter (fun con ->
+	let conList' = try Hashtbl.find Subexponentials.conTbl $2 with Not_found -> [] in
+	Hashtbl.replace Subexponentials.conTbl $2 (con :: conList')
+      ) $6;
       Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
     | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
 }
