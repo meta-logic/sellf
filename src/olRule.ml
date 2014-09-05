@@ -28,7 +28,7 @@ module type OLCONTEXT =
     val getSubLabels : context -> string list
     val toStringForms : terms list -> string -> string -> int -> string -> string
     val toTexString : context -> string -> int -> string -> int -> string
-    val fixContext : subexp -> subexp
+    val fixSubLabel : subexp -> subexp
   
   end
 
@@ -72,8 +72,8 @@ module OlContext : OLCONTEXT = struct
       else (remFirstChar label) :: acc
     ) ctx.lst []
     
-  (* Print context variables, considering the right side and generates new*)
-  (* contexts if connectives are declared.                                *)
+  (* Prints context variables, considering the right side and generates   *)
+  (* new contexts if connectives are declared.                            *)
   let toStringVariable subLabel index maxIndex side = 
     let k = ref maxIndex in
     let generateIndex = (fun () -> k := !k+1; !k) in
@@ -94,7 +94,10 @@ module OlContext : OLCONTEXT = struct
 			conTex ^ "\\Delta_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
 		      ) lst ""
     | _ -> failwith ("Error: the subexponential " ^ subLabel ^ " can not be printed.")
-  
+
+  (* Prints formula variables, considering the right side and colorize the*)
+  (* formula if it corresponds to the rule that will be applied. If a for-*)
+  (* mula appears in a wrong context, a warning will be printed.          *)
   let toStringForms formulas side subLabel actualHeight mainRule = 
     (List.fold_right (fun f acc ->
       let formSide = Specification.getSide (Specification.getPred f) in
@@ -112,7 +115,7 @@ module OlContext : OLCONTEXT = struct
   let toTexString ctx side maxIndex mainRule actualHeight = 
     let subLst = Subexponentials.getAllValid () in
     let slotToTex ctx side sub actualHeight =
-    (* Print context variables *)
+    (* Prints context variables *)
     (List.fold_right (fun ((n, i), f) acc ->
       let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
       match (f, correctSide, i) with
@@ -121,14 +124,15 @@ module OlContext : OLCONTEXT = struct
       | (f', true, _) -> (toStringVariable n i maxIndex side) ^ (toStringForms f' side n actualHeight mainRule) ^ acc
       | _ -> acc
     ) ctx.lst "") ^
-    (* Print formula variables *)
+    (* Prints formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      match (i, side, f(*, (n = sub)*)) with
-      | (-1, "lft", f'(*, true*))  -> (toStringForms f' "lft" (remFirstChar n) actualHeight mainRule) ^ acc
-      | (-1, "rght", f'(*, true*)) -> (toStringForms f' "rght" (remFirstChar n) actualHeight mainRule) ^ acc
+      let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
+      match (side, correctSide, i) with
+      | ("lft", true, -1)  -> (toStringForms f "lft" (remFirstChar n) actualHeight mainRule) ^ acc
+      | ("rght", true, -1) -> (toStringForms f "rght" (remFirstChar n) actualHeight mainRule) ^ acc
       | _ -> acc
     ) ctx.lst "") in
-    (* Print all slots *)
+    (* Prints all the slots *)
     let slotString = List.fold_right (fun sub acc ->
       match Subexponentials.isSameSide sub side with
         | false -> acc
@@ -146,7 +150,7 @@ module OlContext : OLCONTEXT = struct
     String.sub slotString 1 ((String.length slotString) - 1)
   
   (* Hack to fix the name of subexponential that come without $ *)
-  let fixContext ctx =
+  let fixSubLabel ctx =
     if (fst(ctx) = "gamma" || fst(ctx) = "infty") then (("$" ^ (fst(ctx))), snd(ctx))
     else ctx
   
@@ -443,12 +447,12 @@ let solveIn olPt c t =
  
   let rewSeqFst seq cstr = 
     match cstr with 
-    | ELIN (t, c) -> solveElin seq (OlContext.fixContext c) t
-    | EMP (c) -> solveEmp seq (OlContext.fixContext c)
+    | ELIN (t, c) -> solveElin seq (OlContext.fixSubLabel c) t
+    | EMP (c) -> solveEmp seq (OlContext.fixSubLabel c)
     | UNION (c1, c2, c3) ->
-			let c3' = OlContext.fixContext c3 in
-			let c2' = OlContext.fixContext c2 in
-			let c1' = OlContext.fixContext c1 in
+			let c3' = OlContext.fixSubLabel c3 in
+			let c2' = OlContext.fixSubLabel c2 in
+			let c1' = OlContext.fixSubLabel c1 in
 			solveUnion seq c1' c2' c3'
     (* Any other constraint is despised *)
     | _ -> false
@@ -498,7 +502,7 @@ let solveIn olPt c t =
     
   let rewSeqSnd seq cstr = 
     match cstr with 
-    | IN (t, c) -> solveIn seq (OlContext.fixContext c) t
+    | IN (t, c) -> solveIn seq (OlContext.fixSubLabel c) t
     (* Any other constraint is despised *)
     | _ -> false
     
