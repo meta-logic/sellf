@@ -19,9 +19,9 @@ let i = ref 0;;
 type ctx = string * int
 type constraintpred = 
   | IN of terms * ctx
-  | ELIN of terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
+  | MINUS of ctx * terms * ctx
   | REQIN_UNB of terms * ctx (* printed as ":- not in(term, ctx)."*)
   | REQIN_LIN of terms * ctx (* printed as ":- not in(term, ctx). :- in(F, G), in(F', G), F != F'."*)
  
@@ -39,7 +39,7 @@ let times set1 set2 = List.concat (List.map (fun cst1 ->
   List.map (fun cst2 -> union cst1 cst2) set2
 ) set1)
 
-(* TODO: check is this method is actually needed *)
+(* TODO: check if this method is actually needed *)
 let copy cst = create cst.lst
 
 let isEmpty cst = (List.length cst.lst) == 0
@@ -47,8 +47,7 @@ let isEmpty cst = (List.length cst.lst) == 0
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
   try match Subexponentials.getCtxArity subexp with
-    | MANY -> create [IN(f, (subexp, index))]
-    | SINGLE -> create [ELIN(f, (subexp, index))]
+    | MANY | SINGLE -> create [IN(f, (subexp, index))]
     with _ -> failwith "Not applicable: cannot insert formula in context."
 ;;
 
@@ -76,9 +75,7 @@ let inEndSequent spec ctx =
 let insert f subexp oldctx newctx = 
   let oldindex = ContextSchema.getIndex oldctx subexp in
   let newindex = ContextSchema.getIndex newctx subexp in
-  let middleindex = newindex - 1 in
-  create [ELIN(f, (subexp, middleindex));
-  UNION((subexp, oldindex), (subexp, middleindex), (subexp, newindex))]
+  create [MINUS((subexp, newindex), f, (subexp, oldindex))]
 
 let empty subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
@@ -136,8 +133,8 @@ let initial ctx f =
 let predToTexString c = match c with
   | IN (t, c) -> 
     "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
-  | ELIN (t, c) ->
-    "$elin(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
+  | MINUS (c1, t, c0) ->
+    "$minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ").$"
   | EMP (c) -> 
     "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
   | UNION (c1, c2, c3) -> 
@@ -154,8 +151,8 @@ let rec toTexString csts =
 let predToString c = match c with
   | IN (t, c) -> 
     "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
-  | ELIN (t, c) ->
-    "elin(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
+  | MINUS (c1, t, c0) ->
+    "minus(" ^ (ContextSchema.ctxToStr c1) ^ ", \"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c0) ^ ")."
   | EMP (c) ->
     "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
   | UNION (c1, c2, c3) -> 

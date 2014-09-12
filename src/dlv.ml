@@ -16,7 +16,7 @@ module type DLV =
   
     val description : string
     val union_clauses_set : string
-    val elin_clauses_set : string
+    val minus_clauses_set : string
     val emp_clauses_set : string
     val aux_clauses_set : string
     val proveIf_clauses : string
@@ -50,15 +50,17 @@ module Dlv : DLV = struct
   % provIf(Leaf1, Leaf2) -> Denotes that the Leaf1 is provable if Leaf2 is provable.\n\n"
 
   (* union definition *)
+  (* union(S1, S2, S) :: S = S1 U S2 *)
   let union_clauses_set =
   "in(X, S) :- in(X, S1), union(S1, S2, S).
   in(X, S) :- in(X, S2), union(S1, S2, S).
   in(X, S1) v in(X, S2) :- in(X, S), union(S1, S2, S).\n\n"
 
-  (* elin definition *)
-  let elin_clauses_set = 
-  "in(F, G) :- elin(F, G).
-  :- in(F, G), elin(F1, G), F != F1.\n\n"
+  (* minus definition *)
+  (* minus(G1, F, G0) :: G0 = G1 - F *)
+  let minus_clauses_set =
+  "in(F, G1) :- minus(G1, F, G0).
+   in(F1, G1) :- minus(G1, F, G0), in(F1, G0).\n\n"
 
   (* emp definition *)
   let emp_clauses_set = 
@@ -106,7 +108,7 @@ module Dlv : DLV = struct
     let file = open_out ("solver/"^name^".in") in
     Printf.fprintf file "%s" description;
     Printf.fprintf file "%s" union_clauses_set;
-    Printf.fprintf file "%s" elin_clauses_set;
+    Printf.fprintf file "%s" minus_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     Printf.fprintf file "%s" aux_clauses_set;
     Printf.fprintf file "%s" (Constraints.toString cstrSet);
@@ -174,7 +176,7 @@ module Dlv : DLV = struct
     let file = open_out (name) in
     Printf.fprintf file "%s" description;
     Printf.fprintf file "%s" union_clauses_set;
-    Printf.fprintf file "%s" elin_clauses_set;
+    Printf.fprintf file "%s" minus_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     Printf.fprintf file "%s" aux_clauses_set;
     Printf.fprintf file "%s" proveIf_clauses;

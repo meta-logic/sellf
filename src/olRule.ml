@@ -447,24 +447,25 @@ let solveIn olPt c t =
  
   let rewSeqFst seq cstr = 
     match cstr with 
-    | ELIN (t, c) -> solveElin seq (OlContext.fixSubLabel c) t
+    (*| ELIN (t, c) -> solveElin seq (OlContext.fixSubLabel c) t*)
     | EMP (c) -> solveEmp seq (OlContext.fixSubLabel c)
     | UNION (c1, c2, c3) ->
 			let c3' = OlContext.fixSubLabel c3 in
 			let c2' = OlContext.fixSubLabel c2 in
 			let c1' = OlContext.fixSubLabel c1 in
 			solveUnion seq c1' c2' c3'
+    (* TODO add minus case *)
     (* Any other constraint is despised *)
     | _ -> false
     
   let solveConstraintsFst cstr olProofTree =
     match cstr with
-    | ELIN (t, c) -> 
+    (*| ELIN (t, c) -> 
       let rec rewTreeElin olTree =
 	rewSeqFst olTree cstr ::
 	List.concat (List.map rewTreeElin olTree.OlProofTree.premises) in
       let boolList = rewTreeElin olProofTree in
-      List.exists (fun el -> el = true) boolList
+      List.exists (fun el -> el = true) boolList*)
 	
     | EMP (c) -> 
       let rec rewTreeEmp olTree =
@@ -480,6 +481,7 @@ let solveIn olPt c t =
       let boolList = rewTreeUnion olProofTree in
       List.exists (fun el -> el = true) boolList
       
+    (* TODO add minus case *)
     | _ -> false
     
   let applyConstraints pt model = 

@@ -81,6 +81,7 @@ module ContextSchema : CONTEXTSCHEMA = struct
     create newctxhash
 
   (* Creates the next context after inserting a formula in subexp *)
+  (* TODO: the middle index is no longer necessary, increase by one *)
   let insert ctx subexp = 
     let index = Hashtbl.find global subexp in
     let newctxhash = Hashtbl.copy ctx.hash in

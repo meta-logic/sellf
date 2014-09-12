@@ -18,9 +18,9 @@ rule token = parse
   | [' ' '\t' '\r']  { token lexbuf }
   (* Constraints predicates *)
   | "in"         { IN } 
-  | "elin"       { ELIN }
   | "emp"        { EMP }
   | "union"      { UNION }
+  | "minus"      { MINUS }
   | '('          { LPAREN }
   | ')'          { RPAREN }
   | '{'          { LCURLY }
