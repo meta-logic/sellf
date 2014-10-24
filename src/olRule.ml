@@ -528,9 +528,7 @@ module Derivation : DERIVATION = struct
 		     Hashtbl.replace subexpRewrite olc newRewrite
 		   end else begin
 		     let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-		     let formulaExists = List.exists (fun (olc', f') -> List.exists (fun el -> el = t) f') oldRewrite in
-		     if not formulaExists then Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
-		     else ()
+		     Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
 		   end
 		 end
 	end else ()
