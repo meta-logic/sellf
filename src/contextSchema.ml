@@ -72,12 +72,21 @@ module ContextSchema : CONTEXTSCHEMA = struct
     let news = remSpecial s in
     ""^news^"_"^(string_of_int i)^""
 
-  (* Creates the next context after inserting a formula in subexp *)
-  let insert ctx subexp = 
+  (* Creates the next context where the index of subexp is updated *)
+  let next ctx subexp =
     let index = Hashtbl.find global subexp in
     let newctxhash = Hashtbl.copy ctx.hash in
     Hashtbl.replace newctxhash subexp (index + 1);
     Hashtbl.replace global subexp (index + 1);
+    create newctxhash
+
+  (* Creates the next context after inserting a formula in subexp *)
+  (* TODO: the middle index is no longer necessary, increase by one *)
+  let insert ctx subexp = 
+    let index = Hashtbl.find global subexp in
+    let newctxhash = Hashtbl.copy ctx.hash in
+    Hashtbl.replace newctxhash subexp (index+2);
+    Hashtbl.replace global subexp (index+2);
     create newctxhash
 
   (* Creates the two resulting contexts after a split *)

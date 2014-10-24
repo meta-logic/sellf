@@ -111,8 +111,13 @@ module OlContext : OLCONTEXT = struct
       | false -> begin print_string ("\nWarning: the following formula can't belong to the context "
 		^ subLabel ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc end
     ) formulas "")
+    
+  let printFormList f = List.fold_right (fun f' acc -> (Prints.termToTexString (Term.formatForm f')) ^ ", " ^ acc) f ""
   
+  (* Subexponentials with index < 0 means that the context should not be *)
+  (* writed, just the formulas.                                          *)
   let toTexString ctx side maxIndex mainRule actualHeight = 
+    (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (remFirstChar n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
     let subLst = Subexponentials.getAllValid () in
     let slotToTex ctx side sub actualHeight =
     (* Prints context variables *)
@@ -126,7 +131,7 @@ module OlContext : OLCONTEXT = struct
     ) ctx.lst "") ^
     (* Prints formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
+      let correctSide = (((remFirstChar n) = sub) && (Subexponentials.isSameSide (remFirstChar n) side)) in
       match (side, correctSide, i) with
       | ("lft", true, -1)  -> (toStringForms f "lft" (remFirstChar n) actualHeight mainRule) ^ acc
       | ("rght", true, -1) -> (toStringForms f "rght" (remFirstChar n) actualHeight mainRule) ^ acc
@@ -194,6 +199,10 @@ module OlSequent : OLSEQUENT = struct
   
   let toTexString seq index mainRule actualHeight = 
     (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "rght" index mainRule actualHeight)
+  
+(*  let toTexString seq index mainRule actualHeight = match seq.pol with
+    | ASYN -> (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\Uparrow "
+    | SYNC -> (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\Downarrow "*)
 
 end;;
 
@@ -335,27 +344,33 @@ module type DERIVATION =
     type olBipole = OlProofTree.prooftree * Constraints.constraintset
     val remakeBipoles : bipole list -> olBipole list
     val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list
-    val solveFirstPhaseBpl : olBipole list -> unit
-    val solveFirstPhasePer : (olBipole * olBipole) list -> unit
-    val solveSndPhaseBpl : olBipole list -> unit
-    val solveSndPhasePer : (olBipole * olBipole) list -> unit
-    val equatingContexts : OlProofTree.prooftree -> unit  
+    val rewriteBipoleList : olBipole list -> unit
+    val rewritePermutationList : (olBipole * olBipole) list -> unit
   
   end
 
 module Derivation : DERIVATION = struct
 
+  (* Hashtable that contains the updates of subexponentials, to rewrite them properly. *)
+  (* A context can be rewritten to other contexts and/or formulas.                     *)
+  type ctx = string * int
+  let subexpRewrite : (ctx, (ctx * terms list) list) Hashtbl.t = Hashtbl.create 100 ;;
+
   type bipole = ProofTreeSchema.prooftree * Constraints.constraintset
   
   type olBipole = OlProofTree.prooftree * Constraints.constraintset
 
+  (* ProofTreeSchema and OlProofTree have different types, the first                   *)
+  (* has sequents that have contexts of type ContextSchema, which consists of          *)
+  (* a hashtable of (string * int). The latter has sequents that have contexts         *)
+  (* of type OlContext, which contains a list of ((string * int) * list of formulas)   *)
   let rec remakeTree pt =
     let seq = ProofTreeSchema.getConclusion pt in
     let rule = ProofTreeSchema.getRule pt in
     let ctx = SequentSchema.getContext seq in
-    let ctxListRef = Hashtbl.fold (fun str1 int1 acc -> 
-      if str1 = "$gamma" || str1 = "$infty" then acc
-      else (str1, int1) :: acc
+    let ctxListRef = Hashtbl.fold (fun str' int' acc -> 
+      if str' = "$gamma" || str' = "$infty" then acc
+      else (str', int') :: acc
     ) ctx.ContextSchema.hash [] in
     let context = OlContext.create ctxListRef in
     let goals = SequentSchema.getGoals seq in
@@ -368,294 +383,283 @@ module Derivation : DERIVATION = struct
       olPt
     end 
     
-  let remakeBipoles bplLst = 
-    List.map (fun (pt, model) -> (remakeTree pt, model)) bplLst 
+  let remakeBipoles bpl_lst = 
+    List.map (fun (pt, model) -> (remakeTree pt, model)) bpl_lst 
     
   let remakePermutation pair_bpl = 
     List.map (fun ((pt1, model1), (pt2, model2)) ->
       ((remakeTree pt1, model1), (remakeTree pt2, model2))) 
-    pair_bpl
-    
-  (*  IN(F, Γ ): Γ → Γ, F
-      EMP(Γ ): Γ → .
-      ELIN(F, Γ ): Γ → F
-      UNION(Γ1, Γ2, Γ3): Γ3 → Γ1, Γ2 *)
-  
-  (*let solveMctx olPt c t = 
-    let olSeq = OlProofTree.getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    let newCtx = List.map (fun (olc, f) ->  
-      if olc = c then (olc, t :: f) 
-      else (olc, f)
-    ) olCtx.OlContext.lst in
-    olCtx.OlContext.lst <- newCtx*)
+    pair_bpl 
 
-  let print_subexp (str, i) = print_endline (str ^ (string_of_int i))
+  (* The functions below treat the constraints and their behavior. *)
+  let print_subexp (str, i) = print_string (str ^ (string_of_int i))
+  
+  let print_hashtbl () = print_endline "Hashtbl begin: "; 
+  Hashtbl.iter (fun k content -> 
+    print_subexp k; 
+    print_string " -> ";
+    List.iter (fun (sub, f) -> print_subexp sub;
+      print_string ", ";
+      List.iter (fun t -> print_string ((Prints.termToTexString t) ^ ", ")) f;
+      print_string " ^ "
+    ) content;
+    print_string " | "
+  ) subexpRewrite; 
+  print_string ("\n");
+  print_endline "Hashtbl end"
+  
+  (*let rec rewriteContext c acc =
+    let ctxList = Hashtbl.find subexpRewrite c in
+    let (s, i) = c in
+    if List.exists (fun ((s', i'), tlist) -> s = s' || i' = (-1)) ctxList then ctxList
+    else List.concat (List.map (fun (olc, tList') -> rewriteContext olc ) ctxList)*)
     
-  let solveElin olPt c t = 
-    let olSeq = OlProofTree.getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    let bChange = ref false in
-    let newCtx = (List.fold_left (fun acc (olc, f) ->  
-      if olc = c then begin 
-		      if snd(olc) = -1 then (olc, f) :: acc else
-                      begin bChange := true; (((OlContext.remFirstChar (fst c)), -1), t :: f) :: acc end end
-      else begin (olc, f) :: acc end
-    ) [] olCtx.OlContext.lst) in
-    olCtx.OlContext.lst <- newCtx; 
-    !bChange
+  let applyCstrToHashtable cstr isOpenLeaf = 
+    match cstr with 
+    | EMP (c) -> let c' = (OlContext.fixSubLabel c) in
+                 Hashtbl.iter (fun k oldRewrite -> 
+                   let newRewrite = List.fold_right (fun (ctx, fList) acc ->
+	             if ctx = c' then acc
+	             else (ctx, fList) :: acc
+	           ) oldRewrite [] in
+	           Hashtbl.replace subexpRewrite k newRewrite
+	         ) subexpRewrite
+                   
+    | IN (t, c) -> let c' = (OlContext.fixSubLabel c) in
+                   Hashtbl.iter (fun k oldRewrite -> 
+                     let formulaExists = List.exists (fun (ctx, tlist) -> 
+		       List.exists (fun el -> el = t) tlist
+	 	     ) oldRewrite in
+	 	     if formulaExists then ()
+	 	     else begin
+                       let newRewrite = List.fold_right (fun (ctx, tlist) acc ->
+	                 if ctx = c' then begin
+	                   if isOpenLeaf then (ctx, t :: tlist) :: acc
+	                   else ((fst(ctx), -1),  t :: tlist) :: acc
+		         end else (ctx, tlist) :: acc
+	               ) oldRewrite [] in
+	               Hashtbl.replace subexpRewrite k newRewrite
+	             end
+	           ) subexpRewrite
+	           
+    | UNION (c1, c2, c3) -> let c3' = OlContext.fixSubLabel c3 in
+			    let c2' = OlContext.fixSubLabel c2 in
+		 	    let c1' = OlContext.fixSubLabel c1 in
+		 	    Hashtbl.iter (fun k oldRewrite -> 
+                              let newRewrite = List.fold_right (fun (ctx, tlist) acc ->
+	                        if ctx = c3' then (c1', []) :: (c2', []) :: acc
+		                else (ctx, tlist) :: acc
+	                      ) oldRewrite [] in
+	                      Hashtbl.replace subexpRewrite k newRewrite
+	                    ) subexpRewrite
+		 	    
+    | MINUS (c1, t, c2) -> let c2' = OlContext.fixSubLabel c2 in
+	                   let c1' = OlContext.fixSubLabel c1 in
+	                   Hashtbl.iter (fun k oldRewrite -> 
+                             let newRewrite = List.fold_right (fun (ctx, tlist) acc ->
+	                       if ctx = c2' then begin
+	                         let c1' = Hashtbl.find subexpRewrite c1 in
+	                         let newRewrite = (List.map (fun (ctx', tlist') -> 
+	                           (ctx', (List.fold_right (fun el acc' -> 
+	                             if el = t then acc'
+	                             else el :: acc'
+	                           ) tlist' []))
+	                         ) c1' ) in newRewrite @ acc
+                               end else (ctx, tlist) :: acc
+	                     ) oldRewrite [] in
+	                     Hashtbl.replace subexpRewrite k newRewrite
+	                   ) subexpRewrite
+  
+  (* EMP (Γ): Γ → . *)
+  let solveEmp seq c = 
+    let olCtx = OlSequent.getContext seq in
+    let isDifferent = ref false in
+    List.iter (fun (olc, f) ->
+		  if olc = c then begin
+		    Hashtbl.replace subexpRewrite olc [];
+		    isDifferent := true
+		  end else ()
+    ) olCtx.OlContext.lst;
+    !isDifferent
     
-  let solveEmp olPt c = 
-    let olSeq = OlProofTree.getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    let bChange = ref false in
-    let newCtx = List.fold_left (fun acc (olc, f) ->
-      if olc = c then begin bChange := true; acc end else (olc, f) :: acc)
-      [] olCtx.OlContext.lst in
-    olCtx.OlContext.lst <- newCtx; !bChange
+  (* UNION(Γ1, Γ2, Γ3): Γ3 → Γ1, Γ2 *)
+    (*let solveUnion seq c1 c2 cU =
+    let olCtx = OlSequent.getContext seq in
+    let isDifferent = ref false in
+    let newCtx = List.fold_left (fun acc (olc, f') ->
+		  if (olc = cU) then begin
+		    Hashtbl.add subexpRewrite olc ([(c1, []);(c2, [])]);
+		    isDifferent := true; (c1, []) :: (c2, []) :: acc
+		  end else (olc, f') :: acc
+		 ) [] olCtx.OlContext.lst in
+    olCtx.OlContext.lst <- newCtx; !isDifferent*)
+  
+  let solveUnion seq c1 c2 cU =
+    let olCtx = OlSequent.getContext seq in
+    let isDifferent = ref false in
+    List.iter (fun (olc, f') ->
+		  if (olc = cU) then begin
+		    Hashtbl.add subexpRewrite olc ([(c1, []);(c2, [])]);
+		    isDifferent := true;
+		  end else ()
+    ) olCtx.OlContext.lst;
+    !isDifferent
     
-  let solveUnion olPt c1 c2 cU =
-    let olSeq = OlProofTree.getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    let lctx = olCtx.OlContext.lst in
-    let bChange = ref false in
-    let newCtx = List.fold_left (fun acc (olc', f') ->
-		  if (olc' = cU) then 
-		    begin bChange := true; (c1, []) :: (c2, []) :: acc end
-		  else (olc', f') :: acc) [] lctx in
-    olCtx.OlContext.lst <- newCtx; !bChange
+  (* IN (F, Γ): Γ → Γ, F (if the sequent is an open leaf) *)
+  (*            Γ → F    (else)                            *)
+
+  let solveIn seq c t isOpenLeaf =
+    let olCtx = OlSequent.getContext seq in
+    let isDifferent = ref false in
+    List.iter (fun (olc, f) ->  
+      if olc = c then begin
+	(* Don't process formulas with the predicate EXISTS *)
+	match t with
+	  | EXISTS (s, i, t) -> ()
+	  | _ -> begin
+		   isDifferent := true;
+		   if isOpenLeaf then begin 
+		     let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+		     let newRewrite = if Hashtbl.mem subexpRewrite olc then
+		       List.fold_right (fun (c, tlist) acc ->
+		         if olc = c then (c, t :: tlist) :: acc
+		         else (c, tlist) :: acc
+		       ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
+		     Hashtbl.replace subexpRewrite olc newRewrite
+		   end else begin
+		     let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+		     let formulaExists = List.exists (fun (olc', f') -> List.exists (fun el -> el = t) f') oldRewrite in
+		     if not formulaExists then Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
+		     else ()
+		   end
+		 end
+	end else ()
+    ) olCtx.OlContext.lst;
+    !isDifferent
     
-let solveIn olPt c t =
-    let olSeq = OlProofTree.getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    let bChange = ref false in
-    let newCtx = List.map (fun (olc, f) ->  
-      if olc = c then
-      (* Hack to don't process formulas with the predicate EXISTS *)
-      match t with
-        | EXISTS (s, i, t) -> (olc, f)
-        | _ -> if (List.exists (fun el -> el = t) f) then (olc, f)
-        else begin bChange := true;
-		     match Subexponentials.type_of (fst olc) with
-					  | LIN | AFF -> 
-		              (((OlContext.remFirstChar (fst c)), -1), t :: f)
-					  | UNB | REL -> (olc, t :: f) 
-		     end
-      else (olc, f)
-    ) olCtx.OlContext.lst in
-    olCtx.OlContext.lst <- newCtx; !bChange
+  (* MINUS (Γ0, F, Γ1): Γ1 → Γ0 - F *)
+  let solveMinus seq c1 t c2 =
+    let olCtx = OlSequent.getContext seq in
+    let isDifferent = ref false in
+    List.iter (fun (olc, f) ->
+      if olc = c2 then begin
+	let l1 = Hashtbl.find subexpRewrite c1 in
+	let newRewrite = (List.map (fun (olc', f') -> 
+	  (olc', (List.fold_right (fun el acc' -> 
+	    if el = t then begin isDifferent := true; acc'
+	    end else el :: acc'
+	  ) f' []))
+	) l1) in
+	Hashtbl.add subexpRewrite olc newRewrite;
+      end else ()
+    ) olCtx.OlContext.lst;
+    !isDifferent
  
-  let rewSeqFst seq cstr = 
-    match cstr with 
-    (*| ELIN (t, c) -> solveElin seq (OlContext.fixSubLabel c) t*)
-    | EMP (c) -> solveEmp seq (OlContext.fixSubLabel c)
-    | UNION (c1, c2, c3) ->
-			let c3' = OlContext.fixSubLabel c3 in
-			let c2' = OlContext.fixSubLabel c2 in
-			let c1' = OlContext.fixSubLabel c1 in
-			solveUnion seq c1' c2' c3'
-    (* TODO add minus case *)
-    (* Any other constraint is despised *)
-    | _ -> false
+ (* isOpenLeaf is a boolean that it's necessary because the constraint IN (G, F) *)
+ (* application differs according to that.                                       *)
+  let rewriteSequent olTree model isOpenLeaf =
+    let seq = OlProofTree.getConclusion olTree in
+    let applyConstraint seq cstr = 
+      match cstr with 
+      | EMP (c) -> solveEmp seq (OlContext.fixSubLabel c)
+      | IN (t, c) -> solveIn seq (OlContext.fixSubLabel c) t isOpenLeaf
+      | UNION (c1, c2, c3) ->
+			  let c3' = OlContext.fixSubLabel c3 in
+			  let c2' = OlContext.fixSubLabel c2 in
+			  let c1' = OlContext.fixSubLabel c1 in
+			  solveUnion seq c1' c2' c3'
+      | MINUS (c1, t, c2) -> 
+			  let c2' = OlContext.fixSubLabel c2 in
+			  let c1' = OlContext.fixSubLabel c1 in
+			  solveMinus seq c1' t c2'
+      (* Any other constraint is despised *)
+      | _ -> false in
+    (*while (List.exists (fun cstr -> (applyConstraint seq cstr) = true) model.lst) do () done*)
+    let newModel = List.fold_left (fun acc cstr -> 
+      if (applyConstraint seq cstr) then begin
+	applyCstrToHashtable cstr isOpenLeaf;
+        print_string "APPLIED: ";
+        print_endline (Constraints.predToString cstr);
+        print_hashtbl ();
+        acc
+      end else acc @ [cstr]
+    ) [] model.lst in
+    model.lst <- newModel; model
     
-  let solveConstraintsFst cstr olProofTree =
-    match cstr with
-    (*| ELIN (t, c) -> 
-      let rec rewTreeElin olTree =
-	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeElin olTree.OlProofTree.premises) in
-      let boolList = rewTreeElin olProofTree in
-      List.exists (fun el -> el = true) boolList*)
-	
-    | EMP (c) -> 
-      let rec rewTreeEmp olTree =
-	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeEmp olTree.OlProofTree.premises) in
-      let boolList = rewTreeEmp olProofTree in
-      List.exists (fun el -> el = true) boolList
-      
-    | UNION (c1, c2, c3) ->
-      let rec rewTreeUnion olTree = 
-	rewSeqFst olTree cstr ::
-	List.concat (List.map rewTreeUnion olTree.OlProofTree.premises) in
-      let boolList = rewTreeUnion olProofTree in
-      List.exists (fun el -> el = true) boolList
-      
-    (* TODO add minus case *)
-    | _ -> false
+  (* The constraints are applied from the proof tree leafs to the root. *)
     
-  let applyConstraints pt model = 
-    while (List.exists (fun el -> (solveConstraintsFst el pt) = true) model.lst) do
-      List.iter (fun cstr -> if solveConstraintsFst cstr pt then () else ()) model.lst
-    done
+  (*let applyModel pt model = 
+     let rec orderSequents olTree =
+	if (olTree.OlProofTree.premises != []) then begin
+	  let lst = List.concat (List.map orderSequents olTree.OlProofTree.premises) in 
+	  lst @ [(olTree, false)]
+        end else begin
+	  let isOpenLeaf = match olTree.rule with
+		       | Some(r) -> false
+		       | None -> true 
+	  in [(olTree, isOpenLeaf)]
+	end in
+      let orderedSequents = orderSequents pt in
+      let model' = ref model in
+      List.iter (fun (seq, isOpenLeaf) -> print_endline ("NOVO SEQUENTE"); model' := (rewriteSequent seq !model' isOpenLeaf)) orderedSequents;
+      Hashtbl.reset subexpRewrite*)
+      
+   let applyModel pt model = 
+     let model' = ref model in
+     let rec applyModel' olTree =
+	if (olTree.OlProofTree.premises <> []) then begin
+	  List.iter applyModel' olTree.OlProofTree.premises; 
+	  model' := (rewriteSequent olTree !model' false)
+        end else begin
+	  let isOpenLeaf = match olTree.rule with
+		       | Some(r) -> false
+		       | None -> true 
+	  in model' := (rewriteSequent olTree !model' isOpenLeaf)
+	end in
+    let rewriteSeq' seq = 
+      let olCtx = OlSequent.getContext seq in
+      let newCtx = List.fold_right (fun (olc, f) acc ->
+        if Hashtbl.mem subexpRewrite olc then
+          let ctxRewritten = Hashtbl.find subexpRewrite olc in
+          if (List.exists (fun (olc', f') -> olc = olc') ctxRewritten) then (olc, f) :: acc
+          else (List.map (fun (olc', f') -> (olc', [])) ctxRewritten) @ acc 
+        else (olc, f) :: acc
+      ) olCtx.OlContext.lst [] in
+      let isDifferent = olCtx.OlContext.lst <> newCtx in
+      olCtx.OlContext.lst <- newCtx; isDifferent in
+    let rewriteSeq seq = 
+      let olCtx = OlSequent.getContext seq in
+      let newCtx = List.fold_right (fun (olc, f) acc ->
+        if Hashtbl.mem subexpRewrite olc then
+          let ctxRewritten = Hashtbl.find subexpRewrite olc in
+          ctxRewritten @ [((fst(olc), -1), f)] @ acc
+        else (olc, f) :: acc
+      ) olCtx.OlContext.lst [] in
+      olCtx.OlContext.lst <- newCtx in
+    let rec rewriteTree olTree =
+      List.iter rewriteTree olTree.OlProofTree.premises;
+      (*while*) rewriteSeq olTree.OlProofTree.conclusion; (*do () done*)
+      while rewriteSeq' olTree.OlProofTree.conclusion do () done in
+    applyModel' pt;
+    rewriteTree pt;
+    print_endline ("NOVO SEQUENTE");
+    Hashtbl.reset subexpRewrite
+      
+  (*let applyConstraints pt model = 
+    while (List.exists (fun cstr -> (applyConstraint cstr pt) = true) model.lst) do
+      List.iter (fun cstr -> if applyConstraint cstr pt then () else ()) model.lst
+    done*)
    
-  (* First phase: #bipole *)
-  let solveFirstPhaseBpl olBipole =
+  let rewriteBipoleList olBipole =
     List.iter (fun (olProofTree, model) ->
-      applyConstraints olProofTree model;
+      applyModel olProofTree model;
     ) olBipole
-    
-  (* First phase: #permute *)
-  let solveFirstPhasePer pairOfBipoles =
+
+  let rewritePermutationList pairOfBipoles =
     List.iter (fun ((olProofTree1, model1), (olProofTree2, model2)) ->
-      applyConstraints olProofTree1 model1;
-      applyConstraints olProofTree2 model2;
+      applyModel olProofTree1 model1;
+      applyModel olProofTree2 model2;
     ) pairOfBipoles
-    
-  let rewSeqSnd seq cstr = 
-    match cstr with 
-    | IN (t, c) -> solveIn seq (OlContext.fixSubLabel c) t
-    (* Any other constraint is despised *)
-    | _ -> false
-    
-  let solveConstraintsSnd cstr olProofTree =
-    match cstr with
-    | IN (t, c) -> 
-      let rec rewTreeIn olTree = 
-	rewSeqSnd olTree cstr ::
-	List.concat (List.map rewTreeIn olTree.OlProofTree.premises) in
-      let boolList = rewTreeIn olProofTree in
-      List.exists (fun el -> el = true) boolList
-    | _ -> false
-    
-  let applyConstraints' pt model = 
-    while (List.exists (fun el -> (solveConstraintsSnd el pt) = true) model.lst) do
-      List.iter (fun cstr -> if solveConstraintsSnd cstr pt then () else ()) model.lst
-    done    
-    
-  (* Second phase: #bipole *)     
-  let solveSndPhaseBpl olBipole =
-    List.iter (fun (olProofTree, model) ->
-      applyConstraints' olProofTree model;
-    ) olBipole
-    
-  (* Second phase: #permute *)     
-  let solveSndPhasePer pairOfBipoles =
-    List.iter (fun ((olProofTree1, model1), (olProofTree2, model2)) ->
-      applyConstraints' olProofTree1 model1;
-      applyConstraints' olProofTree2 model2;
-    ) pairOfBipoles
-    
-  (* Third phase: Equating the contexts *)
-  
-  let sameContexts ctx1 ctx2 str = 
-    List.for_all (fun (olc, f) ->
-      if (fst(olc)) = str then
-	List.exists (fun (olc', f') -> (olc = olc')) ctx2.OlContext.lst
-      else true
-    ) ctx1.OlContext.lst
-    
-  let getValidCtx ctx str = 
-    List.concat (List.map (fun ((s, i), f) -> 
-    if ((String.get s 0) = '#') || s <> str then []
-    else [(s, i)]) ctx.OlContext.lst)
-    
-  let getMaxPair (n: OlContext.subexp list) = 
-    let rec max_value lst = match lst with
-      | [] -> 0
-      | hd :: tl -> max hd (max_value tl) in
-    let str = fst(List.hd n) in
-    let lst' = List.map (fun (s, i) -> i) n in (str, max_value lst')
-  
-  let createContextList (m: OlContext.subexp list) (n: OlContext.subexp list) (maxPair: OlContext.subexp) =
-    let ctx_name = fst(maxPair) in
-    let i = ref (snd(maxPair)) in
-    let counter = (fun () -> i := !i+1; !i) in
-    List.map (fun (s, i) -> List.map (fun (s', i') -> ctx_name, counter()) m) n
-    
-  (* Returns a (ctx, list of ctx) list *)
-  let getAssocN n lst = 
-    let j = ref (-1) in
-    let counter = (fun () -> j := !j+1; !j) in
-    List.map (fun (s, i) -> ((s,i), (List.nth lst (counter())))) n
-  
-  (* Returns a (ctx, list of ctx) list *)
-  let getAssocM m lst = 
-    let reagroupContextList lst = 
-      let q = ref (-1) in
-      let counter' = (fun () -> q := !q+1) in
-      let head = List.hd lst in
-      List.map (fun ctx ->
-	counter'();
-	List.fold_right (fun lst'' acc -> 
-	  (List.nth lst'' !q) :: acc
-	) lst []
-      ) head in
-    let k = ref (-1) in
-    let counter = (fun () -> k := !k+1; !k) in
-    let lst' = reagroupContextList lst in
-    List.map (fun (s, i) -> ((s, i), List.nth lst' (counter()))) m
-  
-  (* nCtx = (Ctx to find, List to rewrite the Ctx) *)
-  let rewriteTree pt nctx = 
-    let solve olPt ctx listOfCtx =
-      let olSeq = OlProofTree.getConclusion olPt in
-      let olCtx = OlSequent.getContext olSeq in
-      let lctx = olCtx.OlContext.lst in
-      let newCtxRef = ref lctx in
-      List.iter (fun (olc, f) ->
-	newCtxRef := List.map (fun (olc', f') ->
-	if (olc' = ctx) then (((fst(ctx)), -1), f')
-	else (olc', f')) !newCtxRef;
-	if (olc = ctx) then newCtxRef := listOfCtx @ !newCtxRef
-	else ()
-      ) lctx;
-      olCtx.OlContext.lst <- !newCtxRef in
-    let rec rewTree olTree = 
-      solve olTree (fst(nctx)) (snd(nctx));
-      List.iter rewTree olTree.OlProofTree.premises in
-    rewTree pt
-    
-  let fixContexts lst = 
-    List.map (fun lst' -> List.map (fun (s, i) -> ((s,i), [])) lst') lst
-      
-  (* Create new contexts and apply this to the tree *)
-  (* seq1 is the conclusion and seq2 the premise *)
-  let applyNewContexts pt seq1 seq2 str = 
-    let ctx1 = OlSequent.getContext seq1 in
-    let ctx2 = OlSequent.getContext seq2 in
-    let m = getValidCtx ctx1 str in
-    let n = getValidCtx ctx2 str in
-    let maxPair = getMaxPair n in
-    let lst = fixContexts (createContextList m n maxPair) in
-    let nList = getAssocN n lst in
-    let mList = getAssocM m lst in
-    List.iter (fun nctx -> rewriteTree pt nctx) nList;
-    List.iter (fun nctx -> rewriteTree pt nctx) mList;
-    ()
-  
-  (* Get the sequents to rewrite the contexts to obtain an equality *)  
-  let equatingContexts pt = 
-    let ptRef = ref pt in
-    let rec getSequents' pt = 
-      if (List.exists (fun pt' ->
-	  match pt'.OlProofTree.rule with
-	  | Some(r) -> if (pt'.OlProofTree.premises = []) then true else false
-	  | None -> false
-	) pt.OlProofTree.premises) then
-	begin
-	  let pt2 = List.find (fun pt' -> pt'.OlProofTree.premises <> []) pt.OlProofTree.premises in
-	  let ctx1 = (OlProofTree.getContextFromPt pt) in
-	  let ctx2 = (OlProofTree.getContextFromPt pt2) in
-	  let seq1 = OlProofTree.getConclusion pt in
-	  let seq2 = OlProofTree.getConclusion pt2 in
-	  let ctx_str_lst = OlContext.getSubLabels ctx1 in
-	  if (List.for_all (fun str -> sameContexts ctx1 ctx2 str) ctx_str_lst) then
-	    getSequents' pt2
-	  else 
-	    begin 
-	      let ctx_str_lst = OlContext.getSubLabels ctx1 in
-	      let diff_ctx = List.map (fun el -> (el, (sameContexts ctx1 ctx2 el))) ctx_str_lst in
-	      List.iter (fun (str, bol) -> 
-		if bol = false then
-		while (sameContexts ctx1 ctx2 str) = false do
-		  applyNewContexts !ptRef seq1 seq2 str
-		done
-	      ) diff_ctx
-	    end
-	end
-      else List.iter (fun p -> getSequents' p) pt.OlProofTree.premises in
-    getSequents' pt
 
 end;;
 
@@ -664,11 +668,8 @@ end;;
 let apply_permute perm_bipoles = begin
   let olPt = ref [] in
   olPt := Derivation.remakePermutation perm_bipoles;
-  Derivation.solveFirstPhasePer !olPt;
-  Derivation.solveSndPhasePer !olPt;
+  Derivation.rewritePermutationList !olPt;
   List.iter (fun ((olt1, model1), (olt2, model2)) -> 
-    Derivation.equatingContexts olt1;
-    Derivation.equatingContexts olt2;
     OlProofTree.toPermutationFormat olt1;
     OlProofTree.toPermutationFormat olt2;
   ) !olPt;
@@ -678,7 +679,6 @@ end ;;
 let apply_perm_not_found perm_not_found = begin
   let olPt = ref [] in
   olPt := Derivation.remakeBipoles perm_not_found;
-  Derivation.solveFirstPhaseBpl !olPt;
-  Derivation.solveSndPhaseBpl !olPt;
+  Derivation.rewriteBipoleList !olPt;
   !olPt
 end ;;
