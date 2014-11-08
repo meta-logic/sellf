@@ -83,3 +83,15 @@ val toTexString : constraintset -> string
 val predToString : constraintpred -> string
 
 val toString : constraintset -> string
+
+val isUnion : constraintpred -> bool
+
+val isIn : constraintpred -> bool
+
+val isEmp : constraintpred -> bool
+
+val isMinus : constraintpred -> bool
+
+val isUnbounded : constraintpred -> bool
+
+val isBounded : constraintpred -> bool

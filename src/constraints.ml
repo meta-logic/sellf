@@ -168,4 +168,31 @@ let toString csts =
     (predToString c) ^ "\n" ^ str
   ) csts.lst ""
 
+let isUnion cstr = 
+  match cstr with
+  | UNION (c2, c3, c1) -> true
+  | _ -> false
+  
+let isIn cstr = 
+  match cstr with
+  | IN (t, c) -> true
+  | _ -> false
 
+let isEmp cstr = 
+  match cstr with
+  | EMP (c) -> true
+  | _ -> false
+  
+let isMinus cstr = 
+  match cstr with
+  | MINUS (c1, t, c2) -> true
+  | _ -> false
+  
+let isUnbounded cstr = 
+  match cstr with
+  | UNION (c2, c3, (s, i)) -> type_of s = UNB 
+  | IN (t, (s, i)) -> type_of s = UNB
+  | EMP ((s, i)) -> type_of s = UNB
+  | MINUS (c1, t, (s, i)) -> type_of s = UNB
+  
+let isBounded cstr = not (isUnbounded cstr)  
