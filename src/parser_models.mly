@@ -33,7 +33,7 @@ let make_APP lst =
 /* Terminal symbols */
 %token <int> INDEX
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
-%token IN EMP UNION MINUS
+%token IN EMP UNION SETMINUS
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
 %token COMMA LBRACKET RBRACKET LCURLY RCURLY LPAREN RPAREN UNDERSCORE DOT NEWLINE QUOTE
 %right FORALL EXISTS
@@ -78,9 +78,9 @@ constraintPred:
   | EMP LPAREN contextVar RPAREN { 
     Constraints.EMP($3) 
   }
-  | MINUS LPAREN contextVar COMMA QUOTE formula QUOTE COMMA contextVar RPAREN { 
+  | SETMINUS LPAREN contextVar COMMA QUOTE formula QUOTE COMMA contextVar RPAREN { 
     let f = deBruijn true $6 in
-    Constraints.MINUS($3, f, $9) 
+    Constraints.SETMINUS($3, f, $9) 
   }
   | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
     Constraints.UNION($3, $5, $7) 

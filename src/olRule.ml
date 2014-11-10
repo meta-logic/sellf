@@ -549,7 +549,7 @@ module Derivation : DERIVATION = struct
 			  let c2' = OlContext.fixSubLabel c2 in
 			  let c1' = OlContext.fixSubLabel c1 in
 			  solveUnion seq c1' c2' c3'
-      | MINUS (c1, t, c2) -> 
+      | SETMINUS (c1, t, c2) -> 
 			  let c2' = OlContext.fixSubLabel c2 in
 			  let c1' = OlContext.fixSubLabel c1 in
 			  solveMinus seq c1' t c2'
@@ -584,7 +584,7 @@ module Derivation : DERIVATION = struct
          if (olTree.OlProofTree.premises <> []) then begin
 	   model' := (rewriteSequent olTree !model' false)
          end else begin
-	   let isOpenLeaf = match olTree.rule with
+	   let isOpenLeaf = match olTree.OlProofTree.rule with
 		        | Some(r) -> false
 		        | None -> true 
 	   in model' := (rewriteSequent olTree !model' isOpenLeaf)

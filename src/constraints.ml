@@ -21,7 +21,7 @@ type constraintpred =
   | IN of terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | MINUS of ctx * terms * ctx
+  | SETMINUS of ctx * terms * ctx
   | REQIN_UNB of terms * ctx (* printed as ":- not in(term, ctx)."*)
   | REQIN_LIN of terms * ctx (* printed as ":- not in(term, ctx). :- in(F, G), in(F', G), F != F'."*)
  
@@ -75,7 +75,7 @@ let inEndSequent spec ctx =
 let insert f subexp oldctx newctx = 
   let oldindex = ContextSchema.getIndex oldctx subexp in
   let newindex = ContextSchema.getIndex newctx subexp in
-  create [MINUS((subexp, newindex), f, (subexp, oldindex))]
+  create [SETMINUS((subexp, newindex), f, (subexp, oldindex))]
 
 let empty subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
@@ -133,7 +133,7 @@ let initial ctx f =
 let predToTexString c = match c with
   | IN (t, c) -> 
     "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
-  | MINUS (c1, t, c0) ->
+  | SETMINUS (c1, t, c0) ->
     "$minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ").$"
   | EMP (c) -> 
     "$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$"
@@ -151,7 +151,7 @@ let rec toTexString csts =
 let predToString c = match c with
   | IN (t, c) -> 
     "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
-  | MINUS (c1, t, c0) ->
+  | SETMINUS (c1, t, c0) ->
     "minus(" ^ (ContextSchema.ctxToStr c1) ^ ", \"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c0) ^ ")."
   | EMP (c) ->
     "emp(" ^ (ContextSchema.ctxToStr c) ^ ")."
@@ -185,7 +185,7 @@ let isEmp cstr =
   
 let isMinus cstr = 
   match cstr with
-  | MINUS (c1, t, c2) -> true
+  | SETMINUS (c1, t, c2) -> true
   | _ -> false
   
 let isUnbounded cstr = 
@@ -193,6 +193,6 @@ let isUnbounded cstr =
   | UNION (c2, c3, (s, i)) -> type_of s = UNB 
   | IN (t, (s, i)) -> type_of s = UNB
   | EMP ((s, i)) -> type_of s = UNB
-  | MINUS (c1, t, (s, i)) -> type_of s = UNB
+  | SETMINUS (c1, t, (s, i)) -> type_of s = UNB
   
 let isBounded cstr = not (isUnbounded cstr)  

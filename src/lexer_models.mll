@@ -20,7 +20,7 @@ rule token = parse
   | "in"         { IN } 
   | "emp"        { EMP }
   | "union"      { UNION }
-  | "minus"      { MINUS }
+  | "minus"      { SETMINUS }
   | '('          { LPAREN }
   | ')'          { RPAREN }
   | '{'          { LCURLY }

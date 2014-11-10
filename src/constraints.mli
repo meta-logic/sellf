@@ -23,7 +23,7 @@ type constraintpred =
   | IN of terms * ctx
   | EMP of ctx
   | UNION of ctx * ctx * ctx
-  | MINUS of ctx * terms * ctx
+  | SETMINUS of ctx * terms * ctx
   | REQIN_UNB of terms * ctx
   | REQIN_LIN of terms * ctx
 
