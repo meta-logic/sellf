@@ -104,18 +104,6 @@ let parse file_name = begin
     end
 end ;;
 
-(* TODO: improve here *)
-let get_bipoles () = begin
-  let formulas = !Specification.others @ !Specification.introRules in
-  let bpl_lst = ref [] in
-  let all_bipoles = List.for_all (fun f -> 
-    try match Bipole.bipole f with
-    | bipole -> bpl_lst := !bpl_lst @ [bipole]; 
-    true
-    with Bipole.Not_bipole -> false    
-  ) formulas in (all_bipoles, !bpl_lst)
-end ;;
-
 (* TODO: this function should be somewhere else and olPt should not be a mutable
 object. *)
 (* Ask Leo about this function. [Giselle] *)
@@ -194,22 +182,18 @@ let printBipoles bipoles fileName =
 ;;
 
 (* Command line #bipole *)
-let bipole_cl () = begin
-  let pair_bpl = get_bipoles () in
-  let all_bipoles = fst(pair_bpl) in
-  let bpl_lst = snd(pair_bpl) in begin
-  if all_bipoles then
-  List.iter (fun bipoles ->
-    let olPt = apply_derivation bipoles in
-    List.iter (fun (olt, model) ->
-      print_endline "\\[";
-      print_endline (OlProofTree.toTexString olt);
-      print_endline "\\]";
-    ) olPt;
-  ) bpl_lst
-  else print_endline "This specification is not a bipole!"
-  end
-end
+let bipole_cl () =
+  let formulas = !Specification.others @ !Specification.introRules in
+  try match Bipole.bipoles formulas with
+    | bpls -> List.iter (fun bipoles ->
+      let olPt = apply_derivation bipoles in
+      List.iter (fun (olt, model) ->
+	print_endline "\\[";
+	print_endline (OlProofTree.toTexString olt);
+	print_endline "\\]";
+      ) olPt;
+    ) bpls
+  with Bipole.Not_bipole f -> print_endline ("This formula is not a bipole: " ^ (Prints.termToString f))
 ;;
 
 let permutationTex f1 f2 = match Permutation.permute f1 f2 with

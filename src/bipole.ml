@@ -17,8 +17,9 @@ module type BIPOLE =
   sig
     val toPairsProofModel : (ProofTreeSchema.prooftree * Constraints.constraintset list) list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val deriveBipole : SequentSchema.sequent -> terms -> Constraints.constraintset list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    exception Not_bipole
+    exception Not_bipole of terms
     val bipole : terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val bipoles : terms list -> ((ProofTreeSchema.prooftree * Constraints.constraintset) list) list
   end
 
 module Bipole : BIPOLE = struct
@@ -168,7 +169,7 @@ module Bipole : BIPOLE = struct
     toPairsProofModel !results
   ;;
 
-  exception Not_bipole
+  exception Not_bipole of terms
 
   (* Generates the bipole of a formula from a generic initial sequent *)
   (* Considering the formula is chosen from gamma *)
@@ -189,7 +190,10 @@ module Bipole : BIPOLE = struct
       let sequent = SequentSchema.createAsyn context [] in
       let constraints = Constraints.inEndSequent fnorm context in
       deriveBipole sequent fnorm constraints
-    else raise Not_bipole
+    else raise (Not_bipole f)
+
+  (* Generates the bipoles of a list of terms *)
+  let bipoles terms = List.fold_left (fun acc f -> (bipole f) :: acc ) [] terms
 
 end;;
 
