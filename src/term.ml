@@ -394,21 +394,4 @@ let div l = match l with
   | [t1;t2] -> DIV(t1,t2)
   | _ -> failwith "ERROR: Expected two elements in a times."
 
-let rec formatForm f = 
-  match f with 
-  | EXISTS (s, i, t)   -> formatForm t
-  | LOLLI (t1, t2, t3) -> formatForm t2
-  | NOT (t)            -> formatForm t
-  | PRED (s, t, pol)   -> formatForm t
-  | TENSOR (t1, t2)    -> formatForm t1
-  | ADDOR (t1, t2)     -> formatForm t1
-  | PARR (t1, t2)      -> formatForm t1
-  | WITH (t1, t2)      -> formatForm t1
-  | APP (t, tlist)     -> List.hd tlist
-  | _ -> f
-  
-let getOnlyRule f = match f with
-  | APP (t, tlist) -> t
-  | _ -> f
-  
 (**/**) 

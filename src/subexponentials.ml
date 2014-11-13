@@ -148,8 +148,8 @@ let typeAsString s = match type_of s with
     rght *)
 let isSameSide sub str = try match (getCtxSide sub, str) with
   | (RIGHTLEFT, _) -> true
-  | (RIGHT, "rght") -> true
-  | (LEFT, "lft") -> true
+  | (RIGHT, "r") -> true
+  | (LEFT, "l") -> true
   | _ -> false
   with _ -> false
 

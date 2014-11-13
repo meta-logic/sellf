@@ -53,20 +53,20 @@ let isIn f subexp ctx =
 
 (* TODO: decent error handling. *)
 let inEndSequent spec ctx = 
-  let head = Specification.getPred spec in
-  let side = Specification.getSide head in
-  let main = Prints.termToTexString(Term.getOnlyRule(Term.formatForm head)) in
+  let head = Specification.getHeadPredicate spec in
+  let side = Specification.getSide spec in
+  let main = Specification.getConnectiveName spec in
   let conDeclared s = Hashtbl.mem Subexponentials.conTbl s in
   List.fold_right (fun (s, i) acc -> 
     let conList = try Hashtbl.find Subexponentials.conTbl s with Not_found -> [] in
     if s = "$gamma" || s = "$infty" then acc
     else try match (getCtxSide s, conDeclared s, conList) with
       | (RIGHTLEFT, false, _) -> (isIn head s ctx) :: acc
-      | (RIGHT, false, _) when side  = "rght" -> (isIn head s ctx) :: acc
-      | (LEFT, false, _) when side = "lft" -> (isIn head s ctx) :: acc
-      | (RIGHTLEFT, true, lst) when List.mem main lst ->(isIn head s ctx) :: acc
-      | (RIGHT, true, lst) when side  = "rght" && List.mem main lst -> (isIn head s ctx) :: acc
-      | (LEFT, true, lst) when side = "lft" && List.mem main lst ->(isIn head s ctx) :: acc
+      | (RIGHT, false, _) when side  = "r" -> (isIn head s ctx) :: acc
+      | (LEFT, false, _) when side = "l" -> (isIn head s ctx) :: acc
+      | (RIGHTLEFT, true, lst) when List.mem main lst -> (isIn head s ctx) :: acc
+      | (RIGHT, true, lst) when side  = "r" && List.mem main lst -> (isIn head s ctx) :: acc
+      | (LEFT, true, lst) when side = "l" && List.mem main lst ->(isIn head s ctx) :: acc
       | _ -> acc
       with _ -> acc
   ) (ContextSchema.getContexts ctx) []
@@ -123,8 +123,8 @@ let initial ctx f =
     (requireIn dualf (sub, i)) :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
-    let formSide = Specification.getSide (Specification.getPred (nnf (NOT f))) in
-  (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
+    let formSide = Specification.getSide (nnf (NOT f)) in
+    (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
     if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in

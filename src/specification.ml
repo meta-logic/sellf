@@ -83,49 +83,65 @@ let addRSpec str t = try match Hashtbl.find lr_hash str with
   | (l, r) -> Hashtbl.replace lr_hash str (l, ADDOR(r, t)) 
   with Not_found -> Hashtbl.add lr_hash str (ZERO, t)
 
-let getFirstArgName p = match p with
-  | APP(CONST(n), lst) -> begin match lst with
-    | CONST(s) :: t -> s
-    | APP(CONST(s), _) :: t -> s
-    | _ -> failwith "Error while getting the name of a connective. Are you sure
-    this is a introduction rule specification?"
-  end
-  | _ -> failwith "Function is not an application."
-;;
-
-(* TODO: if there are existential quantifiers, the DB indices are messed up with
-this method... *)
-let rec getPred f = match f with 
+(* Returns the predicate in the head of a specification. 
+ * TODO: if there are existential quantifiers, the DB indices are messed up with
+ * this method... *)
+let rec getHeadPredicate f = match f with 
   | TENSOR(NOT(prd), spc) -> prd
-  | EXISTS(s, i, t) -> getPred t      
+  | EXISTS(s, i, t) -> getHeadPredicate t
   | NOT(prd) -> prd
   | PRED(_, _, _) -> f
   | _ -> failwith ("Not expected formula in specification: " ^ Prints.termToString f)
 ;;
 
-(* Given a predicate that is a head of a specification, return the side of the
-sequent that it occurs (left or right) *)
-let rec getSide p = match p with 
-  | PRED("lft", _, _) -> "lft"
-  | PRED("rght", _, _) -> "rght"
-  | PRED("mlft", _, _) -> "lft"
-  | PRED("mrght", _, _) -> "rght"
-  | _ -> failwith ("No side information available (predicate not corresponding to a specification's head or not a predicate): " ^ Prints.termToString p)
+(* Returns the side of the introduction rule *)
+let rec getSide f = match getHeadPredicate f with 
+  | PRED("lft", _, _) -> "l"
+  | PRED("rght", _, _) -> "r"
+  | PRED("mlft", _, _) -> "l"
+  | PRED("mrght", _, _) -> "r"
+  | _ -> failwith ("No side information available (predicate not corresponding to a specification's head or not a predicate): " ^ Prints.termToString f)
+;;
+
+let getConnectiveName f = match getHeadPredicate f with
+  | PRED(_, APP(CONST(_), args), _) -> match args with
+    | CONST(s) :: t -> s
+    | APP(CONST(s), _) :: t -> s
+    | _ -> failwith "Error while getting the name of a connective. Are you sure
+		     this is an introduction rule specification?"
+  | _ -> failwith ("Error getting the name of a connective: " ^ (Prints.termToString (getHeadPredicate f)))
+;;
+
+let getObjectLogicMainFormula f = match getHeadPredicate f with
+  | PRED(_, APP(CONST(_), h::tl), _) -> h
+  | _ -> failwith ("Error getting the object logic's main formula from a specification: " ^ (Prints.termToString (getHeadPredicate f)))
+;;
+
+let getRuleName f = (getConnectiveName f) ^ "_" ^ (getSide f) ;; 
+
+let getAllRulesName () = 
+  let formulas = !others @ !introRules in
+  List.map (fun f -> getRuleName f) formulas
+;;
+
+(* Given a name of a rule, returns its specification.
+ * NOTE: relies on the fact that the formulas in the lists never change order.
+ *)
+let getSpecificationOf name = 
+  let formulas = !others @ !introRules in
+  List.find (fun f -> getRuleName f = name) formulas
 ;;
 
 let processIntroRule t = 
-  let rec getSpec f = match f with
+  let rec getBodyFormula f = match f with
     | TENSOR(NOT(prd), spc) -> spc
-    | ABS(s, i, t) -> ABS(s, i, getSpec t)
+    | ABS(s, i, t) -> ABS(s, i, getBodyFormula t)
     | NOT(prd) -> TOP (* Specification has no body. *)
     | _ -> failwith "Not expected formula in specification."
   in
-  let (p, s) = getPred t, getSpec t in
-  match p with
-    | PRED("lft", p, _) -> addLSpec (getFirstArgName p) s
-    | PRED("rght", p, _) -> addRSpec (getFirstArgName p) s
-    | PRED("mlft", p, _) -> addLSpec (getFirstArgName p) s
-    | PRED("mrght", p, _) -> addRSpec (getFirstArgName p) s
+  match getSide t with
+    | "l" -> addLSpec (getConnectiveName t) (getBodyFormula t)
+    | "r" -> addRSpec (getConnectiveName t) (getBodyFormula t)
     | _ -> failwith "Valid predicates are 'lft' or 'right' or 'mlft' or 'mrght'."
 ;;
 
@@ -151,3 +167,4 @@ let initialize () =
   addTypeTbl "mlft" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mlft form -> world -> o. *)
   addTypeTbl "mrght" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mrght form -> world -> o. *)
 ;;
+

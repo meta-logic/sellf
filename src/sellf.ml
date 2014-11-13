@@ -115,35 +115,12 @@ let apply_derivation bipoles = begin
   !olPt
 end ;;
 
-let get_form_index n rules_lst = begin
-  let i = ref 0 in
-  let count = ref true in
-  List.iter (fun (rule, side) -> 
-    let finalRule = (rule ^ "_" ^ side) in
-    if n = finalRule then count := false
-    else begin
-      if !count then i := !i + 1
-      else () 
-    end
-  ) rules_lst;
-  !i
-end ;;
-
-let get_rulenames () =
-  let formulas = !Specification.others @ !Specification.introRules in
-  List.map (fun f ->
-    let rule = termToTexString (Term.getOnlyRule (Term.formatForm f)) in
-    let side = Specification.getSide (Specification.getPred f) in
-    (rule, side)
-  ) formulas
-;;  
-
-let print_rulenames () = begin
-  let rules_lst = get_rulenames () in
-  List.iter (fun (rule, side) ->
-    print_endline (rule ^ "_" ^ side);
-  ) rules_lst
-end ;;
+let print_rulenames () =
+  let names = Specification.getAllRulesName () in
+  List.iter (fun s ->
+    print_endline s
+  ) names
+;;
 
 let printOLrules bipoles fileName =
   let file = open_out (filePrefix ^ fileName ^ ".tex") in
@@ -211,18 +188,13 @@ let permutationTex f1 f2 = match Permutation.permute f1 f2 with
     (Permutation.nonPermutationsToTexString notok);
 ;;
 
-(* TODO: a function that, given a specification, returns the name of the rule *)
 let permute forms_lst fileName =
   let file = open_out (filePrefix ^ fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
-  List.iter (fun (f1, f2) -> 
-    let rule1 = termToTexString (Term.getOnlyRule (Term.formatForm f1)) in
-    let side1 = Specification.getSide (Specification.getPred f1) in
-    let pred1 = rule1 ^ "_{" ^ side1 ^ "}" in
-    let rule2 = termToTexString (Term.getOnlyRule (Term.formatForm f2)) in
-    let side2 = Specification.getSide (Specification.getPred f2) in
-    let pred2 = rule2 ^ "_{" ^ side2 ^ "}" in
-    Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" pred1 pred2;
+  List.iter (fun (f1, f2) ->
+    let name1 = Specification.getRuleName f1 in
+    let name2 = Specification.getRuleName f2 in
+    Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
     Printf.fprintf file "%s" (permutationTex f1 f2);
   ) forms_lst;
   Printf.fprintf file "%s" Prints.texFileFooter;
@@ -230,12 +202,10 @@ let permute forms_lst fileName =
 ;;
 
 (* permute_bin: Returns "1" if the rules permute and "0" otherwise *)
-let permute_bin n1 n2 = 
-  let formulas = !Specification.others @ !Specification.introRules in
-  let rulesList = get_rulenames () in
-  let i1 = get_form_index n1 rulesList in
-  let i2 = get_form_index n2 rulesList in 
-  match Permutation.permute (List.nth formulas i1) (List.nth formulas i2) with 
+let permute_bin name1 name2 = 
+  let formula1 = Specification.getSpecificationOf name1 in
+  let formula2 = Specification.getSpecificationOf name2 in
+  match Permutation.permute formula1 formula2 with 
     (* If both lists are empty, no bipoles could be constructed. *)
     | ([], []) -> print_endline "NO (failed constructing bipoles)"
     (* Else if there are no failures the second list should be empty. *)
@@ -246,12 +216,10 @@ let permute_bin n1 n2 =
 
 
 (* Command line #permute *)
-let permute_cl n1 n2 = 
-  let formulas = !Specification.others @ !Specification.introRules in
-  let rulesList = get_rulenames () in
-  let i1 = get_form_index n1 rulesList in
-  let i2 = get_form_index n2 rulesList in
-  print_endline (permutationTex (List.nth formulas i1) (List.nth formulas i2))
+let permute_cl name1 name2 = 
+  let formula1 = Specification.getSpecificationOf name1 in
+  let formula2 = Specification.getSpecificationOf name2 in
+  print_endline (permutationTex formula1 formula2)
 ;;
 
 let print_formulas formulas = 
