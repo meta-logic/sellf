@@ -19,7 +19,7 @@ module type BIPOLE =
     val deriveBipole : SequentSchema.sequent -> terms -> Constraints.constraintset list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     exception Not_bipole of terms
     val bipole : terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val bipoles : terms list -> ((ProofTreeSchema.prooftree * Constraints.constraintset) list) list
+    val bipoles : terms list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
   end
 
 module Bipole : BIPOLE = struct
@@ -193,7 +193,7 @@ module Bipole : BIPOLE = struct
     else raise (Not_bipole f)
 
   (* Generates the bipoles of a list of terms *)
-  let bipoles terms = List.fold_left (fun acc f -> (bipole f) :: acc ) [] terms
+  let bipoles terms = List.fold_left (fun acc f -> (bipole f) @ acc ) [] terms
 
 end;;
 

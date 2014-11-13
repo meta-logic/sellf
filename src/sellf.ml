@@ -185,14 +185,13 @@ let printBipoles bipoles fileName =
 let bipole_cl () =
   let formulas = !Specification.others @ !Specification.introRules in
   try match Bipole.bipoles formulas with
-    | bpls -> List.iter (fun bipoles ->
+    | bipoles ->
       let olPt = apply_derivation bipoles in
       List.iter (fun (olt, model) ->
 	print_endline "\\[";
 	print_endline (OlProofTree.toTexString olt);
 	print_endline "\\]";
       ) olPt;
-    ) bpls
   with Bipole.Not_bipole f -> print_endline ("This formula is not a bipole: " ^ (Prints.termToString f))
 ;;
 

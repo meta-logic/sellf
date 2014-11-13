@@ -347,6 +347,11 @@ module OlProofTree : OLPROOFTREE = struct
 
 end;;
 
+(* TODO: 
+ * (1) refactor the methods so that they take only a bipole, and not a bipole list.
+ * (2) do not transform the full tree into an olTree. With the new algorithm
+ * this should no longer be necessary.
+ *)
 module type DERIVATION = 
   sig
   
