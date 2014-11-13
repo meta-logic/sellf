@@ -201,7 +201,7 @@ let permute forms_lst fileName =
   close_out file
 ;;
 
-(* permute_bin: Returns "1" if the rules permute and "0" otherwise *)
+(* permute_bin: prints yes/no, without showing the derivations *)
 let permute_bin name1 name2 = 
   let formula1 = Specification.getSpecificationOf name1 in
   let formula2 = Specification.getSpecificationOf name2 in
@@ -344,6 +344,20 @@ solve_query () =
         ) formulas acc
       ) formulas [] in
       permute pairs f
+
+    (* Generates the permutation graph of all rules of the object logic and
+     * prints it to a dot file *)
+    | "#permutation_graph" ->
+      print_newline ();
+      print_endline "The permutation graph of all rules of the specification \
+      will be generated in the dot format and printed to a file. To see the \
+      actual graph, you need to have graphviz installed and run 'dot -Tpdf \
+      filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
+      let filename = read_line () in
+      let file = open_out (filename ^ ".dot") in
+      let formulas = !Specification.others @ !Specification.introRules in
+      Printf.fprintf file "%s" (Permutation.getPermutationGraph formulas);
+      close_out file
 
     | "#cutcoherence" -> check_cutcoherence ()
     

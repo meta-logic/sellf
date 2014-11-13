@@ -21,6 +21,8 @@ module type PERMUTATION =
   sig
     val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val isPermutable : terms -> terms -> bool
+    val getPermutationGraph : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
     val nonPermutationsToTexString : Derivation.bipole list -> string
   end
@@ -156,6 +158,27 @@ module Permutation : PERMUTATION = struct
     ) bipoles12 ([], [])
 
   ;;
+
+  (* Checks if two rules are permutable and returns true or false *)
+  let isPermutable rule1 rule2 = match permute rule1 rule2 with
+    | ([], []) -> false
+    | (_, []) -> true
+    | _ -> false
+  ;;
+
+  (* Returns the string representing a dot graph with the permutations between
+   * inferences of a system
+   *)
+  let getPermutationGraph rules =
+    let edges = List.fold_left (fun acc1 rule1 ->
+      List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
+        | true -> (Specification.getRuleName rule1) ^ " -> " ^ (Specification.getRuleName rule2) ^ ";\n" ^ acc2
+        | false -> acc2
+      ) acc1 rules
+    ) "" rules in
+    "digraph G {\n" ^ edges ^ "}\n"
+  ;;
+
 
   let permutationsToTexString lst = 
     (*List.fold_right (fun (b12, b21) acc ->
