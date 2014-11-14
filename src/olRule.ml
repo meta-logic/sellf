@@ -61,8 +61,9 @@ module OlContext : OLCONTEXT = struct
   (* of the proof tree. TODO: Analyze the necessity of mod operation here.*)
   let colorizeForm f actualHeight =
     match (actualHeight mod 2) with
-    | 0 -> "{\color{red}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
-    | 1 -> "{\color{blue}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
+    | 0 -> "{\\color{red}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
+    | 1 -> "{\\color{blue}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
+    | _ -> failwith "Wrong result of module operation (colorizeForm)."
   
   (* Collects a set of subexponential labels, eliminating the repetitions *)
   (* and the invalid labels as '#'.                                       *)
@@ -145,7 +146,7 @@ module OlContext : OLCONTEXT = struct
           match remComma (slotToTex ctx side sub actualHeight) with
             | "" -> begin match acc with
               (*| "" -> " \\cdot " ^ acc*)
-              | _ -> "; {}\cdot{} " ^ acc
+              | _ -> "; {}\\cdot{} " ^ acc
             end
             | str -> begin match acc with
               (*| "" -> str ^ " " ^ acc*)
@@ -325,7 +326,6 @@ module OlProofTree : OLPROOFTREE = struct
 	        | hd::tl -> (toTexString' hd (level + 1))^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el (level + 1))) tl "") 
 	      in
         let pred = List.hd seq.OlSequent.goals in
-        let formSide = Specification.getSide pred in
         let ruleNameTex = Specification.getRuleName pred in
 	      (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "}\n{" ^ topproof ^ "}"*)
 	      "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) index mainRule level) ^ "} \\;\\; " ^ ruleNameTex 
@@ -570,7 +570,7 @@ module Derivation : DERIVATION = struct
      let orderedConstraints' = Constraints.create orderedConstraints in
      let model' = ref orderedConstraints' in 
      let treeHeight = ref (OlProofTree.treeDepth pt) in
-     let decreaseHeight () = treeHeight := !treeHeight - 1; !treeHeight in
+     let decreaseHeight () = treeHeight := !treeHeight - 1 in
      (* A model is applied to the proof tree level by level *)
      (* TODO: Change this algorithm                         *)
      let rec applyModelOnLevel olTree height =

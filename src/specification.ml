@@ -104,11 +104,12 @@ let rec getSide f = match getHeadPredicate f with
 ;;
 
 let getConnectiveName f = match getHeadPredicate f with
-  | PRED(_, APP(CONST(_), args), _) -> match args with
+  | PRED(_, APP(CONST(_), args), _) -> begin match args with
     | CONST(s) :: t -> s
     | APP(CONST(s), _) :: t -> s
     | _ -> failwith "Error while getting the name of a connective. Are you sure
 		     this is an introduction rule specification?"
+    end
   | _ -> failwith ("Error getting the name of a connective: " ^ (Prints.termToString (getHeadPredicate f)))
 ;;
 

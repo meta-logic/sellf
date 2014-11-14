@@ -194,5 +194,6 @@ let isUnbounded cstr =
   | IN (t, (s, i)) -> type_of s = UNB
   | EMP ((s, i)) -> type_of s = UNB
   | SETMINUS (c1, t, (s, i)) -> type_of s = UNB
+  | _ -> failwith "Error: unexpected constraint (isUnbounded)."
   
 let isBounded cstr = not (isUnbounded cstr)  

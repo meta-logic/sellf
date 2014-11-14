@@ -76,8 +76,7 @@ let rec termToString_ term absList = match term with
   | ZERO -> "zero"
   | NOT (t) -> "(not "^(termToString_ t absList)^") "
   | COMP (c, i1, i2) -> (termToString_ i1 absList)^(compToString c)^(termToString_ i2 absList)
-  (*| ASGN ( i1, i2) -> (termToString_ i1 absList)^" is "^(termToString_ i2
-  absList)*)
+  | ASGN ( i1, i2) -> (termToString_ i1 absList)^" is "^(termToString_ i2 absList)
   | PRINT (t1) -> "print "^(termToString_ t1 absList)
   | CUT -> "fail(cut)"
   | TENSOR (t1, t2) -> (termToString_ t1 absList)^" * "^(termToString_ t2 absList)
