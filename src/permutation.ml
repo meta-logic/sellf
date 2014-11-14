@@ -23,6 +23,7 @@ module type PERMUTATION =
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val isPermutable : terms -> terms -> bool
     val getPermutationGraph : terms list -> string
+    val getPermutationTable : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
     val nonPermutationsToTexString : Derivation.bipole list -> string
   end
@@ -179,6 +180,35 @@ module Permutation : PERMUTATION = struct
     "digraph G {\n" ^ edges ^ "}\n"
   ;;
 
+  (* Returns the string representing a latex table with the permutations between
+   * inferences of a system
+   *)
+  let getPermutationTable rules =
+    let cols = List.fold_left (fun acc r -> acc ^ "c|") "|c|" rules in
+    let first_row = List.fold_left (fun acc r -> acc ^ "& $" ^ Specification.getRuleName r ^ "$ ") "$\\cdot$ " rules in
+    let preamble = "\\documentclass[a4paper, 11pt]{article}\n\n \
+      \\usepackage[landscape, margin=1cm]{geometry}\n \
+      \\usepackage{xcolor}\n \
+      \\usepackage{pifont}\n \
+      \\newcommand{\\y}{{\\color{green!60!black}\\ding{52}}}\n \
+      \\newcommand{\\n}{{\\color{red!80!black}\\ding{56}}}\n \
+      \\newcommand{\\na}{$\\circ$}\n\n \
+      \\begin{document}\n\n \
+      Position $(i, j)$ should be interpreted as permutation of rule $i$ down \
+      rule $j$.\n\n \
+      \\begin{tabular}{" ^ cols ^ "}\n\\hline\n" ^ first_row ^ " \\\\\n\\hline\n" in
+    let rows = List.fold_left (fun acc1 rule1 ->
+      let row = List.fold_left (fun acc2 rule2 -> match permute rule2 rule1 with
+        | ([], []) -> acc2 ^ "& \\na "
+	| (_, []) -> acc2 ^ "& \\y "
+	| _ -> acc2 ^ "& \\n"
+      ) ("$" ^ Specification.getRuleName rule1 ^ "$ ") rules in
+      acc1 ^ row ^ " \\\\\n\\hline\n"
+    ) "" rules in
+    let closing = "\\end{tabular}\n \
+      \\end{document}\n" in
+    preamble ^ rows ^ closing
+  ;;
 
   let permutationsToTexString lst = 
     (*List.fold_right (fun (b12, b21) acc ->

@@ -354,10 +354,20 @@ solve_query () =
       actual graph, you need to have graphviz installed and run 'dot -Tpdf \
       filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
       let filename = read_line () in
-      let file = open_out (filename ^ ".dot") in
+      let file = open_out (filePrefix ^ filename ^ ".dot") in
       let formulas = !Specification.others @ !Specification.introRules in
       Printf.fprintf file "%s" (Permutation.getPermutationGraph formulas);
       close_out file
+
+    | "#permutation_table" ->
+      print_newline ();
+      print_endline "The permutation table of all rules of the specification \
+      will be generated in the tex format and printed to a file.\nPlease choose \
+      a name for the file:";
+      let filename = read_line () in
+      let file = open_out (filePrefix ^ filename ^ ".tex") in
+      let formulas = !Specification.others @ !Specification.introRules in
+      Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
     | "#cutcoherence" -> check_cutcoherence ()
     
