@@ -40,6 +40,7 @@ let argslst = [
     'initialcoherence', 'atomicelim', 'scopebang', 'rulenames', 'permute' or 'bipole' (depending on what you want to check)");
   ("-r1", Arg.String (fun r -> rule1 := r), ": set the name of the first rule to check the permutation above the second rule.");
   ("-r2", Arg.String (fun r -> rule2 := r), ": set the name of the second rule.");
+  ("-bipole", Arg.Unit (fun () -> Permutation.setShowBipole true), ": show bipole.");
 ]
 
 let initAll () = 

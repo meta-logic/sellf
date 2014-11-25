@@ -195,10 +195,6 @@ module OlSequent : OLSEQUENT = struct
   
   let toTexString seq index mainRule actualHeight = 
     (OlContext.toTexString seq.ctx "l" index mainRule actualHeight) ^ " \\vdash " ^ (OlContext.toTexString seq.ctx "r" index mainRule actualHeight)
-  
-(*  let toTexString seq index mainRule actualHeight = match seq.pol with
-    | ASYN -> (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\Uparrow "
-    | SYNC -> (OlContext.toTexString seq.ctx "lft" index mainRule actualHeight) ^ " \\Downarrow "*)
 
 end;;
 
@@ -216,7 +212,6 @@ module type OLPROOFTREE =
     val toPermutationFormat : prooftree -> unit
     val toTexString : prooftree -> string
     val toMacroRule : prooftree -> unit
-    val treeDepth : prooftree -> int
   
   end
 
@@ -292,15 +287,6 @@ module OlProofTree : OLPROOFTREE = struct
     let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
     olPt.premises <- newPremises
-   
-  let treeDepth root = 
-    let max (lst : int list) = List.fold_left (fun x y -> if x > y then x else y) (List.hd lst) lst in
-    let rec traverseTree pt = 
-      if pt.premises = [] then 0 else begin
-        let maxHeight = (max (List.map (fun p -> traverseTree p) pt.premises)) in
-        maxHeight + 1
-      end
-    in traverseTree root
     
   let maxIndex pt = 
     let index = ref (-1) in
@@ -396,21 +382,22 @@ module Derivation : DERIVATION = struct
     pair_bpl 
 
   (* The functions below treat the constraints and their behavior. *)
-  let print_subexp (str, i) = print_string (str ^ (string_of_int i))
+  
+  (*let print_subexp (str, i) = print_string (str ^ (string_of_int i))
   
   let print_hashtbl () = print_endline "Hashtbl begin: "; 
-  Hashtbl.iter (fun k content -> 
-    print_subexp k; 
-    print_string " -> ";
-    List.iter (fun (sub, f) -> print_subexp sub;
-      print_string ", ";
-      List.iter (fun t -> print_string ((Prints.termToTexString t) ^ ", ")) f;
-      print_string " ^ "
-    ) content;
-    print_string " | "
-  ) subexpRewrite; 
-  print_string ("\n");
-  print_endline "Hashtbl end"
+    Hashtbl.iter (fun k content -> 
+      print_subexp k; 
+      print_string " -> ";
+      List.iter (fun (sub, f) -> print_subexp sub;
+	print_string ", ";
+	List.iter (fun t -> print_string ((Prints.termToTexString t) ^ ", ")) f;
+	print_string " ^ "
+      ) content;
+      print_string " | "
+    ) subexpRewrite; 
+    print_string ("\n");
+    print_endline "Hashtbl end"*)
   
   (*let rec rewriteContext c acc =
     let ctxList = Hashtbl.find subexpRewrite c in
@@ -430,25 +417,25 @@ module Derivation : DERIVATION = struct
     ) olCtx.OlContext.lst;
     !isDifferent
     
-  (* UNION(Γ1, Γ2, Γ3): Γ3 → Γ1, Γ2 *)
-    (*let solveUnion seq c1 c2 cU =
-    let olCtx = OlSequent.getContext seq in
-    let isDifferent = ref false in
-    let newCtx = List.fold_left (fun acc (olc, f') ->
-		  if (olc = cU) then begin
-		    Hashtbl.add subexpRewrite olc ([(c1, []);(c2, [])]);
-		    isDifferent := true; (c1, []) :: (c2, []) :: acc
-		  end else (olc, f') :: acc
-		 ) [] olCtx.OlContext.lst in
-    olCtx.OlContext.lst <- newCtx; !isDifferent*)
+  (* UNION(Γ1, Γ2, Γ3): Γ3 → Γ1, Γ2 only if Γ3 is bounded *)
   
   let solveUnion seq c1 c2 cU =
     let olCtx = OlSequent.getContext seq in
     let isDifferent = ref false in
+    let isUnbounded = ref false in
     List.iter (fun (olc, f') ->
 		  if (olc = cU) then begin
-		    Hashtbl.add subexpRewrite olc ([(c1, []);(c2, [])]);
-		    isDifferent := true;
+		    (match Subexponentials.type_of (fst olc) with
+		     | LIN | AFF -> ()
+		     | UNB | REL -> isUnbounded := true);
+		     if !isUnbounded then ()
+		     else begin
+		       (* cU is replaced by the rewritten of c1 and c2 in the hashtable. *)
+		       let c1' = Hashtbl.find subexpRewrite c1 in
+		       let c2' = Hashtbl.find subexpRewrite c2 in
+		       Hashtbl.add subexpRewrite olc (c1' @ c2');
+		       isDifferent := true;
+		     end
 		  end else ()
     ) olCtx.OlContext.lst;
     !isDifferent
@@ -456,88 +443,70 @@ module Derivation : DERIVATION = struct
   (* IN (F, Γ): Γ → Γ, F (if the sequent is an open leaf) *)
   (*            Γ → F    (else)                            *)
 
-  let solveIn seq c t isOpenLeaf =
+  let solveIn seq c t isOpenLeaf isLeaf =
     let olCtx = OlSequent.getContext seq in
     let isDifferent = ref false in
     let isUnbounded = ref false in
     List.iter (fun (olc, f) ->  
-      if olc = c then begin
-	(* Don't process formulas with the predicate EXISTS *)
-	match t with
-	  | EXISTS (s, i, t) -> ()
-	  | _ -> begin
-		   isDifferent := true;
-		   (match Subexponentials.type_of (fst olc) with
+      if olc = c && isLeaf then begin
+	    (* Don't process formulas with the predicate EXISTS *)
+	      match t with
+	      | EXISTS (s, i, t) -> ()
+	      | _ -> begin
+		      isDifferent := true;
+		      (match Subexponentials.type_of (fst olc) with
                                           | LIN | AFF -> ()
                                           | UNB | REL -> isUnbounded := true);
-		   if (isOpenLeaf || !isUnbounded) then begin 
-		     let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-		     let newRewrite = if Hashtbl.mem subexpRewrite olc then
-		       List.fold_right (fun (c, tlist) acc ->
-		         if olc = c then (c, t :: tlist) :: acc
-		         else (c, tlist) :: acc
-		       ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
-		     Hashtbl.replace subexpRewrite olc newRewrite
-		   end else begin
-		     let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-		     Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
-		   end
-		 end
-	end else ()
+                      if !isUnbounded || (isLeaf && (not (isOpenLeaf))) then begin
+			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+			Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
+                      end else if isOpenLeaf then begin 
+		        let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+			let newRewrite = if Hashtbl.mem subexpRewrite olc then
+		        List.fold_right (fun (c, tlist) acc ->
+			  if olc = c then (c, t :: tlist) :: acc
+		          else (c, tlist) :: acc
+		        ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
+		        Hashtbl.replace subexpRewrite olc newRewrite
+		      end else ()
+		     end
+      end else ()
     ) olCtx.OlContext.lst;
     !isDifferent
     
   (* MINUS (Γ0, F, Γ1): Γ1 → Γ0 - F *)
   let solveMinus seq c1 t c2 =
-    let isUnbounded = ref false in
     let olCtx = OlSequent.getContext seq in
     let isDifferent = ref false in
+    let isUnbounded = ref false in
     List.iter (fun (olc, f) ->
       if olc = c2 then begin
         (match Subexponentials.type_of (fst olc) with
            | LIN | AFF -> ()
            | UNB | REL -> isUnbounded := true);
-        if !isUnbounded then begin 
-          isDifferent := true;
-          if (Hashtbl.mem subexpRewrite c2) then begin
-            let l1 = Hashtbl.find subexpRewrite c1 in
-            let newRewrite = (List.map (fun ((s, i), f') -> if i = (-1) then ((s, i), f') else (c2, f')) l1) in
-            Hashtbl.replace subexpRewrite c1 newRewrite
-          end else begin
-            let l1 = Hashtbl.find subexpRewrite c1 in
-            let newRewrite1 = (List.map (fun ((s, i), f') -> if i = (-1) then ((s, i), f') else (c2, f')) l1) in
-            let newRewrite2 = (List.map (fun (olc', f') -> 
-	      (c2, (List.fold_right (fun el acc' -> 
-	      if el = t then begin isDifferent := true; acc'
-	      end else el :: acc'
-	      ) f' []))
-	    ) newRewrite1) in    
-	    Hashtbl.replace subexpRewrite c2 newRewrite2;
-            Hashtbl.replace subexpRewrite c1 newRewrite1
-	  end
-	end else begin
+        if !isUnbounded then ()
+	else begin
 	  let l1 = Hashtbl.find subexpRewrite c1 in
 	  let newRewrite = (List.map (fun (olc', f') -> 
 	    (olc', (List.fold_right (fun el acc' -> 
 	      if el = t then begin isDifferent := true; acc'
 	      end else el :: acc'
-	    ) f' []))
+	     ) f' []))
 	  ) l1) in
 	  Hashtbl.add subexpRewrite olc newRewrite;
 	end
       end else ()
-      
     ) olCtx.OlContext.lst;
     !isDifferent
  
- (* isOpenLeaf is a boolean that it's necessary because the constraint IN (G, F) *)
- (* application differs according to that.                                       *)
-  let rewriteSequent olTree model isOpenLeaf =
+ (* isOpenLeaf and isLeaf are booleans that are necessary because the constraint *)
+ (* IN (G, F) application differs according to that.                             *)
+  let rewriteSequent olTree model isOpenLeaf isLeaf =
     let seq = OlProofTree.getConclusion olTree in
     let applyConstraint seq cstr = 
       match cstr with 
       | EMP (c) -> solveEmp seq (OlContext.fixSubLabel c)
-      | IN (t, c) -> solveIn seq (OlContext.fixSubLabel c) t isOpenLeaf
+      | IN (t, c) -> solveIn seq (OlContext.fixSubLabel c) t isOpenLeaf isLeaf
       | UNION (c1, c2, c3) ->
 			  let c3' = OlContext.fixSubLabel c3 in
 			  let c2' = OlContext.fixSubLabel c2 in
@@ -549,61 +518,30 @@ module Derivation : DERIVATION = struct
 			  solveMinus seq c1' t c2'
       (* Any other constraint is despised *)
       | _ -> false in
+    (* If a constraint is applied the new model doesn't contain it. *)
     let newModel = List.fold_left (fun acc cstr -> 
-	      (* print_string "Constraint: ";
-        print_endline (Constraints.predToString cstr); *)
-      if (applyConstraint seq cstr) then begin
-        (* print_string "APPLIED: ";
-        print_endline (Constraints.predToString cstr);
-        print_hashtbl (); *)
-        acc
-      end else acc @ [cstr]
+      if (applyConstraint seq cstr) then acc
+      else acc @ [cstr]
     ) [] model.lst in
     model.lst <- newModel; model
-    
-  (* The constraints are applied from the proof tree leafs to the root. *)
       
-   let applyModel pt model = 
-     (* The constraints must to be ordered because IN(G, F) must be applied before MINUS(G1, F, G0) *) 
-     let orderedConstraints = (List.filter Constraints.isUnion model.lst) @ (List.filter Constraints.isIn model.lst)
-                              @ (List.filter Constraints.isMinus model.lst) @ (List.filter Constraints.isEmp model.lst) in
-     let orderedConstraints' = Constraints.create orderedConstraints in
-     let model' = ref orderedConstraints' in 
-     let treeHeight = ref (OlProofTree.treeDepth pt) in
-     let decreaseHeight () = treeHeight := !treeHeight - 1 in
-     (* A model is applied to the proof tree level by level *)
-     (* TODO: Change this algorithm                         *)
-     let rec applyModelOnLevel olTree height =
-       if height = 0 then begin
-         if (olTree.OlProofTree.premises <> []) then begin
-	   model' := (rewriteSequent olTree !model' false)
-         end else begin
-	   let isOpenLeaf = match olTree.OlProofTree.rule with
-		        | Some(r) -> false
-		        | None -> true 
-	   in model' := (rewriteSequent olTree !model' isOpenLeaf)
-	 end
-       end else List.iter (fun pt' -> applyModelOnLevel pt' (height-1)) olTree.OlProofTree.premises in
-    (* Decreases the level after apply the model to it *)
-    let rec applyModelByLevel olTree treeHeight = 
-      while !treeHeight >= 0 do begin
-        applyModelOnLevel olTree !treeHeight;
-        decreaseHeight ()
-      end done in
-    (* Rewrite the sequent considering only the contexts *)
-    let rewriteSeq' seq = 
-      let olCtx = OlSequent.getContext seq in
-      let newCtx = List.fold_right (fun (olc, f) acc ->
-        if Hashtbl.mem subexpRewrite olc then
-          let ctxRewritten = Hashtbl.find subexpRewrite olc in
-          if (List.exists (fun (olc', f') -> olc = olc') ctxRewritten) then (olc, f) :: acc
-          else (List.map (fun (olc', f') -> (olc', [])) ctxRewritten) @ [((fst(olc), -1), f)] @ acc
-        else (olc, f) :: acc
-      ) olCtx.OlContext.lst [] in
-      let isDifferent = olCtx.OlContext.lst <> newCtx in
-      olCtx.OlContext.lst <- newCtx; isDifferent in
-    (* Rewrite the sequent considering only the formulas *)
-    let rewriteSeq seq = 
+  let applyModel pt model = 
+    let model' = ref model in
+    (* The constraints are applied from the proof tree leafs to the root *)
+    let rec applyModel' olTree =
+      if (olTree.OlProofTree.premises <> []) then begin
+        List.iter applyModel' olTree.OlProofTree.premises; 
+        model' := (rewriteSequent olTree !model' false false)
+      end else begin
+        let isLeaf = true in
+        let isOpenLeaf = match olTree.rule with
+          | Some(r) -> false
+          | None -> true 
+        in model' := (rewriteSequent olTree !model' isOpenLeaf isLeaf)
+      end in
+    (* Bounded case: if the context is member of the hashtable then replace with the rewritten. *)
+    (* if not, do nothing.                                                                      *)
+    let rewriteSeqBounded seq = 
       let olCtx = OlSequent.getContext seq in
       let newCtx = List.fold_right (fun (olc, f) acc ->
         if Hashtbl.mem subexpRewrite olc then begin
@@ -612,13 +550,30 @@ module Derivation : DERIVATION = struct
         end else (olc, f) :: acc
       ) olCtx.OlContext.lst [] in
       olCtx.OlContext.lst <- newCtx in
+    (* Unbounded case: the new context list initiates with the context list of the end sequent. *)
+    (* If the context is member of the hashtable, then replace with the rewritten               *)
+    (* If not, despise the context.                                                             *)
+    let rewriteSeqUnbounded endSeq seq = 
+      let endSeqCtx = OlSequent.getContext endSeq in
+      let olCtx = OlSequent.getContext seq in
+      let newCtx = List.fold_right (fun (olc, f) acc ->
+        if Hashtbl.mem subexpRewrite olc then begin
+          let ctxRewritten = Hashtbl.find subexpRewrite olc in
+          ctxRewritten @ acc
+        end else acc
+      ) olCtx.OlContext.lst endSeqCtx.lst in
+      olCtx.OlContext.lst <- newCtx in
     (* Apply the rewritten in the hashtable on the proof tree *)
-    let rec rewriteTree olTree = 
-      List.iter rewriteTree olTree.OlProofTree.premises;
-      rewriteSeq olTree.OlProofTree.conclusion;
-      (while rewriteSeq' olTree.OlProofTree.conclusion do () done) in
-    applyModelByLevel pt treeHeight;
-    rewriteTree pt;
+    let rec rewriteTree olTree endSeq isUnbounded =
+      List.iter (fun el -> rewriteTree el endSeq isUnbounded) olTree.OlProofTree.premises;
+      if isUnbounded then rewriteSeqUnbounded endSeq olTree.OlProofTree.conclusion
+      else rewriteSeqBounded olTree.OlProofTree.conclusion in
+    let olCtx = OlProofTree.getContextFromPt pt in
+    let isUnbounded = match Subexponentials.type_of (fst(fst(List.hd olCtx.OlContext.lst))) with
+           | LIN | AFF -> false
+           | UNB | REL -> true in
+    applyModel' pt;
+    rewriteTree pt pt.OlProofTree.conclusion isUnbounded;
     Hashtbl.reset subexpRewrite
    
   let rewriteBipoleList olBipole =

@@ -26,10 +26,15 @@ module type PERMUTATION =
     val getPermutationTable : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
     val nonPermutationsToTexString : Derivation.bipole list -> string
+    val setShowBipole: bool -> unit
   end
 
 module Permutation : PERMUTATION = struct
 
+  let showBipole = ref false;;
+  
+  let setShowBipole b = showBipole := b;;
+  
   (* Generates all possible derivations of spec1/spec2 (bottom-up) *)
   let derive2 spec1 spec2 =
 
@@ -210,8 +215,9 @@ module Permutation : PERMUTATION = struct
     preamble ^ rows ^ closing
   ;;
 
-  let permutationsToTexString lst = 
-    (*List.fold_right (fun (b12, b21) acc ->
+  let permutationsToTexString lst =
+    if !showBipole then
+    List.fold_right (fun (b12, b21) acc ->
       "{\\scriptsize\n" ^ 
       "\\[\n" ^
       ProofTreeSchema.toTexString (fst(b12)) ^
@@ -220,10 +226,9 @@ module Permutation : PERMUTATION = struct
       "\n\\]" ^
       "\n}" ^
       "\n\\\\[0.7cm]\n\n" ^ "CONSTRAINTS1\n" ^ (Constraints.toTexString (snd(b12))) ^ "CONSTRAINTS2\n" ^ (Constraints.toTexString (snd(b21)))
-      
       ^ acc
-    ) lst ""*)
-    let olPt = apply_permute lst in
+    ) lst ""
+    else let olPt = apply_permute lst in
     List.fold_right (fun (b12, b21) acc ->
       "{\\scriptsize\n" ^ 
       "\\[\n" ^
