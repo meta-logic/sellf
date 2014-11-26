@@ -111,8 +111,8 @@ object. *)
 let apply_derivation bipoles = begin 
   let olPt = ref [] in
   olPt := Derivation.remakeBipoles bipoles;
-  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
   Derivation.rewriteBipoleList !olPt;
+  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
   !olPt
 end ;;
 
@@ -159,18 +159,23 @@ let printBipoles bipoles fileName =
   close_out file
 ;;
 
-(* Command line #bipole *)
-let bipole_cl () =
+(* Command line #rules *)
+let rules_cl () =
   let formulas = !Specification.others @ !Specification.introRules in
-  try match Bipole.bipoles formulas with
-    | bipoles ->
-      let olPt = apply_derivation bipoles in
+  let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
+    with Bipole.Not_bipole f -> 
+      begin 
+        print_endline ("This formula is not a bipole: " ^ (Prints.termToString f)); acc 
+      end
+  ) formulas [] in
+  List.iter (fun bipole ->
+      let olPt = apply_derivation bipole in
       List.iter (fun (olt, model) ->
-	print_endline "\\[";
-	print_endline (OlProofTree.toTexString olt);
-	print_endline "\\]";
+      	print_endline "\\[";
+      	print_endline (OlProofTree.toTexString olt);
+      	print_endline "\\]";
       ) olPt;
-  with Bipole.Not_bipole f -> print_endline ("This formula is not a bipole: " ^ (Prints.termToString f))
+  ) bipoles
 ;;
 
 let permutationTex f1 f2 = match Permutation.permute f1 f2 with
@@ -442,7 +447,7 @@ match (!check, !fileName, !rule1, !rule2) with
     if parse file then check_scopebang ()
   | ("bipole", file, _, _) ->
     initAll ();
-    if parse file then bipole_cl ()
+    if parse file then rules_cl ()
   | ("permute", file, r1, r2) ->
     initAll ();
     if parse file then permute_cl r1 r2

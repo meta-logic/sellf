@@ -383,7 +383,7 @@ module Derivation : DERIVATION = struct
 
   (* The functions below treat the constraints and their behavior. *)
   
-  (*let print_subexp (str, i) = print_string (str ^ (string_of_int i))
+  (* let print_subexp (str, i) = print_string (str ^ (string_of_int i))
   
   let print_hashtbl () = print_endline "Hashtbl begin: "; 
     Hashtbl.iter (fun k content -> 
@@ -397,7 +397,7 @@ module Derivation : DERIVATION = struct
       print_string " | "
     ) subexpRewrite; 
     print_string ("\n");
-    print_endline "Hashtbl end"*)
+    print_endline "Hashtbl end" *)
   
   (*let rec rewriteContext c acc =
     let ctxList = Hashtbl.find subexpRewrite c in
@@ -519,7 +519,7 @@ module Derivation : DERIVATION = struct
       (* Any other constraint is despised *)
       | _ -> false in
     (* If a constraint is applied the new model doesn't contain it. *)
-    let newModel = List.fold_left (fun acc cstr -> 
+    let newModel = List.fold_left (fun acc cstr ->
       if (applyConstraint seq cstr) then acc
       else acc @ [cstr]
     ) [] model.lst in
