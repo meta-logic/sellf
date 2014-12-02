@@ -2,20 +2,20 @@
 make clean
 make
 OCAMLRUNPARAM="b" ./sellf -bipole << EOF
-#load ../examples/proofsystems/ll
+#load ../examples/proofsystems/mlj
 #permute
-3
-3
-tensor_over_tensor_bipole
+0
+0
+imp_over_imp_bipole
 #done
 #exit
 EOF
 OCAMLRUNPARAM="b" ./sellf << EOF
-#load ../examples/proofsystems/ll
+#load ../examples/proofsystems/mlj
 #permute
-3
-3
-tensor_over_tensor
+0
+0
+imp_over_imp
 #done
 #exit
 EOF
