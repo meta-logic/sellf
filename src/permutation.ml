@@ -220,8 +220,8 @@ module Permutation : PERMUTATION = struct
     List.fold_right (fun (b12, b21) acc ->
       "{\\scriptsize\n" ^ 
       "\\[\n" ^
-      (* ProofTreeSchema.toTexString (fst(b12)) ^ *)
-      (* "\n\\quad\\rightsquigarrow\\quad\n" ^ *)
+      ProofTreeSchema.toTexString (fst(b12)) ^
+      "\n\\quad\\rightsquigarrow\\quad\n" ^
       ProofTreeSchema.toTexString (fst(b21)) ^
       "\n\\]" ^
       "\n}" ^
@@ -254,5 +254,3 @@ module Permutation : PERMUTATION = struct
     ) olPt ""
 
 end;;
-
-
