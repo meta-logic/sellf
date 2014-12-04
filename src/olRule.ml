@@ -326,6 +326,13 @@ end;;
  * (1) refactor the methods so that they take only a bipole, and not a bipole list.
  * (2) do not transform the full tree into an olTree. With the new algorithm
  * this should no longer be necessary.
+ *
+ * Possible signature (initial idea):
+ * private type context = string * int
+ * private type rewritingRules = (context, (context list * terms list)) Hashtbl.t
+ * private val computeRewritingRules : ProofTreeSchema.prooftree -> Constraints.constraintset -> rewritingRules
+ * private val applyRewriting : ProofTreeSchema.prooftree ->  rewritingRules -> OlProofTree
+ * val toObjectLogic : ProofTreeSchema.prooftree -> Constraints.constraintset -> OlProofTree.prooftree
  *)
 module type DERIVATION = 
   sig
@@ -336,7 +343,7 @@ module type DERIVATION =
     val remakePermutation : (bipole * bipole) list -> (olBipole * olBipole) list
     val rewriteBipoleList : olBipole list -> unit
     val rewritePermutationList : (olBipole * olBipole) list -> unit
-  
+
   end
 
 module Derivation : DERIVATION = struct
@@ -542,7 +549,7 @@ module Derivation : DERIVATION = struct
          model' := rewriteSequent olTree !model' false false
       end else begin
         let isLeaf = true in
-        let isOpenLeaf = match olTree.rule with
+        let isOpenLeaf = match olTree.OlProofTree.rule with
           | Some(r) -> false
           | None -> true 
         in model' := rewriteSequent olTree !model' isOpenLeaf isLeaf
