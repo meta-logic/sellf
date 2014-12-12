@@ -474,18 +474,18 @@ module Derivation : DERIVATION = struct
 		      | LIN | AFF -> ()
 		      | UNB | REL -> isUnbounded := true);
 		      if !isUnbounded || (isLeaf && (not (isOpenLeaf))) then begin
-			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-			Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
+      			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+      			Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
 		      end else if isOpenLeaf then begin 
-			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-			let newRewrite = if Hashtbl.mem subexpRewrite olc then
-			  List.fold_right (fun (c, tlist) acc ->
-			    if olc = c then (c, t :: tlist) :: acc
-			    else (c, tlist) :: acc
-			  ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
-			Hashtbl.replace subexpRewrite olc newRewrite
-		      end else ()
-		     end
+      			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+      			let newRewrite = if Hashtbl.mem subexpRewrite olc then
+      			  List.fold_right (fun (c, tlist) acc ->
+      			    if olc = c then (c, t :: tlist) :: acc
+      			    else (c, tlist) :: acc
+      			  ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
+      			Hashtbl.replace subexpRewrite olc newRewrite
+          end else ()
+        end
       end else ()
   ) olCtx.OlContext.lst;
   !isDifferent
@@ -536,12 +536,18 @@ module Derivation : DERIVATION = struct
       | _ -> false in
     (* If a constraint is applied the new model doesn't contain it. *)
     let newModel = List.fold_left (fun acc cstr ->
-      if (applyConstraint seq cstr) then acc
-      else acc @ [cstr]
+      if (applyConstraint seq cstr) then begin
+        (* print_string "APPLIED: ";
+        print_endline (Constraints.predToString cstr);
+        print_hashtbl (); *) acc
+      end else acc @ [cstr]
     ) [] model in newModel
       
   let applyModel pt model = 
     let model' = ref model.lst in
+    (* print_endline ">>>>>>>>>> begin model: ";
+    print_endline (Constraints.toString model);
+    print_endline ">>>>>>>>>> end model: "; *)
     (* The constraints are applied from the proof tree leafs to the root *)
     let rec applyModel' olTree =
       if (olTree.OlProofTree.premises <> []) then begin
@@ -576,10 +582,10 @@ module Derivation : DERIVATION = struct
         if Hashtbl.mem subexpRewrite olc then begin
           let ctxRewritten = Hashtbl.find subexpRewrite olc in
           List.iter (fun ((s, i), f') -> 
-	    (* If i = -2, all the context occurrences after (including) that will be despised *)
-	    if i = (-2) then newEndSeqCtx := List.filter (fun ((s', i'), f'') -> s <> s') !newEndSeqCtx 
-	    else ()
-	  ) ctxRewritten;
+            (* If i = -2, all the context occurrences after (including) that will be despised *)
+            if i = (-2) then newEndSeqCtx := List.filter (fun ((s', i'), f'') -> s <> s') !newEndSeqCtx 
+            else ()
+          ) ctxRewritten;
           ctxRewritten @ acc
         end else acc
       ) olCtx.OlContext.lst [] in
@@ -590,13 +596,13 @@ module Derivation : DERIVATION = struct
       let newEndSeq = begin if isUnbounded then rewriteSeqUnbounded endSeq olTree.OlProofTree.conclusion 
       else rewriteSeqBounded olTree.OlProofTree.conclusion end in
       List.iter (fun el -> rewriteTree el newEndSeq isUnbounded) olTree.OlProofTree.premises in
-    let olCtx = OlProofTree.getContextFromPt pt in
-    let isUnbounded = match Subexponentials.type_of (fst(fst(List.hd olCtx.OlContext.lst))) with
+      let olCtx = OlProofTree.getContextFromPt pt in
+      let isUnbounded = match Subexponentials.type_of (fst(fst(List.hd olCtx.OlContext.lst))) with
            | LIN | AFF -> false
            | UNB | REL -> true in
-    applyModel' pt;
-    rewriteTree pt pt.OlProofTree.conclusion isUnbounded;
-    Hashtbl.reset subexpRewrite
+      applyModel' pt;
+      rewriteTree pt pt.OlProofTree.conclusion isUnbounded;
+      Hashtbl.reset subexpRewrite
    
   let rewriteBipoleList olBipole =
     List.iter (fun (olProofTree, model) ->

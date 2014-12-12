@@ -159,14 +159,28 @@ let printBipoles bipoles fileName =
   close_out file
 ;;
 
+(* Command line #bipoles *)
+let bipoles_cl () =
+  let formulas = !Specification.others @ !Specification.introRules in
+  let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
+    with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
+  ) formulas [] in
+  List.iter (fun bipole ->
+    List.iter (fun (pt, model) ->
+      print_endline "\\[";
+      print_endline (ProofTreeSchema.toTexString (pt));
+      print_endline "\\]";
+      print_endline "CONSTRAINTS:\n";
+      print_endline (Constraints.toTexString (model));
+    ) bipole;
+  ) bipoles
+;;
+
 (* Command line #rules *)
 let rules_cl () =
   let formulas = !Specification.others @ !Specification.introRules in
   let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
-    with Bipole.Not_bipole f -> 
-      begin 
-        print_endline ("This formula is not a bipole: " ^ (Prints.termToString f)); acc 
-      end
+    with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
   ) formulas [] in
   List.iter (fun bipole ->
       let olPt = apply_derivation bipole in
@@ -445,7 +459,10 @@ match (!check, !fileName, !rule1, !rule2) with
   | ("scopebang", file, _, _) ->
     initAll ();
     if parse file then check_scopebang ()
-  | ("bipole", file, _, _) ->
+  | ("bipoles", file, _, _) ->
+    initAll ();
+    if parse file then bipoles_cl ()
+  | ("rules", file, _, _) ->
     initAll ();
     if parse file then rules_cl ()
   | ("permute", file, r1, r2) ->

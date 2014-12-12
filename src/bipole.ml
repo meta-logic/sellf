@@ -20,6 +20,7 @@ module type BIPOLE =
     exception Not_bipole of terms
     val bipole : terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val bipoles : terms list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val isNotBipole : terms -> unit
   end
 
 module Bipole : BIPOLE = struct
@@ -194,6 +195,8 @@ module Bipole : BIPOLE = struct
 
   (* Generates the bipoles of a list of terms *)
   let bipoles terms = List.fold_left (fun acc f -> (bipole f) @ acc ) [] terms
+
+  let isNotBipole f = print_endline ("This formula is not a bipole: " ^ (Prints.termToString f))
 
 end;;
 
