@@ -80,6 +80,10 @@ val predToTexString : constraintpred -> string
 
 val toTexString : constraintset -> string
 
+val predToJaxString : constraintpred -> string
+
+val toJaxString : constraintset -> string
+
 val predToString : constraintpred -> string
 
 val toString : constraintset -> string

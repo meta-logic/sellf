@@ -55,7 +55,7 @@ module OlContext : OLCONTEXT = struct
     else subLabel
     
   let remComma str = try String.sub str 0 ((String.length str) - 2) 
-		     with Invalid_argument("String.sub") -> str
+		     with Invalid_argument("String.sub / Bytes.sub") -> str
   
   (* To print the formulas colorized properly, we need to know the height *)
   (* of the proof tree. TODO: Analyze the necessity of mod operation here.*)
@@ -408,11 +408,22 @@ module Derivation : DERIVATION = struct
     print_string ("\n");
     print_endline "Hashtbl end"
   
-  (*let rec rewriteContext c acc =
-    let ctxList = Hashtbl.find subexpRewrite c in
-    let (s, i) = c in
-    if List.exists (fun ((s', i'), tlist) -> s = s' || i' = (-1)) ctxList then ctxList
-    else List.concat (List.map (fun (olc, tList') -> rewriteContext olc ) ctxList)*)
+  (* All occurrences of c1 will be rewritten to c2 *)
+  let rewriteContextInHashtable c1 c2 = 
+    Hashtbl.iter (fun k rewritten ->
+      let rewritten' = List.fold_right (fun (olc, f) acc -> 
+        if (olc = c1) then (c2, f) :: acc
+        else  (olc, f) :: acc
+      ) rewritten [] in
+      Hashtbl.replace subexpRewrite k rewritten'
+    ) subexpRewrite
+
+  (* All contexts are added in the hashtable to be rewritten for itself *)
+  (* It's necessary when a constraint IN isn't applied in an open leaf *)
+  let addContextsInHashtable olTree = 
+    let seq = OlProofTree.getConclusion olTree in
+    let olCtx = OlSequent.getContext seq in
+    List.iter (fun (olc, f) -> Hashtbl.replace subexpRewrite olc [(olc, [])]) olCtx.OlContext.lst
  
   (* EMP (Γ): Γ → . *)
   let solveEmp seq c = 
@@ -442,15 +453,17 @@ module Derivation : DERIVATION = struct
     List.iter (fun (olc, f') ->
 		  if (olc = cU) then begin
 		    (match Subexponentials.type_of (fst olc) with
-		     | LIN | AFF -> ()
-		     | UNB | REL -> isUnbounded := true);
-		     if !isUnbounded then ()
-		     else begin
-		       (* cU is replaced by the rewritten of c1 and c2 in the hashtable. *)
-		       let c1' = Hashtbl.find subexpRewrite c1 in
-		       let c2' = Hashtbl.find subexpRewrite c2 in
-		       Hashtbl.add subexpRewrite olc (c1' @ c2');
-		       isDifferent := true;
+  	    | LIN | AFF -> ()
+  	    | UNB | REL -> isUnbounded := true);
+  	    if !isUnbounded then ()
+  	    else begin
+	        if Hashtbl.mem subexpRewrite c1 && Hashtbl.mem subexpRewrite c2 then begin
+            (* cU is replaced by the rewritten of c1 and c2 in the hashtable. *)
+  	        let c1' = Hashtbl.find subexpRewrite c1 in
+  	        let c2' = Hashtbl.find subexpRewrite c2 in
+  	        Hashtbl.add subexpRewrite olc (c1' @ c2');
+  	        isDifferent := true
+          end else ()
 		     end
 		  end else ()
     ) olCtx.OlContext.lst;
@@ -502,14 +515,27 @@ module Derivation : DERIVATION = struct
         | UNB | REL -> isUnbounded := true);
         if !isUnbounded then ()
         else begin
-          let l1 = Hashtbl.find subexpRewrite c1 in
-          let newRewrite = (List.map (fun (olc', f') -> 
-            (olc', (List.fold_right (fun el acc' -> 
-              if el = t then begin isDifferent := true; acc'
-              end else el :: acc'
-            ) f' []))
-          ) l1) in
-          Hashtbl.add subexpRewrite olc newRewrite;
+          if Hashtbl.mem subexpRewrite c1 then begin
+            let l1 = Hashtbl.find subexpRewrite c1 in
+            let newRewrite = (List.map (fun (olc', f') -> 
+              (olc', (List.fold_right (fun el acc' -> 
+                if el = t then begin isDifferent := true; acc'
+                end else el :: acc'
+              ) f' []))
+            ) l1) in
+            if Hashtbl.mem subexpRewrite olc then begin
+              let olc' = Hashtbl.find subexpRewrite olc in
+              let formulae = List.concat (List.map (fun (c, f) -> f) olc') in
+              let formulae' = List.concat (List.map (fun (c, f) -> f) newRewrite) in
+              let sameContextLength = ((List.length olc') = (List.length newRewrite)) in
+              let sameFormulae = (List.for_all (fun f -> List.exists (fun f' -> f = f') formulae) formulae')
+                                 && (List.for_all (fun f -> List.exists (fun f' -> f = f') formulae') formulae) in
+              if sameFormulae && sameContextLength then begin
+                List.iter2 (fun (c1, f1) (c2, f2) -> rewriteContextInHashtable c1 c2) newRewrite olc'
+              end else print_endline ("The context " ^ fst(olc) ^ "_" ^ (string_of_int(snd(olc))) ^
+                                      " exists in the hashtable but doesn't have a correspondence in the rewritten.")
+            end else Hashtbl.add subexpRewrite olc newRewrite
+          end else ()
         end
       end else ()
     ) olCtx.OlContext.lst;
@@ -544,7 +570,7 @@ module Derivation : DERIVATION = struct
     ) [] model in newModel
       
   let applyModel pt model = 
-    let model' = ref model.lst in
+    let newModel = ref model.lst in
     (* print_endline ">>>>>>>>>> begin model: ";
     print_endline (Constraints.toString model);
     print_endline ">>>>>>>>>> end model: "; *)
@@ -552,13 +578,15 @@ module Derivation : DERIVATION = struct
     let rec applyModel' olTree =
       if (olTree.OlProofTree.premises <> []) then begin
         List.iter applyModel' olTree.OlProofTree.premises; 
-         model' := rewriteSequent olTree !model' false false
+        newModel := rewriteSequent olTree !newModel false false
       end else begin
         let isLeaf = true in
         let isOpenLeaf = match olTree.OlProofTree.rule with
           | Some(r) -> false
-          | None -> true 
-        in model' := rewriteSequent olTree !model' isOpenLeaf isLeaf
+          | None -> true in
+        let model' = !newModel in
+        newModel := rewriteSequent olTree !newModel isOpenLeaf isLeaf;
+        if isOpenLeaf && (model' = !newModel) then addContextsInHashtable olTree else ()
       end in
     (* Bounded case: if the context is member of the hashtable then replace with the rewritten. *)
     (* if not, do nothing.                                                                      *)

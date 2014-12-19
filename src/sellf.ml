@@ -170,8 +170,8 @@ let bipoles_cl () =
       print_endline "\\[";
       print_endline (ProofTreeSchema.toTexString (pt));
       print_endline "\\]";
-      print_endline "CONSTRAINTS:\n";
-      print_endline (Constraints.toTexString (model));
+      print_endline "$$CONSTRAINTS$$\n";
+      print_endline (Constraints.toJaxString (model));
     ) bipole;
   ) bipoles
 ;;
