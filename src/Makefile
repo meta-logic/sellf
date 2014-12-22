@@ -86,8 +86,8 @@ DOT = dependencies.gv
 # The Caml compilers.
 # You may fix here the path to access the Caml compiler on your machine
 # You may also have to add various -I options.
-CAMLC = ocamlc -g -annot
-CAMLOPT = ocamlopt
+CAMLC = ocamlc -g -annot -I +ocamlgraph
+CAMLOPT = ocamlopt -I +ocamlgraph
 CAMLDEP = ocamldep
 CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
@@ -99,7 +99,7 @@ CAMLDOT = ocamldoc -dot
 # LIBS=$(WITHGRAPHICS) $(WITHUNIX) $(WITHSTR) $(WITHNUMS) $(WITHTHREADS)\
 # $(WITHDBM)
 
-LIBS=$(WITHUNIX)
+LIBS=$(WITHUNIX) $(WITHGRAPH)
 
 # Should be set to -custom if you use any of the libraries above
 # or if any C code have to be linked with your program
@@ -123,6 +123,8 @@ WITHNUMS =nums.cma -cclib -lnums
 WITHTHREADS =threads.cma -cclib -lthreads
 
 WITHDBM =dbm.cma -cclib -lmldbm -cclib -lndbm
+
+WITHGRAPH =graph.cma
 
 ################ End of user's variables #####################
 

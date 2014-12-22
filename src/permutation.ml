@@ -16,6 +16,7 @@ open Dlv
 open OlRule
 open ProofTreeSchema
 open Sequent
+open Graph
 
 module type PERMUTATION = 
   sig
@@ -171,6 +172,15 @@ module Permutation : PERMUTATION = struct
     | (_, []) -> true
     | _ -> false
   ;;
+
+  (* Immutable acyclic graph *)
+  module G = Persistent.Graph.Concrete (struct 
+    type t = string
+    let compare = compare
+    let hash = Hashtbl.hash
+    let equal = (=)
+    let default = ""
+  end)
 
   (* Returns the string representing a dot graph with the permutations between
    * inferences of a system

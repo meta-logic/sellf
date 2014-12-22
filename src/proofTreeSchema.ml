@@ -244,7 +244,7 @@ module ProofTreeSchema : PROOFTREESCHEMA = struct
     let conc = getConclusion pt in
     let ctx = SequentSchema.getContext conc in
     pt.rule <- Some(ONERULE);
-    Constraints.empty "$gamma" ctx
+    Constraints.linearEmpty ctx
 
   (* About the initial rule:
      The initial rule generates constraints of the type ":- not in(F, G1).",

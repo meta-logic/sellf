@@ -81,6 +81,15 @@ let empty subexp ctx =
   let index = ContextSchema.getIndex ctx subexp in
   create [EMP(subexp, index)]
 
+(* Creates empty constraints for all linear contexts *)
+let linearEmpty ctx = 
+  let contexts = ContextSchema.getContexts ctx in
+  let cstrlst = List.fold_right (fun (s, i) acc -> match type_of s with
+    | AFF | LIN -> EMP(s, i) :: acc
+    | REL | UNB -> acc
+  ) contexts [] in
+  create cstrlst
+
 (* Creates the union constraints of linear contexts of newctx1 and newctx2
   resulting in contexts of ctx *)
 let split ctx newctx1 newctx2 =

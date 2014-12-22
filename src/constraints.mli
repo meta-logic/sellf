@@ -70,6 +70,8 @@ val insert : terms -> string -> ContextSchema.context -> ContextSchema.context -
 
 val empty : string -> ContextSchema.context -> constraintset
 
+val linearEmpty : ContextSchema.context -> constraintset
+
 val split : ContextSchema.context -> ContextSchema.context -> ContextSchema.context -> constraintset
 
 val bang : ContextSchema.context -> string -> constraintset

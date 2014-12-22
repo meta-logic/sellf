@@ -28,12 +28,12 @@ rules introduction.
 (not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
 
 % Forall
-%(not (lft (forall A))) * (sigma \X ([l]? (lft (A X)))).
-%(not (rght (forall A))) *  (pi \X ([r]? (rght (A X)))).
+(not (lft (forall A))) * (sigma \X ([l]? (lft (A X)))).
+(not (rght (forall A))) *  (pi \X ([r]? (rght (A X)))).
 
 % Exists
-%(not (lft (exists A))) * (pi \X ([l]? (lft (A X)))).
-%(not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
+(not (lft (exists A))) * (pi \X ([l]? (lft (A X)))).
+(not (rght (exists A))) * (sigma \X ([r]? (rght (A X)))).
 
 % Not
 (not (lft (myNot A))) * ([l]bang ([r]? (rght A))).
@@ -48,3 +48,4 @@ rules cut.
 rules structural.
 (not (lft A)) * (([l]? (lft A)) | ([l]? (lft A)) ). 
 (not (lft A)) * bot. 
+(not (rght A)) * bot. 
