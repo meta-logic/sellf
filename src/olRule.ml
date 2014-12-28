@@ -82,10 +82,10 @@ module OlContext : OLCONTEXT = struct
     match (conList, side) with
     | ([], "l") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
 		     if arity = MANY then "\\Gamma_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int index) ^ "}, "
-		     else "C^{" ^ (string_of_int index) ^ "}_{" ^ (Prints.remSpecial subLabel) ^ "}, "
+		     else ""
     | ([], "r") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
 		      if arity = MANY then "\\Delta_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int index) ^ "}, "
-		      else "C^{" ^ (string_of_int index) ^ "}_{" ^ (Prints.remSpecial subLabel) ^ "}, "
+		      else ""
     | (lst, "l") -> List.fold_right (fun con acc -> 
 			let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found -> failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
 			conTex ^ "\\Gamma_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
@@ -116,7 +116,7 @@ module OlContext : OLCONTEXT = struct
   let printFormList f = List.fold_right (fun f' acc -> (Prints.termToTexString (Specification.getHeadPredicate f')) ^ ", " ^ acc) f ""
   
   (* Subexponentials with index < 0 means that the context should not be *)
-  (* writed, just the formulas.                                          *)
+  (* written, just the formulas.                                         *)
   let toTexString ctx side maxIndex mainRule actualHeight = 
     (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (remFirstChar n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
     let subLst = Subexponentials.getAllValid () in
@@ -146,7 +146,11 @@ module OlContext : OLCONTEXT = struct
           match remComma (slotToTex ctx side sub actualHeight) with
             | "" -> begin match acc with
               (*| "" -> " \\cdot " ^ acc*)
-              | _ -> "; {}\\cdot{} " ^ acc
+              | _ -> begin
+                      let (arity, side) = Hashtbl.find Subexponentials.ctxTbl sub in
+                      if (arity = SINGLE) && (side = RIGHT) then "; {}C " ^ acc
+                      else "; {}\\cdot{} " ^ acc
+                     end
             end
             | str -> begin match acc with
               (*| "" -> str ^ " " ^ acc*)
