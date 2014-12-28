@@ -7,8 +7,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp lr lin.
+subexp un unb.
 
 subexpctx lr many rghtlft.
+subexpctx un many rghtlft.
 
 rules introduction.
 
@@ -33,12 +35,12 @@ rules introduction.
 (not (rght (oplus A B))) * (([lr]? (rght A)) + ([lr]? (rght B))).
 
 % Bang
-(not (lft (lbang A))) * (? (lft A)).
-(not (rght (lbang A))) * (bang (rght A)).
+(not (lft (lbang A))) * ([un]? (lft A)).
+(not (rght (lbang A))) * ([un]bang ([un]? (rght A))).
 
 % Quest
-(not (lft (lquest A))) * (bang (lft A)).
-(not (rght (lquest A))) * (? (rght A)).
+(not (lft (lquest A))) * ([un]bang ([un]? (lft A))).
+(not (rght (lquest A))) * ([un]? (rght A)).
 
 % One
 (not (lft lone)) * bot.
