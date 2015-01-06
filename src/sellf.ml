@@ -365,9 +365,26 @@ solve_query () =
       ) formulas [] in
       permute pairs f
 
+    (* Prints all sets of rules (one per line) such that all rules within one
+     * set permute over each other.
+     *)
+    | "#permutation_cliques" ->
+      print_newline ();
+      print_endline "Rules belonging to the same group permute over each other.";
+      print_endline "This may take a while, please be patient...\n";
+      (* TODO add structural rules and check what changes *)
+      let formulas = !Specification.others @ !Specification.introRules in
+      let cliques = Permutation.getPermutationCliques formulas in
+      List.iter (fun clq ->
+	print_string "[ ";
+	List.iter (fun v -> print_string (v ^ ", ")) clq;
+	print_string " ]\n";
+      ) cliques;
+      print_newline ()
+
     (* Generates the permutation graph of all rules of the object logic and
      * prints it to a dot file *)
-    | "#permutation_graph" ->
+    | "#permutation_dot_graph" ->
       print_newline ();
       print_endline "The permutation graph of all rules of the specification \
       will be generated in the dot format and printed to a file. To see the \
@@ -376,7 +393,7 @@ solve_query () =
       let filename = read_line () in
       let file = open_out (filePrefix ^ filename ^ ".dot") in
       let formulas = !Specification.others @ !Specification.introRules in
-      Printf.fprintf file "%s" (Permutation.getPermutationGraph formulas);
+      Printf.fprintf file "%s" (Permutation.getPermutationDotGraph formulas);
       close_out file
 
     | "#permutation_table" ->

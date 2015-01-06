@@ -18,12 +18,26 @@ open ProofTreeSchema
 open Sequent
 open Graph
 
+(* Immutable acyclic graph *)
+module G = Persistent.Graph.Concrete (struct 
+  type t = string
+  let compare = compare
+  let hash = Hashtbl.hash
+  let equal = (=)
+  let default = ""
+end)
+
+(* Find maximal cliques algorithm *)
+module BK = Clique.Bron_Kerbosch(G)
+
 module type PERMUTATION = 
   sig
     val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val isPermutable : terms -> terms -> bool
-    val getPermutationGraph : terms list -> string
+    val getPermutationGraph : terms list -> G.t
+    val getPermutationCliques : terms list -> string list list
+    val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
     val nonPermutationsToTexString : Derivation.bipole list -> string
@@ -173,19 +187,31 @@ module Permutation : PERMUTATION = struct
     | _ -> false
   ;;
 
-  (* Immutable acyclic graph *)
-  module G = Persistent.Graph.Concrete (struct 
-    type t = string
-    let compare = compare
-    let hash = Hashtbl.hash
-    let equal = (=)
-    let default = ""
-  end)
+  (* Returns an undirected graph of the permutations. An edge between two 
+   * vertices r1, r2 means that r1 permutes over r2 and vice versa.
+   *)
+  let getPermutationGraph rules = 
+    let vertices = Specification.getAllRulesName () in
+    let dir_edges = List.fold_left (fun acc1 rule1 ->
+      List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
+	| true -> ((Specification.getRuleName rule1), (Specification.getRuleName rule2)) :: acc2
+	| false -> acc2
+      ) acc1 rules
+    ) [] rules in
+    (* Keeping only edges in both directions and removing self-loops *)
+    let edges = List.filter (fun (v1, v2) -> (List.mem (v2, v1) dir_edges) && v1 <> v2) dir_edges in
+    let g = List.fold_left (fun graph v -> G.add_vertex graph v) G.empty vertices in
+    List.fold_left (fun graph (v1, v2) -> G.add_edge graph v1 v2) g edges
 
-  (* Returns the string representing a dot graph with the permutations between
+  (* Returns the sets of rules such that they all permute over each other in
+   * each set (equivalent to a clique in the undirected graph).
+   *)
+  let getPermutationCliques rules = BK.maximalcliques (getPermutationGraph rules)
+
+  (* Returns the string representing a dot directed graph with the permutations between
    * inferences of a system
    *)
-  let getPermutationGraph rules =
+  let getPermutationDotGraph rules =
     let edges = List.fold_left (fun acc1 rule1 ->
       List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
         | true -> (Specification.getRuleName rule1) ^ " -> " ^ (Specification.getRuleName rule2) ^ ";\n" ^ acc2
