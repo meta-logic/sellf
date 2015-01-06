@@ -31,7 +31,8 @@ module Bron_Kerbosch(G : G) = struct
     | ([], _) -> cliquelst
     | (c, u) -> 
       let (_, _, cliques) = List.fold_left ( fun (c, u, acc) v ->
-	let n = G.succ graph v in
+	(* Get the neighbors ignoring self-loops *)
+	let n = List.filter (fun nb -> not (G.V.equal nb v)) (G.succ graph v) in
 	let c' = List.filter (fun cv -> List.exists (fun v -> G.V.equal v cv) n) c in
 	let u' = List.filter (fun cv -> List.exists (fun v -> G.V.equal v cv) n) u in
 	let c_minus_v = List.filter (fun cv -> not (G.V.equal cv v)) c in
