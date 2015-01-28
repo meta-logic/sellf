@@ -1,7 +1,10 @@
+
+Thank you for downloading SELLF :)
+
 I) Requirements:
 
 These tools must be installed for 'sellf' to work.
-- ocaml (http://caml.inria.fr/)
+- ocaml, ocamldoc (http://caml.inria.fr/)
 - dlv (http://www.dlvsystem.com/dlv/)
 
 NOTE: The system was implemented and tested in Linux/Ubuntu. It was also
@@ -15,7 +18,8 @@ Execute the installation script:
 ./install.sh
 
 It will create a binary called 'sellf' in the current directory. To start the
-program, execute this binary.
+program, execute this binary. It also creates a documentation of the main
+modules implemented. This is a pdf file in the folder 'doc'.
 
 III) Syntax
 
@@ -44,18 +48,16 @@ current folder. To execute it, just type:
 ./sellf
 
 and press enter. A command line prompt will appear with the symbol ':>'. For a
-list of commands available, you can type '#help'. Here I will only go through a
-small example so that you can understand quickly how the system works.
+list of commands available, you can type '#help'. 
 
 Some example specifications can be found inside the 'examples/proofsystems'
-folder. If you open the file 'g1m.pl' you can see the specification of linear
-logic (without subexponentials). A specification rule has the following form:
+folder. If you open the file 'mall.pl' you can see the specification of
+multiplicative additive linear logic (MALL). A specification rule has the
+following form:
 
-(not (lft (imp A B))) * (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
+(not (rght (tensor A B))) * (([lr]? (rght A)) * ([lr]? (rght B))).
 
-This is exactly as it was specified in the paper "An Extended Framework for
-Specifying and Reasoning about Proof Systems" by Vivek Nigam, Elaine Pimentel
-and Giselle Reis. Some buit-in elements for the specification of systems are:
+Some buit-in elements for the specification of systems are:
 
 - 'form' as the type of formulas of the object logic
 - 'term' as the type of terms of the object logic
@@ -66,10 +68,10 @@ predicates 'rght' or 'lft' that atomizes formulas of the object logic. They are
 also divided in four sections which are identified by the keywords: 'rules
 introduction', 'rules axiom', 'rules cut' and 'rules structural'.
 
-To load the file 'g1m.pl' of the examples folder, run 'sellf' as expalined above
+To load the file 'mall.pl' of the examples folder, run 'sellf' as expalined above
 and type:
 
-#load ../examples/proofsystems/g1m
+#load ../examples/proofsystems/mall
 
 Then, the system will display a '?>' symbol indicating that the file is loaded.
 The commands available at this point can be seen using the command '#help'. 
