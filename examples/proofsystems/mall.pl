@@ -6,11 +6,11 @@
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subexp lr lin.
-subexp un unb.
+% MALL sequent: Gamma |- Delta
+% where Gamma and Delta are multi-sets of formulas (linear)
 
+subexp lr lin.
 subexpctx lr many rghtlft.
-subexpctx un many rghtlft.
 
 rules introduction.
 
