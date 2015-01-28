@@ -360,7 +360,7 @@ solve_query () =
       let f = read_line () in
       let pairs = List.fold_right (fun f1 acc -> 
         List.fold_right (fun f2 acc2 ->
-          (f1, f2) :: acc 
+          (f1, f2) :: acc2 
         ) formulas acc
       ) formulas [] in
       permute pairs f
