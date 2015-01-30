@@ -371,15 +371,26 @@ solve_query () =
     | "#permutation_cliques" ->
       print_newline ();
       print_endline "Rules belonging to the same group permute over each other.";
+      print_endline "Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci, i.e., rj -> ri in G.";
       print_endline "This may take a while, please be patient...\n";
-      (* TODO add structural rules and check what changes *)
       let formulas = !Specification.others @ !Specification.introRules in
       let cliques = Permutation.getPermutationCliques formulas in
+      let graph = Permutation.getPermutationGraph formulas in
+      let pairs = Permutation.getCliquesOrdering cliques graph in
       List.iter (fun clq ->
 	print_string "[ ";
 	List.iter (fun v -> print_string (v ^ ", ")) clq;
 	print_string " ]\n";
       ) cliques;
+      print_newline ();
+      List.iter (fun (c1, c2) ->
+	print_string "[ ";
+	List.iter (fun v -> print_string (v ^ ", ")) c1;
+	print_string " ] < ";
+	print_string "[ ";
+	List.iter (fun v -> print_string (v ^ ", ")) c2;
+	print_string " ]\n";
+      ) pairs;
       print_newline ()
 
     (* Generates the permutation graph of all rules of the object logic and

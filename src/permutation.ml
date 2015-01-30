@@ -27,6 +27,16 @@ module G = Persistent.Graph.Concrete (struct
   let default = ""
 end)
 
+(* Immutable acyclic directed graph *)
+module DG = Persistent.Digraph.Concrete (struct 
+  type t = string
+  let compare = compare
+  let hash = Hashtbl.hash
+  let equal = (=)
+  let default = ""
+end)
+
+
 (* Find maximal cliques algorithm *)
 module BK = Clique.Bron_Kerbosch(G)
 
@@ -35,8 +45,9 @@ module type PERMUTATION =
     val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val isPermutable : terms -> terms -> bool
-    val getPermutationGraph : terms list -> G.t
+    val getPermutationGraph : terms list -> DG.t
     val getPermutationCliques : terms list -> string list list
+    val getCliquesOrdering : string list list -> DG.t -> (string list * string list) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
@@ -187,10 +198,24 @@ module Permutation : PERMUTATION = struct
     | _ -> false
   ;;
 
-  (* Returns an undirected graph of the permutations. An edge between two 
-   * vertices r1, r2 means that r1 permutes over r2 and vice versa.
+  (* Returns a directed graph of the permutations. An edge r1 -> r2
+   * means that r1 permutes up r2.
    *)
   let getPermutationGraph rules = 
+    let vertices = Specification.getAllRulesName () in
+    let edges = List.fold_left (fun acc1 rule1 ->
+      List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
+	| true -> ((Specification.getRuleName rule1), (Specification.getRuleName rule2)) :: acc2
+	| false -> acc2
+      ) acc1 rules
+    ) [] rules in
+    let g = List.fold_left (fun graph v -> DG.add_vertex graph v) DG.empty vertices in
+    List.fold_left (fun graph (v1, v2) -> DG.add_edge graph v1 v2) g edges
+  
+  (* Returns an undirected graph of the permutations. An edge between two 
+   * vertices r1, r2 means that r1 permutes up r2 and vice versa.
+   *)
+  let getUndirectedPermutationGraph rules = 
     let vertices = Specification.getAllRulesName () in
     let dir_edges = List.fold_left (fun acc1 rule1 ->
       List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
@@ -206,10 +231,25 @@ module Permutation : PERMUTATION = struct
   (* Returns the sets of rules such that they all permute over each other in
    * each set (equivalent to a clique in the undirected graph).
    *)
-  let getPermutationCliques rules = BK.maximalcliques (getPermutationGraph rules)
+  let getPermutationCliques rules = BK.maximalcliques (getUndirectedPermutationGraph rules)
+
+  (* Returns the pairs (Ci, Cj) such that Ci < Cj.
+   * Let Ci, Cj be two cliques in the permutation graph G. Then
+   * Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci,
+   * i.e., rj -> ri in G.
+   *)
+  let getCliquesOrdering cliques graph = List.fold_left (fun acc1 c1 ->
+    List.fold_left (fun acc2 c2 -> match c1 = c2 with
+      | true -> acc2 (* not comparing the clique with itself *)
+      | false -> (* check if c1 < c2 *)
+	match List.for_all (fun r2 -> List.for_all (fun r1 -> DG.mem_edge graph r2 r1) c1) c2 with
+	  | true -> (c1, c2) :: acc2
+	  | false -> acc2
+    ) acc1 cliques
+  ) [] cliques
 
   (* Returns the string representing a dot directed graph with the permutations between
-   * inferences of a system
+   * inferences of a system TODO: generate the permutation graph and use ocamlgraph's translation to dot
    *)
   let getPermutationDotGraph rules =
     let edges = List.fold_left (fun acc1 rule1 ->
