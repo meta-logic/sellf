@@ -24,7 +24,6 @@ module type OLCONTEXT =
     type ctx = subexp * terms list
     type context = { mutable lst : ctx list  }
     val create : subexp list -> context
-    val remFirstChar : string -> string
     val getSubLabels : context -> string list
     val toStringForms : terms list -> string -> string -> int -> terms -> string
     val toTexString : context -> string -> int -> terms -> int -> string
@@ -46,16 +45,8 @@ module OlContext : OLCONTEXT = struct
     lst = List.map (fun ctx -> (ctx, [])) ctxList;
   }
   
-  (* Some subexponentials labels comes with '#' or '$' as first character.*)
-  (* For comparison reasons, we need to take away these characters.       *)
-  let remFirstChar subLabel = 
-    if (String.get subLabel 0) = '#' || (String.get subLabel 0) = '$' then 
-      try String.sub subLabel 1 ((String.length subLabel)-1) 
-      with Invalid_argument("index out of bounds") -> subLabel
-    else subLabel
-    
   let remComma str = try String.sub str 0 ((String.length str) - 2) 
-		     with Invalid_argument("String.sub / Bytes.sub") -> str
+		     with Invalid_argument("String.sub") -> str
   
   (* To print the formulas colorized properly, we need to know the height *)
   (* of the proof tree. TODO: Analyze the necessity of mod operation here.*)
@@ -69,8 +60,8 @@ module OlContext : OLCONTEXT = struct
   (* and the invalid labels as '#'.                                       *)
   let getSubLabels ctx =
     List.fold_right (fun ((label, index), f) acc ->  
-      if (List.exists (fun el -> el = (remFirstChar label)) acc) || label = "#" then acc
-      else (remFirstChar label) :: acc
+      if (List.exists (fun el -> el = (Prints.remSpecial label)) acc) || label = "#" then acc
+      else (Prints.remSpecial label) :: acc
     ) ctx.lst []
     
   (* Prints context variables, considering the right side and generates   *)
@@ -118,7 +109,7 @@ module OlContext : OLCONTEXT = struct
   (* Subexponentials with index < 0 means that the context should not be *)
   (* written, just the formulas.                                         *)
   let toTexString ctx side maxIndex mainRule actualHeight = 
-    (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (remFirstChar n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
+    (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
     let subLst = Subexponentials.getAllValid () in
     let slotToTex ctx side sub actualHeight =
     (* Prints context variables *)
@@ -132,10 +123,10 @@ module OlContext : OLCONTEXT = struct
     ) ctx.lst "") ^
     (* Prints formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = (((remFirstChar n) = sub) && (Subexponentials.isSameSide (remFirstChar n) side)) in
+      let correctSide = (((Prints.remSpecial n) = sub) && (Subexponentials.isSameSide (Prints.remSpecial n) side)) in
       match (side, correctSide, i) with
-      | ("l", true, -1)  -> (toStringForms f "l" (remFirstChar n) actualHeight mainRule) ^ acc
-      | ("r", true, -1) -> (toStringForms f "r" (remFirstChar n) actualHeight mainRule) ^ acc
+      | ("l", true, -1)  -> (toStringForms f "l" (Prints.remSpecial n) actualHeight mainRule) ^ acc
+      | ("r", true, -1) -> (toStringForms f "r" (Prints.remSpecial n) actualHeight mainRule) ^ acc
       | _ -> acc
     ) ctx.lst "") in
     (* Prints all the slots *)
@@ -157,7 +148,8 @@ module OlContext : OLCONTEXT = struct
               | _ -> ";{} " ^ str ^ acc
             end
     ) subLst "" in
-    String.sub slotString 1 ((String.length slotString) - 1)
+    try String.sub slotString 1 ((String.length slotString) - 1)
+    with Invalid_argument("String.sub") -> slotString
   
   (* Hack to fix the name of subexponential that come without $ *)
   let fixSubLabel (sub, index) =

@@ -199,9 +199,13 @@ let texFileFooter = "\n\\end{document}"
     
 
 (* Removes special characters from a string *)
-(* TODO: naive function. Fix it. *)
-let remSpecial s = try match  (String.index s '$') with
-  | n -> let cp = String.copy s in
-    String.set cp n ' '; cp
-  with Not_found -> s
+(* Add more symbols to the special list if necessary *)
+let remSpecial s = 
+  let special = ['$';'#'] in 
+  let newStr = ref "" in
+  String.iter (fun c -> match List.mem c special with
+    | true -> ()
+    | false -> newStr := (!newStr ^ (String.make 1 c))
+  ) s;
+  !newStr
 ;;
