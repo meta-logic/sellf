@@ -46,8 +46,8 @@ module type PERMUTATION =
     val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val isPermutable : terms -> terms -> bool
     val getPermutationGraph : terms list -> DG.t
-    val getPermutationCliques : terms list -> string list list
-    val getCliquesOrdering : string list list -> DG.t -> (string list * string list) list
+    val getPermutationCliques : terms list -> (string list, string) Hashtbl.t
+    val getCliquesOrdering : (string list, string) Hashtbl.t -> DG.t -> (string * string) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
     val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
@@ -230,23 +230,29 @@ module Permutation : PERMUTATION = struct
 
   (* Returns the sets of rules such that they all permute over each other in
    * each set (equivalent to a clique in the undirected graph).
+   * The sets are stored in a hashtable that associates it with a name.
    *)
-  let getPermutationCliques rules = BK.maximalcliques (getUndirectedPermutationGraph rules)
+  let getPermutationCliques rules = 
+    let sets = BK.maximalcliques (getUndirectedPermutationGraph rules) in
+    let hashtbl = Hashtbl.create 10 in
+    let index = ref 0 in
+    List.iter (fun cl -> Hashtbl.add hashtbl cl ("C" ^ string_of_int(!index)); index := !index + 1 ) sets;
+    hashtbl
 
   (* Returns the pairs (Ci, Cj) such that Ci < Cj.
    * Let Ci, Cj be two cliques in the permutation graph G. Then
    * Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci,
    * i.e., rj -> ri in G.
    *)
-  let getCliquesOrdering cliques graph = List.fold_left (fun acc1 c1 ->
-    List.fold_left (fun acc2 c2 -> match c1 = c2 with
+  let getCliquesOrdering cliques graph = Hashtbl.fold (fun c1 n1 acc1 ->
+    Hashtbl.fold (fun c2 n2 acc2 -> match c1 = c2 with
       | true -> acc2 (* not comparing the clique with itself *)
       | false -> (* check if c1 < c2 *)
 	match List.for_all (fun r2 -> List.for_all (fun r1 -> DG.mem_edge graph r2 r1) c1) c2 with
-	  | true -> (c1, c2) :: acc2
+	  | true -> (n1, n2) :: acc2
 	  | false -> acc2
-    ) acc1 cliques
-  ) [] cliques
+    ) cliques acc1
+  ) cliques []
 
   (* Returns the string representing a dot directed graph with the permutations between
    * inferences of a system TODO: generate the permutation graph and use ocamlgraph's translation to dot

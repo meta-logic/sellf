@@ -377,19 +377,14 @@ solve_query () =
       let cliques = Permutation.getPermutationCliques formulas in
       let graph = Permutation.getPermutationGraph formulas in
       let pairs = Permutation.getCliquesOrdering cliques graph in
-      List.iter (fun clq ->
-	print_string "[ ";
+      Hashtbl.iter (fun clq name ->
+	print_string (name ^ ": [ ");
 	List.iter (fun v -> print_string (v ^ ", ")) clq;
 	print_string " ]\n";
       ) cliques;
       print_newline ();
       List.iter (fun (c1, c2) ->
-	print_string "[ ";
-	List.iter (fun v -> print_string (v ^ ", ")) c1;
-	print_string " ] < ";
-	print_string "[ ";
-	List.iter (fun v -> print_string (v ^ ", ")) c2;
-	print_string " ]\n";
+	print_endline (c1 ^ " < " ^ c2);
       ) pairs;
       print_newline ()
 
