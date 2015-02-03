@@ -528,7 +528,7 @@ module Derivation : DERIVATION = struct
               if sameFormulae && sameContextLength && sameSub then begin
                 List.iter2 (fun (c1, f1) (c2, f2) -> rewriteContextInHashtable c1 c2) newRewrite olc'
               end else print_endline ("The context " ^ fst(olc) ^ "_" ^ (string_of_int(snd(olc))) ^
-                                      " exists in the hashtable but doesn't have a correspondence in the rewritten.")
+                                      " exists in the hashtable but doesn't have a correspondent in the rewriting system.")
             end else Hashtbl.add subexpRewrite olc newRewrite
           end else ()
         end
