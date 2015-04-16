@@ -7,6 +7,8 @@
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Adequacy on the level of derivations
+
 % The sequents will be Gamma |- Delta 
 % where Gamma and Delta are multi-sets of formulas (linear)
 % and Delta contains at most one formuls at all times.
@@ -23,19 +25,19 @@ rules introduction.
 
 % Implication
 (not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
-(not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
+(not (rght (imp A B))) *  (([l]? (lft A)) | ([l]bang ([r]? (rght B)))).
 
 % Disjunction
 (not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
-(not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
+(not (rght (or A B))) * (([l]bang ([r]? (rght A))) + ([l]bang ([r]? (rght B)))).
 
 % Conjunction additive
 (not (lft (andA A B))) * (([l]? (lft A)) + ([l]? (lft B))).
-(not (rght (andA A B))) * (([r]? (rght A)) & ([r]? (rght B))).
+(not (rght (andA A B))) * (([l]bang ([r]? (rght A))) & ([l]bang ([r]? (rght B)))).
 
 % Conjunction multiplicative
 (not (lft (andM A B))) * (([l]? (lft A)) | ([l]? (lft B))).
-(not (rght (andM A B))) * (([r]? (rght A)) * ([r]? (rght B))).
+(not (rght (andM A B))) * (([l]bang ([r]? (rght A))) * ([l]bang ([r]? (rght B)))).
 
 rules axiom.
 ((not (lft A)) * (not (rght A))).
