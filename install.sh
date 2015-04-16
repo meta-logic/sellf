@@ -3,7 +3,8 @@
 cd src
 make 
 make doc
-cp sellf ../
+#Fix relative paths before uncommenting this
+#cp sellf ../
 cd ../doc
 pdflatex sellfdoc.tex
 pdflatex sellfdoc.tex
