@@ -193,19 +193,21 @@ let rules_cl () =
 ;;
 
 let permutationTex f1 f2 = match Permutation.permute f1 f2 with
-  | ([], []) -> 
-    "Could not build a derivation of the first rule over the second.\n\n";
+  | (true, [], []) -> 
+    "Could not build a derivation with the two chosen rules.\n\n";
 
-  | (pairs, []) -> 
+  | (true, pairs, []) -> 
     "The rules permute. Here are the permutations:\n" ^ 
     (Permutation.permutationsToTexString pairs);
   
-  | (ok, notok) -> 
+  | (false, ok, notok) -> 
     "The rules might not permute. These are the configurations for which a \
     permutation was found:\n" ^
     (Permutation.permutationsToTexString ok) ^ 
     "These are the configurations for which a permutation was not found:\n" ^
     (Permutation.nonPermutationsToTexString notok);
+  
+  | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
 let permute forms_lst fileName =
@@ -227,11 +229,12 @@ let permute_bin name1 name2 =
   let formula2 = Specification.getSpecificationOf name2 in
   match Permutation.permute formula1 formula2 with 
     (* If both lists are empty, no bipoles could be constructed. *)
-    | ([], []) -> print_endline "NO (failed constructing bipoles)"
+    | (true, [], []) -> print_endline "NO (failed constructing bipoles)"
     (* Else if there are no failures the second list should be empty. *)
-    | (pairs, []) -> print_endline "YES";
+    | (true, pairs, []) -> print_endline "YES";
     (* Else, some permutation was not possible. *)
-    | (_, bipoles) -> print_endline "NO (some case is not possible)";
+    | (false, _, bipoles) -> print_endline "NO (some case is not possible)";
+    | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
 

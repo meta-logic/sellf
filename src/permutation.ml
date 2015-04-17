@@ -43,7 +43,7 @@ module BK = Clique.Bron_Kerbosch(G)
 module type PERMUTATION = 
   sig
     val derive2 : terms -> terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val permute : terms -> terms -> ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val permute : terms -> terms -> bool * ((ProofTreeSchema.prooftree * Constraints.constraintset) * (ProofTreeSchema.prooftree * Constraints.constraintset)) list * (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val isPermutable : terms -> terms -> bool
     val getPermutationGraph : terms list -> DG.t
     val getPermutationCliques : terms list -> (string list, string) Hashtbl.t
@@ -153,12 +153,13 @@ module Permutation : PERMUTATION = struct
     ) bipoles1 []
   ;;
 
-  (* The return value of this function is a pair: 
-    ( [(a_1, a_2), ..., (a_{n-1}, a_n)], [b_1, ..., b_k] )
+  (* The return value of this function is a tuple: 
+    ( status, [(a_1, a_2), ..., (a_{n-1}, a_n)], [b_1, ..., b_k] )
 
-    in which the first element is a list of pairs of permutations found, and the
-    secont element are the configurations of the rule for which no permutations
-    were found.
+    where status is a boolean indicating if the rules permute or not,
+    the second element is a list of pairs of permutations found, and the
+    third element is a list of the configurations of the rule for which 
+    no permutations were found.
   *)
   let permute spec1 spec2 =
 
@@ -183,19 +184,23 @@ module Permutation : PERMUTATION = struct
     bipole21, this leaf can be proven given that a leaf of bipole12 is provable.
   *)
 
-    List.fold_right (fun b12 acc ->
+    List.fold_right (fun b12 (status, ppairs, failed) ->
       try match List.find (fun b21 -> Dlv.proofImplies b12 b21) bipoles21 with
-	| b -> ( (b12, b) :: fst(acc), snd(acc) )
-      with Not_found -> ( fst(acc), b12 :: snd(acc) )
-    ) bipoles12 ([], [])
+	| b -> ( true && status, (b12, b) :: ppairs, failed )
+      with Not_found -> ( false && status, ppairs, b12 :: failed )
+    ) bipoles12 (true, [], [])
 
   ;;
 
   (* Checks if two rules are permutable and returns true or false *)
   let isPermutable rule1 rule2 = match permute rule1 rule2 with
-    | ([], []) -> false
-    | (_, []) -> true
-    | _ -> false
+    | (false, _, failed) -> 
+      (* If the permutation failed, there must exist counter examples *)
+      assert (failed != []); false 
+    | (true, _, []) -> 
+      (* If _ is empty, return true by lack of elements in a forall set *)
+      true
+    | _ -> failwith ("Invalid result for permutation checking.")
   ;;
 
   (* Returns a directed graph of the permutations. An edge r1 -> r2
@@ -286,9 +291,10 @@ module Permutation : PERMUTATION = struct
       \\begin{tabular}{" ^ cols ^ "}\n\\hline\n" ^ first_row ^ " \\\\\n\\hline\n" in
     let rows = List.fold_left (fun acc1 rule1 ->
       let row = List.fold_left (fun acc2 rule2 -> match permute rule2 rule1 with
-        | ([], []) -> acc2 ^ "& \\na "
-	| (_, []) -> acc2 ^ "& \\y "
-	| _ -> acc2 ^ "& \\n"
+        | (true, [], []) -> acc2 ^ "& \\na "
+	| (true, _, []) -> acc2 ^ "& \\y "
+	| (false, _, _) -> acc2 ^ "& \\n"
+	| _ -> failwith ("Invalid result for permutation checking.")
       ) ("$" ^ Specification.getRuleName rule1 ^ "$ ") rules in
       acc1 ^ row ^ " \\\\\n\\hline\n"
     ) "" rules in
