@@ -3,6 +3,10 @@ body {
   margin: 50px;
 }
 
+textarea {
+  font: 40.5% "Trebuchet MS", sans-serif;
+}
+
 /* Fixes the positioning of the icon inside a button */
 span.ui-icon {
   margin: 0 5px 0 0;
@@ -16,6 +20,48 @@ span.ui-icon {
 div.blank {
   background: #ffffff;
   font-size: 70%;
+  outline-color: black;
+  outline-width: 1px;
+  outline-style: solid;
 }
 
+div.rightDiv {
+  position: absolute;
+  width: 200px;
+  font-size: 100%;
+  float: right;
+  right: 50px;
+  top: 100px;
+}
+
+div.subRightDiv {
+  position: absolute;
+  width: 200px;
+  font-size: 100%;
+  float: right;
+  right: 0px;
+  top: 180px;
+}
+
+/* For generates LaTeX logo */
+.tex sub, .latex sub, .latex sup {
+  text-transform: uppercase;
+}
+
+.tex sub, .latex sub {
+  vertical-align: -0.5ex;
+  margin-left: -0.1667em;
+  margin-right: -0.125em;
+}
+
+.tex, .latex, .tex sub, .latex sub {
+  font-size: 1em;
+}
+
+.latex sup {
+  font-size: 0.85em;
+  vertical-align: 0.15em;
+  margin-left: -0.36em;
+  margin-right: -0.15em;
+}
 

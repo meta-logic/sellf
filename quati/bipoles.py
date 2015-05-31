@@ -14,20 +14,39 @@ def submit():
     print "Content-type: text/html\n"
 
     form = cgi.FieldStorage()
- 
-    systemName = form.getvalue('system')
 
-    system = urllib.unquote(systemName)
+    src_enc = form.getvalue('src')
+    sig_enc = form.getvalue('sig')
 
-    if system == "":
+    src = urllib.unquote(src_enc)
+    sig = urllib.unquote(sig_enc)
+
+    if src == "":
         print "ERROR"
-        print "No system specified."
+        print "The specification is empty."
+        return
+    if sig == "":
+        print "ERROR"
+        print "The signature is empty."
         return
 
-    cmd = Popen('./quati -c bipole -i examples/' + system, shell=True, stdout=PIPE, stderr=PIPE)
+    src_file = open("files/spec_bipoles.pl", 'w')
+    sig_file = open("files/spec_bipoles.sig", 'w')
+
+    src_file.write(src)
+    sig_file.write(sig)
+
+    src_file.close()
+    sig_file.close()
+
+    # env attribute indicates where dlv.bin is located
+    cmd = Popen('./sellf -c bipoles -i files/spec_bipoles', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout
     print stderr
+
+    os.remove("files/spec_bipoles.pl")
+    os.remove("files/spec_bipoles.sig")
 
 submit()
