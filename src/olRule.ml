@@ -46,7 +46,7 @@ module OlContext : OLCONTEXT = struct
   }
   
   let remComma str = try String.sub str 0 ((String.length str) - 2) 
-		     with Invalid_argument("String.sub / Bytes.sub") -> str
+		     with Invalid_argument("String.sub") -> str
   
   (* To print the formulas colorized properly, we need to know the height *)
   (* of the proof tree. TODO: Analyze the necessity of mod operation here.*)
@@ -149,7 +149,7 @@ module OlContext : OLCONTEXT = struct
             end
     ) subLst "" in
     try String.sub slotString 1 ((String.length slotString) - 1)
-    with Invalid_argument("String.sub / Bytes.sub") -> slotString
+    with Invalid_argument("String.sub") -> slotString
   
   (* Hack to fix the name of subexponential that come without $ *)
   let fixSubLabel (sub, index) =

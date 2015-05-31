@@ -156,7 +156,7 @@ let predToTexString c = match c with
 let rec toTexString csts = 
   (List.fold_right (fun c str -> (predToTexString c) ^ "\n\n" ^ str) csts.lst "") 
 
-(* let predToJaxString c = match c with
+let predToJaxString c = match c with
   | IN (t, c) -> 
     "$$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$$"
   | SETMINUS (c1, t, c0) ->
@@ -164,25 +164,10 @@ let rec toTexString csts =
   | EMP (c) -> 
     "$$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$$"
   | UNION (c1, c2, c3) -> 
-    "$$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$$" *)
-
-let predToJaxString c = match c with
-  | IN (t, c) -> 
-    "in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ")."
-  | SETMINUS (c1, t, c0) ->
-    "minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ")."
-  | EMP (c) -> 
-    "emp(" ^ (ContextSchema.ctxToTex c) ^ ")."
-  | UNION (c1, c2, c3) -> 
-    "union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ")."
+    "$$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$$"
 
 let rec toJaxString csts = 
-  let i = ref (-1) in
-  let counter () = i := !i + 1; !i in
-  (List.fold_right (fun c str ->
-    let bl = if (counter() mod 3) = 0 then "\\\\" else " " in
-    (predToJaxString c) ^ bl ^ str) 
-  csts.lst "")
+  (List.fold_right (fun c str -> (predToJaxString c) ^ "\n" ^ str) csts.lst "") 
 
 let predToString c = match c with
   | IN (t, c) -> 
