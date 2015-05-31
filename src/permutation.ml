@@ -50,8 +50,8 @@ module type PERMUTATION =
     val getCliquesOrdering : (string list, string) Hashtbl.t -> DG.t -> (string * string) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
-    val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> string
-    val nonPermutationsToTexString : Derivation.bipole list -> string
+    val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> bool -> string
+    val nonPermutationsToTexString : Derivation.bipole list -> bool -> string
     val setShowBipole: bool -> unit
   end
 
@@ -303,42 +303,49 @@ module Permutation : PERMUTATION = struct
     preamble ^ rows ^ closing
   ;;
 
-  let permutationsToTexString lst =
+  (* cl is a boolean that is true if it's called from command line functions
+   * it is necessary because \scriptsize and \\ are not needed in this case 
+   *)
+
+  let permutationsToTexString lst cl =
+    let fontSize = if cl then "" else "{\\scriptsize\n" in
+    let fontSizeEnd = if cl then "\n\n" else "\n}\n\\\\[0.7cm]\n\n" in
     if !showBipole then
     List.fold_right (fun (b12, b21) acc ->
-      "{\\scriptsize\n" ^ 
+      fontSize ^ 
       "\\[\n" ^
       ProofTreeSchema.toTexString (fst(b12)) ^
-      "\n\\quad\\rightsquigarrow\\quad\n" ^
+      "\n\\quad\\rightsquigarrow\\\\\\qquad\\qquad\\qquad\n" ^
       ProofTreeSchema.toTexString (fst(b21)) ^
       "\n\\]" ^
-      "\n}" ^
-      "\n\\\\[0.7cm]\n\n" ^ "CONSTRAINTS1\n" ^ (Constraints.toTexString (snd(b12))) ^ "CONSTRAINTS2\n" ^ (Constraints.toTexString (snd(b21)))
+      fontSizeEnd ^
+      "CONSTRAINTS1\n" ^ (Constraints.toTexString (snd(b12))) ^ 
+      "CONSTRAINTS2\n" ^ (Constraints.toTexString (snd(b21)))
       ^ acc
     ) lst ""
     else let olPt = apply_permute lst in
     List.fold_right (fun (b12, b21) acc ->
-      "{\\scriptsize\n" ^ 
+      fontSize ^ 
       "\\[\n" ^
       OlProofTree.toTexString (fst(b12)) ^
-      "\n\\quad\\rightsquigarrow\\quad\n" ^
+      "\n\\quad\\rightsquigarrow\\\\\\qquad\\qquad\\qquad\n" ^
       OlProofTree.toTexString (fst(b21)) ^
       "\n\\]" ^
-      "\n}" ^
-      "\n\\\\[0.7cm]\n\n" ^ acc
+      fontSizeEnd ^ acc
     ) olPt ""
   ;;
 
-  let nonPermutationsToTexString lst = 
+  let nonPermutationsToTexString lst cl = 
+    let fontSize = if cl then "" else "{\\scriptsize\n" in
+    let fontSizeEnd = if cl then "\n\n" else "\n}\n\\\\[0.7cm]\n\n" in
     let olPt = apply_perm_not_found lst in
     List.fold_right (fun (olt, mdl) acc ->
       OlProofTree.toPermutationFormat olt;
-      "{\\scriptsize\n" ^ 
+      fontSize ^ 
       "\\[\n" ^
       OlProofTree.toTexString olt ^
       "\n\\]" ^
-      "\n}" ^
-      "\n\\\\[0.7cm]\n\n" ^ acc
+      fontSizeEnd ^ acc
     ) olPt ""
 
 end;;
