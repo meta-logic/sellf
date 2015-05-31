@@ -130,11 +130,11 @@ let printOLrules bipoles fileName =
     (* Why is the result of this method a list?? *)
     let olPt = apply_derivation bipole in
     List.iter (fun (olt, model) ->
-  		Printf.fprintf file "%s" "{\\scriptsize";
-  		Printf.fprintf file "%s" "\\[";
-  		Printf.fprintf file "%s" (OlProofTree.toTexString olt);
-  		Printf.fprintf file "%s" "\\]";
-  		Printf.fprintf file "%s" "}";
+      Printf.fprintf file "%s" "{\\scriptsize";
+      Printf.fprintf file "%s" "\\[";
+      Printf.fprintf file "%s" (OlProofTree.toTexString olt);
+      Printf.fprintf file "%s" "\\]";
+      Printf.fprintf file "%s" "}";
       (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);*)
     ) olPt;
   ) bipoles;
@@ -170,8 +170,10 @@ let bipoles_cl () =
       print_endline "\\[";
       print_endline (ProofTreeSchema.toTexString (pt));
       print_endline "\\]";
-      print_endline "$$CONSTRAINTS$$\n";
+      print_endline "\\[";
+      print_endline "CONSTRAINTS = ";
       print_endline (Constraints.toJaxString (model));
+      print_endline "\\]";
     ) bipole;
   ) bipoles
 ;;
@@ -185,27 +187,27 @@ let rules_cl () =
   List.iter (fun bipole ->
       let olPt = apply_derivation bipole in
       List.iter (fun (olt, model) ->
-      	print_endline "\\[";
-      	print_endline (OlProofTree.toTexString olt);
-      	print_endline "\\]";
+        print_endline "\\[";
+        print_endline (OlProofTree.toTexString olt);
+        print_endline "\\]";
       ) olPt;
   ) bipoles
 ;;
 
-let permutationTex f1 f2 = match Permutation.permute f1 f2 with
+let permutationTex f1 f2 cl = match Permutation.permute f1 f2 with
   | (true, [], []) -> 
     "Could not build a derivation with the two chosen rules.\n\n";
 
   | (true, pairs, []) -> 
     "The rules permute. Here are the permutations:\n" ^ 
-    (Permutation.permutationsToTexString pairs);
+    (Permutation.permutationsToTexString pairs cl);
   
   | (false, ok, notok) -> 
     "The rules might not permute. These are the configurations for which a \
     permutation was found:\n" ^
-    (Permutation.permutationsToTexString ok) ^ 
+    (Permutation.permutationsToTexString ok cl) ^ 
     "These are the configurations for which a permutation was not found:\n" ^
-    (Permutation.nonPermutationsToTexString notok);
+    (Permutation.nonPermutationsToTexString notok cl);
   
   | _ -> failwith ("Invalid result for permutation checking.")
 ;;
@@ -217,7 +219,7 @@ let permute forms_lst fileName =
     let name1 = Specification.getRuleName f1 in
     let name2 = Specification.getRuleName f2 in
     Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
-    Printf.fprintf file "%s" (permutationTex f1 f2);
+    Printf.fprintf file "%s" (permutationTex f1 f2 false);
   ) forms_lst;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
@@ -242,7 +244,7 @@ let permute_bin name1 name2 =
 let permute_cl name1 name2 = 
   let formula1 = Specification.getSpecificationOf name1 in
   let formula2 = Specification.getSpecificationOf name2 in
-  print_endline (permutationTex formula1 formula2)
+  print_endline (permutationTex formula1 formula2 true)
 ;;
 
 let print_formulas formulas = 
@@ -253,6 +255,34 @@ let print_formulas formulas =
     i := !i + 1
   ) formulas;
   print_newline ()
+;;
+
+let permute_to_file name1 name2 =
+  let formulas = !Specification.others @ !Specification.introRules in
+  let index = ref (-1) in
+  let counter () = index := !index + 1; !index in
+  let i1 = ref 0 in
+  let i2 = ref 0 in
+  List.iter(fun f -> 
+    if (Specification.getRuleName f) = name1 then i1 := counter()
+    else begin
+      if (Specification.getRuleName f) = name2 then i2 := counter()
+      else index := !index + 1;
+    end
+  );
+  permute [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
+;;
+
+let rules_to_file () =
+  let formulas = !Specification.others @ !Specification.introRules in
+  let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
+  printOLrules bipoles "rules"
+;;
+
+let bipoles_to_file () =
+  let formulas = !Specification.others @ !Specification.introRules in
+  let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
+  printBipoles bipoles "bipoles"
 ;;
  
 let rec start () =
@@ -381,13 +411,13 @@ solve_query () =
       let graph = Permutation.getPermutationGraph formulas in
       let pairs = Permutation.getCliquesOrdering cliques graph in
       Hashtbl.iter (fun clq name ->
-	print_string (name ^ ": [ ");
-	List.iter (fun v -> print_string (v ^ ", ")) clq;
-	print_string " ]\n";
+        print_string (name ^ ": [ ");
+        List.iter (fun v -> print_string (v ^ ", ")) clq;
+        print_string " ]\n";
       ) cliques;
       print_newline ();
       List.iter (fun (c1, c2) ->
-	print_endline (c1 ^ " < " ^ c2);
+        print_endline (c1 ^ " < " ^ c2);
       ) pairs;
       print_newline ()
 
@@ -466,7 +496,7 @@ match (!check, !fileName, !rule1, !rule2) with
       print_endline "Version 0.5.\n";
       print_endline ("The file: " ^ file ^ " was loaded.\n");
       while true do
-	      solve_query ()
+        solve_query ()
       done
     end
   (* Running in batch mode *)
@@ -500,6 +530,15 @@ match (!check, !fileName, !rule1, !rule2) with
   | ("permutebin", file, r1, r2) ->
     initAll ();
     if parse file then permute_bin r1 r2
+  | ("bipoles_to_file", file, _, _) ->
+    initAll ();
+    if parse file then bipoles_to_file ()
+  | ("rules_to_file", file, _, _) ->
+    initAll ();
+    if parse file then rules_to_file ()
+  | ("permute_to_file", file, r1, r2) ->
+    initAll ();
+    if parse file then permute_to_file r1 r2
   | (x, y, _, _) -> failwith ("Invalid arguments.")
 ;;
 
