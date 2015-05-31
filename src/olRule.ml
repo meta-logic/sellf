@@ -608,6 +608,7 @@ module Derivation : DERIVATION = struct
       let contextsToErase = List.fold_right (fun ((s, i), f') acc -> 
         if i = (-2) then s :: acc else acc
       ) newCtx [] in
+      let newCtx = List.filter (fun ((s, i), f') -> not (List.mem s contextsToErase)) newCtx in
       let contextsOfEndSequent = List.filter (fun ((s, i), f') -> not (List.mem s contextsToErase)) contextsOfEndSequent in
       let newEndSeqCtx = List.filter (fun ((s, i), f') -> not (List.mem s contextsToErase)) endSeqCtx in
       olCtx.OlContext.lst <- (newCtx @ contextsOfEndSequent); newEndSeqCtx in
