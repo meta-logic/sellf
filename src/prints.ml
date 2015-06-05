@@ -157,7 +157,7 @@ let rec termToTexString_ term absList = match term with
   | CUT -> "fail(cut)"
   | TENSOR (t1, t2) -> (termToTexString_ t1 absList)^" \\otimes "^(termToTexString_ t2 absList)
   | ADDOR (t1, t2) -> (termToTexString_ t1 absList)^" \\oplus "^(termToTexString_ t2 absList)
-  | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\bindnasrepma "^(termToTexString_ t2 absList)
+  | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\unicode{0x214B} "^(termToTexString_ t2 absList)
   | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\multimap_{"^(termToTexString_ s absList)^"} "^(termToTexString_ t1 absList)
   | BANG (CONST("$infty"), t) -> " ! "^(termToTexString_ t absList)
   | HBANG (CONST("$infty"), t) -> " \\hat{!} "^(termToTexString_ t absList)
@@ -165,7 +165,7 @@ let rec termToTexString_ term absList = match term with
   | BANG (s, t) -> " !^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
   | HBANG (s, t) -> " !^{\\hat{"^(termToTexString_ s absList)^"}} "^(termToTexString_ t absList)
   | QST (s, t) -> " ?^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
-  | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\binampersand "^(termToTexString_ t2 absList)
+  | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\unicode{0xFF06} "^(termToTexString_ t2 absList)
   | FORALL (s, i, t) -> "\\forall "^s^" "^(termToTexString_ t ([s] @ absList))
   | EXISTS (s, i, t) -> "\\exists "^s^" "^(termToTexString_ t ([s] @ absList))
   | CLS (ty, t1, t2) -> (termToTexString_ t1 absList)^(clsTypeToString ty)^(termToTexString_ t2 absList)
