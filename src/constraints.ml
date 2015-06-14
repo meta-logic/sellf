@@ -156,16 +156,6 @@ let predToTexString c = match c with
 let rec toTexString csts = 
   (List.fold_right (fun c str -> (predToTexString c) ^ "\n\n" ^ str) csts.lst "") 
 
-(* let predToJaxString c = match c with
-  | IN (t, c) -> 
-    "$$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$$"
-  | SETMINUS (c1, t, c0) ->
-    "$$minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ").$$"
-  | EMP (c) -> 
-    "$$emp(" ^ (ContextSchema.ctxToTex c) ^ ").$$"
-  | UNION (c1, c2, c3) -> 
-    "$$union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ").$$" *)
-
 let predToJaxString c = match c with
   | IN (t, c) -> 
     "in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ")."
