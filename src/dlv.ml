@@ -39,14 +39,11 @@ module Dlv : DLV = struct
   let description = 
   "% We use the following predicate names:
   %
-  %  form(X) ->  Denotes that X is a formula;
   %  in(X, Ctx) -> Denotes that the  formula X is in the context Ctx; 
   %  union(C1, C2, C3)  -> Denotes that the union of the contexts C1 and C2
   %    contains the same elements as the context C3;
   % ctx(Ctx, Sub, Lin/Unb, Leaf, Tree) -> Denotes that the context Ctx belongs to the 
   %   linear/unbounded subexponential of the open leaf Leaf of the tree Tree.
-  % in_geq(F, Sub, Leaf) -> Denotes that the formula F is in a context of a subexponential of 
-  %   of the Leaf that is greater than the subexponential Sub.
   % provIf(Leaf1, Leaf2) -> Denotes that the Leaf1 is provable if Leaf2 is provable.\n\n"
 
   (* union definition *)
@@ -70,8 +67,6 @@ module Dlv : DLV = struct
   let aux_clauses_set = 
   "emp(G1) :- emp(G), union(G1, G2, G).
   emp(G2) :- emp(G), union(G1, G2, G).
-  elin(F, G1) v elin(F, G2) :- elin(F, G), union(G1, G2, G).
-  emp(G1) v emp(G2) :- elin(F, G), union(G1, G2, G).
   emp(G) :- emp(G1), emp(G2), union(G1, G2, G).\n\n"
 
   let proveIf_clauses = 
