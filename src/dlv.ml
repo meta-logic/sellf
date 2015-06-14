@@ -95,9 +95,6 @@ module Dlv : DLV = struct
   % There is a formula in S1 that is in a lower context in S2.
   not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(C2, Sub2, _, Lf2, tree2), not geq(Sub2, Sub1). 
 
-  % There is a formula in a linear context of S2 such that it is in S1 in a greater context.
-  %not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), not geq(Sub2, Sub1). 
-
   % If all the leaves of the second tree are not provable, no models are generated
   :- not ok.\n\n"
 
