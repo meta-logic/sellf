@@ -46,9 +46,7 @@ let isEmpty cst = (List.length cst.lst) == 0
 
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
-  try match Subexponentials.getCtxArity subexp with
-    | MANY | SINGLE -> create [IN(f, (subexp, index))]
-    with _ -> failwith "Not applicable: cannot insert formula in context."
+  create [IN(f, (subexp, index))]
 ;;
 
 (* TODO: decent error handling. *)
