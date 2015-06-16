@@ -406,7 +406,7 @@ solve_query () =
       print_endline "Rules belonging to the same group permute over each other.";
       print_endline "Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci, i.e., rj -> ri in G.";
       print_endline "This may take a while, please be patient...\n";
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       let cliques = Permutation.getPermutationCliques formulas in
       let graph = Permutation.getPermutationGraph formulas in
       let pairs = Permutation.getCliquesOrdering cliques graph in

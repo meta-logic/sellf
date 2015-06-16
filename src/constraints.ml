@@ -18,7 +18,7 @@ let i = ref 0;;
 
 type ctx = string * int
 type constraintpred = 
-  | IN of terms * ctx
+  | IN of terms * ctx * int
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | SETMINUS of ctx * terms * ctx
@@ -46,7 +46,7 @@ let isEmpty cst = (List.length cst.lst) == 0
 
 let isIn f subexp ctx = 
   let index = ContextSchema.getIndex ctx subexp in
-  create [IN(f, (subexp, index))]
+  create [IN(f, (subexp, index), 1)]
 ;;
 
 (* TODO: decent error handling. *)
@@ -138,8 +138,8 @@ let initial ctx f =
   List.map (fun set -> create set) cstrs
 
 let predToTexString c = match c with
-  | IN (t, c) -> 
-    "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ").$"
+  | IN (t, c, n) -> 
+    "$in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ", " ^ (string_of_int n) ^ ").$"
   | SETMINUS (c1, t, c0) ->
     "$minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ").$"
   | EMP (c) -> 
@@ -155,8 +155,8 @@ let rec toTexString csts =
   (List.fold_right (fun c str -> (predToTexString c) ^ "\n\n" ^ str) csts.lst "") 
 
 let predToJaxString c = match c with
-  | IN (t, c) -> 
-    "in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ")."
+  | IN (t, c, n) -> 
+    "in(" ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c) ^ ", " ^ (string_of_int n) ^ ")."
   | SETMINUS (c1, t, c0) ->
     "minus(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (termToTexString t) ^ ", " ^ (ContextSchema.ctxToTex c0) ^ ")."
   | EMP (c) -> 
@@ -173,8 +173,8 @@ let rec toJaxString csts =
   csts.lst "")
 
 let predToString c = match c with
-  | IN (t, c) -> 
-    "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
+  | IN (t, c, n) -> 
+    "in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ", " ^ (string_of_int n) ^ ")."
   | SETMINUS (c1, t, c0) ->
     "minus(" ^ (ContextSchema.ctxToStr c1) ^ ", \"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c0) ^ ")."
   | EMP (c) ->
@@ -182,10 +182,11 @@ let predToString c = match c with
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
   | REQIN_UNB (t, c) -> 
-    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ")."
+    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ", M), greater_than_zero(M)."
   | REQIN_LIN (t, c) -> 
-    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ").\n" ^
-    ":- in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ "), in(F1, " ^ (ContextSchema.ctxToStr c) ^ "), \"" ^ (termToString t) ^ "\" != F1." 
+    ":- not in_ctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ").\n" ^
+    ":- in_ctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ "), in_ctx(F1, " ^ (ContextSchema.ctxToStr c) ^ "), \"" ^ (termToString t) ^ "\" != F1.\n" ^
+    ":- in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ", M), M > 1."
 
 let toString csts = 
   List.fold_right (fun c str -> 
@@ -194,30 +195,31 @@ let toString csts =
 
 let isUnion cstr = 
   match cstr with
-  | UNION (c2, c3, c1) -> true
+  | UNION (_, _, _) -> true
   | _ -> false
   
 let isIn cstr = 
   match cstr with
-  | IN (t, c) -> true
+  | IN (_, _, _) -> true
   | _ -> false
 
 let isEmp cstr = 
   match cstr with
-  | EMP (c) -> true
+  | EMP (_) -> true
   | _ -> false
   
 let isMinus cstr = 
   match cstr with
-  | SETMINUS (c1, t, c2) -> true
+  | SETMINUS (_, _, _) -> true
   | _ -> false
   
 let isUnbounded cstr = 
   match cstr with
-  | UNION (c2, c3, (s, i)) -> type_of s = UNB 
-  | IN (t, (s, i)) -> type_of s = UNB
-  | EMP ((s, i)) -> type_of s = UNB
-  | SETMINUS (c1, t, (s, i)) -> type_of s = UNB
+  | UNION (_, _, (s, _)) -> type_of s = UNB 
+  | IN (_, (s, _), _) -> type_of s = UNB
+  | EMP ((s, _)) -> type_of s = UNB
+  | SETMINUS (_, _, (s, _)) -> type_of s = UNB
   | _ -> failwith "Error: unexpected constraint (isUnbounded)."
   
-let isBounded cstr = not (isUnbounded cstr)  
+let isBounded cstr = not (isUnbounded cstr)
+

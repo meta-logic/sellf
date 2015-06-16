@@ -20,7 +20,7 @@ type ctx = string * int
     translated as ":- not in(F, G)." and REQIN_LIN is translated as ":- not
     in(F, G). :- in(F, G), in(F1, G), F != F1." *)
 type constraintpred =
-  | IN of terms * ctx
+  | IN of terms * ctx * int
   | EMP of ctx
   | UNION of ctx * ctx * ctx
   | SETMINUS of ctx * terms * ctx

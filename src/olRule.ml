@@ -464,35 +464,42 @@ module Derivation : DERIVATION = struct
     ) olCtx.OlContext.lst;
     !isDifferent
     
-  (* IN (F, Γ): Γ → Γ, F (if the sequent is an open leaf)  *)
-  (*            Γ → F    (else)                            *)
-  let solveIn seq c t isOpenLeaf isLeaf =
+  (* IN (F, Γ, N): Γ → Γ, F, ..., F (if the sequent is an open leaf)  *)
+  (*               Γ → F, ..., F    (else)                            *)
+  let solveIn seq c t n isOpenLeaf isLeaf =
     let olCtx = OlSequent.getContext seq in
     let isDifferent = ref false in
-    let isUnbounded = ref false in
     List.iter (fun (olc, f) ->
       if olc = c && isLeaf then begin
-	    (* Don't process formulas with the predicate EXISTS *)
-	      match t with
-	      | EXISTS (s, i, t) -> ()
-	      | _ -> begin
-		      isDifferent := true;
-		      (match Subexponentials.type_of (fst olc) with
-		      | LIN | AFF -> ()
-		      | UNB | REL -> isUnbounded := true);
-		      if !isUnbounded || (isLeaf && (not (isOpenLeaf))) then begin
-      			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-      			Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), [t])] @ oldRewrite)
-		      end else if isOpenLeaf then begin 
-      			let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
-      			let newRewrite = if Hashtbl.mem subexpRewrite olc then
-      			  List.fold_right (fun (c, tlist) acc ->
-      			    if olc = c then (c, t :: tlist) :: acc
-      			    else (c, tlist) :: acc
-      			  ) oldRewrite [] else (oldRewrite @ [(c, [t])]) in
-      			Hashtbl.replace subexpRewrite olc newRewrite
-          end else ()
-        end
+        (* Don't process formulas with the predicate EXISTS *)
+        match t with
+          | EXISTS (s, i, t) -> ()
+          | _ -> begin
+            isDifferent := true;
+            let isUnbounded = match Subexponentials.type_of (fst olc) with
+              | LIN | AFF -> false
+              | UNB | REL -> true
+            in
+            (* Creates a list with n copies of f *)
+            let rec flist f n = match n with
+              | 0 -> []
+              | n -> t :: (flist t (n-1))
+            in
+            if isUnbounded || (not isOpenLeaf) then begin
+              let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+              Hashtbl.replace subexpRewrite olc ([((fst(olc), -1), (flist t n))] @ oldRewrite)
+            end else if isOpenLeaf then begin 
+              let oldRewrite = try Hashtbl.find subexpRewrite olc with Not_found -> [] in
+              let newRewrite = match Hashtbl.mem subexpRewrite olc with
+                | true -> List.fold_right (fun (c, tlist) acc ->
+                    if olc = c then (c, t :: tlist) :: acc
+                    else (c, tlist) :: acc
+                  ) oldRewrite []
+                | false -> oldRewrite @ [(c, (flist t n))] 
+              in
+              Hashtbl.replace subexpRewrite olc newRewrite
+            end else ()
+          end
       end else ()
   ) olCtx.OlContext.lst;
   !isDifferent
@@ -544,8 +551,8 @@ module Derivation : DERIVATION = struct
       match cstr with 
       | EMP (c) -> let c' = (OlContext.fixSubLabel c) in
                    if fst(c') = sub then solveEmp seq c' else false
-      | IN (t, c) -> let c' = (OlContext.fixSubLabel c) in
-                     if fst(c') = sub then solveIn seq c' t isOpenLeaf isLeaf else false
+      | IN (t, c, n) -> let c' = (OlContext.fixSubLabel c) in
+                        if fst(c') = sub then solveIn seq c' t n isOpenLeaf isLeaf else false
       | UNION (c1, c2, c3) ->
 			  let c3' = OlContext.fixSubLabel c3 in
 			  let c2' = OlContext.fixSubLabel c2 in

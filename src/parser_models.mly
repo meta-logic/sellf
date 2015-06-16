@@ -15,6 +15,7 @@ open Types
 open TypeChecker
 
 let parse_error s = 
+  print_endline "Error parsing model from DLV.";
   print_endline s;
   flush stdout
 
@@ -33,7 +34,7 @@ let make_APP lst =
 /* Terminal symbols */
 %token <int> INDEX
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
-%token IN EMP UNION SETMINUS
+%token IN INCTX EMP UNION SETMINUS GTZ
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
 %token COMMA LBRACKET RBRACKET LCURLY RCURLY LPAREN RPAREN UNDERSCORE DOT NEWLINE QUOTE
 %right FORALL EXISTS
@@ -65,26 +66,28 @@ input:
 
 model: 
   /* empty */                   { [] }
-  | constraintPred              { [$1] }
-  | constraintPred COMMA model  { $1 :: $3 }
+  | constraintPred              { $1 }
+  | constraintPred COMMA model  { $1 @ $3 }
   | LCURLY model RCURLY         { $2 }
 ;
 
 constraintPred:
-  | IN LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN {
+  | IN LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INDEX RPAREN {
     let f = deBruijn true $4 in
-    Constraints.IN(f, $7) 
+    [Constraints.IN(f, $7, $9)]
   }
+  | INCTX LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { [] }
   | EMP LPAREN contextVar RPAREN { 
-    Constraints.EMP($3) 
+    [Constraints.EMP($3)]
   }
   | SETMINUS LPAREN contextVar COMMA QUOTE formula QUOTE COMMA contextVar RPAREN { 
     let f = deBruijn true $6 in
-    Constraints.SETMINUS($3, f, $9) 
+    [Constraints.SETMINUS($3, f, $9)]
   }
   | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
-    Constraints.UNION($3, $5, $7) 
+    [Constraints.UNION($3, $5, $7)]
   }
+  | GTZ LPAREN INDEX RPAREN { [] }
   ;
 
 contextVar: 

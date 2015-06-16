@@ -14,17 +14,22 @@ open ProofTreeSchema
 module type DLV = 
   sig
   
-    val description : string
+    val header_title : string
+    val header_multiset_spec : string
+    val header_proveIf_spec : string
+    val title_multiset : string
+    val greater_than_zero : string
     val union_clauses_set : string
     val minus_clauses_set : string
     val emp_clauses_set : string
     val aux_clauses_set : string
+    val title_proveIf : string
     val proveIf_clauses : string
+    val title_facts : string
     val genFile : Constraints.constraintset -> string -> unit
     val getModels : Constraints.constraintset -> Constraints.constraintset list
     val ctxPredicates : SequentSchema.sequent list -> string -> string
-    (* TODO: Remove the polymorphic type *)
-    val okIfProve : 'a list -> string -> string
+    val okIfProve : SequentSchema.sequent list -> string -> string
     val subexpOrdStr : unit -> string
     val reflSubexpRel : unit -> string
     val genPermutationFile : string -> string -> string -> string -> string -> string -> unit
@@ -35,74 +40,151 @@ module type DLV =
 module Dlv : DLV = struct
 
   (* Definitions for the dlv file *)
+  (* The indentation is strange but necessary for a well-formatted output file *)
 
-  let description = 
-  "% We use the following predicate names:
-  %
-  %  in(X, Ctx) -> Denotes that the  formula X is in the context Ctx; 
-  %  union(C1, C2, C3)  -> Denotes that the union of the contexts C1 and C2
-  %    contains the same elements as the context C3;
-  % ctx(Ctx, Sub, Lin/Unb, Leaf, Tree) -> Denotes that the context Ctx belongs to the 
-  %   linear/unbounded subexponential of the open leaf Leaf of the tree Tree.
-  % provIf(Leaf1, Leaf2) -> Denotes that the Leaf1 is provable if Leaf2 is provable.\n\n"
+  let header_title = "
+% Predicate specification:
+%"
+
+  let header_multiset_spec = "
+%
+% in(F, Ctx, N) -> Formula F occurs in Ctx N times
+% union(C1, C2, C) -> C = C1 U C2
+% minus(C1, F, C0) -> C0 = C1 - F
+% emp(C) -> C is the empty set
+%"
+
+  let header_proveIf_spec = "
+% proveIf(S2, S1) -> Sequent S2 is provable if sequent S1 is provable.
+% not_proveIf(S2, S1) -> Sequent S2 cannot be proven from a proof of sequent S1
+% ctx(C, SE, lin/unb, Seq, Tree) -> The context C represents subexponential SE
+%       which is lin/unb in sequent Seq and proof tree Tree.
+% in_sequent_tree{1,2}(F, SE, lin/unb, S, N) -> Formula F occurs in 
+%       subexponential SE, which is lin/unb, N times in sequent S and
+%       proof tree {1,2}.
+%
+"
+
+  let title_multiset = "
+%%%%%%%%%%%%%%%% Clauses for multi-set operations in contexts %%%%%%%%%%%%%%%%%
+"
+
+  let greater_than_zero = "
+% Considering that there are not more than 10 copies of the same formula
+#maxint=10.
+greater_than_zero(I) :- #int(I), I > 0.
+"
 
   (* union definition *)
   (* union(S1, S2, S) :: S = S1 U S2 *)
-  let union_clauses_set =
-  "in(X, S) :- in(X, S1), union(S1, S2, S).
-  in(X, S) :- in(X, S2), union(S1, S2, S).
-  in(X, S1) v in(X, S2) :- in(X, S), union(S1, S2, S).\n\n"
+  let union_clauses_set = "
+in_ctx(F, C) :- in(F, C, M), M > 0.
+
+in(F, C0, N) :- 
+  in(F, C1, N), 
+  not in(F, C2, M), greater_than_zero(M), 
+  union(C1, C2, C0).
+in(F, C0, N) :- 
+  not in(F, C1, M), greater_than_zero(M), 
+  in(F, C2, N), 
+  union(C1, C2, C0).
+in(F, C0, N) :- in(F, C1, I), in(F, C2, J), N = I+J, union(C1, C2, C0).
+
+in(F, C1, M) :- in(F, C0, M), not in_ctx(F, C2), union(C1, C2, C0).
+in(F, C2, M) :- in(F, C0, M), not in_ctx(F, C1), union(C1, C2, C0).
+in(F, C1, D) :- in(F, C0, N), in(F, C2, M), N > M, D = N-M, union(C1, C2, C0).
+in(F, C2, D) :- in(F, C0, N), in(F, C1, M), N > M, D = N-M, union(C1, C2, C0).
+"
 
   (* minus definition *)
   (* minus(G1, F, G0) :: G0 = G1 - F *)
-  let minus_clauses_set =
-  "in(F, G1) :- minus(G1, F, G0).
-   in(F1, G1) :- minus(G1, F, G0), in(F1, G0).\n\n"
+  let minus_clauses_set = "
+in(F, C1, M) :- minus(C1, F, C0), in(F, C0, N), M = N+1.
+in(F, C1, 1) :- minus(C1, F, C0), not in(F, C0, M), greater_than_zero(M).
+in(F1, C1, N) :- minus(C1, F, C0), in(F1, C0, N), F1 != F.
+"
 
   (* emp definition *)
-  let emp_clauses_set = 
-  ":- in(X, G), emp(G).\n\n"
+  let emp_clauses_set = " 
+:- in(F, C, M), M > 0, emp(C).
+"
 
   (* for consistency *)
-  let aux_clauses_set = 
-  "emp(G1) :- emp(G), union(G1, G2, G).
-  emp(G2) :- emp(G), union(G1, G2, G).
-  emp(G) :- emp(G1), emp(G2), union(G1, G2, G).\n\n"
+  let aux_clauses_set = "
+emp(C1) :- emp(C), union(C1, C2, C).
+emp(C2) :- emp(C), union(C1, C2, C).
+emp(C) :- emp(C1), emp(C2), union(C1, C2, C).
+"
 
-  let proveIf_clauses = 
-  "
-  %% Clauses to certify: proof of Lf1 => proof of Lf2
-  provIf(Lf2, Lf1) :- not not_provIf(Lf2, Lf1), ctx(_, _, _, Lf2, tree2), ctx(_, _, _, Lf1, tree1).
+  let title_proveIf = "
+%%%%%%%%%%%%%%%  Clauses to certify: proof of S1 => proof of S2 %%%%%%%%%%%%%%%%
+"
 
-  % Every subexponential is greater than itself.
-  % TODO: not safe. Find a way to specify this.
-  % geq(X, X).
+  let proveIf_clauses = "
+proveIf(S2, S1) :- 
+  not not_proveIf(S2, S1), 
+  ctx(_, _, _, S2, tree2), 
+  ctx(_, _, _, S1, tree1).
 
-  % Definition of in_leaf
-  in_leaf(F, Lf) :- in(F, C), ctx(C, _, _, Lf, _).
+in_sequent_tree1(F, SE, TP, S, M) :- in(F, C, M), M > 0, ctx(C, SE, TP, S, tree1).
+in_sequent_tree2(F, SE, TP, S, M) :- in(F, C, M), M > 0, ctx(C, SE, TP, S, tree2).
+in_sequent_tree2_simple(F, S2) :- in(F, C, M), M > 0, ctx(C, SE, TP, S2, tree2).
 
-  % There is a formula in S1 that is not present in S2
-  not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, _, _, Lf1, tree1), not in_leaf(F, Lf2), ctx(_, _, _, Lf2, tree2).
+% S2 must be provable from a proof of S1.
+% Here we specify the cases where this does not happen.
 
-  % There is a formula in a linear context of S2 such that it is not in S1.
-  not_provIf(Lf2, Lf1) :- in(F, C2), ctx(C2, Sub2, lin, Lf2, tree2), not in_leaf(F, Lf1), ctx(_, _, _, Lf1, tree1).
+% For unbounded and bounded subexponentials:
+% 1. S1 has a formula that is not in S2 at all or
+% 2. S1 has a formula that is in S2 but in a lower subexponential
+%    (remember that formulas can always be downgraded, but never upgraded).
 
-  % There is a formula in S1 that is in a lower context in S2.
-  not_provIf(Lf2, Lf1) :- in(F, C1), ctx(C1, Sub1, _, Lf1, tree1), in(F, C2), ctx(C2, Sub2, _, Lf2, tree2), not geq(Sub2, Sub1). 
+% Additionally, for bound subexponentials:
+% 3. S1 has a formula F n times and S2 has the same formula m times and n != m 
+%    (considering that the occurrences must be in the same subexponential)
 
-  % If all the leaves of the second tree are not provable, no models are generated
-  :- not ok.\n\n"
+% 1. S1 has a formula that is not in S2
+not_proveIf(S2, S1) :- 
+  in_sequent_tree1(F, _, _, S1, _),
+  % This might seem redundant but is necessary to make the rule safe.
+  not in_sequent_tree2_simple(F, S2), ctx(C, _, _, S2, tree2).
+  % Represets the unsafe literal:
+  % not in_sequent_tree2(F, _, _, S2, _).
+  
+% 2. S1 has a formula that is in S2 but in a lower subexponential
+not_proveIf(S2, S1) :- 
+  in_sequent_tree1(F, SE1, _, S1, _),
+  in_sequent_tree2(F, SE2, _, S2, _),
+  not geq(SE2, SE1).
+
+% 3. S1 and S2 both have a formula in a linear subexponential 
+%    but with different multiplicity
+not_proveIf(S2, S1) :- 
+  in_sequent_tree1(F, SE, lin, S1, M),
+  in_sequent_tree2(F, SE, lin, S2, N),
+  M != N.
+
+% If not all the leaves of the second tree are provable, no models are generated
+:- not ok.
+"
+
+  let title_facts = "
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Facts %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+"
 
   (* Generating models for a set of constraints *)
 
   (* Generates a file with the constraint set and the theory specification *)
   let genFile cstrSet name = 
     let file = open_out ("solver/"^name^".in") in
-    Printf.fprintf file "%s" description;
+    Printf.fprintf file "%s" header_title;
+    Printf.fprintf file "%s" header_multiset_spec;
+    Printf.fprintf file "%s" title_multiset;
+    Printf.fprintf file "%s" greater_than_zero;
     Printf.fprintf file "%s" union_clauses_set;
     Printf.fprintf file "%s" minus_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     Printf.fprintf file "%s" aux_clauses_set;
+    Printf.fprintf file "%s" title_facts;
     Printf.fprintf file "%s" (Constraints.toString cstrSet);
     close_out file
 
@@ -111,8 +193,8 @@ module Dlv : DLV = struct
   as strings which are the true predicated in the format of facts (e.g.
   "pred(a). pred(b)." *)
   let getModels cstrSet =
-    genFile cstrSet "temp";
-    let channel = Unix.open_process_in ("dlv -silent solver/temp.in") in
+    genFile cstrSet "temp2";
+    let channel = Unix.open_process_in ("dlv -silent solver/temp2.in") in
     let rec readModel input = try match input_line input with
       | str ->
 	let lexbuf = Lexing.from_string str in
@@ -149,11 +231,11 @@ module Dlv : DLV = struct
       | [_] ->
 	i := !i + 1;
 	let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
-	"provIf(" ^ leafName ^ ", _)."
+	"proveIf(" ^ leafName ^ ", _)."
       | _ :: tl -> 
 	i := !i + 1;
 	let leafName = treeName ^ "_leaf" ^ (string_of_int !i) in
-	"provIf(" ^ leafName ^ ", _), " ^ (okIfProve_aux tl)
+	"proveIf(" ^ leafName ^ ", _), " ^ (okIfProve_aux tl)
     in
     "ok :- " ^ (okIfProve_aux leafs)
 
@@ -166,19 +248,25 @@ module Dlv : DLV = struct
 
   let genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr name =  
     let file = open_out (name) in
-    Printf.fprintf file "%s" description;
+    Printf.fprintf file "%s" header_title;
+    Printf.fprintf file "%s" header_multiset_spec;
+    Printf.fprintf file "%s" header_proveIf_spec;
+    Printf.fprintf file "%s" title_multiset;
+    Printf.fprintf file "%s" greater_than_zero;
     Printf.fprintf file "%s" union_clauses_set;
     Printf.fprintf file "%s" minus_clauses_set;
     Printf.fprintf file "%s" emp_clauses_set;
     Printf.fprintf file "%s" aux_clauses_set;
+    Printf.fprintf file "%s" title_proveIf;
     Printf.fprintf file "%s" proveIf_clauses;
+    Printf.fprintf file "%s\n" okStr;
+    Printf.fprintf file "%s" title_facts;
     Printf.fprintf file "%s" (reflSubexpRel ());
     Printf.fprintf file "%s" (subexpOrdStr ());
     Printf.fprintf file "%s\n" modelStr1;
     Printf.fprintf file "%s\n" modelStr2;
     Printf.fprintf file "%s\n" ctxStr1;
     Printf.fprintf file "%s\n" ctxStr2;
-    Printf.fprintf file "%s\n" okStr;
     close_out file
 
   (* Decides whether a proof of der1 implies in a proof of der2 *)
@@ -190,7 +278,7 @@ module Dlv : DLV = struct
     let modelStr1 = Constraints.toString model1 in
     let modelStr2 = Constraints.toString model2 in
     let okStr = okIfProve openLeaves2 "tree2" in
-    let fileName = "solver/permute.in" in
+    let fileName = "solver/permute2.in" in
     genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
     let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
     let rec hasModel input = try match input_line input with

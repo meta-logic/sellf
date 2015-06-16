@@ -17,14 +17,16 @@ let index = ['0' - '9']+
 rule token = parse
   | [' ' '\t' '\r']  { token lexbuf }
   (* Constraints predicates *)
-  | "in"         { IN } 
-  | "emp"        { EMP }
-  | "union"      { UNION }
-  | "minus"      { SETMINUS }
-  | '('          { LPAREN }
-  | ')'          { RPAREN }
-  | '{'          { LCURLY }
-  | '}'          { RCURLY }
+  | "in"                { IN } 
+  | "in_ctx"            { INCTX } 
+  | "emp"               { EMP }
+  | "union"             { UNION }
+  | "minus"             { SETMINUS }
+  | "greater_than_zero" { GTZ }
+  | '('                 { LPAREN }
+  | ')'                 { RPAREN }
+  | '{'                 { LCURLY }
+  | '}'                 { RCURLY }
   (* Names of contexts *)
   | "_"            { UNDERSCORE }
   | index as idx   { INDEX(int_of_string idx) }
