@@ -182,11 +182,11 @@ let predToString c = match c with
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
   | REQIN_UNB (t, c) -> 
-    ":- not in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ", M), greater_than_zero(M)."
-  | REQIN_LIN (t, c) -> 
-    ":- not in_ctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ").\n" ^
-    ":- in_ctx(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ "), in_ctx(F1, " ^ (ContextSchema.ctxToStr c) ^ "), \"" ^ (termToString t) ^ "\" != F1.\n" ^
-    ":- in(\"" ^ (termToString t) ^ "\", " ^ (ContextSchema.ctxToStr c) ^ ", M), M > 1."
+    ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ", M) } = 0."
+  | REQIN_LIN (t, c) ->
+    ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ") } = 0.\n" ^ 
+    ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ") } > 1.\n" ^
+    ":- in_unique(F, _, " ^ (ContextSchema.ctxToStr c) ^ "), F != \"" ^ (termToString t) ^ "\"."
 
 let toString csts = 
   List.fold_right (fun c str -> 

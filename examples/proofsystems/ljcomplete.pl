@@ -42,3 +42,5 @@ rules introduction.
 rules axiom.
 ((not (lft A)) * (not (rght A))).
 
+rules structural.
+(not (lft A)) * (([l]? (lft A)) | ([l]? (lft A)) ). 

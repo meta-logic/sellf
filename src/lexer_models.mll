@@ -18,11 +18,14 @@ rule token = parse
   | [' ' '\t' '\r']  { token lexbuf }
   (* Constraints predicates *)
   | "in"                { IN } 
-  | "in_ctx"            { INCTX } 
+  | "in_unique"         { INUNQ }
+  | "in_final"          { INFINAL }
   | "emp"               { EMP }
   | "union"             { UNION }
   | "minus"             { SETMINUS }
-  | "greater_than_zero" { GTZ }
+  | "contained"         { CONTAINED }
+  | "max_index"         { MAXIDX }
+  | "not_max_index"     { NOTMAXIDX }
   | '('                 { LPAREN }
   | ')'                 { RPAREN }
   | '{'                 { LCURLY }

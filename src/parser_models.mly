@@ -34,7 +34,7 @@ let make_APP lst =
 /* Terminal symbols */
 %token <int> INDEX
 %token <string> NAME STRING FORALL EXISTS VAR ABS NEW
-%token IN INCTX EMP UNION SETMINUS GTZ
+%token IN INUNQ INFINAL EMP UNION SETMINUS CONTAINED MAXIDX NOTMAXIDX
 %token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
 %token COMMA LBRACKET RBRACKET LCURLY RCURLY LPAREN RPAREN UNDERSCORE DOT NEWLINE QUOTE
 %right FORALL EXISTS
@@ -72,11 +72,15 @@ model:
 ;
 
 constraintPred:
-  | IN LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INDEX RPAREN {
+  | IN LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INDEX RPAREN { [] }
+  | INUNQ LPAREN QUOTE formula QUOTE COMMA INDEX COMMA contextVar RPAREN { [] }
+  | CONTAINED LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { [] }
+  | MAXIDX LPAREN QUOTE formula QUOTE COMMA INDEX COMMA contextVar RPAREN { [] }
+  | NOTMAXIDX LPAREN QUOTE formula QUOTE COMMA INDEX COMMA contextVar RPAREN { [] }
+  | INFINAL LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INDEX RPAREN {
     let f = deBruijn true $4 in
     [Constraints.IN(f, $7, $9)]
   }
-  | INCTX LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { [] }
   | EMP LPAREN contextVar RPAREN { 
     [Constraints.EMP($3)]
   }
@@ -87,7 +91,6 @@ constraintPred:
   | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
     [Constraints.UNION($3, $5, $7)]
   }
-  | GTZ LPAREN INDEX RPAREN { [] }
   ;
 
 contextVar: 

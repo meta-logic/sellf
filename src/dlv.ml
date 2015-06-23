@@ -18,11 +18,7 @@ module type DLV =
     val header_multiset_spec : string
     val header_proveIf_spec : string
     val title_multiset : string
-    val greater_than_zero : string
-    val union_clauses_set : string
-    val minus_clauses_set : string
-    val emp_clauses_set : string
-    val aux_clauses_set : string
+    val multiset_clauses : string
     val title_proveIf : string
     val proveIf_clauses : string
     val title_facts : string
@@ -49,6 +45,7 @@ module Dlv : DLV = struct
   let header_multiset_spec = "
 %
 % in(F, Ctx, N) -> Formula F occurs in Ctx N times
+% in_unique(F, I, C) -> Represents one occurrence of F in C
 % union(C1, C2, C) -> C = C1 U C2
 % minus(C1, F, C0) -> C0 = C1 - F
 % emp(C) -> C is the empty set
@@ -69,51 +66,38 @@ module Dlv : DLV = struct
 %%%%%%%%%%%%%%%% Clauses for multi-set operations in contexts %%%%%%%%%%%%%%%%%
 "
 
-  let greater_than_zero = "
-% Considering that there are not more than 10 copies of the same formula
-#maxint=10.
-greater_than_zero(I) :- #int(I), I > 0.
-"
+  let multiset_clauses = "
+% Considering that there are not more than 5 copies of the same formula
+#maxint=5.
 
-  (* union definition *)
-  (* union(S1, S2, S) :: S = S1 U S2 *)
-  let union_clauses_set = "
-in_ctx(F, C) :- in(F, C, M), M > 0.
+% Distinguishes formula occurrences
+in_unique(F, I, C) :- in(F, C, N), #int(I), 1 <= I, I <= N.
 
-in(F, C0, N) :- 
-  in(F, C1, N), 
-  not in(F, C2, M), greater_than_zero(M), 
-  union(C1, C2, C0).
-in(F, C0, N) :- 
-  not in(F, C1, M), greater_than_zero(M), 
-  in(F, C2, N), 
-  union(C1, C2, C0).
-in(F, C0, N) :- in(F, C1, I), in(F, C2, J), N = I+J, union(C1, C2, C0).
+% Distributes each copy individually
+in_unique(F, I, C1) v in_unique(F, I, C2) :- in_unique(F, I, C), union(C1, C2, C).
+% Avoids duplicated results
+:- in_unique(F, I, C), in_unique(F, I1, C1), in_unique(F, I2, C2), I1 > I2, union(C1, C2, C).
 
-in(F, C1, M) :- in(F, C0, M), not in_ctx(F, C2), union(C1, C2, C0).
-in(F, C2, M) :- in(F, C0, M), not in_ctx(F, C1), union(C1, C2, C0).
-in(F, C1, D) :- in(F, C0, N), in(F, C2, M), N > M, D = N-M, union(C1, C2, C0).
-in(F, C2, D) :- in(F, C0, N), in(F, C1, M), N > M, D = N-M, union(C1, C2, C0).
-"
+% C0 = C1 - {F}
+% Every formula occurring in C0 is also in C1
+in_unique(F, I, C1) :- minus(C1, _, C0), in_unique(F, I, C0).
+% C1 has one extra occurrence of F
+contained(F, C) :- max_index(F, _, C).
+% Index 1 if it's the first occurrence
+in_unique(F, 1, C1) :- minus(C1, F, C0), not contained(F, C0).
+% Otherwise index max_index + 1
+not_max_index(F, I, C) :- in_unique(F, I, C), in_unique(F, J, C), J > I.
+max_index(F, I, C) :- in_unique(F, I, C), not not_max_index(F, I, C).
+in_unique(F, I, C1) :- minus(C1, F, C0), contained(F, C0), max_index(F, J, C0), I = J+1.
 
-  (* minus definition *)
-  (* minus(G1, F, G0) :: G0 = G1 - F *)
-  let minus_clauses_set = "
-in(F, C1, M) :- minus(C1, F, C0), in(F, C0, N), M = N+1.
-in(F, C1, 1) :- minus(C1, F, C0), not in(F, C0, M), greater_than_zero(M).
-in(F1, C1, N) :- minus(C1, F, C0), in(F1, C0, N), F1 != F.
-"
+:- in_unique(F, I, C), I > 0, emp(C).
 
-  (* emp definition *)
-  let emp_clauses_set = " 
-:- in(F, C, M), M > 0, emp(C).
-"
-
-  (* for consistency *)
-  let aux_clauses_set = "
 emp(C1) :- emp(C), union(C1, C2, C).
 emp(C2) :- emp(C), union(C1, C2, C).
 emp(C) :- emp(C1), emp(C2), union(C1, C2, C).
+
+% count the copies of elements in all sets and translate back to original notation
+in_final(F, C, Count) :- in_unique(F, _, C), Count = #count{ I : in_unique(F, I, C) }, #int(Count).
 "
 
   let title_proveIf = "
@@ -179,11 +163,7 @@ not_proveIf(S2, S1) :-
     Printf.fprintf file "%s" header_title;
     Printf.fprintf file "%s" header_multiset_spec;
     Printf.fprintf file "%s" title_multiset;
-    Printf.fprintf file "%s" greater_than_zero;
-    Printf.fprintf file "%s" union_clauses_set;
-    Printf.fprintf file "%s" minus_clauses_set;
-    Printf.fprintf file "%s" emp_clauses_set;
-    Printf.fprintf file "%s" aux_clauses_set;
+    Printf.fprintf file "%s" multiset_clauses;
     Printf.fprintf file "%s" title_facts;
     Printf.fprintf file "%s" (Constraints.toString cstrSet);
     close_out file
@@ -252,11 +232,7 @@ not_proveIf(S2, S1) :-
     Printf.fprintf file "%s" header_multiset_spec;
     Printf.fprintf file "%s" header_proveIf_spec;
     Printf.fprintf file "%s" title_multiset;
-    Printf.fprintf file "%s" greater_than_zero;
-    Printf.fprintf file "%s" union_clauses_set;
-    Printf.fprintf file "%s" minus_clauses_set;
-    Printf.fprintf file "%s" emp_clauses_set;
-    Printf.fprintf file "%s" aux_clauses_set;
+    Printf.fprintf file "%s" multiset_clauses;
     Printf.fprintf file "%s" title_proveIf;
     Printf.fprintf file "%s" proveIf_clauses;
     Printf.fprintf file "%s\n" okStr;

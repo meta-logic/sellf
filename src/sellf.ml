@@ -21,7 +21,7 @@ let position lexbuf =
     if file = "" then
       () (* lexbuf information is rarely accurate at the toplevel *)
     else
-      print_string "";Format.sprintf ": line %d, character %d" line char
+      print_string ""; Format.sprintf ": line %d, character %d" line char
 
 let filePrefix = "proofsTex/" ;;
 
@@ -161,7 +161,7 @@ let printBipoles bipoles fileName =
 
 (* Command line #bipoles *)
 let bipoles_cl () =
-  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
   let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
     with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
   ) formulas [] in
@@ -180,7 +180,7 @@ let bipoles_cl () =
 
 (* Command line #rules *)
 let rules_cl () =
-  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
   let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
     with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
   ) formulas [] in
@@ -258,7 +258,7 @@ let print_formulas formulas =
 ;;
 
 let permute_to_file name1 name2 =
-  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
   let index = ref (-1) in
   let counter () = index := !index + 1; !index in
   let i1 = ref 0 in
@@ -274,13 +274,13 @@ let permute_to_file name1 name2 =
 ;;
 
 let rules_to_file () =
-  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
   let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
   printOLrules bipoles "rules"
 ;;
 
 let bipoles_to_file () =
-  let formulas = !Specification.others @ !Specification.introRules in
+  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
   let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
   printBipoles bipoles "bipoles"
 ;;
@@ -320,7 +320,7 @@ solve_query () =
 
     (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
     | "#bipole" -> 
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       print_formulas formulas;
       print_endline "The bipoles for the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -336,7 +336,7 @@ solve_query () =
       print_endline "All the bipoles of the specification will be generated \
       and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
       printBipoles bipoles f
 
@@ -350,7 +350,7 @@ solve_query () =
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       print_formulas formulas;
       print_endline "The object logic rule of the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -366,13 +366,13 @@ solve_query () =
       print_endline "The object logic rules of all the formulas of the specification \
       will be generated and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
       printOLrules bipoles f
 
     (* Check if two rules permute *)
     | "#permute" -> 
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       print_formulas formulas;
       print_endline "Checking the permutation of one formula F1 over \
       another F2 (i.e., can a derivation where F1 is below F2 be transformed \
@@ -387,7 +387,7 @@ solve_query () =
 
     (* Check if all rules permute *)
     | "#permute_all" ->
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       print_endline "Checking the permutation of all formulas over all \
       formulas.\nPlease type a file name for the results:";
       let f = read_line () in
@@ -431,7 +431,7 @@ solve_query () =
       filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
       let filename = read_line () in
       let file = open_out (filePrefix ^ filename ^ ".dot") in
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       Printf.fprintf file "%s" (Permutation.getPermutationDotGraph formulas);
       close_out file
 
@@ -442,7 +442,7 @@ solve_query () =
       a name for the file:";
       let filename = read_line () in
       let file = open_out (filePrefix ^ filename ^ ".tex") in
-      let formulas = !Specification.others @ !Specification.introRules in
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
     | "#cutcoherence" -> check_cutcoherence ()

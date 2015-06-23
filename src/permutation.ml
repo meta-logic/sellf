@@ -96,7 +96,7 @@ module Permutation : PERMUTATION = struct
 	  | lst -> lst :: acc
       ) (ProofTreeSchema.getOpenLeaves pt1) []
       in
-
+    
       (* Combining the derivations
 
 	Let ol1, ol2, ..., oln be the open leaves of derivation. Each open leaf

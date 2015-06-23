@@ -107,7 +107,7 @@ let getConnectiveName f = match getHeadPredicate f with
   | PRED(_, APP(CONST(_), args), _) -> begin match args with
     | CONST(s) :: t -> s
     | APP(CONST(s), _) :: t -> s
-    | _ -> "contraction"
+    | _ -> "noname"
     (* TODO FIXME commented out because this method is sometimes called for structural rules *)
     (*failwith "Error while getting the name of a connective. Are you sure this is an introduction rule specification?"*)
     end
