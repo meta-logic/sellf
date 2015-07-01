@@ -43,12 +43,12 @@ rules axiom.
 % Init
 ((not (lft A)) * (not (rght A))).
 
-rules cut.
+%rules cut.
 % Cut
-(([l]? (lft A)) * ([r]? (rght A))).
+%(([l]? (lft A)) * ([r]? (rght A))).
 
-rules structural.
+%rules structural.
 % Structural rules for modals
-((not (lft (nec A))) * ([nl]? (lft (nec A)))).
-((not (rght (poss A))) * ([pr]? (rght (poss A)))).
+%((not (lft (nec A))) * ([nl]? (lft (nec A)))).
+%((not (rght (poss A))) * ([pr]? (rght (poss A)))).
 

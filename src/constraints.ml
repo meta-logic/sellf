@@ -182,7 +182,7 @@ let predToString c = match c with
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToStr c1) ^ ", " ^ (ContextSchema.ctxToStr c2) ^ ", " ^ (ContextSchema.ctxToStr c3) ^ ")."
   | REQIN_UNB (t, c) -> 
-    ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ", M) } = 0."
+    ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ") } = 0."
   | REQIN_LIN (t, c) ->
     ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ") } = 0.\n" ^ 
     ":- #count{ I : in_unique(\"" ^ (termToString t) ^ "\", I, " ^ (ContextSchema.ctxToStr c) ^ ") } > 1.\n" ^
