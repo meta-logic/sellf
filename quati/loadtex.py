@@ -36,13 +36,13 @@ def submit():
   fileName = ''
 
   if textAreaId == 'rulesSourceCode':
-    cmdStr = './sellf -c rules_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c rules_to_file -i files/spec_loadtex'
     fileName = 'rules.tex'
   elif textAreaId == 'permutationSourceCode':
-    cmdStr = './sellf -c permute_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c permute_to_file -i files/spec_loadtex'
     fileName = 'permutation.tex'
   elif textAreaId == 'bipolesSourceCode':
-    cmdStr = './sellf -c bipoles_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c bipoles_to_file -i files/spec_loadtex'
     fileName = 'bipoles.tex'
 
   # env attribute indicates where dlv.bin is located

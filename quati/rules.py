@@ -40,7 +40,7 @@ def submit():
     sig_file.close()
 
     # env attribute indicates where dlv.bin is located
-    cmd = Popen('./sellf -c rules -i files/spec_rules', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
+    cmd = Popen('ocamlrun sellf -c rules -i files/spec_rules', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout

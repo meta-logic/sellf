@@ -44,7 +44,7 @@ def submit():
     sig_file.close()
 
     # env attribute indicates where dlv.bin is located
-    cmd = Popen('./sellf -c permute -i files/spec_permutation  -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
+    cmd = Popen('ocamlrun sellf -c permute -i files/spec_permutation  -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout
