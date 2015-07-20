@@ -46,7 +46,7 @@ def submit():
     fileName = 'bipoles.tex'
 
   # env attribute indicates where dlv.bin is located
-  cmd = Popen(cmdStr, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin'})
+  cmd = Popen(cmdStr, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
   stdout, stderr = cmd.communicate()
 
   os.remove("files/spec_loadtex.pl")
