@@ -99,7 +99,7 @@ CAMLDOT = ocamldoc -dot
 # LIBS=$(WITHGRAPHICS) $(WITHUNIX) $(WITHSTR) $(WITHNUMS) $(WITHTHREADS)\
 # $(WITHDBM)
 
-LIBS=$(WITHUNIX) $(WITHGRAPH)
+LIBS=$(WITHUNIX) $(WITHGRAPH) $(WITHSTR)
 
 # Should be set to -custom if you use any of the libraries above
 # or if any C code have to be linked with your program

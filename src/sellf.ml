@@ -273,7 +273,48 @@ let bipoles_to_file () =
   let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
   printBipoles bipoles "bipoles"
 ;;
- 
+
+let print_help () = 
+  print_endline "\n* The following commands are available during state ':>':\n";
+  print_endline "#load location-of-file (without extensions .sig nor .pl): loads \
+    the corresponding program;";
+  print_endline "#verbose on or #verbose off: turns on or off the printing of \
+    some steps of the computation. The default value is 'off';";
+  (*print_endline "#time on or #time off: turns on or off the measuring of the
+  execution time of a query. The default value is 'off'. (Note that the time
+  measurement of the permutation checking is always on);";*)
+  print_endline "#help displays this message.";
+  print_endline "#exit terminates the program.";
+  
+  print_endline "\n* The following commands are available during state 'file_name >':";
+  
+  print_endline "\n** Helper commands **";
+  print_endline "#check_rules: checks if all the rules of a file are bipoles.";
+  print_endline "#scopebang: prints which subexponentials will have their \
+    formulas erased and which should be empty when a !s formula is going to be \
+    used.";
+  print_endline "#done: you must type this to indicate that you are done working \
+    with a file and before loading another one.\n";
+  print_endline "#help displays this message.";
+  print_endline "#exit terminates the program.";
+  
+  print_endline "\n** Quati commands **";
+  print_endline "#rule: prints the selected object logic rule to a LaTeX file.";
+  print_endline "#rules: prints all object logic rules to a LaTeX file.";
+  print_endline "#bipole: prints the bipole of the selected rule to a LaTeX file";
+  print_endline "#bipoles: prints the bipoles of all rules to a LaTeX file.";
+  print_endline "#permute: checks if two rules of your choice permute.";
+  print_endline "#permute_all: checks the permutation of all rules of the system.";
+  print_endline "#permutation_graph: generates a permutation graph of all rules of the system.";
+
+  print_endline "\n** Tatu commands **";
+  print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
+  print_endline "#cutcoherence: checks whether the system specified on the file loaded is cut-coherent.";
+  print_endline "#initialcoherence: checks whether the system specified on the file loaded is initial-coherent.";
+  print_endline "#atomicelim: checks whether the system specified on the file loaded is weak coherent.";
+  print_endline ""
+;;
+
 let rec start () =
   initAll ();
   print_string ":> ";
@@ -287,8 +328,11 @@ let rec start () =
       | "verbose-off" -> print_endline "Verbose is set to off."; Term.verbose := false; start ()
       | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
       | "time-off" -> Term.time := false; print_endline "Time is set to off."; start ()
+      | "help" -> print_help ();
+      | "exit" -> print_endline "Thank you for using SELLF."; exit 1
       | file_name -> 
         print_endline ("Loading file "^file_name);
+        fileName := file_name;
         if parse file_name then begin
           samefile := true;
           while !samefile do 
@@ -301,11 +345,16 @@ let rec start () =
     |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
 and
 solve_query () = 
-  print_string "?> ";
+  let idx = String.rindex !fileName '/' in
+  let specName = Str.string_after !fileName (idx+1) in
+  print_string (specName ^ " > ");
   let query_string = read_line() in
-  if query_string = "#done" then samefile := false      
+  if query_string = "#done" then samefile := false
   else begin
   match query_string with
+
+    | "#help" -> print_help ();
+    | "#exit" -> print_endline "Thank you for using SELLF."; exit 1
 
     (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
     | "#bipole" -> 
@@ -483,9 +532,14 @@ match (!check, !fileName, !rule1, !rule2) with
     if parse file then begin
       print_endline "SELLF -- A linear logic framework for systems with locations.";
       print_endline "Version 0.5.\n";
+      print_endline "Type #help for a list of available commands.\n";
       print_endline ("The file: " ^ file ^ " was loaded.\n");
-      while true do
+      samefile := true;
+      while !samefile do 
         solve_query ()
+      done;
+      while true do
+        start ()
       done
     end
   (* Running in batch mode *)

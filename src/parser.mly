@@ -379,50 +379,11 @@ logCst:
 ;
 
 top: 
-| HELP    { 
-  print_endline "\nThe following commands are available during state ':>':\n";
-  print_endline "#load location-of-file (without extensions .sig nor .pl): loads \
-    the corresponding program (the location is relative to the place the \
-    executable file was launched);";
-  print_endline "#verbose on or #verbose off: turns on or off the printing of \
-    some steps of the computation. The default value is 'off';";
-  (*print_endline "#time on or #time off: turns on or off the measuring of the
-  execution time of a query. The default value is 'off'. (Note that the time
-  measurement of the permutation checking is always on);";*)
-  print_endline "#exit command terminates the program.";
-  print_endline "#help displays this message.";
-  
-  print_endline "\nThe following commands are available during state '?>':";
-  
-  print_endline "\n** Helper commands **";
-  print_endline "#check_rules: checks if all the rules of a file are bipoles.";
-  print_endline "#scopebang: prints which subexponentials will have their \
-    formulas erased and which should be empty when a !s formula is going to be \
-    used.";
-  print_endline "#done: you must type this to indicate that you are done working \
-    with a file and before loading another one.\n";
-  
-  print_endline "\n** Quati commands **";
-  print_endline "#rule: prints the selected object logic rule to a LaTeX file.";
-  print_endline "#rules: prints all object logic rules to a LaTeX file.";
-  print_endline "#bipole: prints the bipole of the selected rule to a LaTeX file";
-  print_endline "#bipoles: prints the bipoles of all rules to a LaTeX file.";
-  print_endline "#permute: checks if two rules of your choice permute.";
-  print_endline "#permute_all: checks the permutation of all rules of the system.";
-  print_endline "#permutation_graph: generates a permutation graph of all rules of the system.";
-
-  print_endline "\n** Tatu commands **";
-  print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
-  print_endline "#cutcoherence: checks whether the system specified on the file loaded is cut-coherent.";
-  print_endline "#initialcoherence: checks whether the system specified on the file loaded is initial-coherent.";
-  print_endline "#atomicelim: checks whether the system specified on the file loaded is weak coherent.";
-  
-  "help"
-}
-| VERBOSE ON {"verbose-on"}
+| HELP        {"help"}
+| VERBOSE ON  {"verbose-on"}
 | VERBOSE OFF {"verbose-off"}
-| TIME ON {"time-on"}
-| TIME OFF {"time-off"}
-| EXIT                    {print_endline "Thank you for using SELLF."; exit 1}
-| LOAD  FILE  {$2}
+| TIME ON     {"time-on"}
+| TIME OFF    {"time-off"}
+| EXIT        {"exit"}
+| LOAD FILE   {$2}
 
