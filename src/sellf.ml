@@ -304,7 +304,11 @@ let print_help () =
   print_endline "#bipoles: prints the bipoles of all rules to a LaTeX file.";
   print_endline "#permute: checks if two rules of your choice permute.";
   print_endline "#permute_all: checks the permutation of all rules of the system.";
-  print_endline "#permutation_graph: generates a permutation graph of all rules of the system.";
+  print_endline "#permutation_cliques: computes the permutation cliques (sets of rules such that \
+    every rules permutes over each other) and prints one per line.";
+  print_endline "#permutation_dot_graph: generates a permutation graph in dot format of all rules of the system.";
+  print_endline "#permutation_table: generates a latex file with a table containing the permutation between all \
+    the rules in the system.";
 
   print_endline "\n** Tatu commands **";
   print_endline "#principalcut: checks if the rules can permute until the cut becomes principal.";
