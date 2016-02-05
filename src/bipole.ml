@@ -196,9 +196,6 @@ module Bipole : BIPOLE = struct
     else raise Not_bipole
 
   (* Generates the bipoles of a list of terms, and only the bipoles *)
-  (*let bipoles terms = List.fold_left (fun acc f -> (bipole f) @ acc ) []
-  terms*)
-
   let get_bipoles formulas = List.fold_right (fun f acc -> try 
     (bipole f) @ acc
     with Not_bipole -> 
