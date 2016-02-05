@@ -15,7 +15,7 @@ subexpctx r many rght.
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (lft (imp A B))) * (([r]? (rght A)) & ([l]? (lft B))).
 (not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction

@@ -1,7 +1,7 @@
 % Object logic connectives' types
 
-type andA form -> form -> form.
-type andM form -> form -> form.
-type orA  form -> form -> form.
-type orM  form -> form -> form.
+type andNeg form -> form -> form.
+type andPos form -> form -> form.
+type orNeg  form -> form -> form.
+type orPos  form -> form -> form.
 
