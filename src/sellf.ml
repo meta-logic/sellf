@@ -116,8 +116,10 @@ let printOLrules bipoles fileName =
   let file = open_out (filePrefix ^ fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
-    (* Why is the result of this method a list?? *)
-    let olPt = apply_derivation bipole in
+    (* TODO: this is always a list with one element, one bipole (which is a pair
+    <proof_tree, model>. All methods in olRule should be modified to work with
+    only one derivation at a time *)
+    let olPt = apply_derivation [bipole] in
     List.iter (fun (olt, model) ->
       Printf.fprintf file "%s" "{\\scriptsize";
       Printf.fprintf file "%s" "\\[";
@@ -151,30 +153,27 @@ let printBipoles bipoles fileName =
 (* Command line #bipoles *)
 let bipoles_cl () =
   let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
-    with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
-  ) formulas [] in
-  List.iter (fun bipole ->
-    List.iter (fun (pt, model) ->
-      print_endline "\\[";
-      print_endline (ProofTreeSchema.toTexString (pt));
-      print_endline "\\]";
-      print_endline "\\[";
-      print_endline "CONSTRAINTS = ";
-      print_endline (Constraints.toJaxString (model));
-      print_endline "\\]";
-    ) bipole;
+  let bipoles = Bipole.get_bipoles formulas in
+  List.iter (fun (pt, model) ->
+    print_endline "\\[";
+    print_endline (ProofTreeSchema.toTexString (pt));
+    print_endline "\\]";
+    print_endline "\\[";
+    print_endline "CONSTRAINTS = ";
+    print_endline (Constraints.toJaxString (model));
+    print_endline "\\]";
   ) bipoles
 ;;
 
 (* Command line #rules *)
 let rules_cl () =
   let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = List.fold_right (fun f acc -> try (Bipole.bipole f) :: acc
-    with Bipole.Not_bipole f -> Bipole.isNotBipole f; acc
-  ) formulas [] in
+  let bipoles = Bipole.get_bipoles formulas in
   List.iter (fun bipole ->
-      let olPt = apply_derivation bipole in
+    (* TODO: this is always a list with one element, one bipole (which is a pair
+    <proof_tree, model>. All methods in olRule should be modified to work with
+    only one derivation at a time *)
+      let olPt = apply_derivation [bipole] in
       List.iter (fun (olt, model) ->
         print_endline "\\[";
         print_endline (OlProofTree.toTexString olt);
@@ -264,13 +263,13 @@ let permute_to_file name1 name2 =
 
 let rules_to_file () =
   let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
+  let bipoles = Bipole.get_bipoles formulas in
   printOLrules bipoles "rules"
 ;;
 
 let bipoles_to_file () =
   let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
+  let bipoles = Bipole.get_bipoles formulas in
   printBipoles bipoles "bipoles"
 ;;
 
@@ -375,7 +374,7 @@ solve_query () =
       and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-      let bipoles = List.fold_right (fun f acc -> (Bipole.bipole f) @ acc) formulas [] in
+      let bipoles = Bipole.get_bipoles formulas in
       printBipoles bipoles f
 
     (* Check if all rules are bipoles *)
@@ -396,7 +395,7 @@ solve_query () =
       print_endline "Please choose a name for the file:";
       let f = read_line () in
       let bp = Bipole.bipole (List.nth formulas i1) in
-      printOLrules [bp] f
+      printOLrules bp f
 
     (* Generates all rules of the object logic and prints a latex file with them *)
     | "#rules" ->
@@ -405,7 +404,7 @@ solve_query () =
       will be generated and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-      let bipoles = List.map (fun f -> Bipole.bipole f) formulas in
+      let bipoles = Bipole.get_bipoles formulas in
       printOLrules bipoles f
 
     (* Check if two rules permute *)

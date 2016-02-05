@@ -15,18 +15,22 @@ open Types
 
 module type BIPOLE = 
   sig
-    val toPairsProofModel : (ProofTreeSchema.prooftree * Constraints.constraintset list) list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val deriveBipole : SequentSchema.sequent -> terms -> Constraints.constraintset list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    exception Not_bipole of terms
+    exception Not_bipole
+    val toPairsProofModel : (ProofTreeSchema.prooftree * Constraints.constraintset list) list 
+      -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
+    val deriveBipole : SequentSchema.sequent -> terms -> Constraints.constraintset list 
+      -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
     val bipole : terms -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val bipoles : terms list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
-    val isNotBipole : terms -> unit
+    val get_bipoles : terms list -> (ProofTreeSchema.prooftree * Constraints.constraintset) list
   end
 
 module Bipole : BIPOLE = struct
+  
   (* Builds the possible bipoles from a formula in a sequent and a set of constraints *)
   (* Generates the necessary further constraints. *)
   (* Returns a list of pairs (proof tree * model) *)
+
+  exception Not_bipole
 
   (* Transforms a list ((ProofTreeSchema * Constraints list) list) into a list of *)
   (* pairs consisting of a proof tree schema and a valid non-empty model *)
@@ -170,8 +174,6 @@ module Bipole : BIPOLE = struct
     toPairsProofModel !results
   ;;
 
-  exception Not_bipole of terms
-
   (* Generates the bipole of a formula from a generic initial sequent *)
   (* Considering the formula is chosen from gamma *)
   let bipole f =
@@ -191,12 +193,19 @@ module Bipole : BIPOLE = struct
       let sequent = SequentSchema.createAsyn context [] in
       let constraints = Constraints.inEndSequent fnorm context in
       deriveBipole sequent fnorm constraints
-    else raise (Not_bipole f)
+    else raise Not_bipole
 
-  (* Generates the bipoles of a list of terms *)
-  let bipoles terms = List.fold_left (fun acc f -> (bipole f) @ acc ) [] terms
+  (* Generates the bipoles of a list of terms, and only the bipoles *)
+  (*let bipoles terms = List.fold_left (fun acc f -> (bipole f) @ acc ) []
+  terms*)
 
-  let isNotBipole f = print_endline ("This formula is not a bipole: " ^ (Prints.termToString f))
+  let get_bipoles formulas = List.fold_right (fun f acc -> try 
+    (bipole f) @ acc
+    with Not_bipole -> 
+      print_endline ("The formula\n" ^ Prints.termToString f ^ 
+      "\nis not a bipole. Skipping it...\n");
+      acc
+  ) formulas []
 
 end;;
 
