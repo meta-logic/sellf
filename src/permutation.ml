@@ -50,8 +50,8 @@ module type PERMUTATION =
     val getCliquesOrdering : (string list, string) Hashtbl.t -> DG.t -> (string * string) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
-    val permutationsToTexString : (Derivation.bipole * Derivation.bipole) list -> bool -> string
-    val nonPermutationsToTexString : Derivation.bipole list -> bool -> string
+    val permutationsToTexString : (Rewritten.derivation * Rewritten.derivation) list -> bool -> string
+    val nonPermutationsToTexString : Rewritten.derivation list -> bool -> string
     val setShowBipole: bool -> unit
   end
 
@@ -340,7 +340,7 @@ module Permutation : PERMUTATION = struct
     let fontSizeEnd = if cl then "\n\n" else "\n}\n\\\\[0.7cm]\n\n" in
     let olPt = apply_perm_not_found lst in
     List.fold_right (fun (olt, mdl) acc ->
-      OlProofTree.toPermutationFormat olt;
+      OlProofTree.toPermutation olt;
       fontSize ^ 
       "\\[\n" ^
       OlProofTree.toTexString olt ^

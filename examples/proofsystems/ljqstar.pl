@@ -14,11 +14,11 @@ subexprel r < l.
 
 subexpctx l many lft.
 subexpctx r many rght.
-subexpctx f single rghtlft.
+subexpctx f single rght.
 
 rules axiom.
 % Init
-(not (lft A)) * (not (rght A)).
+(not (lft A)) * (not ([f]? rght A)).
 
 rules introduction.
 % Implication

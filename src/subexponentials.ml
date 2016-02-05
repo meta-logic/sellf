@@ -63,8 +63,8 @@ let isSubexponentialDeclared name = try match Hashtbl.find typeTbl name with
 
 let initialize () = 
   Hashtbl.clear typeTbl;
-  addType "$gamma" LIN;
-  addType "$infty" UNB;
+  addType "gamma" LIN;
+  addType "infty" UNB;
   Hashtbl.clear orderTbl;
   Hashtbl.clear ctxTbl
 ;;
@@ -153,4 +153,8 @@ let isSameSide sub str = try match (getCtxSide sub, str) with
   | _ -> false
   with _ -> false
 
-  
+let isUnbounded sub = match type_of sub with
+  | UNB | REL -> true
+  | LIN | AFF -> false
+
+let isBounded sub = not (isUnbounded sub)

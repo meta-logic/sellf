@@ -105,17 +105,6 @@ let parse file_name = begin
     end
 end ;;
 
-(* TODO: this function should be somewhere else and olPt should not be a mutable
-object. *)
-(* Ask Leo about this function. [Giselle] *)
-let apply_derivation bipoles = begin 
-  let olPt = ref [] in
-  olPt := Derivation.remakeBipoles bipoles;
-  Derivation.rewriteBipoleList !olPt;
-  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
-  !olPt
-end ;;
-
 let print_rulenames () =
   let names = Specification.getAllRulesName () in
   List.iter (fun s ->

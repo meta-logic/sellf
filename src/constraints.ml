@@ -132,7 +132,7 @@ let initial ctx f =
   let cstrs = List.fold_right (fun c acc ->
     let formSide = Specification.getSide (nnf (NOT f)) in
     (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
-    if (fst(c)) = "$gamma" || (fst(c)) = "$infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
+    if (fst(c)) = "gamma" || (fst(c)) = "infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 
   ) contexts [] in
   List.map (fun set -> create set) cstrs
@@ -163,7 +163,8 @@ let predToJaxString c = match c with
     "emp(" ^ (ContextSchema.ctxToTex c) ^ ")."
   | UNION (c1, c2, c3) -> 
     "union(" ^ (ContextSchema.ctxToTex c1) ^ ", " ^ (ContextSchema.ctxToTex c2) ^ ", " ^ (ContextSchema.ctxToTex c3) ^ ")."
-
+  | _ -> ""
+                                                                                                                         
 let rec toJaxString csts = 
   let i = ref (-1) in
   let counter () = i := !i + 1; !i in
@@ -222,4 +223,3 @@ let isUnbounded cstr =
   | _ -> failwith "Error: unexpected constraint (isUnbounded)."
   
 let isBounded cstr = not (isUnbounded cstr)
-
