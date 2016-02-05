@@ -46,7 +46,7 @@ module OlContext : OLCONTEXT = struct
   }
 
   let remComma str = try String.sub str 0 ((String.length str) - 2) 
-		                 with Invalid_argument("String.sub / Bytes.sub") -> str
+		                 with Invalid_argument(_) -> str
 
   let subToString (s, i) = s ^ "_" ^ string_of_int(i)
   
@@ -153,7 +153,7 @@ module OlContext : OLCONTEXT = struct
             end
     ) subLst "" in
     try String.sub slotString 1 ((String.length slotString) - 1)
-    with Invalid_argument("String.sub / Bytes.sub") -> slotString
+    with Invalid_argument(_) -> slotString
   
 end;;
 
