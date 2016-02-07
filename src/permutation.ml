@@ -50,8 +50,8 @@ module type PERMUTATION =
     val getCliquesOrdering : (string list, string) Hashtbl.t -> DG.t -> (string * string) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
-    val permutationsToTexString : (Rewritten.derivation * Rewritten.derivation) list -> bool -> string
-    val nonPermutationsToTexString : Rewritten.derivation list -> bool -> string
+    val permutationsToTexString : (Rewriting.derivation * Rewriting.derivation) list -> bool -> string
+    val nonPermutationsToTexString : Rewriting.derivation list -> bool -> string
     val setShowBipole: bool -> unit
   end
 

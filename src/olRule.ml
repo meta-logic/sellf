@@ -339,7 +339,7 @@ end;;
  * private val applyRewriting : ProofTreeSchema.prooftree ->  rewritingRules -> OlProofTree
  * val toObjectLogic : ProofTreeSchema.prooftree -> Constraints.constraintset -> OlProofTree.prooftree
  *)
-module type REWRITTEN = 
+module type REWRITING = 
   sig
   
     type derivation = ProofTreeSchema.prooftree * Constraints.constraintset
@@ -351,7 +351,7 @@ module type REWRITTEN =
 
   end
 
-module Rewritten : REWRITTEN = struct
+module Rewriting : REWRITING = struct
 
   type sub = string * int
   type derivation = ProofTreeSchema.prooftree * Constraints.constraintset
@@ -580,8 +580,8 @@ end;;
 (* Discuss it with Leo. [Giselle]*)
 let apply_permute drvt_pair_lst = begin
   let olPt = ref [] in
-  olPt := Rewritten.reconstruct_derivations_pair drvt_pair_lst;
-  Rewritten.rewrite_derivations_pair !olPt;
+  olPt := Rewriting.reconstruct_derivations_pair drvt_pair_lst;
+  Rewriting.rewrite_derivations_pair !olPt;
   List.iter (fun ((olt1, model1), (olt2, model2)) -> 
     OlProofTree.toPermutation olt1;
     OlProofTree.toPermutation olt2;
@@ -591,15 +591,15 @@ end ;;
 
 let apply_perm_not_found perm_not_found = begin
   let olPt = ref [] in
-  olPt := Rewritten.reconstruct_derivations perm_not_found;
-  Rewritten.rewrite_derivations !olPt;
+  olPt := Rewriting.reconstruct_derivations perm_not_found;
+  Rewriting.rewrite_derivations !olPt;
   !olPt
 end ;;
 
 let apply_derivation bipoles = begin
   let olPt = ref [] in
-  olPt := Rewritten.reconstruct_derivations bipoles;
-  Rewritten.rewrite_derivations !olPt;
+  olPt := Rewriting.reconstruct_derivations bipoles;
+  Rewriting.rewrite_derivations !olPt;
   List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
   !olPt
 end ;;
