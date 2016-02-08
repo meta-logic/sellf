@@ -119,15 +119,13 @@ let printOLrules bipoles fileName =
     (* TODO: this is always a list with one element, one bipole (which is a pair
     <proof_tree, model>. All methods in olRule should be modified to work with
     only one derivation at a time *)
-    let olPt = apply_derivation [bipole] in
-    List.iter (fun (olt, model) ->
-      Printf.fprintf file "%s" "{\\scriptsize";
-      Printf.fprintf file "%s" "\\[";
-      Printf.fprintf file "%s" (OlProofTree.toTexString olt);
-      Printf.fprintf file "%s" "\\]";
-      Printf.fprintf file "%s" "}";
-      (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);*)
-    ) olPt;
+    let olpt = apply_derivation bipole in
+    Printf.fprintf file "%s" "{\\scriptsize";
+    Printf.fprintf file "%s" "\\[";
+    Printf.fprintf file "%s" (OlProofTree.toTexString olpt);
+    Printf.fprintf file "%s" "\\]";
+    Printf.fprintf file "%s" "}";
+    (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);*)
   ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
@@ -173,12 +171,10 @@ let rules_cl () =
     (* TODO: this is always a list with one element, one bipole (which is a pair
     <proof_tree, model>. All methods in olRule should be modified to work with
     only one derivation at a time *)
-      let olPt = apply_derivation [bipole] in
-      List.iter (fun (olt, model) ->
-        print_endline "\\[";
-        print_endline (OlProofTree.toTexString olt);
-        print_endline "\\]";
-      ) olPt;
+      let olpt = apply_derivation bipole in
+      print_endline "\\[";
+      print_endline (OlProofTree.toTexString olpt);
+      print_endline "\\]";
   ) bipoles
 ;;
 

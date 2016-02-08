@@ -344,8 +344,10 @@ module type REWRITING =
   
     type derivation = ProofTreeSchema.prooftree * Constraints.constraintset
     type ol_derivation = OlProofTree.prooftree * Constraints.constraintset
+    val reconstruct_tree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
     val reconstruct_derivations : derivation list -> ol_derivation list
     val reconstruct_derivations_pair : (derivation * derivation) list -> (ol_derivation * ol_derivation) list
+    val apply_model : OlProofTree.prooftree -> Constraints.constraintset -> unit
     val rewrite_derivations : ol_derivation list -> unit
     val rewrite_derivations_pair : (ol_derivation * ol_derivation) list -> unit
 
@@ -381,7 +383,7 @@ module Rewriting : REWRITING = struct
              olPt
                
   let reconstruct_derivations drvt_lst = 
-    List.map (fun (pt, model) -> (reconstruct_tree pt, model)) drvt_lst 
+    List.map (fun (pt, model) -> (reconstruct_tree pt, model)) drvt_lst
     
   let reconstruct_derivations_pair drvt_pair_lst = 
     List.map (fun ((pt1, model1), (pt2, model2)) ->
@@ -539,8 +541,7 @@ module Rewriting : REWRITING = struct
     | (false, false) ->
        List.iter (fun pt -> compute_rewrite_rules pt model rewrite_ht) olpt.OlProofTree.premisses;
        compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index false false
-    | (true, true) -> failwith ("[ERROR] Apparently a sequent can be at the same time closed and open.")
-                               
+
   let rewrite_sequent seq rewrite_ht =
     let ctx = OlSequent.getContext seq in
     let newCtx = List.fold_right (fun (c, f) acc ->
@@ -596,10 +597,10 @@ let apply_perm_not_found perm_not_found = begin
   !olPt
 end ;;
 
-let apply_derivation bipoles = begin
-  let olPt = ref [] in
-  olPt := Rewriting.reconstruct_derivations bipoles;
-  Rewriting.rewrite_derivations !olPt;
-  List.iter (fun (olt, model) -> OlProofTree.toMacroRule olt) !olPt;
-  !olPt
+let apply_derivation bipole = begin
+  let (pt, model) = bipole in
+  let olpt = Rewriting.reconstruct_tree pt in
+  Rewriting.apply_model olpt model;
+  OlProofTree.toMacroRule olpt;
+  olpt
 end ;;
