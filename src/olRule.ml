@@ -423,13 +423,22 @@ module Rewriting : REWRITING = struct
                      | false -> acc
                     ) lst []
 
+  let filter_constraints s lst =
+    List.filter (fun cstr ->
+                 match cstr with
+                 | EMP (c) -> c = s
+                 | IN (t, c, n) ->  c = s
+                 | SETMINUS (c1, t, c) -> c = s 
+                 | UNION (c1, c2, c) -> c = s
+                ) lst
+
   let compute_rewrite_sequent seq model rewrite_ht max_index is_closed_leaf is_open_leaf =
     (* New context variables are created when we have IN(G, F, n) -> G*, F1, ..., Fn. G* doesn't occur on the proof tree
      * TODO: This solution using references is not the best one 
      *)
     let i = ref (max_index+1) in
     let count () = i := !i + 1; !i in
-    (* Rewritten algorithm *)
+    (* Rewriting algorithm *)
     let ctx = OlSequent.getContext seq in
     ctx.OlContext.lst <- filter_subexponentials ctx.OlContext.lst;
     List.iter (fun (c, f) ->
@@ -439,29 +448,25 @@ module Rewriting : REWRITING = struct
                              match cstr with
                              (* EMP(G) => G -> . *)
                              | EMP (c') ->
-                                (if c' = c then
-                                   (try match Hashtbl.find rewrite_ht c' with
-                                        | ([], []) -> ()
-                                        | _ -> failwith ("[ERROR] " ^ (OlContext.subToString c') ^ " should be empty.")
-                                    with Not_found -> Hashtbl.replace rewrite_ht c' ([], []))
-                                 else () )
+                                (try match Hashtbl.find rewrite_ht c' with
+                                     | ([], []) -> ()
+                                     | _ -> failwith ("[ERROR] " ^ (OlContext.subToString c') ^ " should be empty.")
+                                 with Not_found -> Hashtbl.replace rewrite_ht c' ([], []))
 
                              (* IN(F, G, n) => G -> rwt(G), F (if rwt(G) is empty then rwt(G) = G *)
                              | IN (t, c', n) ->
-                                (if c' = c then
-                                   (try match Hashtbl.find rewrite_ht c' with
-                                        | (sublst, flst) ->
-                                           if not (List.exists (fun f -> t = f) flst) then
-                                             Hashtbl.replace rewrite_ht c' (sublst, ((flist t n) @ flst))
-                                           else ()
-                                    with Not_found ->
-                                      (match (is_closed_leaf, (Subexponentials.isUnbounded (fst(c')))) with
-                                       | (true, false) -> Hashtbl.add rewrite_ht c' ([], (flist t n))
-                                       | (_, _) -> let new_ctx = ((fst(c')), count()) in
-                                                   Hashtbl.add rewrite_ht c' ([new_ctx], (flist t n))))
-                                 else () )
+                                (try match Hashtbl.find rewrite_ht c' with
+                                     | (sublst, flst) ->
+                                        if not (List.exists (fun f -> t = f) flst) then
+                                          Hashtbl.replace rewrite_ht c' (sublst, ((flist t n) @ flst))
+                                        else ()
+                                 with Not_found ->
+                                   (match (is_closed_leaf, (Subexponentials.isUnbounded (fst(c')))) with
+                                    | (true, false) -> Hashtbl.add rewrite_ht c' ([], (flist t n))
+                                    | (_, _) -> let new_ctx = ((fst(c')), count()) in
+                                                Hashtbl.add rewrite_ht c' ([new_ctx], (flist t n))))
                              | _ -> ()
-                            ) model.lst
+                            ) (filter_constraints c model.lst)
                | false ->
                   List.iter (fun cstr ->
                              match cstr with
@@ -472,26 +477,25 @@ module Rewriting : REWRITING = struct
                               *    and G -> .
                               *) 
                              | EMP (c') ->
-                                (if c' = c then
-                                   (try match Hashtbl.find rewrite_ht c' with
-                                        | ([], []) -> ()
-                                        | (sublst, flst) ->
-                                           (List.iter (fun s ->
-                                                       Hashtbl.iter (fun k (sublst', flst') ->
-                                                                     Hashtbl.replace rewrite_ht k ((List.filter (fun s' -> s' <> s) sublst'), flst')
-                                                                    ) rewrite_ht;
-                                                      ) sublst;
-                                            Hashtbl.replace rewrite_ht c' ([], []))
-                                    with Not_found -> Hashtbl.replace rewrite_ht c' ([], []))
-                                 else () )
+                                (try match Hashtbl.find rewrite_ht c' with
+                                     | ([], []) -> ()
+                                     | (sublst, flst) ->
+                                        (List.iter (fun s ->
+                                                    Hashtbl.iter (fun k (sublst', flst') ->
+                                                                  Hashtbl.replace rewrite_ht k ((List.filter (fun s' -> s' <> s) sublst'), flst')
+                                                                 ) rewrite_ht;
+                                                   ) sublst;
+                                         Hashtbl.replace rewrite_ht c' ([], []))
+                                 with Not_found -> Hashtbl.replace rewrite_ht c' ([], []))
 
                              (* UNION(G1, G2, G3) => G3 -> rwt(G1), rwt(G2) (if rwt(Gn) is empty then rwt(Gn) = Gn, where n = {1,2}) *)
                              | UNION (c1, c2, c') ->
-                                (if c' = c then
-                                   (let (sublst1, flst1) = try Hashtbl.find rewrite_ht c1 with Not_found -> ([c1], []) in
-                                    let (sublst2, flst2) = try Hashtbl.find rewrite_ht c2 with Not_found -> ([c2], []) in
-                                    Hashtbl.replace rewrite_ht c' (sublst1 @ sublst2, flst1 @ flst2))
-                                 else () )
+                                (try match Hashtbl.find rewrite_ht c' with
+                                     | (sublst, flst) -> ()
+                                 with Not_found ->
+                                (let (sublst1, flst1) = try Hashtbl.find rewrite_ht c1 with Not_found -> ([c1], []) in
+                                 let (sublst2, flst2) = try Hashtbl.find rewrite_ht c2 with Not_found -> ([c2], []) in
+                                 Hashtbl.add rewrite_ht c' (sublst1 @ sublst2, flst1 @ flst2)))
 
                              (* SETMINUS(G1, F, G0) => 
                               * 1. rwt(G0) is empty, so G0 -> rwt(G1) - F (if rwt(G1) is empty then the constraint will be processed on another sequent)
@@ -499,36 +503,32 @@ module Rewriting : REWRITING = struct
                               *    forall k on the hashtable: k -> rwt(G0) => k -> rwt(G1)
                               *)
                              | SETMINUS (c1, t, c') ->
-                                (if c' = c then
-                                   (try match Hashtbl.find rewrite_ht c1 with
-                                        | (sublst, flst) ->
-                                           (try match Hashtbl.find rewrite_ht c' with
-                                                | (sublst', flst') ->
-                                                   (if ((List.length sublst) > 0) && ((List.length sublst') > 0) &&
-                                                         (not ((Hashtbl.mem rewrite_ht (List.hd sublst)) ||
-                                                                 (Hashtbl.mem rewrite_ht (List.hd sublst')))) &&
-                                                           sublst <> sublst' && flst' = (remove_f t flst) then
-                                                      (if (List.hd sublst) > (List.hd sublst') then
-                                                         Hashtbl.iter (fun k (s, f) ->
+                                (try match Hashtbl.find rewrite_ht c1 with
+                                     | (sublst, flst) ->
+                                        (try match Hashtbl.find rewrite_ht c' with
+                                             | (sublst', flst') ->
+                                                (if ((List.length sublst) > 0) && ((List.length sublst') > 0) &&
+                                                        sublst <> sublst' && flst' = (remove_f t flst) then
+                                                   (if (List.hd sublst) > (List.hd sublst') then
+                                                      Hashtbl.iter (fun k (s, f) ->
+                                                                    let _s = List.map (fun s' ->
+                                                                                       if s' = (List.hd sublst') then
+                                                                                         (List.hd sublst)
+                                                                                       else s') s in
+                                                                    Hashtbl.replace rewrite_ht k (_s, f)
+                                                                   ) rewrite_ht
+                                                    else Hashtbl.iter (fun k (s, f) ->
                                                                        let _s = List.map (fun s' ->
-                                                                                          if s' = (List.hd sublst') then
-                                                                                            (List.hd sublst)
+                                                                                          if s' = (List.hd sublst) then
+                                                                                            (List.hd sublst')
                                                                                           else s') s in
                                                                        Hashtbl.replace rewrite_ht k (_s, f)
-                                                                      ) rewrite_ht
-                                                       else Hashtbl.iter (fun k (s, f) ->
-                                                                          let _s = List.map (fun s' ->
-                                                                                             if s' = (List.hd sublst) then
-                                                                                               (List.hd sublst')
-                                                                                             else s') s in
-                                                                          Hashtbl.replace rewrite_ht k (_s, f)
-                                                                         ) rewrite_ht)
-                                                    else ())
-                                            with Not_found -> Hashtbl.add rewrite_ht c' (sublst, remove_f t flst))
-                                    with Not_found -> ())
-                                 else () )
+                                                                      ) rewrite_ht)
+                                                 else ())
+                                         with Not_found -> Hashtbl.add rewrite_ht c' (sublst, remove_f t flst))
+                                 with Not_found -> ())
                              | _ -> ()
-                            ) model.lst
+                            ) (filter_constraints c model.lst)
               ) ctx.OlContext.lst
                                                  
   let rec compute_rewrite_rules olpt model rewrite_ht =
