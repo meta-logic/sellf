@@ -4,3 +4,6 @@ src/.depend.input
 src/.depend
 
 quati/test.py
+
+*.log
+*.aux
