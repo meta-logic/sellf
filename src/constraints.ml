@@ -57,7 +57,7 @@ let inEndSequent spec ctx =
   let conDeclared s = Hashtbl.mem Subexponentials.conTbl s in
   List.fold_right (fun (s, i) acc -> 
     let conList = try Hashtbl.find Subexponentials.conTbl s with Not_found -> [] in
-    if s = "$gamma" || s = "$infty" then acc
+    if s = "gamma" || s = "infty" then acc
     else try match (getCtxSide s, conDeclared s, conList) with
       | (RIGHTLEFT, false, _) -> (isIn head s ctx) :: acc
       | (RIGHT, false, _) when side  = "r" -> (isIn head s ctx) :: acc

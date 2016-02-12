@@ -49,7 +49,7 @@ module Bipole : BIPOLE = struct
     let pt0 = ProofTreeSchema.create seq in
 
     (* decide on the formula *)
-    let (pt1, decidecstr) = ProofTreeSchema.decide pt0 form "$infty" in
+    let (pt1, decidecstr) = ProofTreeSchema.decide pt0 form "infty" in
 
     (* Initial constraints *)
     let constraints : Constraints.constraintset list ref = ref constr in

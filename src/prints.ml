@@ -83,9 +83,9 @@ let rec termToString_ term absList = match term with
   | ADDOR (t1, t2) -> (termToString_ t1 absList)^" + "^(termToString_ t2 absList)
   | PARR (t1, t2) -> (termToString_ t1 absList)^" | "^(termToString_ t2 absList)
   | LOLLI (s, t1, t2) -> (termToString_ t2 absList)^" ["^(termToString_ s absList)^"] o- "^(termToString_ t1 absList)
-  | BANG (CONST("$infty"), t) -> "(bang "^(termToString_ t absList)^" )"
-  | HBANG (CONST("$infty"), t) -> "(hbang "^(termToString_ t absList)^" )"
-  | QST (CONST("$infty"), t) -> "(? "^(termToString_ t absList)^" )"
+  | BANG (CONST("infty"), t) -> "(bang "^(termToString_ t absList)^" )"
+  | HBANG (CONST("infty"), t) -> "(hbang "^(termToString_ t absList)^" )"
+  | QST (CONST("infty"), t) -> "(? "^(termToString_ t absList)^" )"
   | BANG (s, t) -> "( ["^(termToString_ s absList)^"]bang "^(termToString_ t absList)^" )"
   | HBANG (s, t) -> "( ["^(termToString_ s absList)^"]hbang "^(termToString_ t absList)^" )"
   | QST (s, t) -> "( ["^(termToString_ s absList)^"]? "^(termToString_ t absList)^" )"
@@ -159,9 +159,9 @@ let rec termToTexString_ term absList = match term with
   | ADDOR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\oplus\\; "^(termToTexString_ t2 absList)
   | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\mypar\\; "^(termToTexString_ t2 absList)
   | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\;\\multimap_{"^(termToTexString_ s absList)^"}\\; "^(termToTexString_ t1 absList)
-  | BANG (CONST("$infty"), t) -> " ! "^(termToTexString_ t absList)
-  | HBANG (CONST("$infty"), t) -> " \\hat{!} "^(termToTexString_ t absList)
-  | QST (CONST("$infty"), t) -> " ? "^(termToTexString_ t absList)
+  | BANG (CONST("infty"), t) -> " ! "^(termToTexString_ t absList)
+  | HBANG (CONST("infty"), t) -> " \\hat{!} "^(termToTexString_ t absList)
+  | QST (CONST("infty"), t) -> " ? "^(termToTexString_ t absList)
   | BANG (s, t) -> " !^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
   | HBANG (s, t) -> " !^{\\hat{"^(termToTexString_ s absList)^"}} "^(termToTexString_ t absList)
   | QST (s, t) -> " ?^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)

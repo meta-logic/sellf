@@ -7,7 +7,7 @@
  *   atoms are 'lft', 'rght', 'mlft' and 'mrght'                        *
  * - formulas from the object logic have type 'form'                    *
  * - terms from the object logic have type 'term'                       *
- * - specification formulas are saved on the context $infty             *
+ * - specification formulas are saved on the context infty              *
  * - procedures to check cut and initial coherence                      *
  *                                                                      *
  * Giselle Machado Reis - 2011                                          *
@@ -37,8 +37,8 @@ let checkInitCoher str (t1, t2) =
   (* Put axiom formulas on the context *)
   Context.createInitialCoherenceContext ();
   
-  let bt1 = QST(CONST("$infty"), t1) in
-  let bt2 = QST(CONST("$infty"), t2) in
+  let bt1 = QST(CONST("infty"), t1) in
+  let bt2 = QST(CONST("infty"), t2) in
   (* print_endline "Proving initial coherence of:";
   print_endline (termToString bt1);
   print_endline (termToString bt2); *)

@@ -26,8 +26,8 @@ type side =
   | RIGHT
   | RIGHTLEFT
 
-(** Hashtable with subexponentials' types ($gamma is the linear context and
-    $infty holds specifications) *)
+(** Hashtable with subexponentials' types (gamma is the linear context and
+    infty holds specifications) *)
 let typeTbl = Hashtbl.create 100 ;;  
 
 (** Hashtable with subexponentials' parcial order *)
@@ -101,8 +101,8 @@ let rec bfs root queue goal = match queue with
 ;;
 (** Checks if a subexponential s1 > s2 *)
 let greater_than s1 s2 = 
-  (* $infty should be greater than everyone *)
-  if s1 = "$infty" then true
+  (* infty should be greater than everyone *)
+  if s1 = "infty" then true
   else bfs s2 (Hashtbl.find_all orderTbl s2) s1 ;;
 
 (** Returns a list with all subexponentials from idxs that will have their 
@@ -112,7 +112,7 @@ let rec erased s idxs = match idxs with
   | i::t -> 
     match type_of i with
       | UNB | AFF -> 
-        if i = "$infty" || i = s || (greater_than i s) then erased s t
+        if i = "infty" || i = s || (greater_than i s) then erased s t
         else i::(erased s t)
       | _ -> erased s t
 ;;
@@ -126,7 +126,7 @@ let rec checked_empty s idxs = match idxs with
   | i::t -> 
     match type_of i with
       | REL | LIN -> 
-        if i = "$gamma" || i = s || (greater_than i s) then checked_empty s t
+        if i = "gamma" || i = s || (greater_than i s) then checked_empty s t
         else i::(checked_empty s t)
       | _ -> checked_empty s t
 ;;

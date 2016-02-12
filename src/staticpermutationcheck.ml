@@ -279,7 +279,7 @@ let rec greater_subexp bangs quests equiv =
   | _ -> false)
 in
 (* Checking that all subexponentials are unbounded *)
-match Hashtbl.fold (fun key data acc -> if key = "$gamma" then acc else
+match Hashtbl.fold (fun key data acc -> if key = "gamma" then acc else
                       (data = Subexponentials.UNB) & acc) Subexponentials.typeTbl true 
 with
 | true -> 

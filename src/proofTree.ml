@@ -52,7 +52,7 @@ let releaseDown pt =
 let releaseUp pt f = 
   let ctx = Sequent.getContextIn pt.conclusion in
   let goals = Sequent.getGoals conc in
-  let newctx = Context.add ctx "$gamma" in
+  let newctx = Context.add ctx "gamma" in
   let newgoals = List.filter (fun form -> form != f) goals in
   let premise = Sequent.createAsyn newctx newgoals in
   let newpt = create premise in

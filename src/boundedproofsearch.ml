@@ -375,7 +375,7 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         print_endline (Prints.termToString (Term.observe f));
         print_endline (Context.toString ctxin);
       end;
-      let newctx = Context.add ctxin f "$gamma" in
+      let newctx = Context.add ctxin f "gamma" in
       let sq = Sequent.create newctx ctxout goals ASYN in
       prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
  
@@ -399,12 +399,12 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
         | f -> (match f with 
           | CONST(str) ->
             let p = (PRED (str, CONST(str), NEG)) in
-            let newctx = Context.add ctxin p "$gamma" in
+            let newctx = Context.add ctxin p "gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
             prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
           | APP(CONST(str3), arg2) ->
             let p = (PRED(str3, APP(CONST(str3), arg2), NEG)) in
-            let newctx = Context.add ctxin p "$gamma" in
+            let newctx = Context.add ctxin p "gamma" in
             let sq = Sequent.create newctx ctxout goals ASYN in
             prove_asyn (ProofTree.update proof sq) h (fun () -> copyCtxOutFromPremiseUn proof; suc ())
  	     | _ -> failwith "Error on the normalisation of an application."

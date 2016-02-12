@@ -106,9 +106,9 @@ formula:
   | LBRACKET subexp RBRACKET BANG formula   { BANG ($2,$5) }
   | LBRACKET subexp RBRACKET HBANG formula  { HBANG ($2,$5) }
   | LBRACKET subexp RBRACKET QST formula    { QST ($2,$5) }
-  | BANG formula             { BANG (CONST("$infty"),$2) }
-  | HBANG formula            { HBANG (CONST("$infty"),$2) }
-  | QST formula              { QST (CONST("$infty"),$2) }
+  | BANG formula             { BANG (CONST("infty"),$2) }
+  | HBANG formula            { HBANG (CONST("infty"),$2) }
+  | QST formula              { QST (CONST("infty"),$2) }
   | FORALL formula           { FORALL ($1, 0, $2) } 
   | EXISTS formula           { EXISTS ($1, 0, $2) }
   | ABS formula              { ABS($1, 0, $2) }

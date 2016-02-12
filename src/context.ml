@@ -1,8 +1,8 @@
 (*
  * A hashtable implements the context of a sequent. The key is the
  * name of the subexponential, and this is mapped to a list of formulas.
- * The linear formulas (not marked with ?l) are stored with the key '$gamma'.
- * The formulas of specification of systems are stored with the key '$infty'
+ * The linear formulas (not marked with ?l) are stored with the key 'gamma'.
+ * The formulas of specification of systems are stored with the key 'infty'
  *
  * Giselle Machado Reis - 2012
  *)
@@ -64,17 +64,17 @@ module Context : CONTEXT = struct
 
   let createCutCoherenceContext () = 
     (* Adding cut rules' specifications *)
-    List.iter (fun e -> store e "$infty") !Specification.cutRules ;;
+    List.iter (fun e -> store e "infty") !Specification.cutRules ;;
     
   let createInitialCoherenceContext () = 
     (* Adding identity rules' specifications *)
-    List.iter (fun e -> store e "$infty") !Specification.axioms ;;
+    List.iter (fun e -> store e "infty") !Specification.axioms ;;
     
   let createProofSearchContext () = 
     (* Adding rules' specifications (proof search without cut) *)
-    List.iter (fun e -> store e "$infty") !Specification.axioms;
-    List.iter (fun e -> store e "$infty") !Specification.introRules;
-    List.iter (fun e -> store e "$infty") !Specification.structRules ;;
+    List.iter (fun e -> store e "infty") !Specification.axioms;
+    List.iter (fun e -> store e "infty") !Specification.introRules;
+    List.iter (fun e -> store e "infty") !Specification.structRules ;;
 
   (* GR TODO organize the methods above *)
 
@@ -98,9 +98,9 @@ module Context : CONTEXT = struct
 
   let initialize () =
     (* \Gamma context (linear): stores the formulas that have no exponential *)
-    initSubexp "$gamma";
+    initSubexp "gamma";
     (* \infty context (classical): stores specifications *)
-    initSubexp "$infty"
+    initSubexp "infty"
 
   (* All methods that operate on the context should return a new context with the proper modifications *)
 
@@ -144,11 +144,11 @@ module Context : CONTEXT = struct
     Hashtbl.iter (fun idx forms ->
       match idx with
 	(* Unbouded context  *)
-	| "$infty" -> ()
+	| "infty" -> ()
 	(* For every subexponential s < s holds. *)
 	| s when s = subexp -> ()
 	(* Formulas with no exponential must be erased *)
-	| "$gamma" -> Hashtbl.replace newctx "$gamma" []
+	| "gamma" -> Hashtbl.replace newctx "gamma" []
 	(* These are deleted independently of being linear or classical *)
 	| s -> 
 	  if not (greater_than s subexp) then Hashtbl.replace newctx s []
@@ -161,7 +161,7 @@ module Context : CONTEXT = struct
     Hashtbl.iter (fun idx forms ->
       match idx with
 	(* These will always go to the out context  *)
-	| "$gamma" | "$infty" -> ()
+	| "gamma" | "infty" -> ()
 	| s -> match type_of s with
 	  (* Linear formulas that were in the input should not be available here. *)
 	  | LIN | AFF ->
