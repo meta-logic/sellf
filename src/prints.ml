@@ -155,19 +155,19 @@ let rec termToTexString_ term absList = match term with
   | ASGN ( i1, i2) -> (termToTexString_ i1 absList)^" is "^(termToTexString_ i2 absList)
   | PRINT (t1) -> "print "^(termToTexString_ t1 absList)
   | CUT -> "fail(cut)"
-  | TENSOR (t1, t2) -> (termToTexString_ t1 absList)^" \\otimes "^(termToTexString_ t2 absList)
-  | ADDOR (t1, t2) -> (termToTexString_ t1 absList)^" \\oplus "^(termToTexString_ t2 absList)
-  | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\unicode{0x214B} "^(termToTexString_ t2 absList)
-  | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\multimap_{"^(termToTexString_ s absList)^"} "^(termToTexString_ t1 absList)
+  | TENSOR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\otimes\\; "^(termToTexString_ t2 absList)
+  | ADDOR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\oplus\\; "^(termToTexString_ t2 absList)
+  | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\mypar\\; "^(termToTexString_ t2 absList)
+  | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\;\\multimap_{"^(termToTexString_ s absList)^"}\\; "^(termToTexString_ t1 absList)
   | BANG (CONST("$infty"), t) -> " ! "^(termToTexString_ t absList)
   | HBANG (CONST("$infty"), t) -> " \\hat{!} "^(termToTexString_ t absList)
   | QST (CONST("$infty"), t) -> " ? "^(termToTexString_ t absList)
   | BANG (s, t) -> " !^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
   | HBANG (s, t) -> " !^{\\hat{"^(termToTexString_ s absList)^"}} "^(termToTexString_ t absList)
   | QST (s, t) -> " ?^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
-  | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\unicode{0xFF06} "^(termToTexString_ t2 absList)
-  | FORALL (s, i, t) -> "\\forall "^s^" "^(termToTexString_ t ([s] @ absList))
-  | EXISTS (s, i, t) -> "\\exists "^s^" "^(termToTexString_ t ([s] @ absList))
+  | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\&\\; "^(termToTexString_ t2 absList)
+  | FORALL (s, i, t) -> "\\forall\\; "^s^" "^(termToTexString_ t ([s] @ absList))
+  | EXISTS (s, i, t) -> "\\exists\\; "^s^" "^(termToTexString_ t ([s] @ absList))
   | CLS (ty, t1, t2) -> (termToTexString_ t1 absList)^(clsTypeToString ty)^(termToTexString_ t2 absList)
   | NEW (s, t) -> "new \\lambda "^s^(termToTexString_ t ([s] @ absList))
   | BRACKET (f) -> "\\{ "^(termToTexString_ f absList)^" \\}"
@@ -190,12 +190,14 @@ let texFileHeader = (
   "\\usepackage{amsmath}\n"^
   "\\usepackage{amssymb}\n"^ 
   "\\usepackage{stmaryrd}\n"^ 
-  "\\usepackage{proof}\n\n"^
-  "\\usepackage{color}\n\n"^
+  "\\usepackage{proof}\n"^
+  "\\usepackage{graphicx}\n"^
+  "\\usepackage{color}\n"^
   "\\usepackage[landscape, margin=1cm]{geometry}\n\n"^ 
-  "\\begin{document}\n")
+  "\\newcommand{\\mypar}{\\ensuremath{\\rotatebox[origin=c]{180}{\\&}}}\n\n"^
+  "\\begin{document}\n\n")
   
-let texFileFooter = "\n\\end{document}"
+let texFileFooter = "\n\n\\end{document}"
     
 
 (* Removes special characters from a string *)
