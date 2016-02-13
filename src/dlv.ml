@@ -191,10 +191,9 @@ not_proveIf(S2, S1) :-
       let ctx = SequentSchema.getContext leaf in
       List.fold_right ( fun (subexp, index) acc ->
 	let ctxName = ContextSchema.ctxToStr (subexp, index) in
-	let subexpName = Prints.remSpecial subexp in
 	let subexpType = Subexponentials.typeAsString subexp in
 	let leafName = treeName ^ "_leaf" ^ (string_of_int leafIdx) in
-	("ctx(" ^ ctxName ^ ", " ^ subexpName ^ ", " ^ subexpType ^ ", " ^ leafName ^ ", " ^ treeName ^ ").\n") ^ acc 
+	("ctx(" ^ ctxName ^ ", " ^ subexp ^ ", " ^ subexpType ^ ", " ^ leafName ^ ", " ^ treeName ^ ").\n") ^ acc 
       ) (ContextSchema.getContexts ctx) ""
     in
     let i = ref 0 in
@@ -220,10 +219,10 @@ not_proveIf(S2, S1) :-
     "ok :- " ^ (okIfProve_aux leafs)
 
   let subexpOrdStr () = Hashtbl.fold (fun key data acc ->
-    "geq("^(Prints.remSpecial data)^", "^(Prints.remSpecial key)^").\n"^acc
+    "geq("^data^", "^key^").\n"^acc
   ) Subexponentials.orderTbl ""
   let reflSubexpRel () = Hashtbl.fold (fun key data acc -> 
-    "geq("^(Prints.remSpecial key)^", "^(Prints.remSpecial key)^").\n"^acc
+    "geq("^key^", "^key^").\n"^acc
   ) Subexponentials.typeTbl ""
 
   let genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr name =  

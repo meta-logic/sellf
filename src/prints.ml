@@ -198,16 +198,5 @@ let texFileHeader = (
   "\\begin{document}\n\n")
   
 let texFileFooter = "\n\n\\end{document}"
-    
 
-(* Removes special characters from a string *)
-(* Add more symbols to the special list if necessary *)
-let remSpecial s = 
-  let special = ['$';'#'] in 
-  let newStr = ref "" in
-  String.iter (fun c -> match List.mem c special with
-    | true -> ()
-    | false -> newStr := (!newStr ^ (String.make 1 c))
-  ) s;
-  !newStr
 ;;

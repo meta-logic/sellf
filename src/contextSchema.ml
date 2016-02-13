@@ -62,15 +62,13 @@ module ContextSchema : CONTEXTSCHEMA = struct
 
   let toString ctx = Hashtbl.fold (fun n i acc -> n ^ "_" ^ (string_of_int i) ^ ", " ^ acc) ctx.hash ""
 
-  let toTexString ctx = Hashtbl.fold (fun n i acc -> "\\Gamma_{" ^ (remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
+  let toTexString ctx = Hashtbl.fold (fun n i acc -> "\\Gamma_{" ^ n ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ acc) ctx.hash ""
 
   let ctxToTex (s, i) = 
-    let news = remSpecial s in
-    ("\\Gamma_{"^news^"}^{"^(string_of_int i)^"}")
+    ("\\Gamma_{"^s^"}^{"^(string_of_int i)^"}")
 
   let ctxToStr (s, i) = 
-    let news = remSpecial s in
-    ""^news^"_"^(string_of_int i)^""
+    ""^s^"_"^(string_of_int i)^""
 
   (* Creates the next context after inserting a formula in subexp *)
   let insert ctx subexp =

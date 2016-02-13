@@ -24,7 +24,6 @@ module type OLCONTEXT =
     type ctx = subexp * terms list
     type context = { mutable lst : ctx list  }
     val create : subexp list -> context
-    val getSubLabels : context -> string list
     val toStringForms : terms list -> string -> string -> int -> terms -> string
     val toTexString : context -> string -> int -> terms -> int -> string
     val subToString : subexp -> string
@@ -50,50 +49,42 @@ module OlContext : OLCONTEXT = struct
 
   let subToString (s, i) = s ^ "_" ^ string_of_int(i)
   
-  (* To print the formulas colorized properly, we need to know the height *)
-  (* of the proof tree. TODO: Analyze the necessity of mod operation here.*)
+  (* Colorize a formula according to its height on the prooftree *)
   let colorizeForm f currentHeight =
     match (currentHeight mod 2) with
     | 0 -> "{\\color{red}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
     | 1 -> "{\\color{blue}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
     | _ -> failwith "Wrong result of module operation (colorizeForm)."
-  
-  (* Collects a set of subexponential labels, eliminating the repetitions *)
-  (* and the invalid labels as '#'.                                       *)
-  let getSubLabels ctx =
-    List.fold_right (fun ((label, index), f) acc ->  
-      if (List.exists (fun el -> el = (Prints.remSpecial label)) acc) || label = "#" then acc
-      else (Prints.remSpecial label) :: acc
-    ) ctx.lst []
     
-  (* Prints context variables, considering the right side and generates   *)
-  (* new contexts if connectives are declared.                            *)
+  (* Print context variables according to their side; it also takes into account 
+   * if the subexponential has connectives declared on the specification
+   *)
   let toStringVariable subLabel index maxIndex side = 
     let k = ref maxIndex in
     let generateIndex = (fun () -> k := !k+1; !k) in
     let conList = try Hashtbl.find Subexponentials.conTbl subLabel with Not_found -> [] in
     match (conList, side) with
     | ([], "l") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
-		               if arity = MANY then "\\Gamma_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int index) ^ "}, "
+		               if arity = MANY then "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
 		               else ""
     | ([], "r") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
-		               if arity = MANY then "\\Delta_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int index) ^ "}, "
+		               if arity = MANY then "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
 		               else ""
     | (lst, "l") -> List.fold_right (fun con acc -> 
 			                               let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found ->
                                                     failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
-			                               conTex ^ "\\Gamma_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
+			                               conTex ^ "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
 		                                ) lst ""
     | (lst, "r") -> List.fold_right (fun con acc -> 
 			                               let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found ->
                                                     failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
-			                               conTex ^ "\\Delta_{" ^ (Prints.remSpecial subLabel) ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
+			                               conTex ^ "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
 		                                ) lst ""
     | _ -> failwith ("Error: the subexponential " ^ subLabel ^ " can not be printed.")
                     
-  (* Prints formula variables, considering the right side and colorize the*)
-  (* formula if it corresponds to the rule that will be applied. If a for-*)
-  (* mula appears in a wrong context, a warning will be printed.          *)
+  (* Print formula variables according to their side and colorize the
+   * formula if it corresponds to the rule that will be applied
+   *)
   let toStringForms formulas side subLabel currentHeight mainRule = 
     (List.fold_right (fun f acc ->
                       let formSide = Specification.getSide f in
@@ -110,8 +101,10 @@ module OlContext : OLCONTEXT = struct
       
   let printFormList f = List.fold_right (fun f' acc -> (Prints.termToTexString (Specification.getHeadPredicate f')) ^ ", " ^ acc) f ""
                                         
-  (* Subexponentials with index < 0 means that the context should not be *)
-  (* written, just the formulas.                                         *)
+  (* Context variables with index -1 should not be printed, just its formulas;
+   * TODO: Change the data structure of contexts; Formulas don't have to be associated
+   * with context variables, but with subexponential labels
+   *)
   let toTexString ctx side maxIndex mainRule currentHeight = 
     (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
     let subLst = Subexponentials.getAllValid () in
@@ -127,10 +120,10 @@ module OlContext : OLCONTEXT = struct
     ) ctx.lst "") ^
     (* Prints formula variables *)
     (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = (((Prints.remSpecial n) = sub) && (Subexponentials.isSameSide (Prints.remSpecial n) side)) in
+      let correctSide = (n = sub) && (Subexponentials.isSameSide n side) in
       match (side, correctSide, i) with
-      | ("l", true, -1)  -> (toStringForms f "l" (Prints.remSpecial n) currentHeight mainRule) ^ acc
-      | ("r", true, -1) -> (toStringForms f "r" (Prints.remSpecial n) currentHeight mainRule) ^ acc
+      | ("l", true, -1)  -> (toStringForms f "l" n currentHeight mainRule) ^ acc
+      | ("r", true, -1) -> (toStringForms f "r" n currentHeight mainRule) ^ acc
       | _ -> acc
     ) ctx.lst "") in
     (* Prints all the slots *)
@@ -198,7 +191,7 @@ module type OLPROOFTREE =
 
     type prooftree = {
       mutable conclusion : OlSequent.sequent;
-      mutable premisses : prooftree list;
+      mutable premises : prooftree list;
       mutable rule : llrule option}
     
     val create : OlSequent.sequent -> llrule option -> prooftree
@@ -218,15 +211,13 @@ module OlProofTree : OLPROOFTREE = struct
   
   type prooftree = {
     mutable conclusion : OlSequent.sequent;
-    mutable premisses : prooftree list;
+    mutable premises : prooftree list;
     mutable rule : llrule option
   }
-
-  let currentHeight = ref (-1)              
   
   let create sq rl = {
     conclusion = sq;
-    premisses = [];
+    premises = [];
     rule = rl;
   }
 
@@ -236,7 +227,7 @@ module OlProofTree : OLPROOFTREE = struct
   
   let getRule pt = pt.rule
 
-  let isLeaf pt = (pt.premisses = [])
+  let isLeaf pt = (pt.premises = [])
 
   let isOpen pt = (pt.rule = None)
 
@@ -244,17 +235,14 @@ module OlProofTree : OLPROOFTREE = struct
 
   let isClosedLeaf pt = (isLeaf pt) && (not (isOpen pt))
   
-  let counter () = if (!currentHeight + 1) > 1 then currentHeight := 0
-                   else currentHeight := !currentHeight + 1; !currentHeight
-  
   let getPol pt = 
     let conclusion = getConclusion pt in
     conclusion.OlSequent.pol
 
   let toPermutation olPt = 
-    let firstPt = List.hd olPt.premisses in
+    let firstPt = List.hd olPt.premises in
     let rec getSeq' pt = 
-      match (pt.premisses, getPol pt) with 
+      match (pt.premises, getPol pt) with 
       | ([], ASYN) -> 
 				begin
 				  match pt.rule with 
@@ -263,7 +251,7 @@ module OlProofTree : OLPROOFTREE = struct
 				end
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
     let rec getSeq pt =
-        match pt.premisses with
+        match pt.premises with
         | [] -> 
           begin
             match (getRule pt) with 
@@ -272,33 +260,33 @@ module OlProofTree : OLPROOFTREE = struct
           end
         | _ -> begin match (getPol pt) with
  	 		    | ASYN ->
- 	 		      if (List.exists (fun el -> (getPol el) = SYNC) pt.premisses) then
- 	 		        let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premisses in
-              nextPt.premisses <- getSeq' nextPt;
+ 	 		      if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
+ 	 		        let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
+              nextPt.premises <- getSeq' nextPt;
  	 		        [nextPt]
- 	 		      else List.concat (List.map (fun p -> getSeq p) pt.premisses)
+ 	 		      else List.concat (List.map (fun p -> getSeq p) pt.premises)
  	 		    | SYNC -> 
- 	 		      List.concat (List.map (fun p -> getSeq p) pt.premisses)
+ 	 		      List.concat (List.map (fun p -> getSeq p) pt.premises)
  	 		    end in
     let newPtList = getSeq firstPt in
-    olPt.premisses <- newPtList;
+    olPt.premises <- newPtList;
     olPt.conclusion <- firstPt.conclusion
     
   let toMacroRule olPt =
-    let firstPt = List.hd olPt.premisses in
+    let firstPt = List.hd olPt.premises in
     let rec getOpenLeaves pt = 
       match pt.rule with
-      | Some(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.premisses)
+      | Some(rule) -> List.concat (List.map (fun p -> getOpenLeaves p) pt.premises)
       | None -> [pt] in
-    let newPremisses = getOpenLeaves olPt in
+    let newPremises = getOpenLeaves olPt in
     olPt.conclusion <- firstPt.conclusion;
-    olPt.premisses <- newPremisses
+    olPt.premises <- newPremises
     
   let maxIndex pt = 
     let index = ref (-1) in
     let rec getSeq pt = 
       match pt.rule with
-      | Some(rule) -> if pt.premisses = [] then [pt] else List.concat (List.map (fun p -> getSeq p) pt.premisses)
+      | Some(rule) -> if pt.premises = [] then [pt] else List.concat (List.map (fun p -> getSeq p) pt.premises)
       | None -> [pt] in
     let olPt = List.hd (getSeq pt) in
     let olSeq = getConclusion olPt in
@@ -313,7 +301,7 @@ module OlProofTree : OLPROOFTREE = struct
       | Some(r) ->
 	      let seq = getConclusion pt in
 	      let mainRule = Specification.getObjectLogicMainFormula (List.hd seq.OlSequent.goals) in
-	      let topproof = match pt.premisses with
+	      let topproof = match pt.premises with
 	        | [] -> ""
 	        | hd::tl -> (toTexString' hd (level + 1))^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el (level + 1))) tl "") 
 	      in
@@ -344,9 +332,9 @@ module type REWRITING =
   
     type derivation = ProofTreeSchema.prooftree * Constraints.constraintset
     type ol_derivation = OlProofTree.prooftree * Constraints.constraintset
-    val reconstruct_tree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
-    val reconstruct_derivations : derivation list -> ol_derivation list
-    val reconstruct_derivations_pair : (derivation * derivation) list -> (ol_derivation * ol_derivation) list
+    val rebuild_tree : ProofTreeSchema.prooftree -> OlProofTree.prooftree
+    val rebuild_derivations : derivation list -> ol_derivation list
+    val rebuild_derivations_pair : (derivation * derivation) list -> (ol_derivation * ol_derivation) list
     val apply_model : OlProofTree.prooftree -> Constraints.constraintset -> unit
     val rewrite_derivations : ol_derivation list -> unit
     val rewrite_derivations_pair : (ol_derivation * ol_derivation) list -> unit
@@ -365,7 +353,7 @@ module Rewriting : REWRITING = struct
    * has sequents that have contexts of type OlContext, which contains a list of 
    * ((string * int) * list of formulas)   
    *)
-  let rec reconstruct_tree pt =
+  let rec rebuild_tree pt =
     let seq = ProofTreeSchema.getConclusion pt in
     let rule = ProofTreeSchema.getRule pt in
     let ctx = SequentSchema.getContext seq in
@@ -376,18 +364,18 @@ module Rewriting : REWRITING = struct
     let goals = SequentSchema.getGoals seq in
     let pol = SequentSchema.getPhase seq in
     let sequent = OlSequent.create context goals pol in
-    let olPt = OlProofTree.create sequent rule in
+    let olpt = OlProofTree.create sequent rule in
     match pt.ProofTreeSchema.premises with
-    | [] -> olPt
-    | lst -> olPt.OlProofTree.premisses <- List.map reconstruct_tree lst;
-             olPt
+    | [] -> olpt
+    | lst -> olpt.OlProofTree.premises <- List.map rebuild_tree lst;
+             olpt
                
-  let reconstruct_derivations drvt_lst = 
-    List.map (fun (pt, model) -> (reconstruct_tree pt, model)) drvt_lst
+  let rebuild_derivations drvt_lst = 
+    List.map (fun (pt, model) -> (rebuild_tree pt, model)) drvt_lst
     
-  let reconstruct_derivations_pair drvt_pair_lst = 
+  let rebuild_derivations_pair drvt_pair_lst = 
     List.map (fun ((pt1, model1), (pt2, model2)) ->
-              ((reconstruct_tree pt1, model1), (reconstruct_tree pt2, model2))
+              ((rebuild_tree pt1, model1), (rebuild_tree pt2, model2))
              ) drvt_pair_lst
   
   (* let print_subexp (str, i) = print_string (str ^ (string_of_int i)) *)
@@ -539,7 +527,7 @@ module Rewriting : REWRITING = struct
     | (true, false) ->
        compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index true false
     | (false, false) ->
-       List.iter (fun pt -> compute_rewrite_rules pt model rewrite_ht) olpt.OlProofTree.premisses;
+       List.iter (fun pt -> compute_rewrite_rules pt model rewrite_ht) olpt.OlProofTree.premises;
        compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index false false
 
   let rewrite_sequent seq rewrite_ht =
@@ -553,7 +541,7 @@ module Rewriting : REWRITING = struct
 
   let rec rewrite_tree olpt rewrite_ht =
     let seq = OlProofTree.getConclusion olpt in
-    match olpt.OlProofTree.premisses with
+    match olpt.OlProofTree.premises with
     | [] -> olpt.OlProofTree.conclusion <- (rewrite_sequent seq rewrite_ht)
     | lst -> List.iter (fun pt -> rewrite_tree pt rewrite_ht) lst;
              olpt.OlProofTree.conclusion <- (rewrite_sequent seq rewrite_ht)
@@ -581,7 +569,7 @@ end;;
 (* Discuss it with Leo. [Giselle]*)
 let apply_permute drvt_pair_lst = begin
   let olPt = ref [] in
-  olPt := Rewriting.reconstruct_derivations_pair drvt_pair_lst;
+  olPt := Rewriting.rebuild_derivations_pair drvt_pair_lst;
   Rewriting.rewrite_derivations_pair !olPt;
   List.iter (fun ((olt1, model1), (olt2, model2)) -> 
     OlProofTree.toPermutation olt1;
@@ -592,14 +580,14 @@ end ;;
 
 let apply_perm_not_found perm_not_found = begin
   let olPt = ref [] in
-  olPt := Rewriting.reconstruct_derivations perm_not_found;
+  olPt := Rewriting.rebuild_derivations perm_not_found;
   Rewriting.rewrite_derivations !olPt;
   !olPt
 end ;;
 
 let apply_derivation bipole = begin
   let (pt, model) = bipole in
-  let olpt = Rewriting.reconstruct_tree pt in
+  let olpt = Rewriting.rebuild_tree pt in
   Rewriting.apply_model olpt model;
   OlProofTree.toMacroRule olpt;
   olpt
