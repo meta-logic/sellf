@@ -6,41 +6,47 @@
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subexp lr lin.
-subexp un unb.
+subexp l lin.
+subexp r lin.
+subexp bl unb. % banged formulas on the left (represented with a star)
+subexp qr unb. % question marked formulas on the right (represented with a heart)
 
-subexpctx lr many antsuc.
-subexpctx un many antsuc.
+subexpctx l many ant.
+subexpctx r many suc.
+subexpctx bl many ant [lbang].
+subexpctx qr many suc [lquest].
+
+subexprel bl < qr.
 
 rules introduction.
 
 % Implication
-(not (lft (lolli A B))) * (([lr]? (rght A)) * ([lr]? (lft B))).
-(not (rght (lolli A B))) *  (([lr]? (lft A)) | ([lr]? (rght B))).
+(not (lft (lolli A B))) * (([r]? (rght A)) * ([l]? (lft B))).
+(not (rght (lolli A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Tensor
-(not (lft (tensor A B))) * (([lr]? (lft A)) | ([lr]? (lft B))).
-(not (rght (tensor A B))) * (([lr]? (rght A)) * ([lr]? (rght B))).
+(not (lft (tensor A B))) * (([l]? (lft A)) | ([l]? (lft B))).
+(not (rght (tensor A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % With
-(not (lft (with A B))) * (([lr]? (lft A)) + ([lr]? (lft B))).
-(not (rght (with A B))) * (([lr]? (rght A)) & ([lr]? (rght B))).
+(not (lft (with A B))) * (([l]? (lft A)) + ([l]? (lft B))).
+(not (rght (with A B))) * (([r]? (rght A)) & ([r]? (rght B))).
 
 % Par
-(not (lft (par A B))) * (([lr]? (lft A)) * ([lr]? (lft B))).
-(not (rght (par A B))) * (([lr]? (rght A)) | ([lr]? (rght B))).
+(not (lft (par A B))) * (([l]? (lft A)) * ([l]? (lft B))).
+(not (rght (par A B))) * (([r]? (rght A)) | ([r]? (rght B))).
 
 % Oplus
-(not (lft (oplus A B))) * (([lr]? (lft A)) & ([lr]? (lft B))).
-(not (rght (oplus A B))) * (([lr]? (rght A)) + ([lr]? (rght B))).
+(not (lft (oplus A B))) * (([l]? (lft A)) & ([l]? (lft B))).
+(not (rght (oplus A B))) * (([r]? (rght A)) + ([r]? (rght B))).
 
 % Bang
-(not (lft (lbang A))) * ([un]? (lft A)).
-(not (rght (lbang A))) * ([un]bang ([un]? (rght A))).
+(not (lft (lbang A))) * ([l]? (lft A)).
+(not (rght (lbang A))) * ([bl]bang ([r]? (rght A))).
 
 % Quest
-(not (lft (lquest A))) * ([un]bang ([un]? (lft A))).
-(not (rght (lquest A))) * ([un]? (rght A)).
+(not (lft (lquest A))) * ([bl]bang ([l]? (lft A))).
+(not (rght (lquest A))) * ([r]? (rght A)).
 
 % One
 (not (lft lone)) * bot.
@@ -60,7 +66,7 @@ rules axiom.
 ((not (lft A)) * (not (rght A))).
 
 rules cut.
-(([lr]? (rght A)) * ([lr]? (lft A))).
+(([r]? (rght A)) * ([l]? (lft A))).
 
 
 
