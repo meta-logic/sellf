@@ -12,9 +12,9 @@ subexp f lin.
 
 subexprel r < l.
 
-subexpctx l many lft.
-subexpctx r many rght.
-subexpctx f single rght.
+subexpctx l many ant.
+subexpctx r many suc.
+subexpctx f single suc.
 
 rules axiom.
 % Init

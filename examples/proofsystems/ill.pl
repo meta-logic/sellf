@@ -10,9 +10,9 @@ subexp l lin.
 subexp lb lin. % Formulas with ! on the left.
 subexp r lin.
 
-subexpctx l many lft.
-subexpctx lb many lft [lbang].
-subexpctx r single rght.
+subexpctx l many ant.
+subexpctx lb many ant [lbang].
+subexpctx r single suc.
 
 subexprel l < lb.
 

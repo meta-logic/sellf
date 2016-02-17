@@ -18,8 +18,8 @@
 subexp r lin.
 subexp l lin.
 
-subexpctx r single rght.
-subexpctx l many lft.
+subexpctx l many ant.
+subexpctx r single suc.
 
 rules introduction.
 

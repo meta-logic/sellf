@@ -15,8 +15,8 @@
 subexp l lin.
 subexp r lin.
 
-subexpctx l many lft.
-subexpctx r many rght.
+subexpctx l many ant.
+subexpctx r many suc.
 
 rules introduction.
 

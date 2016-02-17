@@ -206,9 +206,9 @@ clause:
         | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
       in
       let side = match $4 with 
-        | "lft" -> LEFT
-        | "rght" -> RIGHT
-        | "rghtlft" -> RIGHTLEFT
+        | "ant" -> LEFT
+        | "suc" -> RIGHT
+        | "antsuc" -> RIGHTLEFT
         | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
       in
       Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
@@ -223,9 +223,9 @@ clause:
         | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
       in
       let side = match $4 with 
-        | "lft" -> LEFT
-        | "rght" -> RIGHT
-        | "rghtlft" -> RIGHTLEFT
+        | "ant" -> LEFT
+        | "suc" -> RIGHT
+        | "antsuc" -> RIGHTLEFT
         | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
       in
       List.iter (fun con ->

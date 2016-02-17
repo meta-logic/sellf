@@ -38,19 +38,19 @@ subexprel h2 < k2.
 subexprel k1 < gl.
 subexprel k2 < gl.
 
-subexpctx l many lft.
-subexpctx ll many lft.
-subexpctx gl many lft.
-subexpctx k1 many lft.
-subexpctx k2 many lft.
-subexpctx h1 many lft.
-subexpctx h2 many lft.
-subexpctx s1L many lft.
-subexpctx s2L many lft.
+subexpctx l many ant.
+subexpctx ll many ant.
+subexpctx gl many ant.
+subexpctx k1 many ant.
+subexpctx k2 many ant.
+subexpctx h1 many ant.
+subexpctx h2 many ant.
+subexpctx s1L many ant.
+subexpctx s2L many ant.
 
-subexpctx r single rght.
-subexpctx s1R single rght.
-subexpctx s2R single rght.
+subexpctx r single suc.
+subexpctx s1R single suc.
+subexpctx s2R single suc.
 
 rules introduction.
 % Tensor

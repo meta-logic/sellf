@@ -12,10 +12,10 @@ subexp nl unb. % Necessarily left
 subexp pr unb. % Possibly right
 subexp e  unb.
 
-subexpctx l many lft.
-subexpctx r many rght.
-subexpctx nl many lft [nec].
-subexpctx pr many rght [poss].
+subexpctx l many ant.
+subexpctx r many suc.
+subexpctx nl many ant [nec].
+subexpctx pr many suc [poss].
 
 subexprel r < pr.
 subexprel l < nl.

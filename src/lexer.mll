@@ -21,7 +21,7 @@ let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials sta
 let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
 let ctxtype = "many"  |  "single"
-let ctxside = "lft" | "rght" | "rghtlft"
+let ctxside = "ant" | "suc" | "antsuc"
 
 rule token = parse 
 

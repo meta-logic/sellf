@@ -9,8 +9,8 @@
 subexp r lin.
 subexp l unb.
 
-subexpctx r single rght.
-subexpctx l many lft.
+subexpctx l many ant.
+subexpctx r single suc.
 
 rules introduction.
 
