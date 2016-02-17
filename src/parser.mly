@@ -47,7 +47,7 @@ let check_val_subexp sub1 sub2 =
 COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
 LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
 QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX HASH
-%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE ABS NEW FILE CONNTEX
+%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE CTXSIDE ABS NEW FILE CONNTEX
 %token <int> INT
 %right ARR  
 %left TIMES
@@ -197,7 +197,7 @@ clause:
 }
 
 /* Define the context type */
-| SUBEXCTX NAME CTXTYPE NAME DOT {
+| SUBEXCTX NAME CTXTYPE CTXSIDE DOT {
   match (Subexponentials.isSubexponentialDeclared $2) with
     | true -> 
       let arity = match $3 with
@@ -214,7 +214,7 @@ clause:
       Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
     | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
 }
-| SUBEXCTX NAME CTXTYPE NAME LBRACKET conList RBRACKET DOT {
+| SUBEXCTX NAME CTXTYPE CTXSIDE LBRACKET conList RBRACKET DOT {
   match (Subexponentials.isSubexponentialDeclared $2) with
     | true -> 
       let arity = match $3 with
