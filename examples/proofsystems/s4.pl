@@ -10,17 +10,13 @@ subexp l  unb.
 subexp r  unb.
 subexp nl unb. % Necessarily left
 subexp pr unb. % Possibly right
-subexp e  unb.
 
 subexpctx l many ant.
 subexpctx r many suc.
 subexpctx nl many ant [nec].
 subexpctx pr many suc [poss].
 
-subexprel r < pr.
-subexprel l < nl.
-subexprel e < pr.
-subexprel e < nl.
+subexprel pr < nl.
 
 rules introduction.
 % Conjunction
@@ -33,19 +29,19 @@ rules introduction.
 
 % Necessarily
 (not (lft (nec A))) * [l]? (lft A).
-(not (rght (nec A))) * [e]bang ([r]? (rght A)).
+(not (rght (nec A))) * [pr]bang ([r]? (rght A)).
 
 % Possibly
-(not (lft (poss A))) * [e]bang ([l]? (lft A)).
+(not (lft (poss A))) * [pr]bang ([l]? (lft A)).
 (not (rght (poss A))) * [r]? (rght A).
 
 rules axiom.
 % Init
 ((not (lft A)) * (not (rght A))).
 
-%rules cut.
+rules cut.
 % Cut
-%(([l]? (lft A)) * ([r]? (rght A))).
+(([l]? (lft A)) * ([r]? (rght A))).
 
 %rules structural.
 % Structural rules for modals
