@@ -20,21 +20,21 @@ open Subexponentials
 module type OLCONTEXT =
   sig
   
-    type subexp = string * int
-    type ctx = subexp * terms list
+    type ctxVar = string * int
+    type ctx = ctxVar * terms list
     type context = { mutable lst : ctx list  }
-    val create : subexp list -> context
+    val create : ctxVar list -> context
     val toStringForms : terms list -> string -> string -> int -> terms -> string
     val toTexString : context -> string -> int -> terms -> int -> string
-    val subToString : subexp -> string
+    val subToString : ctxVar -> string
   
   end
 
 module OlContext : OLCONTEXT = struct
 
-  type subexp = string * int
+  type ctxVar = string * int
   
-  type ctx = subexp * terms list
+  type ctx = ctxVar * terms list
   
   type context = {
     mutable lst : ctx list;
@@ -44,8 +44,7 @@ module OlContext : OLCONTEXT = struct
     lst = List.map (fun ctx -> (ctx, [])) ctxList;
   }
 
-  let remComma str = try String.sub str 0 ((String.length str) - 2) 
-		                 with Invalid_argument(_) -> str
+  let remComma str = (try String.sub str 0 ((String.length str) - 2) with Invalid_argument(_) -> str)
 
   let subToString (s, i) = s ^ "_" ^ string_of_int(i)
   
@@ -58,18 +57,20 @@ module OlContext : OLCONTEXT = struct
     
   (* Print context variables according to their side; it also takes into account 
    * if the subexponential has connectives declared on the specification
+   * TODO: Analyze the cases below where there is a list of connectives
+   * Doesn't the arity matter?
    *)
-  let toStringVariable subLabel index maxIndex side = 
+  let toStringVariable subLabel index maxIndex side nofm = 
     let k = ref maxIndex in
     let generateIndex = (fun () -> k := !k+1; !k) in
     let conList = try Hashtbl.find Subexponentials.conTbl subLabel with Not_found -> [] in
     match (conList, side) with
-    | ([], "l") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
-		               if arity = MANY then "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
-		               else ""
+    | ([], "l") -> "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
     | ([], "r") -> let (arity, side) = Hashtbl.find Subexponentials.ctxTbl subLabel in
-		               if arity = MANY then "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
-		               else ""
+                   (match (arity, nofm) with
+                    | (MANY, _) -> "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int index) ^ "}, "
+                    | (SINGLE, true) -> "C"
+                    | (SINGLE, false) -> "")
     | (lst, "l") -> List.fold_right (fun con acc -> 
 			                               let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found ->
                                                     failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
@@ -98,56 +99,41 @@ module OlContext : OLCONTEXT = struct
                       | false -> (print_string ("\nWarning: the following formula can't belong to the context "
 		                                            ^ subLabel ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc)
                      ) formulas "")
-      
-  let printFormList f = List.fold_right (fun f' acc -> (Prints.termToTexString (Specification.getHeadPredicate f')) ^ ", " ^ acc) f ""
-                                        
+
   (* Context variables with index -1 should not be printed, just its formulas;
    * TODO: Change the data structure of contexts; Formulas don't have to be associated
    * with context variables, but with subexponential labels
    *)
   let toTexString ctx side maxIndex mainRule currentHeight = 
-    (*List.fold_right (fun ((n, i), f) acc -> "\\Gamma_{" ^ (Prints.remSpecial n) ^ "}^{" ^ (string_of_int i) ^ "} ; " ^ (printFormList f) ^ acc) ctx.lst ""*)
     let subLst = Subexponentials.getAllValid () in
     let slotToTex ctx side sub currentHeight =
-    (* Prints context variables *)
-    (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
-      match (f, correctSide, i) with
-      | (_, _, -1) -> acc
-      | ([], true, _) -> (toStringVariable n i maxIndex side) ^ acc
-      | (f', true, _) -> (toStringVariable n i maxIndex side) ^ (toStringForms f' side n currentHeight mainRule) ^ acc
-      | _ -> acc
-    ) ctx.lst "") ^
-    (* Prints formula variables *)
-    (List.fold_right (fun ((n, i), f) acc ->
-      let correctSide = (n = sub) && (Subexponentials.isSameSide n side) in
-      match (side, correctSide, i) with
-      | ("l", true, -1)  -> (toStringForms f "l" n currentHeight mainRule) ^ acc
-      | ("r", true, -1) -> (toStringForms f "r" n currentHeight mainRule) ^ acc
-      | _ -> acc
-    ) ctx.lst "") in
-    (* Prints all the slots *)
+      let s2 = (List.fold_right (fun ((n, i), f) acc ->
+                                 let correctSide = (n = sub) && (Subexponentials.isSameSide n side) in
+                                 match (side, correctSide, i) with
+                                 | ("l", true, -1)  -> (toStringForms f "l" n currentHeight mainRule) ^ acc
+                                 | ("r", true, -1) -> (toStringForms f "r" n currentHeight mainRule) ^ acc
+                                 | _ -> acc
+                                ) ctx.lst "") in
+      let nofm = (s2 = "") in
+      let s1 = (List.fold_right (fun ((n, i), f) acc ->
+                                 let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
+                                 match (f, correctSide, i) with
+                                 | (_, _, -1) -> acc
+                                 | ([], true, _) -> (toStringVariable n i maxIndex side nofm) ^ acc
+                                 | (f', true, _) -> (toStringVariable n i maxIndex side nofm) ^ (toStringForms f' side n currentHeight mainRule) ^ acc
+                                 | _ -> acc
+                                ) ctx.lst "") in (s1 ^ s2) in
     let slotString = List.fold_right (fun sub acc ->
-      match Subexponentials.isSameSide sub side with
-        | false -> acc
-        | true ->
-          match remComma (slotToTex ctx side sub currentHeight) with
-            | "" -> begin match acc with
-              (*| "" -> " \\cdot " ^ acc*)
-              | _ -> begin
-                      let (arity, side) = Hashtbl.find Subexponentials.ctxTbl sub in
-                      if (arity = SINGLE) && (side = RIGHT) then "; {}C " ^ acc
-                      else "; {}\\cdot{} " ^ acc
-                     end
-            end
-            | str -> begin match acc with
-              (*| "" -> str ^ " " ^ acc*)
-              | _ -> ";{} " ^ str ^ acc
-            end
-    ) subLst "" in
+                                      match Subexponentials.isSameSide sub side with
+                                      | false -> acc
+                                      | true -> let _string = remComma (slotToTex ctx side sub currentHeight) in
+                                                (match _string with
+                                                 | "" -> "; {}\\cdot{} " ^ acc
+                                                 | str ->  ";{} " ^ str ^ acc)
+                                     ) subLst "" in
     try String.sub slotString 1 ((String.length slotString) - 1)
     with Invalid_argument(_) -> slotString
-  
+                                  
 end;;
 
 module type OLSEQUENT =
@@ -293,6 +279,19 @@ module OlProofTree : OLPROOFTREE = struct
     let olCtx = OlSequent.getContext olSeq in
     List.iter (fun ((s, i), l) -> if i > !index then index := i else ()) olCtx.OlContext.lst;
     !index
+
+  (* let normalizeIndexes pt = *)
+  (*   let ctx_ht = ref [] in *)
+  (*   let rec normalizeTree pt' = *)
+  (*     match pt'.rule with *)
+  (*     | Some(rule) -> let ctx = getContextFromPt pt' in *)
+  (*                     List.iter (fun (c, f) -> *)
+  (*                                match List.find (fun (s, i) -> *)
+  (*                                                 s = fst(c) *)
+  (*                                                ) !ctx_ht *)
+  (*                               ) ctx.OlContext.lst; *)
+  (*                     List.iter (fun p -> normalizeTree p) pt'.premises; *)
+                      
     
   let toTexString pt =
     let index = maxIndex pt in
@@ -343,7 +342,6 @@ module type REWRITING =
 
 module Rewriting : REWRITING = struct
 
-  type sub = string * int
   type derivation = ProofTreeSchema.prooftree * Constraints.constraintset
   type ol_derivation = OlProofTree.prooftree * Constraints.constraintset
                                             
@@ -403,13 +401,6 @@ module Rewriting : REWRITING = struct
     match l with
     | [] -> failwith ("[ERROR] Formula not found.")
     | h::t -> if f = h then t else h::(remove_f f t)
-                    
-  let filter_subexponentials lst =
-    List.fold_right (fun (sub, f) acc ->
-                     match (List.mem (fst(sub)) (Subexponentials.getAllValid ())) with
-                     | true -> (sub, f) :: acc
-                     | false -> acc
-                    ) lst []
 
   let filter_constraints s lst =
     List.filter (fun cstr ->
@@ -428,7 +419,7 @@ module Rewriting : REWRITING = struct
     let count () = i := !i + 1; !i in
     (* Rewriting algorithm *)
     let ctx = OlSequent.getContext seq in
-    ctx.OlContext.lst <- filter_subexponentials ctx.OlContext.lst;
+    ctx.OlContext.lst <- Subexponentials.filter_subexponentials ctx.OlContext.lst;
     List.iter (fun (c, f) ->
                match is_open_leaf || is_closed_leaf with
                | true ->
@@ -518,7 +509,7 @@ module Rewriting : REWRITING = struct
                              | _ -> ()
                             ) (filter_constraints c model.lst)
               ) ctx.OlContext.lst
-                                                 
+
   let rec compute_rewrite_rules olpt model rewrite_ht =
     let max_index = OlProofTree.maxIndex olpt in
     match (OlProofTree.isClosedLeaf olpt, OlProofTree.isOpenLeaf olpt) with
@@ -547,7 +538,7 @@ module Rewriting : REWRITING = struct
              olpt.OlProofTree.conclusion <- (rewrite_sequent seq rewrite_ht)
 
   let apply_model olpt model =
-    let rewrite_ht : (ctx, (ctx list) * (terms list)) Hashtbl.t = Hashtbl.create 100 in
+    let rewrite_ht : (OlContext.ctxVar, (OlContext.ctxVar list) * (terms list)) Hashtbl.t = Hashtbl.create 100 in
     compute_rewrite_rules olpt model rewrite_ht;
     rewrite_tree olpt rewrite_ht;
     Hashtbl.reset rewrite_ht

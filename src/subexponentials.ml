@@ -143,6 +143,7 @@ let typeAsString s = match type_of s with
   | UNB -> "unb"
   | REL -> "rel"
   | AFF -> "aff"
+;;
 
 (** Checks if a subexponential is on the same side as predicate using lft and
     rght *)
@@ -152,9 +153,19 @@ let isSameSide sub str = try match (getCtxSide sub, str) with
   | (LEFT, "l") -> true
   | _ -> false
   with _ -> false
+;;
 
 let isUnbounded sub = match type_of sub with
   | UNB | REL -> true
   | LIN | AFF -> false
+;;
 
-let isBounded sub = not (isUnbounded sub)
+let isBounded sub = not (isUnbounded sub);;
+
+let filter_subexponentials lst =
+  List.fold_right (fun (sub, f) acc ->
+                   match (List.mem (fst(sub)) (getAllValid ())) with
+                   | true -> (sub, f) :: acc
+                   | false -> acc
+                  ) lst []
+;;
