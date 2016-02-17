@@ -5,6 +5,8 @@ open Parser
 exception Eof
 open Lexing 
 
+exception ReservedKeyword of string
+
 let incrline lexbuf =
     lexbuf.lex_curr_p <- {
     lexbuf.lex_curr_p with
@@ -42,6 +44,8 @@ rule token = parse
 | "cut"                 { CUTRULE }
 | "structural"          { STRUCTURAL }
 | "introduction"        { INTRODUCTION }
+| "gamma"               { raise (ReservedKeyword "gamma") }
+| "infty"               { raise (ReservedKeyword "infty") }
 | subtype as tsub       { TSUB(tsub) }
 | ':'                   { DOTS }
 | "->"                  { TARR }
@@ -55,8 +59,8 @@ rule token = parse
                         { String.iter (function '\n' -> incrline lexbuf | _ -> ()) n ;
                               STRING n }
 | eof                   { raise Eof }
-| "print"             {PRINT}
-| "is"                  {IS}
+| "print"               { PRINT }
+| "is"                  { IS }
 | '+'                   { PLUS }
 | '-'                   { MINUS }
 | '*'                   { TIMES }
@@ -88,9 +92,9 @@ rule token = parse
 | '&'                   { WITH }
 | '['                   { LBRACKET }
 | ']'                   { RBRACKET }
-| '{'			{ LCURLY }
-| '}'			{ RCURLY }
-| varName as lxm    { VAR(lxm) }
+| '{'                   { LCURLY }
+| '}'                   { RCURLY }
+| varName as lxm        { VAR(lxm) }
 | ['0'-'9']+ as lxm     { INT(int_of_string lxm) }
 | '\\' (varName as lxm) { ABS(lxm) }
 | "nsub \\" (varName as lxm)        { NEW(lxm) } 
