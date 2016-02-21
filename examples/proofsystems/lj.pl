@@ -12,6 +12,8 @@ subexp l unb.
 subexpctx l many ant.
 subexpctx r single suc.
 
+%subexprel r < l.
+
 rules introduction.
 
 % Implication
@@ -36,4 +38,4 @@ rules axiom.
 ((not (lft A)) * (not (rght A))).
 
 rules cut.
-(([r]? (rght A)) * ([l]? (lft A))).
+(([l]bang ([r]? (rght A))) * ([l]? (lft A))).
