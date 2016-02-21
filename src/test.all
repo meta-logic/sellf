@@ -48,6 +48,14 @@ echo "------------------ Testing LL -------------------------";
 echo "-------------------------------------------------------";
 echo "";
 
+echo "------------------ Testing ILL -------------------------";
+./sellf -i ../examples/proofsystems/ill -c cutcoherence
+./sellf -i ../examples/proofsystems/ill -c initialcoherence
+./sellf -i ../examples/proofsystems/ill -c principalcut
+./sellf -i ../examples/proofsystems/ill -c atomicelim
+echo "-------------------------------------------------------";
+echo "";
+
 echo "------------------ Testing mLJ ------------------------";
 ./sellf -i ../examples/proofsystems/mlj -c cutcoherence
 ./sellf -i ../examples/proofsystems/mlj -c initialcoherence
