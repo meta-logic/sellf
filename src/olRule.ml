@@ -280,20 +280,42 @@ module OlProofTree : OLPROOFTREE = struct
     List.iter (fun ((s, i), l) -> if i > !index then index := i else ()) olCtx.OlContext.lst;
     !index
 
-  (* let normalizeIndexes pt = *)
-  (*   let ctx_ht = ref [] in *)
-  (*   let rec normalizeTree pt' = *)
-  (*     match pt'.rule with *)
-  (*     | Some(rule) -> let ctx = getContextFromPt pt' in *)
-  (*                     List.iter (fun (c, f) -> *)
-  (*                                match List.find (fun (s, i) -> *)
-  (*                                                 s = fst(c) *)
-  (*                                                ) !ctx_ht *)
-  (*                               ) ctx.OlContext.lst; *)
-  (*                     List.iter (fun p -> normalizeTree p) pt'.premises; *)
-                      
+  (* TODO: Rewrite this code avoiding references
+   * The type of this function should be: OlProofTree -> OlProofTree
+   *)
+  let normalizeIndexes pt =
+    let ctx_conc = getContextFromPt pt in
+    let norm_ht : (OlContext.ctxVar, OlContext.ctxVar) Hashtbl.t = Hashtbl.create 100 in
+    List.iter (fun ((s, i), f) ->
+               if i >= 0 then
+                 (let last_i = ref 0 in
+                  Hashtbl.iter (fun (_s, _i) (_s', _i') ->
+                                if s = _s && _i' > !last_i then last_i := _i'
+                                else ()
+                               ) norm_ht;
+                  if !last_i <> 0 then
+                    Hashtbl.add norm_ht (s, i) (s, (!last_i + 1))
+                  else
+                    Hashtbl.add norm_ht (s, i) (s, 1))
+              ) ctx_conc.OlContext.lst;
+    let normalizeCtx lst =
+      List.fold_right (fun ((s, i), f) acc ->
+                       let sub_norm = try Hashtbl.find norm_ht (s, i)
+                                      with Not_found -> (s, i) in
+                       (sub_norm, f) :: acc
+                      ) lst [] in
+    let rec normalizeTree pt' =
+      match pt'.rule with
+      | None ->
+         let ctx = getContextFromPt pt' in
+         ctx.OlContext.lst <- normalizeCtx ctx.OlContext.lst
+      | Some(r) ->
+         let ctx = getContextFromPt pt' in
+         ctx.OlContext.lst <- normalizeCtx ctx.OlContext.lst;
+         List.iter (fun p -> normalizeTree p) pt'.premises in normalizeTree pt
     
   let toTexString pt =
+    normalizeIndexes pt;
     let index = maxIndex pt in
     let rec toTexString' pt level = 
       match pt.rule with
