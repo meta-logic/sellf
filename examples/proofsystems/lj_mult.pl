@@ -20,7 +20,7 @@ rules introduction.
 (not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
-(not (lft (and A B))) * (([l]? (lft A)) + ([l]? (lft B))).
+(not (lft (and A B))) * (([l]? (lft A)) | ([l]? (lft B))).
 (not (rght (and A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % Disjunction
