@@ -159,7 +159,7 @@ not_proveIf(S2, S1) :-
 
   (* Generates a file with the constraint set and the theory specification *)
   let genFile cstrSet name = 
-    let file = open_out ("solver/"^name^".in") in
+    let file = open_out (name^".in") in
     Printf.fprintf file "%s" header_title;
     Printf.fprintf file "%s" header_multiset_spec;
     Printf.fprintf file "%s" title_multiset;
@@ -173,8 +173,8 @@ not_proveIf(S2, S1) :-
   as strings which are the true predicated in the format of facts (e.g.
   "pred(a). pred(b)." *)
   let getModels cstrSet =
-    genFile cstrSet "temp2";
-    let channel = Unix.open_process_in ("dlv -silent solver/temp2.in") in
+    genFile cstrSet "derivations-tmp";
+    let channel = Unix.open_process_in ("dlv -silent derivations-tmp.in") in
     let rec readModel input = try match input_line input with
       | str ->
 	let lexbuf = Lexing.from_string str in
@@ -253,7 +253,7 @@ not_proveIf(S2, S1) :-
     let modelStr1 = Constraints.toString model1 in
     let modelStr2 = Constraints.toString model2 in
     let okStr = okIfProve openLeaves2 "tree2" in
-    let fileName = "solver/permute2.in" in
+    let fileName = "permute-tmp.in" in
     genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
     let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
     let rec hasModel input = try match input_line input with
