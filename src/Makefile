@@ -71,8 +71,6 @@
 
 SOURCES = clique.ml clique.mli types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll lexer_top.mll sellf.ml 
 
-QUATI = types.mli subexponentials.ml specification.ml contextSchema.ml constraints.ml constraints.mli sequent.ml proofTreeSchema.ml dlv.ml bipole.ml ol.ml permutation.ml sellf.ml 
-
 # The executable file to generate
 EXEC = sellf
 
@@ -155,7 +153,7 @@ SMLYL = $(filter %.ml,$(SMLIYL))
 OBJS = $(SMLYL:.ml=.cmo)
 OPTOBJS = $(SMLYL:.ml=.cmx)
 
-SMLIYDOC = $(QUATI:.mly=.ml)
+SMLIYDOC = $(SOURCES:.mly=.ml)
 SMLIYLDOC = $(SMLIYDOC:.mll=.ml)
 SMLYLDOC = $(filter %.ml,$(SMLIYLDOC))
 

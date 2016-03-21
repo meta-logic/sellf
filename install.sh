@@ -2,9 +2,9 @@
 
 cd src
 make 
+# It is important that make is run before make doc to generate the cmi files.
 make doc
-#Fix relative paths before uncommenting this
-#cp sellf ../
+cp sellf ../
 cd ../doc
 pdflatex sellfdoc.tex
 pdflatex sellfdoc.tex
