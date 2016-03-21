@@ -23,72 +23,64 @@ open TypeChecker
 let cutcoherent = ref true ;;
 let initcoherent = ref true ;;
 
-let initialize () = 
-  cutcoherent := true;
-  initcoherent := true
-;;
-
 (* Procedure to actually check the coherence of a system *)
 
-let system_name = ref "" ;;
-
-let checkInitCoher str (t1, t2) =
-  file_name := ((!system_name)^"_initCoh_"^str); 
+let checkInitCoher system_name connective_name (spec_left, spec_right) =
+  Boundedproofsearch.file_name := (system_name^"_initCoh_"^connective_name); 
   (* Put axiom formulas on the context *)
   Context.createInitialCoherenceContext ();
   
-  let bt1 = QST(CONST("infty"), t1) in
-  let bt2 = QST(CONST("infty"), t2) in
+  let spec_left_infty = QST(CONST("infty"), spec_left) in
+  let spec_right_infty = QST(CONST("infty"), spec_right) in
   (* print_endline "Proving initial coherence of:";
-  print_endline (termToString bt1);
-  print_endline (termToString bt2); *)
+  print_endline (termToString spec_left_infty);
+  print_endline (termToString spec_right_infty); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(bt1, bt2)) in
+  let f0 = deBruijn true (PARR(spec_left_infty, spec_right_infty)) in
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
   prove f 4 (fun () ->
-          print_string ("====> Connective "^str^" is initial-coherent.\n"); ()
+          print_string ("====> Connective "^connective_name^" is initial-coherent.\n"); ()
         )  
         (fun () ->
           initcoherent := false;
-          print_string ("x===> Connective "^str^" is not initial-coherent.\n");
+          print_string ("x ==> Connective "^connective_name^" is not initial-coherent.\n");
         )
 ;;
 
-let checkDuality str (t1, t2) =
-  file_name := ((!system_name)^"_cutCoh_"^str); 
+let checkDuality system_name connective_name (spec_left, spec_right) =
+  Boundedproofsearch.file_name := system_name^"_cutCoh_"^connective_name; 
   (* Put cut formulas on the context *)
   Context.createCutCoherenceContext ();
   
-  let nt1 = Term.nnf (NOT(t1)) in
-  let nt2 = Term.nnf (NOT(t2)) in
+  let spec_left_normalized = Term.nnf (NOT(spec_left)) in
+  let spec_right_normalized = Term.nnf (NOT(spec_right)) in
   (* print_endline "Proving cut coherence of:";
-  print_endline (termToString nt1);
-  print_endline (termToString nt2); *)
+  print_endline (termToString spec_left_normalized);
+  print_endline (termToString spec_right_normalized); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(nt1, nt2)) in 
+  let f0 = deBruijn true (PARR(spec_left_normalized, spec_right_normalized)) in 
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
   prove f 4 (fun () ->
-          print_string ("====> Connective "^str^" has dual specification.\n"); ()
+          print_string ("====> Connective "^connective_name^" has dual specification.\n"); ()
         )  
         (fun () ->
           cutcoherent := false;
-          print_string ("x===> Connective "^str^" does not have dual specifications.\n");
+          print_string ("x ==> Connective "^connective_name^" does not have dual specifications.\n");
         )
 ;;
 
-(* TODO: put proper system name *)
-let cutCoherence () =
-  system_name := "proofsTex/coherence/proof";
-  Hashtbl.iter checkDuality Specification.lr_hash;
+let cutCoherence system_name =
+  cutcoherent := true;
+  Hashtbl.iter (checkDuality system_name) Specification.lr_hash;
   if !cutcoherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n";
 ;;
 
-let initialCoherence () =
-  system_name := "proofsTex/coherence/proof";
-  Hashtbl.iter checkInitCoher Specification.lr_hash;
+let initialCoherence system_name =
+  initcoherent := true;
+  Hashtbl.iter (checkInitCoher system_name) Specification.lr_hash;
   if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
 ;;

@@ -23,8 +23,6 @@ let position lexbuf =
     else
       print_string ""; Format.sprintf ": line %d, character %d" line char
 
-let filePrefix = "proofsTex/" ;;
-
 let samefile = ref true ;;
 let fileName = ref "" ;;
 let check = ref "" ;;
@@ -47,7 +45,6 @@ let initAll () =
   Specification.initialize ();
   Context.initialize ();
   Subexponentials.initialize ();
-  Coherence.initialize ();
 ;;
 
 let check_principalcut () = begin
@@ -63,8 +60,8 @@ let check_atomicelim () = begin
   print_endline "\nCould not infer how to eliminate atomic cuts."  
 end ;;
 
-let check_cutcoherence () = Coherence.cutCoherence () ;;
-let check_initialcoherence () = Coherence.initialCoherence () ;;
+let check_cutcoherence system_name = Coherence.cutCoherence system_name ;;
+let check_initialcoherence system_name = Coherence.initialCoherence system_name ;;
 
 let check_scopebang () = begin
   print_endline "Please type the subexponential:";
@@ -113,7 +110,7 @@ let print_rulenames () =
 ;;
 
 let printOLrules bipoles fileName =
-  let file = open_out (filePrefix ^ fileName ^ ".tex") in
+  let file = open_out (fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
     (* TODO: this is always a list with one element, one bipole (which is a pair
@@ -132,7 +129,7 @@ let printOLrules bipoles fileName =
 ;;
 
 let printBipoles bipoles fileName = 
-  let file = open_out (filePrefix ^ fileName ^ ".tex") in
+  let file = open_out (fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
     Printf.fprintf file "%s" "{\\scriptsize";
@@ -197,7 +194,7 @@ let permutationTex f1 f2 cl = match Permutation.permute f1 f2 with
 ;;
 
 let permute forms_lst fileName =
-  let file = open_out (filePrefix ^ fileName ^ ".tex") in
+  let file = open_out (fileName ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun (f1, f2) ->
     let name1 = Specification.getRuleName f1 in
@@ -467,7 +464,7 @@ solve_query () =
       actual graph, you need to have graphviz installed and run 'dot -Tpdf \
       filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
       let filename = read_line () in
-      let file = open_out (filePrefix ^ filename ^ ".dot") in
+      let file = open_out (filename ^ ".dot") in
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       Printf.fprintf file "%s" (Permutation.getPermutationDotGraph formulas);
       close_out file
@@ -478,13 +475,13 @@ solve_query () =
       will be generated in the tex format and printed to a file.\nPlease choose \
       a name for the file:";
       let filename = read_line () in
-      let file = open_out (filePrefix ^ filename ^ ".tex") in
+      let file = open_out (filename ^ ".tex") in
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
-    | "#cutcoherence" -> check_cutcoherence ()
+    | "#cutcoherence" -> check_cutcoherence specName
     
-    | "#initialcoherence" -> check_initialcoherence ()
+    | "#initialcoherence" -> check_initialcoherence specName
 
     | "#scopebang" -> check_scopebang ()
 
@@ -546,11 +543,15 @@ match (!check, !fileName, !rule1, !rule2) with
     initAll ();
     if parse file then check_principalcut ()
   | ("cutcoherence", file, _, _) -> 
+    let idx = String.rindex file '/' in
+    let specName = Str.string_after file (idx+1) in
     initAll ();
-    if parse file then check_cutcoherence ()
+    if parse file then check_cutcoherence specName
   | ("initialcoherence", file, _, _) -> 
+    let idx = String.rindex file '/' in
+    let specName = Str.string_after file (idx+1) in
     initAll ();
-    if parse file then check_initialcoherence ()
+    if parse file then check_initialcoherence specName
   | ("atomicelim", file, _, _) -> 
     initAll ();
     if parse file then check_atomicelim ()
