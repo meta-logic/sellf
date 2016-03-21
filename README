@@ -8,7 +8,8 @@ These tools must be installed for 'sellf' to work.
 - ocamlgraph (http://ocamlgraph.lri.fr/index.en.html)
 - dlv (http://www.dlvsystem.com/dlv/)
 
-NOTE: The system is implemented and tested in Linux/Fedora and MacOS. 
+NOTE: The system is implemented and tested in Linux/Fedora and MacOS, and
+explicitly makes use of the Unix OCaml module. 
 
 II) Installation:
 
