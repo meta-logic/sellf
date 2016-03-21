@@ -5,11 +5,10 @@ I) Requirements:
 
 These tools must be installed for 'sellf' to work.
 - ocaml, ocamldoc (http://caml.inria.fr/)
+- ocamlgraph (http://ocamlgraph.lri.fr/index.en.html)
 - dlv (http://www.dlvsystem.com/dlv/)
 
-NOTE: The system was implemented and tested in Linux/Ubuntu. It was also
-installed and executed succesfully on MacOS. Other operating systems were not
-yet tried.
+NOTE: The system is implemented and tested in Linux/Fedora and MacOS. 
 
 II) Installation:
 
@@ -71,8 +70,12 @@ introduction', 'rules axiom', 'rules cut' and 'rules structural'.
 To load the file 'mall.pl' of the examples folder, run 'sellf' as expalined above
 and type:
 
-#load ../examples/proofsystems/mall
+#load examples/proofsystems/mall
 
-Then, the system will display a '?>' symbol indicating that the file is loaded.
+Then, the system will display a 'mall >' symbol indicating that the file is loaded.
 The commands available at this point can be seen using the command '#help'. 
+
+Alternatively, a file can be loaded directly from the command line:
+
+./sellf -i examples/proofsystems/mall
 
