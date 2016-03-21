@@ -315,12 +315,15 @@ module Permutation : PERMUTATION = struct
       fontSize ^ 
       "\\[\n" ^
       ProofTreeSchema.toTexString (fst(b12)) ^
-      "\n\\quad\\rightsquigarrow\\\\\\qquad\\qquad\\qquad\n" ^
+      "\n\\]" ^
+      fontSizeEnd ^
+      "CONSTRAINTS 1\n\n" ^ (Constraints.toTexString (snd(b12))) ^ 
+      fontSize ^ 
+      "\\[\n" ^
       ProofTreeSchema.toTexString (fst(b21)) ^
       "\n\\]" ^
       fontSizeEnd ^
-      "CONSTRAINTS1\n" ^ (Constraints.toTexString (snd(b12))) ^ 
-      "CONSTRAINTS2\n" ^ (Constraints.toTexString (snd(b21)))
+      "CONSTRAINTS 2\n\n" ^ (Constraints.toTexString (snd(b21)))
       ^ acc
     ) lst ""
     else let olPt = apply_permute lst in
