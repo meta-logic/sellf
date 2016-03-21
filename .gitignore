@@ -3,6 +3,18 @@ src/.depend.input
 
 src/.depend
 
+src/*.annot
+src/*.cmi
+src/*.cmo
+src/*.tex
+src/lexer.ml
+src/lexer_models.ml
+src/lexer_top.ml
+src/parser.ml
+src/parser.mli
+src/parser_models.ml
+src/parser_models.mli
+
 quati/test.py
 
 *.log
