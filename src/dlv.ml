@@ -180,7 +180,11 @@ not_proveIf(S2, S1) :-
 	let lexbuf = Lexing.from_string str in
 	let model = Parser_models.model Lexer_models.token lexbuf in
 	(Constraints.create model) :: readModel input
-      with End_of_file -> let _ = Unix.close_process_in channel in []
+      with End_of_file -> 
+        let _ = Unix.close_process_in channel in 
+        (* Deltes the file *)
+        let _ = Unix.unlink "derivations-tmp.in" in 
+        []
     in
     readModel channel
 
@@ -257,8 +261,16 @@ not_proveIf(S2, S1) :-
     genPermutationFile ctxStr1 ctxStr2 modelStr1 modelStr2 okStr fileName;
     let channel = Unix.open_process_in ("dlv -silent " ^ fileName) in 
     let rec hasModel input = try match input_line input with
-      | _ -> let _ = Unix.close_process_in channel in true (* If some line is printed, it means that there is a model *)
-      with End_of_file -> let _ = Unix.close_process_in channel in false
+      | _ -> 
+        let _ = Unix.close_process_in channel in 
+        (* Deletes the file *)
+        let _ = Unix.unlink "permute-tmp.in" in
+        true (* If some line is printed, it means that there is a model *)
+      with End_of_file -> 
+        let _ = Unix.close_process_in channel in 
+        (* Deletes the file *)
+        let _ = Unix.unlink "permute-tmp.in" in
+        false
     in
     hasModel channel  
 
