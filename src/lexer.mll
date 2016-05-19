@@ -48,7 +48,8 @@ rule token = parse
 | "gamma"               { raise (ReservedKeyword "gamma") }
 | "infty"               { raise (ReservedKeyword "infty") }
 | subtype as tsub       { TSUB(tsub) }
-| ':'                   { DOTS }
+
+
 | "->"                  { TARR }
 | '.'                   { DOT }
 | "int"                 { TINT }
@@ -61,10 +62,26 @@ rule token = parse
                               STRING n }
 | eof                   { raise Eof }
 | "print"               { PRINT }
-| "is"                  { IS }
-| '+'                   { PLUS }
-| '-'                   { MINUS }
+
+(* LL connectives *)
+| "top"                 { TOP }
+| "bot"                 { BOT }
+| "one"                 { ONE }
+| "zero"                { ZERO }
+| "!"                   { BANG }
+| "?"                   { QST }
+| "all"                 { FORALL }     
+| "exs"                 { EXISTS }     
 | '*'                   { TIMES }
+| '+'                   { PLUS }
+| "|"                   { PIPE }
+| '&'                   { WITH }
+| "-o"                  { LOLLI }
+| "not"                 { NOT }
+| ":-"                  { INVLOLLI } 
+
+(* Things I am not sure we are using/will use. *)
+| '-'                   { MINUS }
 | '/'                   { DIV } 
 | "<>"                  { NEQ }  
 | "<"                   { LESS }
@@ -73,24 +90,10 @@ rule token = parse
 | ">="                  { GEQ }
 | '='                   { EQ }          
 | ":="                  { DEF }
-| ":-"                  { INVLOLLI } 
-| "-o"                  { LOLLI }
 | ','                   { COMMA }
 | ';'                   { SEMICOLON }
-| "|"                   { PIPE }
-| "top"                 { TOP }
-| "bot"                 { BOT }
-| "one"                 { ONE }
-| "zero"                { ZERO }
-| "pi \\" (varName as lxm)        { FORALL(lxm) }     
-| "sigma \\" (varName as lxm)     { EXISTS(lxm) }     
-| "hbang"               { HBANG }
-| "bang"                { BANG }
-| "?"                   { QST }
-| "not"                 { NOT }
 | nameString as lex     { NAME(lex) }
-| "!"                   { CUT }
-| '&'                   { WITH }
+(*| "!"                   { CUT }*)
 | '['                   { LBRACKET }
 | ']'                   { RBRACKET }
 | '{'                   { LCURLY }

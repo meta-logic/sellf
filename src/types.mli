@@ -38,7 +38,7 @@ type terms =
 | BOT
 | ZERO
 | NOT of terms
-(* Arithmetic (comments with one * seem to be ignred.) *)
+(* Arithmetic (comments with one * seem to be ignored.) *)
 | EQU of string * int * terms (* G: equality *)
 | COMP of compType * terms * terms
 | ASGN of terms * terms
@@ -47,9 +47,9 @@ type terms =
 | TENSOR of terms * terms
 | ADDOR of terms * terms
 | PARR of terms * terms
+(* TODO: remove the subexponential argument from LOLLI *)
 | LOLLI of terms * terms * terms
 | BANG of terms * terms
-| HBANG of terms * terms
 | QST of terms * terms
 | WITH of terms * terms
 | FORALL of string * int * terms

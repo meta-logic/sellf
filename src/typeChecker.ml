@@ -41,7 +41,6 @@ let rec deBruijn_aux flag fVarC nABS body =
   | ADDOR (body1, body2) -> ADDOR (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
   | LOLLI (sub, body1, body2) -> LOLLI (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
   | BANG (sub, body1) -> BANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
-  | HBANG (sub, body1) -> HBANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | QST (sub, body1) -> QST (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS body1) 
   | WITH (body1, body2) -> WITH (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
   | PARR (body1, body2) -> PARR (deBruijn_aux flag fVarC nABS body1, deBruijn_aux flag fVarC nABS body2)
@@ -113,7 +112,7 @@ let rec collect_free_variables clause =
                                 collect_free_variables_list freeVar1 bVar t2 
         | DIV (t1, t2)  | TIMES (t1, t2) | MINUS (t1, t2) | PLUS (t1, t2) 
         | TENSOR(t1, t2) | ADDOR(t1, t2) | PARR(t1, t2) | COMP(_, t1, t2) | ASGN(t1, t2)
-        | WITH(t1,t2) | CLS(_, t1, t2) | BANG(t1, t2) | HBANG(t1, t2) | QST(t1, t2) -> 
+        | WITH(t1,t2) | CLS(_, t1, t2) | BANG(t1, t2) | QST(t1, t2) -> 
           let freeVar1 = collect_free_variables_aux freeVar bVar t1 in 
           let freeVar2 = collect_free_variables_aux freeVar1 bVar t2 in 
           freeVar2
@@ -396,9 +395,6 @@ let rec typeCheck clause =
               let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
               tCheckBody body1 env1
       | BANG (subexp, body1) -> 
-              let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
-              tCheckBody body1 env1
-      | HBANG (subexp, body1) -> 
               let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
               tCheckBody body1 env1
       | TENSOR (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in

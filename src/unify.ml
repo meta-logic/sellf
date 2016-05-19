@@ -510,7 +510,6 @@ let makesubst h1 t2 a1 =
       | WITH(t1, t2) -> WITH(nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
       | LOLLI(str, t1, t2) -> LOLLI(nested_subst (Norm.hnorm str) lev, nested_subst (Norm.hnorm t1) lev, nested_subst (Norm.hnorm t2) lev)
       | BANG(str, t1) -> BANG(nested_subst (Norm.hnorm str) lev , nested_subst (Norm.hnorm t1) lev)
-      | HBANG(str, t1) -> HBANG(nested_subst (Norm.hnorm str) lev , nested_subst (Norm.hnorm t1) lev)
       | FORALL(str, i, t) -> FORALL(str, i, nested_subst t (lev+n))
       | NEW(str, t) -> NEW(str, nested_subst t (lev+n))
       | BRACKET(t) -> BRACKET(nested_subst (Norm.hnorm t) (lev+n))
@@ -578,7 +577,7 @@ let makesubst h1 t2 a1 =
             | TIMES _ ->  assert false
             | DIV _ ->  assert false
             | ONE | TOP | BOT | ZERO | EQU _ | COMP _ | ASGN _ | PRINT _ | CUT 
-            | TENSOR _ | LOLLI _ | BANG _ |  HBANG _ | QST _ | WITH _ | ADDOR _ | PARR _ 
+            | TENSOR _ | LOLLI _ | BANG _ |  QST _ | WITH _ | ADDOR _ | PARR _ 
             | FORALL _ | EXISTS _ | NEW _ | PRED _  | CLS _ | BRACKET _
             | NOT _ -> assert false
             (*| LIST _ ->  assert false*)
@@ -757,8 +756,6 @@ and unify t1 t2 = match Term.observe t1,Term.observe t2 with
   | LOLLI (str1 ,a1, b1), LOLLI (str2, a2, b2)  -> 
         unify_list [str1; a1;b1] [str2; a2;b2]
   | BANG (str1 ,a), BANG (str2, b)  -> 
-        unify_list [str1; a] [str2; b]
-  | HBANG (str1 ,a), HBANG (str2, b)  -> 
         unify_list [str1; a] [str2; b]
   | WITH (a1,b1), WITH (a2,b2)  -> unify_list [a1;b1] [a2;b2]
   | FORALL (str1, i1, t1), FORALL (str2, i2, t2) -> 

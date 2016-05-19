@@ -78,23 +78,18 @@ let rec termToString_ term absList = match term with
   | COMP (c, i1, i2) -> (termToString_ i1 absList)^(compToString c)^(termToString_ i2 absList)
   | ASGN ( i1, i2) -> (termToString_ i1 absList)^" is "^(termToString_ i2 absList)
   | PRINT (t1) -> "print "^(termToString_ t1 absList)
-  | CUT -> "fail(cut)"
-  | TENSOR (t1, t2) -> (termToString_ t1 absList)^" * "^(termToString_ t2 absList)
-  | ADDOR (t1, t2) -> (termToString_ t1 absList)^" + "^(termToString_ t2 absList)
-  | PARR (t1, t2) -> (termToString_ t1 absList)^" | "^(termToString_ t2 absList)
-  | LOLLI (s, t1, t2) -> (termToString_ t2 absList)^" ["^(termToString_ s absList)^"] o- "^(termToString_ t1 absList)
-  | BANG (CONST("infty"), t) -> "(bang "^(termToString_ t absList)^" )"
-  | HBANG (CONST("infty"), t) -> "(hbang "^(termToString_ t absList)^" )"
+  | TENSOR (t1, t2) -> "( " ^ (termToString_ t1 absList)^" * "^(termToString_ t2 absList) ^ " )"
+  | ADDOR (t1, t2) -> "( " ^ (termToString_ t1 absList)^" + "^(termToString_ t2 absList) ^ " )"
+  | PARR (t1, t2) -> "( " ^ (termToString_ t1 absList)^" | "^(termToString_ t2 absList) ^ " )"
+  | LOLLI (s, t1, t2) -> "( " ^ (termToString_ t2 absList)^" ["^(termToString_ s absList)^"] o- "^(termToString_ t1 absList) ^ " )"
+  | BANG (CONST("infty"), t) -> "(! "^(termToString_ t absList)^" )"
   | QST (CONST("infty"), t) -> "(? "^(termToString_ t absList)^" )"
-  | BANG (s, t) -> "( ["^(termToString_ s absList)^"]bang "^(termToString_ t absList)^" )"
-  | HBANG (s, t) -> "( ["^(termToString_ s absList)^"]hbang "^(termToString_ t absList)^" )"
-  | QST (s, t) -> "( ["^(termToString_ s absList)^"]? "^(termToString_ t absList)^" )"
-  | WITH (t1, t2) -> (termToString_ t1 absList)^" & "^(termToString_ t2 absList)
-  | FORALL (s, i, t) -> "(pi \\"^s^" "^(termToString_ t ([s] @ absList))^")"
-  | EXISTS (s, i, t) -> "(sigma \\"^s^" "^(termToString_ t ([s] @ absList))^")"
+  | BANG (s, t) -> "( !["^(termToString_ s absList)^"] "^(termToString_ t absList)^" )"
+  | QST (s, t) -> "( ?["^(termToString_ s absList)^"] "^(termToString_ t absList)^" )"
+  | WITH (t1, t2) -> "( " ^ (termToString_ t1 absList)^" & "^(termToString_ t2 absList) ^ " )"
+  | FORALL (s, i, t) -> "(all "^s^" "^(termToString_ t ([s] @ absList))^")"
+  | EXISTS (s, i, t) -> "(exs "^s^" "^(termToString_ t ([s] @ absList))^")"
   | CLS (ty, t1, t2) -> (termToString_ t1 absList)^(clsTypeToString ty)^(termToString_ t2 absList)
-  | NEW (s, t) -> "(nsub \\"^s^(termToString_ t ([s] @ absList))^")"
-  | BRACKET (f) -> "{ "^(termToString_ f absList)^" }"
 
 let termToString term = termToString_ term []
 
@@ -160,10 +155,8 @@ let rec termToTexString_ term absList = match term with
   | PARR (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\mypar\\; "^(termToTexString_ t2 absList)
   | LOLLI (s, t1, t2) -> (termToTexString_ t2 absList)^" \\;\\multimap_{"^(termToTexString_ s absList)^"}\\; "^(termToTexString_ t1 absList)
   | BANG (CONST("infty"), t) -> " ! "^(termToTexString_ t absList)
-  | HBANG (CONST("infty"), t) -> " \\hat{!} "^(termToTexString_ t absList)
   | QST (CONST("infty"), t) -> " ? "^(termToTexString_ t absList)
   | BANG (s, t) -> " !^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
-  | HBANG (s, t) -> " !^{\\hat{"^(termToTexString_ s absList)^"}} "^(termToTexString_ t absList)
   | QST (s, t) -> " ?^{"^(termToTexString_ s absList)^"} "^(termToTexString_ t absList)
   | WITH (t1, t2) -> (termToTexString_ t1 absList)^" \\;\\&\\; "^(termToTexString_ t2 absList)
   | FORALL (s, i, t) -> "\\forall\\; "^s^" "^(termToTexString_ t ([s] @ absList))

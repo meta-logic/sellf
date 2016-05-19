@@ -34,25 +34,24 @@ rule token = parse
   | "_"            { UNDERSCORE }
   | index as idx   { INDEX(int_of_string idx) }
   (* Formulas *)
-  | '"'                   { QUOTE }
-  | "-o"                  { LOLLI }
-  | ','                   { COMMA }
-  | '*'                   { TIMES }
-  | '+'                   { PLUS }
-  | "|"                   { PIPE }
-  | '&'                   { WITH }
   | "top"                 { TOP }
   | "bot"                 { BOT }
   | "one"                 { ONE }
   | "zero"                { ZERO }
-  | "pi \\" (varName as vn)        { FORALL(vn) }     
-  | "sigma \\" (varName as vn)     { EXISTS(vn) }
-  | "hbang"               { HBANG }
-  | "bang"                { BANG }
+  | "!"                   { BANG }
   | "?"                   { QST }
+  | "all"                 { FORALL }     
+  | "exs"                 { EXISTS }     
+  | '*'                   { TIMES }
+  | '+'                   { PLUS }
+  | "|"                   { PIPE }
+  | '&'                   { WITH }
+  | "-o"                  { LOLLI }
   | "not"                 { NOT }
-  | "nsub \\" (varName as vn) { NEW(vn) } 
-  | '\\' (varName as lxm) { ABS(lxm) }
+  | ":-"                  { INVLOLLI } 
+
+  | '"'                   { QUOTE }
+  | ','                   { COMMA }
   | varName as vn         { VAR(vn) }
   | '['                   { LBRACKET }
   | ']'                   { RBRACKET }

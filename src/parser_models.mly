@@ -33,9 +33,9 @@ let make_APP lst =
 
 /* Terminal symbols */
 %token <int> INDEX
-%token <string> NAME STRING FORALL EXISTS VAR ABS NEW
+%token <string> NAME STRING VAR ABS NEW
 %token IN INUNQ INFINAL EMP UNION SETMINUS CONTAINED MAXIDX NOTMAXIDX
-%token LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO HBANG BANG QST NOT
+%token INVLOLLI LOLLI TIMES PLUS PIPE WITH TOP BOT ONE ZERO BANG QST NOT FORALL EXISTS
 %token COMMA LBRACKET RBRACKET LCURLY RCURLY LPAREN RPAREN UNDERSCORE DOT NEWLINE QUOTE
 %right FORALL EXISTS
 %left TIMES
@@ -44,7 +44,7 @@ let make_APP lst =
 %left WITH 
 %left LOLLI
 %right NOT NEW
-%right QST BANG HBANG
+%right QST BANG
 
 /* Start symbol */
 %start model
@@ -98,29 +98,41 @@ contextVar:
 ;
 
 formula:
-  | pred  { $1 }
-  | TOP   { TOP }
-  | BOT   { BOT }
-  | ONE   { ONE }
-  | ZERO  { ZERO }
-  | LBRACKET subexp RBRACKET BANG formula   { BANG ($2,$5) }
-  | LBRACKET subexp RBRACKET HBANG formula  { HBANG ($2,$5) }
-  | LBRACKET subexp RBRACKET QST formula    { QST ($2,$5) }
+  /* For horn-clause-like definitions (we make no restrictions) */
+  | formula INVLOLLI formula    { LOLLI (CONST("gamma"), $1, $3) }
+  /* A -o B : A -o B*/
+  | formula LOLLI formula       { LOLLI (CONST("gamma"), $3, $1) }
+  /* A ⊗ B : A * B */
+  | formula TIMES formula       { TENSOR ($1, $3)}
+  /* A ⊕ B : A + B */
+  | formula PLUS formula        { ADDOR ($1, $3)}
+  /* A ⅋ B : A | B */
+  | formula PIPE formula        { PARR ($1, $3)}
+  /* A & B : A & B */
+  | formula WITH formula        { WITH ($1, $3)}
+  /* !^l F : ![l] F */
+  | BANG LBRACKET term RBRACKET formula  {BANG ($3,$5)}
+  /* ?^l F : ?[l] F */
+  | QST LBRACKET term RBRACKET formula   {QST ($3,$5)}
+  /* !^infty F : ! F */
   | BANG formula             { BANG (CONST("infty"),$2) }
-  | HBANG formula            { HBANG (CONST("infty"),$2) }
+  /* ?^infty F : ? F */
   | QST formula              { QST (CONST("infty"),$2) }
-  | FORALL formula           { FORALL ($1, 0, $2) } 
-  | EXISTS formula           { EXISTS ($1, 0, $2) }
-  | ABS formula              { ABS($1, 0, $2) }
-  | formula TIMES formula    { TENSOR ($1, $3)}
-  | formula PLUS formula     { ADDOR ($1, $3)}
-  | formula PIPE formula     { PARR ($1, $3)}
-  | formula WITH formula     { WITH ($1, $3)}
-  /* a [s]-o b is stored as LOLLI(s, b, a) */
-  | formula LBRACKET subexp RBRACKET LOLLI formula { LOLLI ($3, $6, $1)}
-  | LPAREN formula RPAREN    { $2 }
-  | NEW formula              { NEW ($1, $2) }
+  /* F^{perp} : not F (the formula is already stored in NNF) */
   | NOT formula              { Term.nnf (NOT($2)) }
+  /* ∀ x. F : all x F */
+  | FORALL VAR formula       { FORALL ($2, 0, $3) } 
+  /* ∃ x. F : exs x F */
+  | EXISTS VAR formula       { EXISTS ($2, 0, $3) } 
+  /* (F) */
+  | LPAREN formula RPAREN    { $2 }
+  /* propositional variable */
+  | pred    { $1 }
+  /* T, 1, bot, 0 */
+  | TOP  { TOP }
+  | BOT  { BOT }
+  | ONE  { ONE }
+  | ZERO { ZERO }
 ;
 
 pred:

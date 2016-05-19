@@ -1,9 +1,7 @@
-/* File parser_systems.mly 
- *
- * Parse specifications of sequent calculus systems, as described in "Extended
- * Framework for Specifying and Reasoning about Proof Systems" by Vivek Nigam,
- * Elaine Pimentel and Giselle Reis
+/* 
+ * File parser_systems.mly 
 */
+
 %{
 open Context
 open Types
@@ -43,21 +41,25 @@ let check_val_subexp sub1 sub2 =
 
 %}
 
-%token KIND DOTS TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
+%token KIND TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
 COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
-LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG HBANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
-QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX HASH
-%token <string> NAME STRING VAR FORALL EXISTS TSUB CTXTYPE CTXSIDE ABS NEW FILE CONNTEX
+LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
+QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
+HASH FORALL EXISTS
+%token <string> NAME STRING VAR TSUB CTXTYPE CTXSIDE ABS NEW FILE CONNTEX
 %token <int> INT
 %right ARR  
-%left TIMES
-%left PLUS
-%left PIPE
-%left WITH 
-%left LOLLI
-%right NOT NEW
-%right FORALL EXISTS
-%right QST BANG HBANG
+/* Precedence rules
+ * 1. All symbols in the same line are given the same precedence
+ * 2. Precedence is increasing with the line number.
+ */
+%right INVLOLLI
+%right LOLLI
+%right TIMES
+%right PLUS
+%right PIPE
+%right WITH 
+%nonassoc NOT FORALL EXISTS BANG QST LBRACKET RBRACKET
 
 %start types             /* the entry point */
 %type <string option> types 
@@ -328,34 +330,45 @@ prop:
 ;
 
 body:
-| prop                  { $1 }
-| logCst                { $1 }
-| LBRACKET term RBRACKET BANG body              {BANG ($2,$5)}
-| LBRACKET term RBRACKET HBANG body             {HBANG ($2,$5)}
-| LBRACKET term RBRACKET QST body               {QST ($2,$5)}
-| BANG body             { BANG (CONST("infty"),$2) }
-| HBANG body            { HBANG (CONST("infty"),$2) }
-| QST body              { QST (CONST("infty"),$2) }
-| FORALL body           { FORALL ($1, 0, $2) } 
-| EXISTS body           { EXISTS ($1, 0, $2) } 
-| ABS body              { ABS($1, 0, $2) }
-| body TIMES body       { TENSOR ($1, $3)}
-| body PLUS body        { ADDOR ($1, $3)}
-| body PIPE body        { PARR ($1, $3)}
-| body WITH body        { WITH ($1, $3)}
-/* a [s]-o b is stored as LOLLI(s, b, a) */
-| body LBRACKET term RBRACKET LOLLI body       { LOLLI ($3, $6, $1)}
-| LPAREN body RPAREN    { $2 }
-| NEW body              { NEW ($1, $2) }
-| LCURLY body RCURLY    { BRACKET($2) }
-| NOT body              { Term.nnf (NOT($2)) }
+  /* (F) */
+  | LPAREN body RPAREN    { $2 }
+  /* propositional variable */
+  | prop    { $1 }
+  /* T, 1, bot, 0 */
+  | logCst  { $1 }
+  /* !^l F : ![l] F */
+  | BANG LBRACKET term RBRACKET body  {BANG ($3,$5)}
+  /* ?^l F : ?[l] F */
+  | QST LBRACKET term RBRACKET body   {QST ($3,$5)}
+  /* !^infty F : ! F */
+  | BANG body             { BANG (CONST("infty"),$2) }
+  /* ?^infty F : ? F */
+  | QST body              { QST (CONST("infty"),$2) }
+  /* F^{perp} : not F (the formula is already stored in NNF) */
+  | NOT body              { Term.nnf (NOT($2)) }
+  /* ∀ x. F : all x F */
+  | FORALL VAR body       { FORALL ($2, 0, $3) } 
+  /* ∃ x. F : exs x F */
+  | EXISTS VAR body       { EXISTS ($2, 0, $3) } 
+  /* A & B : A & B */
+  | body WITH body        { WITH ($1, $3)}
+  /* A ⅋ B : A | B */
+  | body PIPE body        { PARR ($1, $3)}
+  /* A ⊕ B : A + B */
+  | body PLUS body        { ADDOR ($1, $3)}
+  /* A ⊗ B : A * B */
+  | body TIMES body       { TENSOR ($1, $3)}
+  /* A -o B : A -o B*/
+  | body LOLLI body       { LOLLI (CONST("gamma"), $3, $1) }
+  /* For horn-clause-like definitions (we make no restrictions) */
+  | body INVLOLLI body    { LOLLI (CONST("gamma"), $1, $3) }
 ;
 
 terms:
-| term                        { [$1] }
-| term terms                  { $1 :: $2 }
-| LPAREN terms RPAREN         { [make_APP $2] }
-| LPAREN terms RPAREN terms   { (make_APP $2) :: $4 } 
+  | term                        { [$1] }
+  | term terms                  { $1 :: $2 }
+  | LPAREN terms RPAREN         { [make_APP $2] }
+  | LPAREN terms RPAREN terms   { (make_APP $2) :: $4 } 
 ;
 
 term:
@@ -370,6 +383,7 @@ term:
 | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
 | INT               { INT ($1) } 
 | STRING            { STRING ($1) }
+;
 
 logCst:
 | TOP  {TOP}

@@ -362,7 +362,6 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
     | TENSOR (_, _)
     | EXISTS(_, _, _)
     | BANG (_, _)
-    | HBANG (_, _)
     | ONE
     | ZERO
     | COMP (_, _, _)
@@ -587,35 +586,6 @@ match (Sequent.getCtxIn conc, Sequent.getCtxOut conc, Sequent.getGoals conc, Seq
           )
         | _ -> failwith "Not expected subexponential while solving positive formulas."
       end
-
-(* TODO implement this when I have time
-    | HBANG (sub, f) -> begin
-      if !Term.verbose then begin
-        print_endline "-- Hat bang:"; 
-        print_endline (Prints.termToString (Term.observe goal));
-      end;
-      match Term.observe sub with
-        | CONST (s) -> ( try match Hashtbl.find !context s with
-          | [] -> 
-            if !Term.verbose then print_endline ("Solved hbang "^s^".\n"); 
-            goals := f :: t; 
-            let sq = SEQ(!context, !goals, SYNC) in
-            activeseq := ProofTree.update !activeseq sq;
-            prove_asyn h suc fail 
-          | _ -> 
-            if !Term.verbose then print_endline ("Failed in hbang rule "^s^".\n"); 
-            fail
-          with Not_found -> failwith ("Hbang applied on non-existing
-          subexponential: "^s^"\n") 
-            (*if !Term.verbose then print_endline ("Solved hbang "^s^".\n"); 
-            goals := f :: t; 
-            let sq = SEQ(!context, !goals, SYNC) in
-            activeseq := ProofTree.update !activeseq sq;
-            prove_asyn h suc fail*)
-        )
-        | _ -> failwith "Not expected subexponential while solving positive formulas."
-      end
-*)
 
     | ONE -> 
       if !Term.verbose then begin
