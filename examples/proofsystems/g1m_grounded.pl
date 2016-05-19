@@ -16,12 +16,12 @@ subexpctx r single suc.
 
 rules introduction.
 % Implication
-(not (lft (imp a b))) * ([l]bang ([r]? (rght a))) * ([l]? (lft b)).
+(not (lft (imp a b))) * (([l]bang ([r]? (rght a))) * ([l]? (lft b))).
 (not (rght (imp a b))) * ([l]bang (([l]? (lft a)) | ([r]? (rght b)))).
 
 % Conjunction
 (not (lft (and a b))) * ([l]? (lft a)) | ([l]? (lft b)).
-(not (rght (and a b))) * ([l]bang ([r]? (rght a))) * ([l]bang ([r]? (rght b))).
+(not (rght (and a b))) * (([l]bang ([r]? (rght a))) * ([l]bang ([r]? (rght b)))).
 
 % Disjunction
 (not (lft (or a b))) * ([l]? (lft a)) & ([l]? (lft b)).
