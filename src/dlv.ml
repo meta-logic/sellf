@@ -2,7 +2,7 @@
 (*                                       *)
 (*  All the code related to calling DLV  *)
 (*                                       *)
-(*  Giselle Machado Reis                 *)
+(*  Giselle Reis                         *)
 (*  2013                                 *)
 (*                                       *)
 (*****************************************)

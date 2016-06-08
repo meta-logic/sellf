@@ -2,7 +2,7 @@
 %                                           %
 % SELLF specification for S4 (modal logic)  %
 %                                           %
-% Giselle Machado Reis - 2012               %
+% Giselle Reis - 2012                       %
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

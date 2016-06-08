@@ -1,5 +1,5 @@
 
-(* Giselle Machado Reis - 2012 *)
+(* Giselle Reis - 2012 *)
 
 open Types
 

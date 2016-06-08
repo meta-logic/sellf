@@ -4,7 +4,7 @@
 % (purely multiplicative      %
 %  calculus)                  %
 %                             %
-% Giselle Machado Reis - 2013 %
+% Giselle Reis - 2013         %
 %                             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

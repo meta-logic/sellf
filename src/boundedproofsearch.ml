@@ -7,7 +7,7 @@
  * goals and context are global variables.
  * Not using the clauses table.
  *
- * Giselle Machado Reis - 2012
+ * Giselle Reis - 2012
  *)
 
 open Basic

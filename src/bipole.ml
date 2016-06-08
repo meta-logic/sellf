@@ -2,7 +2,7 @@
 (*                                    *)
 (*      Derivation of a bipole        *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2013                              *)
 (*                                    *)
 (**************************************)

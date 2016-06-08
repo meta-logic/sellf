@@ -3,7 +3,7 @@
 (*    Checking if two rules are       *)
 (*            permutable              *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2013                              *)
 (*                                    *)
 (**************************************)

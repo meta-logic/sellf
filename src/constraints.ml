@@ -3,7 +3,7 @@
 (*  Constraint set for reasoning about   *)
 (*  context variables                    *)
 (*                                       *)
-(*  Giselle Machado Reis                 *)
+(*  Giselle Reis                         *)
 (*  2013                                 *)
 (*                                       *)
 (*****************************************)

@@ -4,7 +4,7 @@
  * The linear formulas (not marked with ?l) are stored with the key 'gamma'.
  * The formulas of specification of systems are stored with the key 'infty'
  *
- * Giselle Machado Reis - 2012
+ * Giselle Reis - 2012
  *)
 
 (* TODO organize the context module! *)

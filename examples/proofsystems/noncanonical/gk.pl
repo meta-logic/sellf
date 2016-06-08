@@ -3,7 +3,7 @@
 % SELLF specification for GK                %
 % (for Paraconsistent Logics)               %
 %                                           %
-% Giselle Machado Reis - 2012               %
+% Giselle Reis - 2012                       %
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

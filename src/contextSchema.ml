@@ -2,7 +2,7 @@
 (*                                       *)
 (*          Generic context              *)
 (*                                       *)
-(*  Giselle Machado Reis                 *)
+(*  Giselle Reis                         *)
 (*  2013                                 *)
 (*                                       *)
 (*****************************************)

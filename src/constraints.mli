@@ -3,7 +3,7 @@
 (* Constraint set for reasoning about    *)
 (* context variables - interface file    *)
 (*                                       *)
-(* Giselle Machado Reis                  *)
+(* Giselle Reis                          *)
 (* 2013                                  *)
 (*                                       *)
 (*****************************************)

@@ -2,7 +2,7 @@
 %                                           %
 % SELLF specification for Lax Logic         %
 %                                           %
-% Giselle Machado Reis - 2012               %
+% Giselle Reis - 2012                       %
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

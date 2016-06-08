@@ -3,7 +3,7 @@
 (*  Proof tree with context variables *)
 (*  (instead of real contexts)        *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2013                              *)
 (*                                    *)
 (**************************************)

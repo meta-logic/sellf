@@ -2,7 +2,7 @@
 (*                                    *)
 (*        Linear Logic Rules          *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2013                              *)
 (*                                    *)
 (**************************************)

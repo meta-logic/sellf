@@ -2,7 +2,7 @@
 (*                                    *)
 (*         Subexponentials            *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2012                              *)
 (*                                    *)
 (**************************************)

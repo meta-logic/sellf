@@ -10,7 +10,7 @@
  * - specification formulas are saved on the context infty              *
  * - procedures to check cut and initial coherence                      *
  *                                                                      *
- * Giselle Machado Reis - 2011                                          *
+ * Giselle Reis - 2011                                                  *
  *                                                                      *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *)
 

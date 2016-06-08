@@ -4,7 +4,7 @@
 (* Holds the information of a system's  *) 
 (* specification (types, rules, etc.)   *)
 (*                                      *)
-(*  Giselle Machado Reis                *)
+(*  Giselle Reis                        *)
 (*  2012                                *)
 (*                                      *)
 (****************************************)

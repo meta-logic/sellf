@@ -1,7 +1,7 @@
 (* 
  * Definition of tokes for the parsing of DLV models
  *
- * Giselle Machado Reis
+ * Giselle Reis
  * 2013
  * 
  * *)

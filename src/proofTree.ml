@@ -2,7 +2,7 @@
 (*                                    *)
 (*           Proof tree               *)
 (*                                    *)
-(*  Giselle Machado Reis              *)
+(*  Giselle Reis                      *)
 (*  2013                              *)
 (*                                    *)
 (**************************************)
