@@ -1,6 +1,5 @@
 (* File lexer.mll *)
 {
-(*open Parser*)        (* The type token is defined in parser.mli *)
 open Parser
 exception Eof
 open Lexing 
@@ -13,12 +12,22 @@ let incrline lexbuf =
     pos_bol = lexbuf.lex_curr_p.pos_cnum;
     pos_lnum = 1 + lexbuf.lex_curr_p.pos_lnum }
 }
-let nameString = ['a' - 'z']+ ['a' - 'z' 'A' - 'Z' '0' - '9']* (* types and terms start with lower case letters *)
-let connectiveTex = ['\\']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '*']* (* LaTeX code to rewrite the connective in a proper way *)
-let commentString = ['%'] [^'\n']* '\n' (* comments start with % *)
-let instring = [^'"'] *
-let subexp = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* (* subexponentials start with a lower case letter and can have numbers *)
-let varName = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+
+(* comments start with % *)
+let comment = ['%'] [^'\n']* '\n'
+
+(* valid names start with lower case letters and can contain numbers *)
+let valid_name = ['a' - 'z'] ['a' - 'z' 'A' - 'Z' '0' - '9']* 
+
+(* variables start with upper case letters and can contain numbers or _ *)
+let var_name = ['A' - 'Z'] ['a' - 'z' 'A' - 'Z' '0' - '9' '_']*
+
+(* LaTeX code corresponding to a connective *)
+let connectiveTex = ['\\']+ ['a' - 'z' 'A' - 'Z' '0' - '9' '*']*
+
+(* File path can be anything (TODO: find the correct regex to use here) *)
+let filepath =  [^' ']+
+
 let subtype =  "lin"  |  "aff" | "rel" | "unb"
 let ctxtype = "many"  |  "single"
 let ctxside = "ant" | "suc" | "antsuc"
@@ -26,9 +35,11 @@ let ctxside = "ant" | "suc" | "antsuc"
 rule token = parse 
 
 [' ' '\t' '\r']         { token lexbuf }
-| commentString         { incrline lexbuf; token lexbuf }
+| comment               { incrline lexbuf; token lexbuf }
 | connectiveTex as ct   { CONNTEX(ct) }
 | '\n'                  { incrline lexbuf; token lexbuf }
+
+(* Reserved keywords for files *)
 | "kind"                { KIND }
 | "type"                { TYPE }
 | "tsub"                { TSUBEX }
@@ -47,21 +58,34 @@ rule token = parse
 | "introduction"        { INTRODUCTION }
 | "gamma"               { raise (ReservedKeyword "gamma") }
 | "infty"               { raise (ReservedKeyword "infty") }
-| subtype as tsub       { TSUB(tsub) }
+| subtype as s          { TSUB(s) }
 
+(* Reserved keywords for the top-level *)
+| "#load" (filepath as s) { LOAD(s) }
+| "#help"               { HELP }
+| "#verbose"            { VERBOSE }
+| "#time"               { TIME }
+| "on"                  { ON }
+| "off"                 { OFF }
+| "#exit"               { EXIT }
 
-| "->"                  { TARR }
-| '.'                   { DOT }
+(* Built-in types *)
 | "int"                 { TINT }
 | "list"                { TLIST }
 | "string"              { TSTRING }
+
+(* Symbols *)
+| "->"                  { TARR }
+| '.'                   { DOT }
 | '('                   { LPAREN }
 | ')'                   { RPAREN }
-| '"' (instring as n) '"'
-                        { String.iter (function '\n' -> incrline lexbuf | _ -> ()) n ;
-                              STRING n }
-| eof                   { raise Eof }
-| "print"               { PRINT }
+| '['                   { LBRACKET }
+| ']'                   { RBRACKET }
+| '{'                   { LCURLY }
+| '}'                   { RCURLY }
+| "<"                   { LESS }
+| ">="                  { GEQ }
+| ';'                   { SEMICOLON }
 
 (* LL connectives *)
 | "top"                 { TOP }
@@ -80,26 +104,10 @@ rule token = parse
 | "not"                 { NOT }
 | ":-"                  { INVLOLLI } 
 
-(* Things I am not sure we are using/will use. *)
-| '-'                   { MINUS }
-| '/'                   { DIV } 
-| "<>"                  { NEQ }  
-| "<"                   { LESS }
-| "<="                  { LEQ }
-| '>'                   { GRT }
-| ">="                  { GEQ }
-| '='                   { EQ }          
-| ":="                  { DEF }
-| ','                   { COMMA }
-| ';'                   { SEMICOLON }
-| nameString as lex     { NAME(lex) }
-(*| "!"                   { CUT }*)
-| '['                   { LBRACKET }
-| ']'                   { RBRACKET }
-| '{'                   { LCURLY }
-| '}'                   { RCURLY }
-| varName as lxm        { VAR(lxm) }
-| ['0'-'9']+ as lxm     { INT(int_of_string lxm) }
-| '\\' (varName as lxm) { ABS(lxm) }
-| "nsub \\" (varName as lxm)        { NEW(lxm) } 
+(* Others *)
+| valid_name as s       { NAME(s) }
+| var_name as s         { VAR(s) }
+| ['0'-'9']+ as s       { INT(int_of_string s) }
+| eof                   { raise Eof }
+
 

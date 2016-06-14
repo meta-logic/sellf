@@ -1,5 +1,5 @@
 /* 
- * File parser_systems.mly 
+ * File parser.mly 
 */
 
 %{
@@ -41,12 +41,13 @@ let check_val_subexp sub1 sub2 =
 
 %}
 
-%token KIND TINT TLIST DOT TYPE TARR PRED TSTRING PLUS MINUS TIMES DIV LESS LEQ GRT GEQ EQ NEQ DEF 
-COMMA SEMICOLON PIPE TOP ONE CUT WITH LLIST RLIST LHEADTAIL INVLOLLI LPAREN RPAREN SUBEX TENSOR CONTEXT SUBEXPREL 
-LBRACKET RBRACKET LCURLY RCURLY LOLLI BANG TSUBEX NEQ IS PRINT ON OFF HELP VERBOSE TIME EXIT LOAD
-QST BOT ZERO POS NEG NOT RULES AXIOM CUTRULE INTRODUCTION STRUCTURAL SUBEXCTX
-HASH FORALL EXISTS
-%token <string> NAME STRING VAR TSUB CTXTYPE CTXSIDE ABS NEW FILE CONNTEX
+%token KIND TYPE TSUBEX SUBEX SUBEXCTX CONTEXT SUBEXPREL POS NEG
+       RULES AXIOM CUTRULE STRUCTURAL INTRODUCTION
+       LOAD HELP VERBOSE TIME ON OFF EXIT
+       TINT TLIST TSTRING
+       TARR DOT LPAREN RPAREN LBRACKET RBRACKET LCURLY RCURLY LESS GEQ SEMICOLON
+       TOP BOT ONE ZERO BANG QST FORALL EXISTS TIMES PLUS PIPE WITH LOLLI NOT INVLOLLI
+%token <string> CONNTEX CTXTYPE CTXSIDE TSUB NAME VAR LOAD
 %token <int> INT
 %right ARR  
 /* Precedence rules
@@ -143,7 +144,8 @@ NAME { match Specification.isKindDeclared $1 with
 | TSUBEX                          {TBASIC (TSUBEX) }
 | typeN TARR typeN               { ARR ($1, $3) }
 | LPAREN typeN RPAREN            { $2 }
-| LPAREN TLIST TINT RPAREN       { TBASIC (TLIST (TINT)) } /* G: list of int and list of string. Declare the other types of lists? */
+/* Lists of integers and strings */
+| LPAREN TLIST TINT RPAREN       { TBASIC (TLIST (TINT)) }
 | LPAREN TLIST TSTRING RPAREN    { TBASIC (TLIST (TSTRING)) }
 ;
 
@@ -381,23 +383,23 @@ term:
     | _, true -> CONST ($1)
 }
 | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
-| INT               { INT ($1) } 
-| STRING            { STRING ($1) }
+| INT               { INT ($1) }
+/* There was a string match here. Maybe this will create some problems? */
 ;
 
 logCst:
-| TOP  {TOP}
-| ONE  {ONE}
-| BOT  {BOT}
-| ZERO {ZERO}
+| TOP  { TOP }
+| ONE  { ONE }
+| BOT  { BOT }
+| ZERO { ZERO }
 ;
 
 top: 
-| HELP        {"help"}
-| VERBOSE ON  {"verbose-on"}
-| VERBOSE OFF {"verbose-off"}
-| TIME ON     {"time-on"}
-| TIME OFF    {"time-off"}
-| EXIT        {"exit"}
-| LOAD FILE   {$2}
+| HELP        { "help" }
+| VERBOSE ON  { "verbose-on" }
+| VERBOSE OFF { "verbose-off" }
+| TIME ON     { "time-on" }
+| TIME OFF    { "time-off" }
+| EXIT        { "exit" }
+| LOAD        { $1 }
 

@@ -317,7 +317,7 @@ let rec start () =
     let command = read_line() in
     try 
       let lexbuf_top = Lexing.from_string command in 
-      let action = Parser.top Lexer_top.token lexbuf_top in 
+      let action = Parser.top Lexer.token lexbuf_top in 
       match action with
       | "verbose-on" -> print_endline "Verbose is set to on."; Term.verbose := true; start ()
       | "verbose-off" -> print_endline "Verbose is set to off."; Term.verbose := false; start ()
