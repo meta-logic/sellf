@@ -244,7 +244,7 @@ let permute_to_file name1 name2 =
   let counter () = index := !index + 1; !index in
   let i1 = ref 0 in
   let i2 = ref 0 in
-  List.iter(fun f -> 
+  List.iter (fun f -> 
     if (Specification.getRuleName f) = name1 then i1 := counter()
     else begin
       if (Specification.getRuleName f) = name2 then i2 := counter()
@@ -319,7 +319,6 @@ let rec start () =
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer_top.token lexbuf_top in 
       match action with
-      | "help" -> start ()
       | "verbose-on" -> print_endline "Verbose is set to on."; Term.verbose := true; start ()
       | "verbose-off" -> print_endline "Verbose is set to off."; Term.verbose := false; start ()
       | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
