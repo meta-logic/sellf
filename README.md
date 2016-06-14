@@ -72,12 +72,14 @@ The operators of linear logic with subexponentials and its syntax are:
 | plus          |  `+`   |
 | with          |  `&`   |
 | par           |  `|`   |
-| !l            |  `[l]bang` |
-| ?l            |  `[l]?`    |
+| !l            |  `![l]` |
+| ?l            |  `?[l]`    |
 | one           |  `one` |
 | zero          |  `zero`|
 | top           |  `top` |
 | bottom        |  `bot` |
+
+Binary operators associate on the right.
 
 To comment some line in your file, start it with the symbol '%'.
 Signature files have sufix '.sig' and the program file has sufix '.pl' (both
@@ -101,7 +103,7 @@ multiplicative additive linear logic (MALL). A specification rule has the
 following form:
 
 ```
-(not (rght (tensor A B))) * (([lr]? (rght A)) * ([lr]? (rght B))).
+not (rght (tensor A B)) * ?[lr] (rght A) * ?[lr] (rght B).
 ```
 
 Some buit-in elements for the specification of systems are:
