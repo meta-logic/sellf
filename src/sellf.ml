@@ -212,11 +212,11 @@ let permute_bin name1 name2 =
   let formula2 = Specification.getSpecificationOf name2 in
   match Permutation.permute formula1 formula2 with 
     (* If both lists are empty, no bipoles could be constructed. *)
-    | (true, [], []) -> print_endline "NO (failed constructing bipoles)"
+    | (true, [], []) -> print_endline "N/A."
     (* Else if there are no failures the second list should be empty. *)
-    | (true, pairs, []) -> print_endline "YES";
+    | (true, pairs, []) -> print_endline "Yes.";
     (* Else, some permutation was not possible. *)
-    | (false, _, bipoles) -> print_endline "NO (some case is not possible)";
+    | (false, _, bipoles) -> print_endline "No.";
     | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
@@ -407,12 +407,10 @@ solve_query () =
     | "#permute" -> 
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
       print_formulas formulas;
-      print_endline "Checking the permutation of one formula F1 over \
-      another F2 (i.e., can a derivation where F1 is below F2 be transformed \
-      into a derivation where F2 is below F1?) \n";
-      print_endline "Please type the number of F1: ";
+      print_endline "Checking whether a rule R1 permutes up a rule R2.\n";
+      print_endline "Please type the number of R1: ";
       let i1 = int_of_string (read_line ()) in
-      print_endline "Please type the number of F2: ";
+      print_endline "Please type the number of R2: ";
       let i2 = int_of_string (read_line ()) in
       print_endline "Please type a file name for the results:";
       let f = read_line () in
