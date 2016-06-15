@@ -131,7 +131,9 @@ let getAllRulesName () =
  *)
 let getSpecificationOf name = 
   let formulas = !others @ !introRules in
-  List.find (fun f -> getRuleName f = name) formulas
+  try
+    List.find (fun f -> getRuleName f = name) formulas
+  with Not_found -> failwith ("Specification of rule " ^ name ^ " not found")
 ;;
 
 let processIntroRule t = 
