@@ -164,6 +164,7 @@ module Permutation : PERMUTATION = struct
   let permute spec1 spec2 =
 
     (* TODO: normalize the specifications. Do this in a more elegant way!! *)
+    (* This is a *really bad* hack *)
     let rec instantiate_ex spec constLst = match spec with
       | EXISTS(s, i, f) ->
         let constant = CONST (List.hd constLst) in
@@ -173,6 +174,7 @@ module Permutation : PERMUTATION = struct
     in
     (* We shouldn't have more than 4 existentially quantified variables... *)
     let constLst = ["b"; "a"; "d"; "c"; "e"] in
+    List.iter (fun c -> Specification.addTypeTbl c (TBASIC(TPRED)) ) constLst;
     let (spec1norm, rest) = instantiate_ex spec1 constLst in
     let (spec2norm, rest2) = instantiate_ex spec2 rest in
 

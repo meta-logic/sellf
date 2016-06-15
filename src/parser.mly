@@ -21,6 +21,12 @@ type ruleType =
 
 let rules = ref NORULE;;
 
+(* Called by ocamlyacc in case of error *)
+let parse_error s = 
+  print_endline "Error parsing model from DLV.";
+  print_endline s;
+  flush stdout
+
 let make_APP lst = 
   match lst with
   | [t] -> t
@@ -42,11 +48,13 @@ let check_val_subexp sub1 sub2 =
 %}
 
 %token KIND TYPE TSUBEX SUBEX SUBEXCTX CONTEXT SUBEXPREL POS NEG
-       RULES AXIOM CUTRULE STRUCTURAL INTRODUCTION
+       RULES AXIOM CUTRULE STRUCTURAL INTRODUCTION GAMMA
        LOAD HELP VERBOSE TIME ON OFF EXIT
        TINT TLIST TSTRING
        TARR DOT LPAREN RPAREN LBRACKET RBRACKET LCURLY RCURLY LESS GEQ SEMICOLON
+       UNDERSCORE QUOTE COMMA NEWLINE
        TOP BOT ONE ZERO BANG QST FORALL EXISTS TIMES PLUS PIPE WITH LOLLI NOT INVLOLLI
+       IN INUNQ INFINAL EMP UNION SETMINUS CONTAINED MAXIDX NOTMAXIDX
 %token <string> CONNTEX CTXTYPE CTXSIDE TSUB NAME VAR LOAD
 %token <int> INT
 %right ARR  
@@ -62,21 +70,30 @@ let check_val_subexp sub1 sub2 =
 %right WITH 
 %nonassoc NOT FORALL EXISTS BANG QST LBRACKET RBRACKET
 
-%start types             /* the entry point */
+/* Call these parsers depending on what you want */
+
+/* Parse a signature file with type declarations */
+%start types
 %type <string option> types 
 %type <types> typeN
 
-%start clause            /* the entry point */
+/* Parse a specification containing clauses and subexponentials sigs */
+%start clause
 %type <string option> clause
 %type <terms list> terms
 
-%start goal             /* the entry point */
+/* Parse a query on the top-level */
+%start goal
 %type <string option> goal
 
-%start top             /* the entry point */
+/* Parse commands on the top level */
+%start top
 %type <string> top 
-
 %type <string list> conList
+
+/* Parse a dlv model */
+%start model
+%type <Constraints.constraintpred list> model
 
 %%  
 
@@ -247,7 +264,7 @@ clause:
 | RULES STRUCTURAL DOT { rules := STRUCT; None }
 
 /* System's specifications must have this form. */
-| body DOT {
+| formula DOT {
   let clause_typecheck = deBruijn false $1 in
   let _ = typeCheck clause_typecheck in
   let clause = deBruijn true $1 in
@@ -278,11 +295,11 @@ clause:
 }
 ;
 
-/* G: goal is always a single formula (check if I can use body here). 
+/* G: goal is always a single formula (check if I can use formula here). 
  * Using types clause and goal so that it can typecheck the expression.
  */
 goal:
-body DOT {
+formula DOT {
   let raw_clause = (CLS (DEF,TOP, $1)) in 
   let clause_typecheck = deBruijn false raw_clause in
   let _ = typeCheck clause_typecheck in
@@ -331,39 +348,74 @@ prop:
 }
 ;
 
-body:
+/* Parses a dlv model */
+model: 
+  /* empty */                   { [] }
+  | constraintPred              { $1 }
+  | constraintPred COMMA model  { $1 @ $3 }
+  | LCURLY model RCURLY         { $2 }
+;
+
+constraintPred:
+  | IN LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INT RPAREN { [] }
+  | INUNQ LPAREN QUOTE formula QUOTE COMMA INT COMMA contextVar RPAREN { [] }
+  | CONTAINED LPAREN QUOTE formula QUOTE COMMA contextVar RPAREN { [] }
+  | MAXIDX LPAREN QUOTE formula QUOTE COMMA INT COMMA contextVar RPAREN { [] }
+  | NOTMAXIDX LPAREN QUOTE formula QUOTE COMMA INT COMMA contextVar RPAREN { [] }
+  | INFINAL LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INT RPAREN {
+    let f = deBruijn true $4 in
+    [Constraints.IN(f, $7, $9)]
+  }
+  | EMP LPAREN contextVar RPAREN { 
+    [Constraints.EMP($3)]
+  }
+  | SETMINUS LPAREN contextVar COMMA QUOTE formula QUOTE COMMA contextVar RPAREN { 
+    let f = deBruijn true $6 in
+    [Constraints.SETMINUS($3, f, $9)]
+  }
+  | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
+    [Constraints.UNION($3, $5, $7)]
+  }
+  ;
+
+contextVar: 
+  | NAME UNDERSCORE INT  { ($1, $3) }
+  | GAMMA UNDERSCORE INT { ("gamma", $3) }
+;
+
+formula:
   /* (F) */
-  | LPAREN body RPAREN    { $2 }
+  | LPAREN formula RPAREN                { $2 }
   /* propositional variable */
-  | prop    { $1 }
+  | prop                                 { $1 }
   /* T, 1, bot, 0 */
-  | logCst  { $1 }
+  | truth_value                          { $1 }
   /* !^l F : ![l] F */
-  | BANG LBRACKET term RBRACKET body  {BANG ($3,$5)}
+  | BANG LBRACKET term RBRACKET formula  {BANG ($3,$5)}
   /* ?^l F : ?[l] F */
-  | QST LBRACKET term RBRACKET body   {QST ($3,$5)}
+  | QST LBRACKET term RBRACKET formula   {QST ($3,$5)}
   /* !^infty F : ! F */
-  | BANG body             { BANG (CONST("infty"),$2) }
+  | BANG formula                         { BANG (CONST("infty"),$2) }
   /* ?^infty F : ? F */
-  | QST body              { QST (CONST("infty"),$2) }
-  /* F^{perp} : not F (the formula is already stored in NNF) */
-  | NOT body              { Term.nnf (NOT($2)) }
+  | QST formula                          { QST (CONST("infty"),$2) }
+  /* F^{perp} : not F (stored in NNF) */
+  | NOT formula                          { Term.nnf (NOT($2)) }
   /* ∀ x. F : all x F */
-  | FORALL VAR body       { FORALL ($2, 0, $3) } 
+  | FORALL VAR formula                   { FORALL ($2, 0, $3) } 
   /* ∃ x. F : exs x F */
-  | EXISTS VAR body       { EXISTS ($2, 0, $3) } 
+  | EXISTS VAR formula                   { EXISTS ($2, 0, $3) } 
   /* A & B : A & B */
-  | body WITH body        { WITH ($1, $3)}
+  | formula WITH formula                 { WITH ($1, $3)}
   /* A ⅋ B : A | B */
-  | body PIPE body        { PARR ($1, $3)}
+  | formula PIPE formula                 { PARR ($1, $3)}
   /* A ⊕ B : A + B */
-  | body PLUS body        { ADDOR ($1, $3)}
+  | formula PLUS formula                 { ADDOR ($1, $3)}
   /* A ⊗ B : A * B */
-  | body TIMES body       { TENSOR ($1, $3)}
+  | formula TIMES formula                { TENSOR ($1, $3)}
   /* A -o B : A -o B*/
-  | body LOLLI body       { LOLLI (CONST("gamma"), $3, $1) }
-  /* For horn-clause-like definitions (we make no restrictions) */
-  | body INVLOLLI body    { LOLLI (CONST("gamma"), $1, $3) }
+  | formula LOLLI formula                { LOLLI (CONST("gamma"), $3, $1) }
+  /* A -o B : B :- A (for convenience) */
+  | formula INVLOLLI formula             { LOLLI (CONST("gamma"), $1, $3) }
 ;
 
 terms:
@@ -374,32 +426,32 @@ terms:
 ;
 
 term:
-| NAME { 
-  match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
-    | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
-      print_newline(); flush stdout; assert false
-      (*PRED ($1, CONST($1), NEG )*)
-    | true, _ -> CONST ($1)
-    | _, true -> CONST ($1)
-}
-| VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
-| INT               { INT ($1) }
-/* There was a string match here. Maybe this will create some problems? */
+  | NAME { 
+    match (Specification.isTypeDeclared $1), (Subexponentials.isSubexponentialDeclared $1) with
+      | false, false -> print_string ("[ERROR] Constant not declared -> "^$1);
+        print_newline(); flush stdout; assert false
+        (*PRED ($1, CONST($1), NEG )*)
+      | true, _ -> CONST ($1)
+      | _, true -> CONST ($1)
+  }
+  | VAR               { VAR {str = $1; id = 0; tag = LOG; ts = 0; lts = 0} }  
+  | INT               { INT ($1) }
 ;
 
-logCst:
-| TOP  { TOP }
-| ONE  { ONE }
-| BOT  { BOT }
-| ZERO { ZERO }
+truth_value:
+  | TOP  { TOP }
+  | ONE  { ONE }
+  | BOT  { BOT }
+  | ZERO { ZERO }
 ;
 
 top: 
-| HELP        { "help" }
-| VERBOSE ON  { "verbose-on" }
-| VERBOSE OFF { "verbose-off" }
-| TIME ON     { "time-on" }
-| TIME OFF    { "time-off" }
-| EXIT        { "exit" }
-| LOAD        { $1 }
+  | HELP        { "help" }
+  | VERBOSE ON  { "verbose-on" }
+  | VERBOSE OFF { "verbose-off" }
+  | TIME ON     { "time-on" }
+  | TIME OFF    { "time-off" }
+  | EXIT        { "exit" }
+  | LOAD        { $1 }
+;
 

@@ -178,7 +178,7 @@ not_proveIf(S2, S1) :-
     let rec readModel input = try match input_line input with
       | str ->
 	let lexbuf = Lexing.from_string str in
-	let model = Parser_models.model Lexer_models.token lexbuf in
+	let model = Parser.model Lexer.token lexbuf in
 	(Constraints.create model) :: readModel input
       with End_of_file -> 
         let _ = Unix.close_process_in channel in 

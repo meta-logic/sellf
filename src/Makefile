@@ -69,7 +69,7 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = clique.ml clique.mli types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser_models.mly lexer_models.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml parser.mly lexer.mll sellf.ml 
+SOURCES = clique.ml clique.mli types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser.mly lexer.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml sellf.ml 
 
 # The executable file to generate
 EXEC = sellf
@@ -216,10 +216,7 @@ clean::
 	rm -f *.o
 	rm -f parser.mli
 	rm -f parser.ml
-	rm -f parser_models.mli
-	rm -f parser_models.ml
 	rm -f lexer.ml
-	rm -f lexer_models.ml
 
 .depend.input: Makefile
 	@echo -n '--Checking Ocaml input files: '

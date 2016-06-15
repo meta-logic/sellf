@@ -56,7 +56,7 @@ rule token = parse
 | "cut"                 { CUTRULE }
 | "structural"          { STRUCTURAL }
 | "introduction"        { INTRODUCTION }
-| "gamma"               { raise (ReservedKeyword "gamma") }
+| "gamma"               { GAMMA }
 | "infty"               { raise (ReservedKeyword "infty") }
 | subtype as s          { TSUB(s) }
 
@@ -86,6 +86,9 @@ rule token = parse
 | "<"                   { LESS }
 | ">="                  { GEQ }
 | ';'                   { SEMICOLON }
+| "_"                   { UNDERSCORE }
+| '"'                   { QUOTE }
+| ','                   { COMMA }
 
 (* LL connectives *)
 | "top"                 { TOP }
@@ -103,6 +106,17 @@ rule token = parse
 | "-o"                  { LOLLI }
 | "not"                 { NOT }
 | ":-"                  { INVLOLLI } 
+
+(* Constraints predicates *)
+| "in"                  { IN } 
+| "in_unique"           { INUNQ }
+| "in_final"            { INFINAL }
+| "emp"                 { EMP }
+| "union"               { UNION }
+| "minus"               { SETMINUS }
+| "contained"           { CONTAINED }
+| "max_index"           { MAXIDX }
+| "not_max_index"       { NOTMAXIDX }
 
 (* Others *)
 | valid_name as s       { NAME(s) }
