@@ -27,16 +27,15 @@ let isTypeDeclared name = try match Hashtbl.find typeTbl name with
 
 let addTypeTbl name entry = Hashtbl.add typeTbl name entry 
 
-let addKindTbl entry = 
-	match entry with
-	| TINT -> None
-	| TPRED -> None
-	| TKIND (k) -> (
+let addKindTbl entry = match entry with
+  | TINT -> None
+  | TPRED -> None
+  | TKIND (k) -> begin
     match (isKindDeclared k) with
-	    | false -> Hashtbl.add kindTbl k (TKIND (k)); None
-			| true -> Some (k)
-    )
-	| _ -> None
+      | false -> Hashtbl.add kindTbl k (TKIND (k)); None
+      | true -> Some (k)
+    end
+  | _ -> None
 ;;
 
 (* Info from the .pl file *)

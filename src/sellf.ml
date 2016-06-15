@@ -90,7 +90,7 @@ let parse file_name = begin
            begin
            try
              while true do
-               let _ = Parser.clause Lexer.token lexbuf in ();
+               let _ = Parser.specification Lexer.token lexbuf in ();
              done; true 
            with
              | Lexer.Eof -> true
