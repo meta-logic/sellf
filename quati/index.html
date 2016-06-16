@@ -2,230 +2,206 @@
    "http://www.w3.org/TR/xhtml1/DTD/xhtml401-transitional.dtd">
 
 <html>
-<head>
+  <head>
+    <title> Quati </title>
+    <!-- Removing web server advertisement -->
+    <script type="text/javascript">
+      document.cookie = "cskeytech-overlay=shown; expires=Mo, 31 Dec 2012 00:00:00 UTC; path=/;";
+    </script>
+    <!-- jQuery only seems to work if the code below is here -->
+    <!-- Download related-->
+    <script defer src="https://cdn.rawgit.com/eligrey/FileSaver.js/master/FileSaver.js"/>
+    <!-- MathJax to display LaTeX code -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: {}
+      });
+    </script>
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
+    </script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- jQuery -->
+    <link type="text/css" href="jquery/css/custom-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet" />  
+    <script type="text/javascript" src="jquery/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <!-- JS/CSS -->
+    <script type="text/javascript" src="actions.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
-<title> Quati </title>
+    <script type="text/javascript">
 
-<!-- Removing web server advertisement -->
-<script type="text/javascript">
-  document.cookie = "cskeytech-overlay=shown; expires=Mo, 31 Dec 2012 00:00:00 UTC; path=/;";
-</script>
+      // Avoiding conflicts with other jQuery libraries that were eventually
+      // included by the server *without* my permission.
+      var myJQ = jQuery.noConflict();
+      
+      myJQ(document).ready(function(){
+      
+        // Tabs
+        myJQ('#tabs').tabs();
+        myJQ('#tabs').tabs("option", "disabled", [1, 2]);
 
-<!-- Verify the reason why jQuery only works if the code below is here -->
-<script defer src="https://cdn.rawgit.com/eligrey/FileSaver.js/master/FileSaver.js"/>
+        // Button
+        myJQ('button').button();
 
-<!-- MathJax to display LaTeX code -->
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({
-    TeX: {
-      Macros: {
-        ndots: ["{\\stackrel{\\vcenter{\\hbox{$\\scriptstyle :$}}}{\\hbox{$\\scriptstyle {#1}$}}}", 1]
-      }
-    }
-  });
-</script>
+        // Dialog
+        myJQ('#dialoghelp').dialog({
+          autoOpen: false,
+          width: 600,
+          buttons: {
+            "Ok": function() { 
+              myJQ(this).dialog("close"); 
+            }  
+          }
+        });
 
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({ TeX: { extensions: ["color.js"] }});
-</script>
-
-<script type="text/javascript"
-  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
-</script>
-
-<link type="text/css" href="jquery/css/custom-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet" />  
-<script type="text/javascript" src="jquery/js/jquery-1.9.1.js"></script>
-<script type="text/javascript" src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
-
-<script type="text/javascript" src="actions.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css" />
-
-<script type="text/javascript">
-
-  // Avoiding conflicts with other jQuery libraries that were eventually
-  // included by the server *without* my permission.
-  var myJQ = jQuery.noConflict();
-
-	myJQ(document).ready(function(){
-
-		// Tabs
-		myJQ('#tabs').tabs();
-    myJQ('#tabs').tabs("option", "disabled", [1, 2])
-
-    // Button
-    myJQ('button').button();
-
-    // Dialog
-    myJQ('#dialoghelp').dialog({
-      autoOpen: false,
-      width: 600,
-      buttons: {
-        "Ok": function() { 
-          myJQ(this).dialog("close"); 
-        } 
-      }
-    });
-
-    // Help button
-    myJQ('#help').click(function() {
-      myJQ('#dialoghelp').dialog('open');
-      return false;
-    });
+        // Help button
+        myJQ('#help').click(function() {
+          myJQ('#dialoghelp').dialog('open');
+          return false;
+        });
 		
-	});
-</script>
+      });
 
-<!-- The buttons for download will appear only after LaTeX code be renderized by MathJax -->
-<script>
+    </script>
+    <script>
   
-  window.onload=function() {
-    document.getElementById("downloadRules").style.display = 'none';
-    document.getElementById("downloadPermutation").style.display = 'none';
-    document.getElementById("downloadBipoles").style.display = 'none';
-  }
+      window.onload=function() {
+        document.getElementById("downloadRules").style.display = 'none';
+        document.getElementById("downloadPermutation").style.display = 'none';
+        document.getElementById("downloadBipoles").style.display = 'none';
+      }
 
-  function showDownloadButton(button) {
-    document.getElementById(button).style.display = 'block';
-  }
+      function showDownloadButton(button) {
+        document.getElementById(button).style.display = 'block';
+      }
 
-</script>
+    </script>
+  </head>
+  <body>
+    <div class="title"> <a href=""><img src="logo.png" alt="A cute quati." height="120"/></a> </div>
+    <hr>
+      <p> 
+        Online system for checking permutation of sequent calculus rules.<br>
+        Developed by: Giselle Reis, Vivek Nigam and Leonardo Lima<br>
+        Contact: giselle [at] logic [dot] at <br>
+        Based on the theoretical work: Checking Proof Transformations with ASP 
+        [<a href="references/paper.pdf">pdf</a>|<a href="http://prezi.com/nuq4a8cqb-kj/checking-proof-transformations-with-asp/" target="_blank">presentation</a>]- Vivek Nigam, Giselle Reis and Leonardo Lima <br>
+        This web-interface provides only limited funtionality. The full system can be downloaded <a href="quati_1.0.tar.gz">here</a>.<br>
+      </p>
+        <hr>
+          <div id="tabs">
+            <ul>
+              <li><a href="#tabs-1">System</a></li>
+              <li><a href="#tabs-2">Permutations</a></li>
+              <li><a href="#tabs-3" onclick="genBipoles();showDownloadButton('downloadBipoles');">Bipoles</a></li>
+            </ul>
+            <div id="tabs-1" style="width: 100%">
+                <label>You can try one of our examples </label>
+                <select id="select" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon" onchange="getExample()">
+                  <option value="">--</option>
+                  <option value="lk"> Classical Logic </option>
+                  <option value="lj"> Intuitionistic Logic </option>
+                  <option value="mlj"> mLJ </option>
+                  <option value="ll"> Linear Logic </option>
+                  <option value="s4"> S4 </option>
+                </select>
+                <label> or type your own system:</label>
+                <div class="generateRules">
+                  <button style="font-size: 13pt" class="btn btn-primary btn-lg" onclick="genRules();showDownloadButton('downloadRules');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Generate rules</button>
+                </div>
+                <div class="help">
+                  <button id="help" style="font-size: 13pt" class="btn btn-primary btn-lg"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Help</button>
+                </div>
+              <br/>
+              <textarea title="Type the specification of your system here." class="spec" rows="20" id="specification">% SPECIFICATION</textarea>
+              <textarea title="Type the signature of your system's connectives here." class="sig" rows="20" id="signature">% SIGNATURE</textarea>
+              <br/>
+              <div id="rules" style="display: none">
+                <br/>
+                The rules of the system are the following:
+                <br/>
+                <div class="blank" style="font-size: 80%; width: 95%;">
+                  <p id="rulesTex"></p>
+                </div>
 
-</head>
-<body>
+                <button id="downloadRules" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('rulesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
-<div class="title"> <a href=""><img src="logo.png" alt="A cute quati." height="120"/></a> </div>
-<hr>
-<p> 
-Online system for checking permutation of sequent calculus rules.<br>
-Developed by: Giselle Reis, Vivek Nigam and Leonardo Lima<br>
-Contact: giselle [at] logic [dot] at <br>
-Based on the theoretical work: Checking Proof Transformations with ASP [<a href="references/paper.pdf">pdf</a>|<a href="http://prezi.com/nuq4a8cqb-kj/checking-proof-transformations-with-asp/" target="_blank">presentation</a>]- Vivek Nigam, Giselle Reis and Leonardo Lima <br>
-This web-interface provides only limited funtionality. The full system can be downloaded <a href="quati_1.0.tar.gz">here</a>.<br>
-</p>
+              </div>
 
-<hr>
-
-<div id="tabs">
-
-  <ul>
-    <li><a href="#tabs-1">System</a></li>
-    <li><a href="#tabs-2">Permutations</a></li>
-    <li><a href="#tabs-3" onclick="genBipoles();showDownloadButton('downloadBipoles');">Bipoles</a></li>
-  </ul>
-
-  <div id="tabs-1" style="width: 100%">
-
-    <br/>
-
-    <textarea title="Type the specification of your system here." style="width: 40%; font-size: 12px" rows="20" id="specification">% SPECIFICATION</textarea>
-    <textarea title="Type the signature of your system's connectives here." style="width: 30%; font-size: 12px" rows="20" id="signature">% SIGNATURE</textarea>
-    
-    <div class="rightDiv">
-      <label>You can type your own system or try one of our examples:</label>
-      <select id="select" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon" onchange="getExample()">
-        <option value="">--</option>
-        <option value="lk"> Classical Logic </option>
-        <option value="lj"> Intuitionistic Logic </option>
-        <option value="mlj"> mLJ </option>
-        <option value="ll"> Linear Logic </option>
-        <option value="s4"> S4 </option>
-      </select>
-      <div class="subRightDiv">
-        <button id="help" style="font-size: 11pt" class="btn btn-primary btn-lg"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Help</button>
-        <br/>
-        <br/>
-        <button style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="genRules();showDownloadButton('downloadRules');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Generate rules</button>
-      </div>
-    </div>
-
-    <br/>
-    <div id="rules" style="display: none">
-      The rules of the system are the following:
-      <br/>
-      <div class="blank" style="font-size: 80%; width: 95%;">
-        <p id="rulesTex"></p>
-      </div>
-
-      <button id="downloadRules" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('rulesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
-
-    </div>
-
-  </div>
+            </div>
   
-  <div id="tabs-2">
-    I want to check whether the rule 
-      <select id="r1" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon">
-      </select> 
-      permutes over the rule 
-      <select id="r2" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon">
-      </select>
-      <button style="font-size: 11pt" onclick="checkPermutation();showDownloadButton('downloadPermutation');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Does it?</button>
-    
-    <br>
+            <div id="tabs-2">
+              I want to check whether the rule 
+              <select id="r1" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon">
+              </select> 
+              permutes over the rule 
+              <select id="r2" class="ui-widget ui-widget-content ui-corner-left ui-corner-right ui-button-icon">
+              </select>
+              <button style="font-size: 11pt" onclick="checkPermutation();showDownloadButton('downloadPermutation');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Does it?</button>
+              <br>
+                <div id="result" style="display: none">
+                  Results:
+                  <div class="blank" style="font-size: 80%;">
+                    <p id="permutationsTex"></p>
+                  </div>
 
-    <div id="result" style="display: none">
-      Results:
-      <div class="blank" style="font-size: 60%;">
-        <p id="permutationsTex"></p>
-      </div>
+                  <button id="downloadPermutation" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('permutationSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
-      <button id="downloadPermutation" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('permutationSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
+                </div>
 
-    </div>
+              </div>
 
-  </div>
+              <div id="tabs-3">
+                <div id="bipoles" style="display: none">
+                  The bipoles of the system are the following:
+                  <div class="blank" style="font-size: 80%">
+                    <p id="bipolesTex"></p>
+                  </div>
+                </div>
 
-  <div id="tabs-3">
-     <div id="bipoles" style="display: none">
-      The bipoles of the system are the following:
+                <button id="downloadBipoles" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('bipolesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
-      <div class="blank">
-        <p id="bipolesTex"></p>
-      </div>
-    </div>
+              </div>
 
-    <button id="downloadBipoles" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('bipolesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
+            </div>
 
-  </div>
+            <div id="dialoghelp" title="Quick start guide:" style="font-size: 12px">
+              <ul>
+                <li> Type your specification in the text box indicated. Here is a quick syntax reference:<br>
+                <div class="texttt">
+                &otimes; &rarr; * <br>
+                &oplus; &rarr; + <br>
+                &amp; &rarr; &amp; <br>
+                &#8523; &rarr; | <br>
+                !<sup>l</sup> &rarr; [l]bang <br>
+                ?<sup>l</sup> &rarr; [l]? <br>
+                !<sup>&infin;</sup> &rarr; bang <br>
+                ?<sup>&infin;</sup> &rarr; ? <br>
+                1 &rarr; one <br>
+                0 &rarr; zero <br>
+                &#8868; &rarr; top <br>
+                &perp; &rarr; bot <br>
+                &lceil;A&rceil; &rarr; rght A <br>
+                &lfloor;A&rfloor; &rarr; lft A <br>
+                &lceil;A:x&rceil; &rarr; mrght A X <br>
+                &lfloor;A:x&rfloor; &rarr; mlft A X <br>
+                </div>
+                Note that &infin; is the maximal subexponential (it is greater than every
+                other index) that holds the formulas of the specification. It is unbounded.
+                The operators <TT>bang</TT> and <TT>?</TT> can be used to simulate the 
+                exponential operators of Linear Logic.
+                </li><br>
+                <li> Type the signature in the text box indicated. You might want to use
+                the keywords <TT>form</TT> and <TT>term</TT> for types of object level
+                formulas and terms, respectively.</li><br>
+                <li> Lines beginning with <TT>%</TT> are comments.</li><br>
+                <li> Choose what you want to check on the left and click check.</li><br>
+              </ul>
+              PS: You can drag this window around and keep it open for a quick reference.
+            </div>
 
-</div>
-
-<div id="dialoghelp" title="Quick start guide:" style="font-size: 12px">
-<ul>
-    <li> Type your specification in the text box indicated. Here is a quick syntax reference:<br>
-    <div class="texttt">
-    &otimes; &rarr; * <br>
-    &oplus; &rarr; + <br>
-    &amp; &rarr; &amp; <br>
-    &#8523; &rarr; | <br>
-    !<sup>l</sup> &rarr; [l]bang <br>
-    ?<sup>l</sup> &rarr; [l]? <br>
-    !<sup>&infin;</sup> &rarr; bang <br>
-    ?<sup>&infin;</sup> &rarr; ? <br>
-    1 &rarr; one <br>
-    0 &rarr; zero <br>
-    &#8868; &rarr; top <br>
-    &perp; &rarr; bot <br>
-    &lceil;A&rceil; &rarr; rght A <br>
-    &lfloor;A&rfloor; &rarr; lft A <br>
-    &lceil;A:x&rceil; &rarr; mrght A X <br>
-    &lfloor;A:x&rfloor; &rarr; mlft A X <br>
-    </div>
-    Note that &infin; is the maximal subexponential (it is greater than every
-    other index) that holds the formulas of the specification. It is unbounded.
-    The operators <TT>bang</TT> and <TT>?</TT> can be used to simulate the 
-    exponential operators of Linear Logic.
-    </li><br>
-    <li> Type the signature in the text box indicated. You might want to use
-    the keywords <TT>form</TT> and <TT>term</TT> for types of object level
-    formulas and terms, respectively.</li><br>
-    <li> Lines beginning with <TT>%</TT> are comments.</li><br>
-    <li> Choose what you want to check on the left and click check.</li><br>
-</ul>
-PS: You can drag this window around and keep it open for a quick reference.
-</div>
-
-<br>
+            <br>
 
 <!-- Removing web server advertisement -->
 <!--script type="text/javascript">
@@ -237,6 +213,6 @@ $(document).ready(function(){
   })
 </script-->
 
-</body>
+  </body>
 </html>
 

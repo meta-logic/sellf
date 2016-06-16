@@ -30,8 +30,8 @@ def submit():
         print "The signature is empty."
         return
 
-    src_file = open("files/spec_rules.pl", 'w')
-    sig_file = open("files/spec_rules.sig", 'w')
+    src_file = open("files/spec_rules.pl", 'w+')
+    sig_file = open("files/spec_rules.sig", 'w+')
 
     src_file.write(src)
     sig_file.write(sig)
