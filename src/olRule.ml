@@ -7,8 +7,6 @@
 (*                                                  *)
 (****************************************************)
 
-(* Suggestion: Change the name of these modules to viewer as in the Model-Viewer-Controller design pattern. *)
-
 open Constraints 
 open ContextSchema
 open Llrules
@@ -72,15 +70,19 @@ module OlContext : OLCONTEXT = struct
                     | (SINGLE, true) -> "C"
                     | (SINGLE, false) -> "")
     | (lst, "l") -> List.fold_right (fun con acc -> 
-			                               let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found ->
-                                                    failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
-			                               conTex ^ "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
-		                                ) lst ""
+			             let conTex = try Hashtbl.find Subexponentials.conTexTbl con 
+						  with Not_found ->
+						    failwith ("The LaTeX code of the connective " ^ con ^ 
+								" was not found. Please verify the specification file.") in 
+			             conTex ^ "\\Gamma_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
+		                    ) lst ""
     | (lst, "r") -> List.fold_right (fun con acc -> 
-			                               let conTex = try Hashtbl.find Subexponentials.conTexTbl con with Not_found ->
-                                                    failwith ("The LaTeX code of the connective " ^ con ^ " was not found. Please verify the specification file.") in 
-			                               conTex ^ "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
-		                                ) lst ""
+			             let conTex = try Hashtbl.find Subexponentials.conTexTbl con 
+						  with Not_found ->
+                                                    failwith ("The LaTeX code of the connective " ^ con ^ 
+								" was not found. Please verify the specification file.") in 
+			             conTex ^ "\\Delta_{" ^ subLabel ^ "}^{" ^ (string_of_int(generateIndex())) ^ "}, " ^ acc
+		                    ) lst ""
     | _ -> failwith ("Error: the subexponential " ^ subLabel ^ " can not be printed.")
                     
   (* Print formula variables according to their side and colorize the
@@ -92,12 +94,12 @@ module OlContext : OLCONTEXT = struct
                       let sameSide = Subexponentials.isSameSide subLabel formSide in
                       match sameSide with
                       | true -> if formSide = side then begin
-		                                let rule = Specification.getObjectLogicMainFormula f in
-		                                if rule = mainRule then (colorizeForm f currentHeight) ^ ", " ^ acc
-		                                else (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ ", " ^ acc end
-		                            else acc
-                      | false -> (print_string ("\nWarning: the following formula can't belong to the context "
-		                                            ^ subLabel ^ ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc)
+		                    let rule = Specification.getObjectLogicMainFormula f in
+		                    if rule = mainRule then (colorizeForm f currentHeight) ^ ", " ^ acc
+		                    else (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ ", " ^ acc end
+		                else acc
+                      | false -> (print_string ("\nWarning: the following formula can't belong to the context " ^ subLabel ^ 
+						  ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc)
                      ) formulas "")
 
   (* Context variables with index -1 should not be printed, just its formulas;
@@ -120,7 +122,8 @@ module OlContext : OLCONTEXT = struct
                                  match (f, correctSide, i) with
                                  | (_, _, -1) -> acc
                                  | ([], true, _) -> (toStringVariable n i maxIndex side nofm) ^ acc
-                                 | (f', true, _) -> (toStringVariable n i maxIndex side nofm) ^ (toStringForms f' side n currentHeight mainRule) ^ acc
+                                 | (f', true, _) -> (toStringVariable n i maxIndex side nofm) ^ 
+						    (toStringForms f' side n currentHeight mainRule) ^ acc
                                  | _ -> acc
                                 ) ctx.lst "") in (s1 ^ s2) in
     let slotString = List.fold_right (fun sub acc ->
@@ -230,34 +233,34 @@ module OlProofTree : OLPROOFTREE = struct
     let rec getSeq' pt = 
       match (pt.premises, getPol pt) with 
       | ([], ASYN) -> 
-				begin
-				  match pt.rule with 
-				  | Some(r) -> []
-				  | None -> [pt]
-				end
+	 begin
+	   match pt.rule with 
+	   | Some(r) -> []
+	   | None -> [pt]
+	 end
       | (lpt, _) -> List.concat (List.map (fun p -> getSeq' p) lpt) in      
     let rec getSeq pt =
-        match pt.premises with
-        | [] -> 
-          begin
-            match (getRule pt) with 
-            | Some(r) -> []
-            | None -> [pt]
-          end
-        | _ -> begin match (getPol pt) with
- 	 		    | ASYN ->
- 	 		      if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
- 	 		        let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
-              nextPt.premises <- getSeq' nextPt;
- 	 		        [nextPt]
- 	 		      else List.concat (List.map (fun p -> getSeq p) pt.premises)
- 	 		    | SYNC -> 
- 	 		      List.concat (List.map (fun p -> getSeq p) pt.premises)
- 	 		    end in
+      match pt.premises with
+      | [] -> 
+         begin
+           match (getRule pt) with 
+           | Some(r) -> []
+           | None -> [pt]
+         end
+      | _ -> begin match (getPol pt) with
+ 	 	   | ASYN ->
+ 	 	      if (List.exists (fun el -> (getPol el) = SYNC) pt.premises) then
+ 	 		let nextPt = List.find (fun el -> (getPol el) = SYNC) pt.premises in
+			nextPt.premises <- getSeq' nextPt;
+ 	 		[nextPt]
+ 	 	      else List.concat (List.map (fun p -> getSeq p) pt.premises)
+ 	 	   | SYNC -> 
+ 	 	      List.concat (List.map (fun p -> getSeq p) pt.premises)
+ 	     end in
     let newPtList = getSeq firstPt in
     olPt.premises <- newPtList;
     olPt.conclusion <- firstPt.conclusion
-    
+			 
   let toMacroRule olPt =
     let firstPt = List.hd olPt.premises in
     let rec getOpenLeaves pt = 
@@ -269,16 +272,17 @@ module OlProofTree : OLPROOFTREE = struct
     olPt.premises <- newPremises
     
   let maxIndex pt = 
-    let index = ref (-1) in
-    let rec getSeq pt = 
+    let max = ref 0 in
+    let rec getLeaves pt = 
       match pt.rule with
-      | Some(rule) -> if pt.premises = [] then [pt] else List.concat (List.map (fun p -> getSeq p) pt.premises)
+      | Some(rule) -> if pt.premises = [] then [pt] else List.concat (List.map (fun p -> getLeaves p) pt.premises)
       | None -> [pt] in
-    let olPt = List.hd (getSeq pt) in
-    let olSeq = getConclusion olPt in
-    let olCtx = OlSequent.getContext olSeq in
-    List.iter (fun ((s, i), l) -> if i > !index then index := i else ()) olCtx.OlContext.lst;
-    !index
+    let leaves = getLeaves pt in
+    List.iter (fun olPt ->
+	       let olSeq = getConclusion olPt in
+	       let olCtx = OlSequent.getContext olSeq in
+	       List.iter (fun ((s, i), l) -> if i > !max then max := i else ()) olCtx.OlContext.lst;
+	      ) leaves; !max
 
   (* TODO: Rewrite this code avoiding references
    * The type of this function should be: OlProofTree -> OlProofTree
@@ -398,19 +402,20 @@ module Rewriting : REWRITING = struct
               ((rebuild_tree pt1, model1), (rebuild_tree pt2, model2))
              ) drvt_pair_lst
   
-  (* let print_subexp (str, i) = print_string (str ^ (string_of_int i)) *)
+  let print_subexp (str, i) = print_string (str ^ (string_of_int i))
 
-  (* let print_subexp_endline (str, i) = print_endline (str ^ (string_of_int i)) *)
+  let print_subexp_endline (str, i) = print_endline (str ^ (string_of_int i))
   
-  (* let print_hashtbl rewrite_ht = print_endline "------------ Beginnning -----------"; *)
-  (*   Hashtbl.iter (fun k (sublst, flist) -> *)
-  (*     print_subexp k; *)
-  (*     print_string " -> "; *)
-  (*     List.iter (fun sub -> print_subexp sub; print_string ", ") sublst; *)
-  (*     List.iter (fun t -> print_string ((Prints.termToTexString t) ^ ", ")) flist; *)
-  (*     print_string "\n" *)
-  (*   ) rewrite_ht; *)
-  (*   print_endline "------------ End -----------" *)
+  let print_hashtbl rewrite_ht = 
+    print_endline "----------- Beginnning -----";
+    Hashtbl.iter (fun k (sublst, flist) ->
+		  print_subexp k;
+		  print_string " -> ";
+		  List.iter (fun sub -> print_subexp sub; print_string ", ") sublst;
+		  List.iter (fun t -> print_string ((Prints.termToTexString t) ^ ", ")) flist;
+		  print_string "\n"
+		 ) rewrite_ht;
+    print_endline "----------- End ------------"
 
   (* Creates a list with n copies of f *)
   (* TODO: Move this functions to another file or module *)
@@ -421,7 +426,7 @@ module Rewriting : REWRITING = struct
 
   let rec remove_f f l =
     match l with
-    | [] -> failwith ("[ERROR] Formula not found.")
+    | [] -> failwith ("[ERROR] Formula not found while processing MINUS. Please, take a look at the constraintset.")
     | h::t -> if f = h then t else h::(remove_f f t)
 
   let filter_constraints s lst =
@@ -433,13 +438,53 @@ module Rewriting : REWRITING = struct
                  | UNION (c1, c2, c) -> c = s
                 ) lst
 
-  let compute_rewrite_sequent seq model rewrite_ht max_index is_closed_leaf is_open_leaf =
+  let rec rearrange l =
+    if (List.length (List.concat l)) = 0 then []
+    else List.map List.hd l :: rearrange (List.map List.tl l)
+
+  let i = ref 0
+  let set_max_index max_index = i := max_index + 1
+  let count () = i := !i + 1; !i
+
+  let unify_variables sublst sublst' rewrite_ht =
+    let unify_ht : (OlContext.ctxVar, OlContext.ctxVar list) Hashtbl.t = Hashtbl.create 100 in
+    let new_variables1 = List.map (fun (s, i) ->
+				   List.map (fun (s', i') -> 
+					     (s', count())
+					    ) sublst'
+				  ) sublst in
+    let new_variables2 = rearrange new_variables1 in
+    List.iter2 (fun s lst -> Hashtbl.add unify_ht s lst) sublst new_variables1;
+    List.iter2 (fun s lst -> Hashtbl.add unify_ht s lst) sublst' new_variables2;
+    List.iter (fun s ->
+	       Hashtbl.iter (fun k (slst, flst) ->
+			     let new_slst = List.fold_right (fun s' acc ->
+							     if s = s' then
+							       let new_rwt = Hashtbl.find unify_ht s in
+							       Hashtbl.add rewrite_ht s (new_rwt, []);
+							       new_rwt @ acc
+							     else s' :: acc
+							    ) slst [] in
+			     Hashtbl.replace rewrite_ht k (new_slst, flst)
+			    ) rewrite_ht
+	      ) sublst;
+    List.iter (fun s ->
+	       Hashtbl.iter (fun k (slst, flst) ->
+			     let new_slst = List.fold_right (fun s' acc ->
+							     if s = s' then
+							       let new_rwt = Hashtbl.find unify_ht s in
+							       Hashtbl.add rewrite_ht s (new_rwt, []);
+							       new_rwt @ acc
+							     else s' :: acc
+							    ) slst [] in
+			     Hashtbl.replace rewrite_ht k (new_slst, flst)
+			    ) rewrite_ht
+	      ) sublst'
+
+  let compute_rewrite_sequent seq model rewrite_ht is_closed_leaf is_open_leaf =
     (* New context variables are created when we have IN(G, F, n) -> G*, F1, ..., Fn. G* doesn't occur on the proof tree
      * TODO: This solution using references is not the best one 
      *)
-    let i = ref (max_index+1) in
-    let count () = i := !i + 1; !i in
-    (* Rewriting algorithm *)
     let ctx = OlSequent.getContext seq in
     ctx.OlContext.lst <- Subexponentials.filter_subexponentials ctx.OlContext.lst;
     List.iter (fun (c, f) ->
@@ -483,7 +528,9 @@ module Rewriting : REWRITING = struct
                                      | (sublst, flst) ->
                                         (List.iter (fun s ->
                                                     Hashtbl.iter (fun k (sublst', flst') ->
-                                                                  Hashtbl.replace rewrite_ht k ((List.filter (fun s' -> s' <> s) sublst'), flst')
+                                                                  Hashtbl.replace rewrite_ht k ((List.filter (fun s' -> 
+													      s' <> s
+													     ) sublst'), flst')
                                                                  ) rewrite_ht;
                                                    ) sublst;
                                          Hashtbl.replace rewrite_ht c' ([], []))
@@ -508,40 +555,26 @@ module Rewriting : REWRITING = struct
                                      | (sublst, flst) ->
                                         (try match Hashtbl.find rewrite_ht c' with
                                              | (sublst', flst') ->
-                                                (if ((List.length sublst) > 0) && ((List.length sublst') > 0) &&
-                                                        sublst <> sublst' && flst' = (remove_f t flst) then
-                                                   (if (List.hd sublst) > (List.hd sublst') then
-                                                      Hashtbl.iter (fun k (s, f) ->
-                                                                    let _s = List.map (fun s' ->
-                                                                                       if s' = (List.hd sublst') then
-                                                                                         (List.hd sublst)
-                                                                                       else s') s in
-                                                                    Hashtbl.replace rewrite_ht k (_s, f)
-                                                                   ) rewrite_ht
-                                                    else Hashtbl.iter (fun k (s, f) ->
-                                                                       let _s = List.map (fun s' ->
-                                                                                          if s' = (List.hd sublst) then
-                                                                                            (List.hd sublst')
-                                                                                          else s') s in
-                                                                       Hashtbl.replace rewrite_ht k (_s, f)
-                                                                      ) rewrite_ht)
-                                                 else ())
+						(if (List.sort compare sublst) <> (List.sort compare sublst') && 
+						     flst' = (remove_f t flst) then unify_variables sublst sublst' rewrite_ht
+						 else ())
+					 (* If rwt(c1) and rwt(c') are empty, then just process the constraint as usual *)
                                          with Not_found -> Hashtbl.add rewrite_ht c' (sublst, remove_f t flst))
+				 (* If rwt(c1) is empty, then waits to process the constraint on another branch *)
                                  with Not_found -> ())
                              | _ -> ()
                             ) (filter_constraints c model.lst)
               ) ctx.OlContext.lst
 
   let rec compute_rewrite_rules olpt model rewrite_ht =
-    let max_index = OlProofTree.maxIndex olpt in
     match (OlProofTree.isClosedLeaf olpt, OlProofTree.isOpenLeaf olpt) with
     | (false, true) ->
-       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index false true
+       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht false true
     | (true, false) ->
-       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index true false
+       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht true false
     | (false, false) ->
        List.iter (fun pt -> compute_rewrite_rules pt model rewrite_ht) olpt.OlProofTree.premises;
-       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht max_index false false
+       compute_rewrite_sequent olpt.OlProofTree.conclusion model rewrite_ht false false
 
   let rewrite_sequent seq rewrite_ht =
     let ctx = OlSequent.getContext seq in
@@ -561,6 +594,8 @@ module Rewriting : REWRITING = struct
 
   let apply_model olpt model =
     let rewrite_ht : (OlContext.ctxVar, (OlContext.ctxVar list) * (terms list)) Hashtbl.t = Hashtbl.create 100 in
+    let max_index = OlProofTree.maxIndex olpt in
+    set_max_index max_index;
     compute_rewrite_rules olpt model rewrite_ht;
     rewrite_tree olpt rewrite_ht;
     Hashtbl.reset rewrite_ht
