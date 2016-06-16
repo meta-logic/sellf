@@ -1,10 +1,13 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for LAL %
-%                             %
-% Vivek Nigam - 2012          %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                      %
+% SELLF specification for LAL                          %
+% (Linear Authorization Logics)                        %
+% Vivek Nigam - 2012                                   %
+%                                                      %
+% Based on the paper:                                  %
+% On the complexity of linear authorization logics     %
+%                  in LiCS 2012                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp l lin.
 subexp r lin.
@@ -34,6 +37,20 @@ subexprel h1 < k1.
 subexprel h2 < k2.
 subexprel k1 < gl.
 subexprel k2 < gl.
+
+subexpctx l many ant.
+subexpctx ll many ant.
+subexpctx gl many ant.
+subexpctx k1 many ant.
+subexpctx k2 many ant.
+subexpctx h1 many ant.
+subexpctx h2 many ant.
+subexpctx s1L many ant.
+subexpctx s2L many ant.
+
+subexpctx r single suc.
+subexpctx s1R single suc.
+subexpctx s2R single suc.
 
 rules introduction.
 % Tensor

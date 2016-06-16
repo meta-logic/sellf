@@ -1,14 +1,17 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for G3k %
-%                             %
-% Giselle Reis - 2012         %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for G3k               %
+%                                           %
+% Giselle Reis - 2012                       %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp l unb.
 subexp r unb.
 subexp rr unb.
+
+subexpctx l many ant.
+subexpctx r many suc.
 
 rules introduction.
 

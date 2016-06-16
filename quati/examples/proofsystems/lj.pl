@@ -1,16 +1,18 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for LJ  %
-%                             %
-% Elaine Pimentel - 2012      %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for LJ                %
+%                                           %
+% Elaine Pimentel   -   2012                %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp r lin.
 subexp l unb.
 
-subexpctx r single rght.
-subexpctx l many lft.
+subexpctx l many ant.
+subexpctx r single suc.
+
+%subexprel r < l.
 
 rules introduction.
 
@@ -36,4 +38,4 @@ rules axiom.
 ((not (lft A)) * (not (rght A))).
 
 rules cut.
-(([r]? (rght A)) * ([l]? (lft A))).
+(([l]bang ([r]? (rght A))) * ([l]? (lft A))).

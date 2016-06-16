@@ -1,16 +1,16 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for LK  %
-%                             %
-% Elaine Pimentel - 2012      %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for LK                %
+%                                           %
+% Elaine Pimentel   -   2012                %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp l unb.
 subexp r unb.
 
-subexpctx l many lft.
-subexpctx r many rght.
+subexpctx l many ant.
+subexpctx r many suc.
 
 rules introduction.
 

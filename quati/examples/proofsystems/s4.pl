@@ -1,26 +1,22 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for S4  %
-%                             %
-% Giselle Reis - 2012         %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for S4 (modal logic)  %
+%                                           %
+% Giselle Reis - 2012                       %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp l  unb.
 subexp r  unb.
 subexp nl unb. % Necessarily left
 subexp pr unb. % Possibly right
-subexp e  unb.
 
-subexpctx l many lft.
-subexpctx r many rght.
-subexpctx nl many lft.
-subexpctx pr many rght.
+subexpctx l many ant.
+subexpctx r many suc.
+subexpctx nl many ant [nec].
+subexpctx pr many suc [poss].
 
-subexprel r < pr.
-subexprel l < nl.
-subexprel e < pr.
-subexprel e < nl.
+subexprel pr < nl.
 
 rules introduction.
 % Conjunction
@@ -33,10 +29,10 @@ rules introduction.
 
 % Necessarily
 (not (lft (nec A))) * [l]? (lft A).
-(not (rght (nec A))) * [e]bang ([r]? (rght A)).
+(not (rght (nec A))) * [pr]bang ([r]? (rght A)).
 
 % Possibly
-(not (lft (poss A))) * [e]bang ([l]? (lft A)).
+(not (lft (poss A))) * [pr]bang ([l]? (lft A)).
 (not (rght (poss A))) * [r]? (rght A).
 
 rules axiom.
@@ -47,8 +43,8 @@ rules cut.
 % Cut
 (([l]? (lft A)) * ([r]? (rght A))).
 
-rules structural.
+%rules structural.
 % Structural rules for modals
-((not (lft (nec A))) * ([nl]? (lft (nec A)))).
-((not (rght (poss A))) * ([pr]? (rght (poss A)))).
+%((not (lft (nec A))) * ([nl]? (lft (nec A)))).
+%((not (rght (poss A))) * ([pr]? (rght (poss A)))).
 

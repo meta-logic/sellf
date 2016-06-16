@@ -1,19 +1,17 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for LJ  %
-% (purely multiplicative      %
-%  calculus)                  %
-%                             %
-% Giselle Reis - 2013         %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for LJ                %
+% (purely multiplicative calculus)          %
+%                                           %
+% Giselle Reis   -   2013                   %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp r lin.
 subexp l lin.
 
-subexpctx r unit rght.
-subexpctx l many lft.
+subexpctx l many ant.
+subexpctx r single suc.
 
 rules introduction.
 
@@ -22,11 +20,11 @@ rules introduction.
 (not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
 
 % Conjunction
-(not (lft (and A B))) * (([l]? (lft A)) + ([l]? (lft B))).
+(not (lft (and A B))) * (([l]? (lft A)) | ([l]? (lft B))).
 (not (rght (and A B))) * (([r]? (rght A)) * ([r]? (rght B))).
 
 % Disjunction
-(not (lft (or A B))) * (([l]? (lft A)) * ([l]? (lft B))).
+(not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
 (not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
 
 % Forall
@@ -50,3 +48,4 @@ rules cut.
 rules structural.
 (not (lft A)) * (([l]? (lft A)) | ([l]? (lft A)) ). 
 (not (lft A)) * bot. 
+(not (rght A)) * bot. 

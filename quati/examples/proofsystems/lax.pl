@@ -1,10 +1,10 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                             %
-% SELLF specification for Lax %
-%                             %
-% Giselle Reis - 2012         %
-%                             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                           %
+% SELLF specification for Lax Logic         %
+%                                           %
+% Giselle Reis - 2012                       %
+%                                           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subexp l  unb.
 subexp r  lin.
@@ -13,9 +13,9 @@ subexp cr lin.
 subexprel r < cr.
 subexprel cr < l.
 
-subexpctx l many lft.
-subexpctx r single rght.
-subexpctx cr single rght.
+subexpctx l many ant.
+subexpctx r single suc.
+subexpctx cr single suc.
 
 rules introduction.
 % Conjunction
