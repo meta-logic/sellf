@@ -23,7 +23,7 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
     <!-- jQuery -->
     <link type="text/css" href="jquery/css/custom-theme/jquery-ui-1.10.3.custom.css" rel="stylesheet" />  
-    <script type="text/javascript" src="jquery/js/jquery-1.9.1.js"></script>
+    <script type="text/javascript" src="jquery/js/jquery-3.0.0.js"></script>
     <script type="text/javascript" src="jquery/js/jquery-ui-1.10.3.custom.min.js"></script>
     <!-- JS/CSS -->
     <script type="text/javascript" src="actions.js"></script>
@@ -36,7 +36,16 @@
       var myJQ = jQuery.noConflict();
       
       myJQ(document).ready(function(){
-      
+        
+        // Accordion
+        myJQ("#accordion").accordion({ 
+          header: "h3",
+          collapsible: false,
+          active: 0,
+          autoHeight: false,
+          heightStyle: "content"
+        });
+
         // Tabs
         myJQ('#tabs').tabs();
         myJQ('#tabs').tabs("option", "disabled", [1, 2]);
@@ -107,15 +116,31 @@
                   <option value="s4"> S4 </option>
                 </select>
                 <label> or type your own system:</label>
-                <div class="generateRules">
-                  <button style="font-size: 13pt" class="btn btn-primary btn-lg" onclick="genRules();showDownloadButton('downloadRules');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Generate rules</button>
+                <!-- <div class="right-corner"> -->
+                <!--     <button class="btn btn-primary btn-lg" onclick="genRules();showDownloadButton('downloadRules');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Generate rules</button> -->
+                <!--     <button id="help" class="btn btn-primary btn-lg"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Help</button> -->
+                <!-- </div> -->
+                <div class="right-corner">
+                <div id="accordion">
+  	          <div>
+		    <h3><a href="#">Menu</a></h3>
+		    <div>
+                      Render the inference rules of the specified system.
+		      <p>
+                        <button class="btn btn-primary btn-lg" onclick="genRules();showDownloadButton('downloadRules');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Generate rules</button>
+                      </p>
+                      <p>
+                        <button id="help" class="btn btn-primary btn-lg"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Help</button>
+                      </p>
+                    </div>
+		  </div>
                 </div>
-                <div class="help">
-                  <button id="help" style="font-size: 13pt" class="btn btn-primary btn-lg"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Help</button>
                 </div>
+
               <br/>
               <textarea title="Type the specification of your system here." class="spec" rows="20" id="specification">% SPECIFICATION</textarea>
               <textarea title="Type the signature of your system's connectives here." class="sig" rows="20" id="signature">% SIGNATURE</textarea>
+
               <br/>
               <div id="rules" style="display: none">
                 <br/>
@@ -202,16 +227,6 @@
             </div>
 
             <br>
-
-<!-- Removing web server advertisement -->
-<!--script type="text/javascript">
-$(document).ready(function(){
-  $("#pageflip").remove();
-  $("#cskeytech-overlay-data").remove();
-  $("#cskeytech-overlay-overlay").remove();
-  $("#cskeytech-overlay-container").remove();
-  })
-</script-->
 
   </body>
 </html>

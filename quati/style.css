@@ -8,18 +8,18 @@ textarea {
 }
 
 textarea.spec {
-  width: 43%;
+  width: 35%;
   font-size: 12px;
   position: relative;
-  top: 15px;
+  top: 5px;
   left: 0px;
 }
 
 textarea.sig {
-  width: 43%;
+  width: 35%;
   font-size: 12px;
   position: relative;
-  top: 15px;
+  top: 5px;
   left: 10px;
 }
 
@@ -41,23 +41,19 @@ div.blank {
   outline-style: solid;
 }
 
-div.generateRules {
-  position: absolute;
-  font-size: 100%;
-  float: right;
-  right: 20px;
-  top: 290px;
+div.right-corner {
+    margin-top: 3%;
+    margin-right: 5%;
+    width: 20%;
+    height: 30%;
+    float: right;
 }
 
-div.help {
-  position: absolute;
-  font-size: 100%;
-  float: right;
-  right: 55px;
-  top: 340px;
+#accordion {
+    height: 300px;
 }
 
-/* For generates LaTeX logo */
+/* LaTeX logo */
 .tex sub, .latex sub, .latex sup {
   text-transform: uppercase;
 }
