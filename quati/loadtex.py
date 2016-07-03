@@ -23,8 +23,8 @@ def submit():
   sig = urllib.unquote(sig_enc)
   textAreaId = urllib.unquote(textAreaId_enc)
 
-  src_file = open("files/spec_loadtex.pl", 'w')
-  sig_file = open("files/spec_loadtex.sig", 'w')
+  src_file = open("temp/spec_loadtex.pl", 'w')
+  sig_file = open("temp/spec_loadtex.sig", 'w')
 
   src_file.write(src)
   sig_file.write(sig)
@@ -36,21 +36,21 @@ def submit():
   fileName = ''
 
   if textAreaId == 'rulesSourceCode':
-    cmdStr = 'ocamlrun sellf -c rules_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c rules_to_file -i temp/spec_loadtex'
     fileName = 'rules.tex'
   elif textAreaId == 'permutationSourceCode':
-    cmdStr = 'ocamlrun sellf -c permute_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c permute_to_file -i temp/spec_loadtex'
     fileName = 'permutation.tex'
   elif textAreaId == 'bipolesSourceCode':
-    cmdStr = 'ocamlrun sellf -c bipoles_to_file -i files/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c bipoles_to_file -i temp/spec_loadtex'
     fileName = 'bipoles.tex'
 
   # env attribute indicates where dlv.bin is located
   cmd = Popen(cmdStr, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
   stdout, stderr = cmd.communicate()
 
-  os.remove("files/spec_loadtex.pl")
-  os.remove("files/spec_loadtex.sig")
+  os.remove("temp/spec_loadtex.pl")
+  os.remove("temp/spec_loadtex.sig")
 
   result_file = open(fileName, 'r')
 

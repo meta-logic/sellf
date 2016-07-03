@@ -34,8 +34,8 @@ def submit():
         print "The signature is empty."
         return
 
-    src_file = open("files/spec_permutation.pl", 'w')
-    sig_file = open("files/spec_permutation.sig", 'w')
+    src_file = open("temp/spec_permutation.pl", 'w')
+    sig_file = open("temp/spec_permutation.sig", 'w')
 
     src_file.write(src)
     sig_file.write(sig)
@@ -44,13 +44,13 @@ def submit():
     sig_file.close()
 
     # env attribute indicates where dlv.bin is located
-    cmd = Popen('ocamlrun sellf -c permute -i files/spec_permutation  -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
+    cmd = Popen('ocamlrun sellf -c permute -i temp/spec_permutation  -r1 ' + r1 + ' -r2 ' + r2, shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout
     print stderr
 
-    os.remove("files/spec_permutation.pl")
-    os.remove("files/spec_permutation.sig")
+    os.remove("temp/spec_permutation.pl")
+    os.remove("temp/spec_permutation.sig")
 
 submit()

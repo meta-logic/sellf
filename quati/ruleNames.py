@@ -30,8 +30,8 @@ def submit():
         print "The signature is empty."
         return
 
-    src_file = open("files/spec_rulenames.pl", 'w')
-    sig_file = open("files/spec_rulenames.sig", 'w')
+    src_file = open("temp/spec_rulenames.pl", 'w')
+    sig_file = open("temp/spec_rulenames.sig", 'w')
 
     src_file.write(src)
     sig_file.write(sig)
@@ -40,13 +40,13 @@ def submit():
     sig_file.close()
 
     # env attribute indicates where dlv.bin is located
-    cmd = Popen('ocamlrun sellf -c rulenames -i files/spec_rulenames', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
+    cmd = Popen('ocamlrun sellf -c rulenames -i temp/spec_rulenames', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout
     print stderr
 
-    os.remove("files/spec_rulenames.pl")
-    os.remove("files/spec_rulenames.sig")
+    os.remove("temp/spec_rulenames.pl")
+    os.remove("temp/spec_rulenames.sig")
 
 submit()
