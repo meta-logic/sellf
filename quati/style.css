@@ -9,18 +9,22 @@ textarea {
 
 textarea.spec {
   width: 35%;
-  font-size: 12px;
+  font-size: 10pt;
+  font-family: monospace;
   position: relative;
   top: 5px;
   left: 0px;
+  white-space: pre;
 }
 
 textarea.sig {
   width: 35%;
-  font-size: 12px;
+  font-size: 10pt;
+  font-family: monospace;
   position: relative;
   top: 5px;
-  left: 10px;
+  left: 5px;
+  white-space: pre;
 }
 
 /* Fixes the positioning of the icon inside a button */
