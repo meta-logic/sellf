@@ -23,7 +23,6 @@ let rules = ref NORULE;;
 
 (* Called by ocamlyacc in case of error *)
 let parse_error s = 
-  print_endline "Error parsing model from DLV.";
   print_endline s;
   flush stdout
 
@@ -221,7 +220,7 @@ specification:
   }
   | SUBEXCTX NAME CTXTYPE CTXSIDE DOT {
     match (Subexponentials.isSubexponentialDeclared $2) with
-      | true -> 
+      | true ->
         let arity = match $3 with
           | "single" -> SINGLE
           | "many" -> MANY
@@ -377,9 +376,9 @@ formula:
   /* T, 1, bot, 0 */
   | truth_value                          { $1 }
   /* !^l F : ![l] F */
-  | BANG LBRACKET term RBRACKET formula  {BANG ($3,$5)}
+  | BANG LBRACKET term RBRACKET formula  { BANG ($3,$5) }
   /* ?^l F : ?[l] F */
-  | QST LBRACKET term RBRACKET formula   {QST ($3,$5)}
+  | QST LBRACKET term RBRACKET formula   { QST ($3,$5) }
   /* !^infty F : ! F */
   | BANG formula                         { BANG (CONST("infty"),$2) }
   /* ?^infty F : ? F */
@@ -391,13 +390,13 @@ formula:
   /* ∃ x. F : exs x F */
   | EXISTS VAR formula                   { EXISTS ($2, 0, $3) } 
   /* A & B : A & B */
-  | formula WITH formula                 { WITH ($1, $3)}
+  | formula WITH formula                 { WITH ($1, $3) }
   /* A ⅋ B : A | B */
-  | formula PIPE formula                 { PARR ($1, $3)}
+  | formula PIPE formula                 { PARR ($1, $3) }
   /* A ⊕ B : A + B */
-  | formula PLUS formula                 { ADDOR ($1, $3)}
+  | formula PLUS formula                 { ADDOR ($1, $3) }
   /* A ⊗ B : A * B */
-  | formula TIMES formula                { TENSOR ($1, $3)}
+  | formula TIMES formula                { TENSOR ($1, $3) }
   /* A -o B : A -o B*/
   | formula LOLLI formula                { LOLLI (CONST("gamma"), $3, $1) }
   /* A -o B : B :- A (for convenience) */
