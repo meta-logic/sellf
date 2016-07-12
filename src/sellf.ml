@@ -579,6 +579,10 @@ match (!check, !fileName, !rule1, !rule2) with
   | ("permute_to_file", file, r1, r2) ->
     initAll ();
     if parse file then permute_to_file r1 r2
+  | ("parse", file, _, _) ->
+    initAll ();
+    if parse file then print_endline "Yes."
+    else print_endline "No."
   | (x, y, _, _) -> failwith ("Invalid arguments.")
 ;;
 

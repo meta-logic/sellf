@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for file in `ls -p ../examples/proofsystems | grep -v / | sed 's/\..*//' | uniq`; do
+  result=`./sellf -i ../examples/proofsystems/$file -c parse`
+  echo "$file : $result"
+done
