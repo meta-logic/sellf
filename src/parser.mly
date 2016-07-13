@@ -47,7 +47,7 @@ let check_val_subexp sub1 sub2 =
 %}
 
 %token KIND TYPE TSUBEX SUBEX SUBEXCTX CONTEXT SUBEXPREL POS NEG
-       RULES AXIOM CUTRULE STRUCTURAL INTRODUCTION GAMMA
+       RULES AXIOM CUTRULE STRUCTURAL INTRODUCTION GAMMA INFTY
        LOAD HELP VERBOSE TIME ON OFF EXIT
        TINT TLIST TSTRING
        TARR DOT LPAREN RPAREN LBRACKET RBRACKET LCURLY RCURLY LESS GEQ SEMICOLON
@@ -161,7 +161,7 @@ type_spec:
   }
   | TINT                           { TBASIC (TINT) }
   | TSTRING                        { TBASIC (TSTRING) }
-  | TSUBEX                         {TBASIC (TSUBEX) }
+  | TSUBEX                         { TBASIC (TSUBEX) }
   | type_spec TARR type_spec       { ARR ($1, $3) }
   | LPAREN type_spec RPAREN        { $2 }
   /* Lists of integers and strings */
@@ -331,8 +331,9 @@ constraintPred:
   ;
 
 contextVar: 
-  | NAME UNDERSCORE INT  { ($1, $3) }
   | GAMMA UNDERSCORE INT { ("gamma", $3) }
+  | INFTY UNDERSCORE INT { ("infty", $3) }
+  | NAME UNDERSCORE INT  { ($1, $3) }
 ;
 
 

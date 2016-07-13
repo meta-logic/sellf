@@ -24,23 +24,23 @@ subexpctx r single suc.
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
-(not (rght (imp A B))) *  (([l]? (lft A)) | ([l]bang ([r]? (rght B)))).
+not (lft (imp A B)) *  ![l] ?[r] (rght A) * ?[l] (lft B).
+not (rght (imp A B)) *  ?[l] (lft A) | ![l] ?[r] (rght B).
 
 % Disjunction
-(not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
-(not (rght (or A B))) * (([l]bang ([r]? (rght A))) + ([l]bang ([r]? (rght B)))).
+not (lft (or A B)) * ?[l] (lft A) & ?[l] (lft B).
+not (rght (or A B)) * ![l] ?[r] (rght A) + ![l] ?[r] (rght B).
 
 % Conjunction additive
-(not (lft (andA A B))) * (([l]? (lft A)) + ([l]? (lft B))).
-(not (rght (andA A B))) * (([l]bang ([r]? (rght A))) & ([l]bang ([r]? (rght B)))).
+not (lft (andA A B)) * ?[l] (lft A) + ?[l] (lft B).
+not (rght (andA A B)) * ![l] ?[r] (rght A) & ![l] ?[r] (rght B).
 
 % Conjunction multiplicative
-(not (lft (andM A B))) * (([l]? (lft A)) | ([l]? (lft B))).
-(not (rght (andM A B))) * (([l]bang ([r]? (rght A))) * ([l]bang ([r]? (rght B)))).
+not (lft (andM A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (andM A B)) * ![l] ?[r] (rght A) * ![l] ?[r] (rght B).
 
 rules axiom.
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
 rules structural.
-(not (lft A)) * (([l]? (lft A)) | ([l]? (lft A)) ). 
+not (lft A) * ?[l] (lft A) | ?[l] (lft A). 

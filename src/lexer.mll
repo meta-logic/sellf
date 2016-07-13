@@ -57,7 +57,7 @@ rule token = parse
 | "structural"          { STRUCTURAL }
 | "introduction"        { INTRODUCTION }
 | "gamma"               { GAMMA }
-| "infty"               { raise (ReservedKeyword "infty") }
+| "infty"               { INFTY }
 | subtype as s          { TSUB(s) }
 
 (* Reserved keywords for the top-level *)

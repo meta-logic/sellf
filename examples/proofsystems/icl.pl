@@ -3,22 +3,29 @@
 %
 % Giselle Reis - 2012
 
-subexp r lin.
+subexp l unb.
+subexp r unb.
+subexp c lin. % holds the control formula
 
-subexpctx r single suc.
+subexpctx l many ant.
+subexpctx r many suc.
+subexpctx c single suc.
+
+subexprel c < l.
+subexprel c < r.
 
 rules introduction.
 % Implication
-not (lft  (imp A B)) * ! ?[r] (rght A) *  ? (lft B).
-not (rght (imp A B)) * ! (? (lft A) | ?[r] (rght B)).
+not (lft  (imp A B)) * ![c] ?[c] (rght A) *  ?[l] (lft B).
+not (rght (imp A B)) * ![c] (?[l] (lft A) | ?[c] (rght B)).
 
 % Conjunction
-not (lft  (and A B)) * ? (lft A) | ? (lft  B).
-not (rght (and A B)) * ! ?[r] (rght A) * ! ?[r] (rght B).
+not (lft  (and A B)) * ?[l] (lft A) | ?[l] (lft  B).
+not (rght (and A B)) * ![c] ?[c] (rght A) * ![c] ?[c] (rght B).
 
 % Disjunction
-not (lft  (or A B)) * ? (lft  A) & ? (lft  B).
-not (rght (or A B)) * ! ?[r] (rght A) + ! ?[r] (rght B).
+not (lft  (or A B)) * ?[l] (lft  A) & ?[l] (lft  B).
+not (rght (or A B)) * ![c] ?[c] (rght A) + ![c] ?[c] (rght B).
 
 % True
 not (rght tt) * top.
@@ -35,5 +42,5 @@ not (lft A) * not (rght A).
 
 rules cut.
 % Cut
-? (lft A) * ! ?[r] (rght A).
-! ? (lft A) * ?[r] (rght A).
+?[l] (lft A) * ![c] ?[c] (rght A).
+![c] ?[l] (lft A) * ?[c] (rght A).

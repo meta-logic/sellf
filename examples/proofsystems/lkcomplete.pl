@@ -21,21 +21,21 @@ subexpctx r many suc.
 rules introduction.
 
 % Conjunction additive
-(not (lft (andNeg A B))) * (([l]? (lft A)) + ([l]? (lft B))).
-(not (rght (andNeg A B))) * (([r]? (rght A)) & ([r]? (rght B))).
+not (lft (andNeg A B)) * ?[l] (lft A) + ?[l] (lft B).
+not (rght (andNeg A B)) * ?[r] (rght A) & ?[r] (rght B).
 
 % Conjunction multiplicative
-(not (lft (andPos A B))) * (([l]? (lft A)) | ([l]? (lft B))).
-(not (rght (andPos A B))) * (([r]? (rght A)) * ([r]? (rght B))).
+not (lft (andPos A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (andPos A B)) * ?[r] (rght A) * ?[r] (rght B).
 
 % Disjunction additive
-(not (lft (orPos A B))) * (([l]? (lft A)) & ([l]? (lft B))).
-(not (rght (orPos A B))) * (([r]? (rght A)) + ([r]? (rght B))).
+not (lft (orPos A B)) * ?[l] (lft A) & ?[l] (lft B).
+not (rght (orPos A B)) * ?[r] (rght A) + ?[r] (rght B).
 
 % Disjunction multiplicative
-(not (lft (orNeg A B))) * (([l]? (lft A)) * ([l]? (lft B))).
-(not (rght (orNeg A B))) * (([r]? (rght A)) | ([r]? (rght B))).
+not (lft (orNeg A B)) * ?[l] (lft A) * ?[l] (lft B).
+not (rght (orNeg A B)) * ?[r] (rght A) | ?[r] (rght B).
 
 rules axiom.
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
