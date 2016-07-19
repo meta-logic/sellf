@@ -121,7 +121,11 @@ module OlContext : OLCONTEXT = struct
                                  let correctSide = ((n = sub) && (Subexponentials.isSameSide n side)) in
                                  match (f, correctSide, i) with
                                  | (_, _, -1) -> acc
-                                 | ([], true, _) -> (toStringVariable n i maxIndex side nofm) ^ acc
+                                 | ([], true, _) -> (let str = (toStringVariable n i maxIndex side nofm) in
+                                                     match side with
+                                                     | "r" -> (if str = "C" && acc = "C" then acc 
+                                                               else str ^ acc)
+                                                     | "l" -> str ^ acc)
                                  | (f', true, _) -> (toStringVariable n i maxIndex side nofm) ^ 
 						    (toStringForms f' side n currentHeight mainRule) ^ acc
                                  | _ -> acc
