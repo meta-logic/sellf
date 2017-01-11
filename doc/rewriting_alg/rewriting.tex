@@ -13,8 +13,9 @@
   \caption{Rewriting algorithm}
   \begin{algorithmic}[1]
     % apply_model
-    \Function{apply\_model}{$tree, model$} % Please, change the font of apply_model
-    \State $\textit{rewrite\_ht} \gets \textit{new\ hashtable}$
+    \Function{apply\_model}{$tree, model$} % Change the font of \Function
+    \State $\textit{rewrite\_ht}$ is a new and empty hashtable
+    % Add hashtable's definition here
     \State $\textit{compute\_rewrite\_rules}\left(\textit{tree, model, rewrite\_ht}\right)$
     \State $\textit{new\_tree} \gets \textit{rewrite\_tree}\left(\textit{tree, rewrite\_ht}\right)$
     \State \Return $\textit{new\_tree}$
@@ -23,43 +24,55 @@
 
     % compute_rewrite_rules
     \Function{compute\_rewrite\_rules}{$tree, model, rewrite\_ht$}
-    \If {\textit{tree.sequent.is\_leaf}} \State $\textit{compute\_rewrite\_sequent}\left(\textit{tree.sequent, model, rewrite\_ht}\right)$
+    \If {\textit{is\_leaf tree.sequent}} \State $\textit{compute\_rewrite\_sequent}\left(\textit{tree.sequent, model, rewrite\_ht}\right)$
     \Else
-      \For{\text{each premise} \textit{p} \textbf{in} \textit{tree.premisses}}
+      \For{\text{each premise} \textit{p} \textbf{in} \textit{tree.premises}}
       \State $\textit{compute\_rewrite\_rules}\left(\textit{p, model, rewrite\_ht}\right)$
       \EndFor
       \State $\textit{compute\_rewrite\_sequent}\left(\textit{tree.sequent, model, rewrite\_ht}\right)$
     \EndIf
     \EndFunction
     \State
-    
-    % compute_rewrite_sequent
-    \Function{compute\_rewrite\_sequent}{$sequent, model, rewrite\_ht$}
-    \State $\text{Let } K \text{ be the set of keys in } \textit{rewrite\_ht}$
-    \For{\text{each} $\Gamma$ \textbf{in} \textit{sequent.contexts}}
-    \If{\textit{sequent.is\_leaf}}
-      \For{\text{each constraint} \textit{cstr} \text{where $\Gamma$ is found} \textbf{in} \textit{model}}
-        \If{\textit{cstr} $=$ $\text{EMP}\left(\Gamma\right)$}
-          \If{$\Gamma$ \text{was not rewritten yet}}
-            \State $rewrite\_ht.add \text{ } \Gamma \left([\cdot], [\cdot]\right)$
+
+    % unify_variables
+    \Function{unify\_variables}{$sub\_lst, sub\_lst^{'}, rewrite\_ht$}
+    \State Let $[\Gamma_1, \dotsc, \Gamma_n]$ be $sub\_lst$ and $[\Gamma_{1}^{'}, \dotsc, \Gamma_{m}^{'}]$ be $sub\_lst^{'}$
+    \State Generate the following lists with fresh context variables:
+    \State $new\_variables \gets [[\Gamma_{11}, \dotsc, \Gamma_{m1}], [\Gamma_{12}, \dotsc, \Gamma_{m2}], \dotsc, [\Gamma_{1n}, \dotsc, \Gamma_{mn}]]$
+    \State $new\_variables^{'} \gets [[\Gamma_{11}, \Gamma_{12}, \dotsc, \Gamma_{1n}], \dotsc, [\Gamma_{m1}, \Gamma_{m2}, \dotsc, \Gamma_{mn}]]$
+    \State $unify\_ht$ is a new and empty hashtable
+    \For{\text{each} $(\Gamma, \mathcal{L})$ \textbf{in} $(sub\_lst, new\_variables)$}
+      \State $unify\_ht.add$ $\Gamma$ $\mathcal{L}$
+    \EndFor
+    \For{\text{each} $(\Gamma, \mathcal{L})$ \textbf{in} $(sub\_lst^{'}, new\_variables^{'})$}
+      \State $unify\_ht.add$ $\Gamma$ $\mathcal{L}$
+    \EndFor
+    \For{\text{each} $\Gamma$ \textbf{in} $sub\_lst$}
+      \For{\text{each entry} $\Gamma_{}^{k}$ \textbf{in} $rewrite\_ht$}
+        \State $[\Gamma_{1}^{k}, \dotsc, \Gamma_{j}^{k}] \gets$ $rewrite\_ht.get$ $\Gamma_{}^{k}$
+        \For{\text{each } $\Gamma_{i}^{k}$ \textbf{in} $[\Gamma_{1}^{k}, \dotsc, \Gamma_{j}^{k}]$}
+          \If{$\Gamma_{i}^{key} = \Gamma$}
+            \State $new\_rwt \gets$ $unify\_ht.get$ $\Gamma$
+            \State Remove $\Gamma_{i}^{key}$ and add $new\_rwt$ to the list
+            \State $rewrite\_ht.add$ $\Gamma$ $(new\_rwt, [\cdot])$
           \EndIf
-        \EndIf
-        \If{\textit{cstr} $=$ $\text{IN}\left(F, \Gamma, n\right)$}
-          \If{$\Gamma$ \text{was not rewritten yet}}
-            \If{\textit{sequent.is\_closed\_leaf} \textbf{and} $\Gamma$ \text{is bounded}}
-              \State $rewrite\_ht.add \text{ } \Gamma \left([\cdot], [F_1, ..., F_n]\right)$
-            \Else
-              \State $rewrite\_ht.add \text{ } \Gamma \left([\Gamma_{k}], [F_1, ..., F_n]\right)$
-              \State $\text{where } \Gamma_{k} \text{ is a fresh context variable}$
-            \EndIf
-          \Else
-            \State $\text{Let } \left([\Gamma_{1}, ..., \Gamma_{i}], [t_{1}, ..., t_{n}]\right) \text{ be the rewriting of } \Gamma$
-            \If{$F$ \text{is different from every} $t$ \textbf{in} $[t_{1}, ..., t_{n}]$}
-              \State $rewrite\_ht.replace \text{ } \Gamma \left([\Gamma_{1}, ..., \Gamma{i}], [t_{1}, ..., t_{n}, F]\right)$ 
-            \EndIf
-          \EndIf
-        \EndIf
+        \EndFor
       \EndFor
+    \EndFor
+    \For{\text{each} $\Gamma$ \textbf{in} $sub\_lst^{'}$}
+      \For{\text{each entry} $\Gamma_{}^{k}$ \textbf{in} $rewrite\_ht$}
+        \State $[\Gamma_{1}^{k}, \dotsc, \Gamma_{j}^{k}] \gets$ $rewrite\_ht.get$ $\Gamma_{}^{k}$
+        \For{\text{each } $\Gamma_{i}^{k}$ \textbf{in} $[\Gamma_{1}^{k}, \dotsc, \Gamma_{j}^{k}]$}
+          \If{$\Gamma_{i}^{key} = \Gamma$}
+            \State $new\_rwt \gets$ $unify\_ht.find$ $\Gamma$
+            \State Remove $\Gamma_{i}^{key}$ and add $new\_rwt$ to the list
+            \State $rewrite\_ht.add$ $\Gamma$ $(new\_rwt, [\cdot])$
+          \EndIf
+        \EndFor
+      \EndFor
+    \EndFor
+    \EndFunction
+    \State
     \algstore{rewriting}
   \end{algorithmic}
 \end{algorithm}
@@ -68,50 +81,80 @@
   %% \ContinuedFloat
   \caption{Rewriting algorithm (continuation)}
     \begin{algorithmic}
-    \algrestore{rewriting}  
-    \Else
-      \For{\text{each constraint} \textit{cstr} \text{where $\Gamma$ is found} \textbf{in} \textit{model}}
+    \algrestore{rewriting}
+
+    % compute_rewrite_sequent
+    \Function{compute\_rewrite\_sequent}{$sequent, model, rewrite\_ht$}
+    \For{\text{each} $\Gamma$ \textbf{in} \textit{sequent.contexts}}
+    \If{\textit{sequent is a leaf}}
+      \For{\text{each constraint} \textit{cstr} \text{where $\Gamma$ appears} \textbf{in} \textit{model}} 
+      % There must be a way to phrase this better
         \If{\textit{cstr} $=$ $\text{EMP}\left(\Gamma\right)$}
           \If{$\Gamma$ \text{was not rewritten yet}}
             \State $rewrite\_ht.add \text{ } \Gamma \left([\cdot], [\cdot]\right)$
-          \ElsIf{$rewriting\left(\Gamma\right)$ \text{is different from} $\left([\cdot], [\cdot]\right)$}
-            \State $\text{Let } \left([\Gamma_{1}, ..., \Gamma{i}], [\cdot]\right) \text{ be the rewriting of } \Gamma$
-            \For{\text{each} $\Gamma_{k}$ \textbf{in} $[\Gamma_{1}, ..., \Gamma{i}]$}
-              \State $rewrite\_ht.replace \text{ } \Gamma{k} \left([\cdot], [\cdot]\right)$
+            %% \State $\Gamma \gets \left([\cdot], [\cdot]\right) \text{ on rewrite\_ht}$
+          \EndIf
+        \EndIf
+        \If{\textit{cstr} $=$ $\text{IN}\left(F, \Gamma, n\right)$}
+          \If{$\Gamma$ \text{was not rewritten yet}}
+            \If{\textit{sequent is a closed leaf} \textbf{and} $\Gamma$ \textit{is bounded}}
+              \State $rewrite\_ht.add \text{ } \Gamma \left([\cdot], [F_1, \dotsc, F_n]\right)$
+            \Else
+              \State $rewrite\_ht.add \text{ } \Gamma \left([\Gamma_{new}], [F_1, \dotsc, F_n]\right)$
+              \State $\text{where } \Gamma_{new} \text{ is a fresh context variable}$
+            \EndIf
+          \Else
+            \State $\left([\Gamma_{1}, \dotsc, \Gamma_{j}], [F_{1}{'}, \dotsc, F_{k}{'}]\right) \gets rewrite\_ht.get$ $\Gamma$
+            \If{$F$ \text{is different from every} $F_{i}{'}$ \textbf{in} $[F_{1}{'}, \dotsc, F_{k}{'}]$}
+              \State $rewrite\_ht.replace \text{ } \Gamma \left([\Gamma_{1}, \dotsc, \Gamma{j}], [F_{1}{'}, \dotsc, F_{k}{'}, F_{1}, \dotsc, F_{n}]\right)$
+            \EndIf
+          \EndIf
+        \EndIf
+      \EndFor
+    \Else
+      \For{\text{each constraint} \textit{cstr} \text{where $\Gamma$ appears} \textbf{in} \textit{model}}
+        \If{\textit{cstr} $=$ $\text{EMP}\left(\Gamma\right)$}
+          \If{$\Gamma$ \text{was not rewritten yet}}
+            \State $rewrite\_ht.add \text{ } \Gamma \left([\cdot], [\cdot]\right)$
+          \Else 
+            \State $\left([\Gamma_{1}, \dotsc, \Gamma_{j}], [\cdot]\right) \gets rewrite\_ht.get \Gamma$
+            \For{\text{each} $\Gamma_{i}$ \textbf{in} $[\Gamma_{1}, \dotsc, \Gamma_{j}]$}
+              \State $rewrite\_ht.replace \text{ } \Gamma_{i} \left([\cdot], [\cdot]\right)$
             \EndFor
           \EndIf  
         \EndIf
+    \algstore{rewriting2}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  %% \ContinuedFloat
+  \caption{Rewriting algorithm (continuation)}
+    \begin{algorithmic}
+    \algrestore{rewriting2}
         \If{\textit{cstr} $=$ $\text{UNION}\left(\Gamma_{1}, \Gamma_{2},\Gamma\right)$}
           \If{$\Gamma$ \text{was not rewritten yet}}
-            \If{$\Gamma_{1}$ \text{is not a key} \textbf{in} $K$}
-              \State $rewriting\left(\Gamma_{1}\right) \gets \left([\Gamma_{1}], [\cdot]\right)$
+            \If{$\Gamma_{1}$ \text{was not rewritten yet}}
+              \State $rwt_1 \gets \left([\Gamma_{1}], [\cdot]\right)$
+            \Else
+              \State $rwt_1 \gets rewrite\_ht.get \text{ } \Gamma_{1}$
             \EndIf
-            \If{$\Gamma_{2}$ \text{is not a key} \textbf{in} $K$}
-              \State $rewriting\left(\Gamma_{2}\right) \gets \left([\Gamma_{2}], [\cdot]\right)$
-            \EndIf  
-            \State $rewrite\_ht.add \text{ } \Gamma \left(rewriting\left(\Gamma_{1}\right) + rewriting\left(\Gamma_{2}\right)\right)$
+            \If{$\Gamma_{2}$ \text{was not rewritten yet}}
+              \State $rwt_2 \gets \left([\Gamma_{2}], [\cdot]\right)$
+            \Else
+              \State $rwt_2 \gets rewrite\_ht.get \text{ } \Gamma_{2}$
+            \EndIf
+            \State $rewrite\_ht.add \text{ } \Gamma \left(rwt_1 + rwt_2\right)$
           \EndIf
         \EndIf
         \If{\textit{cstr} $=$ $\text{SETMINUS}\left(\Gamma_{0}, F,\Gamma\right)$}
+          \State $\left(sub\_lst, formulas\right) \gets rewrite\_ht.get \text{ } \Gamma$
+          \State $\left(sub\_lst_0, formulas_0\right) \gets rewrite\_ht.get \text{ } \Gamma_{0}$ 
           \If{$\Gamma$ \text{was not rewritten yet}}
-            \State $rewrite\_ht.add \text{ } \Gamma \left(rewriting\left(\Gamma_{0}\right) - F\right)$
+            \State $rewrite\_ht.add \text{ } \Gamma \left(sub\_lst_0, formulas_0 - F\right)$
           \Else
-           \State $\text{This is the case where } rewriting\left(\Gamma\right) \text{ and } rewriting\left(\Gamma_{0}\right)$
-            \State $\text{must have exactly one context variable each, so}$
-            \State $\text{let } \left([\Gamma_{1}], [t_{1}, ..., t_{i}]\right) \text{ be the rewriting of } \Gamma$
-            \State $\text{and } \left([\Gamma_{1'}], [t_{1'}, ..., t_{j'}]\right) \text{ be the rewriting of } \Gamma_{0}$
-            \If{$[t_{1'}, ..., t_{j'}] = \left([t_{1}, ..., t_{i}] - F\right)$}
-              \If{$\Gamma_{1} > \Gamma_{1'}$}
-                \For{\text{each} $\Gamma_{k}$ \textbf{in} $K$}
-                  \State $\text{Replace every occurrence of } \Gamma_{1'}$
-                  \State $\text{with } \Gamma_{1} \text{ in } \textit{rewriting}\left(\Gamma_{k}\right)$
-                \EndFor
-              \Else
-                \For{\text{each} $\Gamma_{k}$ \textbf{in} $K$}
-                  \State $\text{Replace every occurrence of } \Gamma_{1}$
-                  \State $\text{with } \Gamma_{1'} \text{ in } \textit{rewriting}\left(\Gamma_{k}\right)$
-                \EndFor
-              \EndIf
+            \If{$sub\_lst \neq sub\_lst_0$ \textbf{and} $formulas = formulas_0 - F$}
+              \State $unify\_variables\left(sub\_lst_0, sub\_lst, rewrite\_ht\right)$
             \EndIf
           \EndIf
         \EndIf  
