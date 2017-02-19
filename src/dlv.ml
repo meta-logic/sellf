@@ -125,28 +125,24 @@ in_context_tree2(F, SE, TP, S) :- in_sequent_tree2(F, SE, TP, S, M).
 
 % Condition 1: SE is linear and the contexts are the same in both sequents
 condition1(S2,S1,SE) :- ctx(_,SE,lin,S1,tree1), ctx(_,SE,lin,S2,tree2),
-  #count{ F : in_sequent_tree1(F,SE,lin,S1,N), in_sequent_tree2(F,SE,lin,S2,N) } = X,
-  #count{ G : in_sequent_tree1(G,SE,lin,S1,_) } = X,
-  #count{ H : in_sequent_tree2(H,SE,lin,S2,_) } = X.
+  #count{ F : in_sequent_tree1(F,SE,lin,S1,N), in_sequent_tree2(F,SE,lin,S2,M), M != N } = 0,
+  #count{ G : in_context_tree1(G,SE,lin,S1), not in_context_tree2(G,SE,lin,S2) } = 0,
+  #count{ H : in_context_tree2(H,SE,lin,S2), not in_context_tree1(H,SE,lin,S1) } = 0.
 
 % Condition 2: SE is unbounded and the context in S1 is a subset of the one in
 % S2 (i.e., formulas can be weakened to get S2)
 condition2(S2,S1,SE) :- ctx(_,SE,unb,S1,tree1), ctx(_,SE,unb,S2,tree2),
-  #count{ F : in_sequent_tree1(F,SE,unb,S1,N), in_sequent_tree2(F,SE,unb,S2,M), N <= M } = X,
-  #count{ G : in_context_tree2(G,SE,unb,S2), not in_context_tree1(G,SE,unb,S1) } = Y,
-  Z = X + Y,
-  #count{ H : in_sequent_tree2(H,SE,unb,S2,_) } = Z,
+  #count{ F : in_sequent_tree1(F,SE,unb,S1,N), in_sequent_tree2(F,SE,unb,S2,M), N > M } = 0,
   #count{ I : in_context_tree1(I,SE,unb,S1), not in_context_tree2(I,SE,unb,S2) } = 0.
 
 
 % Condition 3: all formulas occurring in S1 but not in S2, are in S2 but in a
 % greater unbounded subexponential
 condition3(S2,S1,SE) :- ctx(_,SE,TP,S1,tree1), ctx(_,SE,TP,S2,tree2),
-  #count{ F : in_context_tree1(F,SE,TP,S1), not in_context_tree2(F,SE,TP,S2), in_unbctx_geq_tree2(F,SE) } = X,
+  #count{ F : in_context_tree1(F,SE,TP,S1), not in_context_tree2(F,SE,TP,S2), in_unbctx_geq(F,SE,S2) } = X,
   #count{ G : in_context_tree1(G,SE,TP,S1), not in_context_tree2(G,SE,TP,S2) } = X.
 
-in_unbctx_geq_tree2(F,SE) :- geq(SE2,SE), in_sequent_tree2(F,SE2,unb,N,S2),
-                             N > 0.
+in_unbctx_geq(F,SE,S) :- geq(SE2,SE), in_context_tree2(F,SE2,unb,S).
 
 % If not all the leaves of the second tree are provable, 
 % no models are generated
