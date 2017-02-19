@@ -104,50 +104,52 @@ in_final(F, C, Count) :- in_unique(F, _, C), Count = #count{ I : in_unique(F, I,
 %%%%%%%%%%%%%%%  Clauses to certify: proof of S1 => proof of S2 %%%%%%%%%%%%%%%%
 "
 
-  let proveIf_clauses = "
+let proveIf_clauses = "
 proveIf(S2, S1) :- 
   not not_proveIf(S2, S1), 
   ctx(_, _, _, S2, tree2), 
   ctx(_, _, _, S1, tree1).
 
+not_proveIf(S2,S1) :- ctx(_,SE,_,_,_), 
+                      ctx(_,_,_,S1,tree1),
+                      ctx(_,_,_,S2,tree2),
+                      not condition1(S2,S1,SE),
+                      not condition2(S2,S1,SE), 
+                      not condition3(S2,S1,SE).
+
 in_sequent_tree1(F, SE, TP, S, M) :- in(F, C, M), M > 0, ctx(C, SE, TP, S, tree1).
 in_sequent_tree2(F, SE, TP, S, M) :- in(F, C, M), M > 0, ctx(C, SE, TP, S, tree2).
-in_sequent_tree2_simple(F, S2) :- in(F, C, M), M > 0, ctx(C, SE, TP, S2, tree2).
 
-% S2 must be provable from a proof of S1.
-% Here we specify the cases where this does not happen.
+in_context_tree1(F, SE, TP, S) :- in_sequent_tree1(F, SE, TP, S, M).
+in_context_tree2(F, SE, TP, S) :- in_sequent_tree2(F, SE, TP, S, M).
 
-% For unbounded and bounded subexponentials:
-% 1. S1 has a formula that is not in S2 at all or
-% 2. S1 has a formula that is in S2 but in a lower subexponential
-%    (remember that formulas can always be downgraded, but never upgraded).
+% Condition 1: SE is linear and the contexts are the same in both sequents
+condition1(S2,S1,SE) :- ctx(_,SE,lin,S1,tree1), ctx(_,SE,lin,S2,tree2),
+  #count{ F : in_sequent_tree1(F,SE,lin,S1,N), in_sequent_tree2(F,SE,lin,S2,N) } = X,
+  #count{ G : in_sequent_tree1(G,SE,lin,S1,_) } = X,
+  #count{ H : in_sequent_tree2(H,SE,lin,S2,_) } = X.
 
-% Additionally, for bound subexponentials:
-% 3. S1 has a formula F n times and S2 has the same formula m times and n != m 
-%    (considering that the occurrences must be in the same subexponential)
+% Condition 2: SE is unbounded and the context in S1 is a subset of the one in
+% S2 (i.e., formulas can be weakened to get S2)
+condition2(S2,S1,SE) :- ctx(_,SE,unb,S1,tree1), ctx(_,SE,unb,S2,tree2),
+  #count{ F : in_sequent_tree1(F,SE,unb,S1,N), in_sequent_tree2(F,SE,unb,S2,M), N <= M } = X,
+  #count{ G : in_context_tree2(G,SE,unb,S2), not in_context_tree1(G,SE,unb,S1) } = Y,
+  Z = X + Y,
+  #count{ H : in_sequent_tree2(H,SE,unb,S2,_) } = Z,
+  #count{ I : in_context_tree1(I,SE,unb,S1), not in_context_tree2(I,SE,unb,S2) } = 0.
 
-% 1. S1 has a formula that is not in S2
-not_proveIf(S2, S1) :- 
-  in_sequent_tree1(F, _, _, S1, _),
-  % This might seem redundant but is necessary to make the rule safe.
-  not in_sequent_tree2_simple(F, S2), ctx(C, _, _, S2, tree2).
-  % Represets the unsafe literal:
-  % not in_sequent_tree2(F, _, _, S2, _).
-  
-% 2. S1 has a formula that is in S2 but in a lower subexponential
-not_proveIf(S2, S1) :- 
-  in_sequent_tree1(F, SE1, _, S1, _),
-  in_sequent_tree2(F, SE2, _, S2, _),
-  not geq(SE2, SE1).
 
-% 3. S1 and S2 both have a formula in a linear subexponential 
-%    but with different multiplicity
-not_proveIf(S2, S1) :- 
-  in_sequent_tree1(F, SE, lin, S1, M),
-  in_sequent_tree2(F, SE, lin, S2, N),
-  M != N.
+% Condition 3: all formulas occurring in S1 but not in S2, are in S2 but in a
+% greater unbounded subexponential
+condition3(S2,S1,SE) :- ctx(_,SE,TP,S1,tree1), ctx(_,SE,TP,S2,tree2),
+  #count{ F : in_context_tree1(F,SE,TP,S1), not in_context_tree2(F,SE,TP,S2), in_unbctx_geq_tree2(F,SE) } = X,
+  #count{ G : in_context_tree1(G,SE,TP,S1), not in_context_tree2(G,SE,TP,S2) } = X.
 
-% If not all the leaves of the second tree are provable, no models are generated
+in_unbctx_geq_tree2(F,SE) :- geq(SE2,SE), in_sequent_tree2(F,SE2,unb,N,S2),
+                             N > 0.
+
+% If not all the leaves of the second tree are provable, 
+% no models are generated
 :- not ok.
 "
 
