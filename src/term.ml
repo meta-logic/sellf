@@ -8,7 +8,7 @@ let tabling = ref false ;;
 (* Timer on/off *)
 let time = ref false ;;
 (* Bound for the proof search *)
-let psBound = ref 10 ;;
+let psBound = ref 1000 ;;
 
 (* Each logical variable is identified by this number. 
  * A new logical variable should increment one in this identifier. *)
