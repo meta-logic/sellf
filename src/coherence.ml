@@ -36,7 +36,7 @@ let checkInitCoher system_name connective_name (spec_left, spec_right) =
   print_endline (termToString spec_left_infty);
   print_endline (termToString spec_right_infty); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(spec_left_infty, spec_right_infty)) in
+  let f0 = deBruijn (PARR(spec_left_infty, spec_right_infty)) in
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
   prove f 4 (fun () ->
@@ -59,7 +59,7 @@ let checkDuality system_name connective_name (spec_left, spec_right) =
   print_endline (termToString spec_left_normalized);
   print_endline (termToString spec_right_normalized); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
-  let f0 = deBruijn true (PARR(spec_left_normalized, spec_right_normalized)) in 
+  let f0 = deBruijn (PARR(spec_left_normalized, spec_right_normalized)) in 
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
   prove f 4 (fun () ->

@@ -264,9 +264,8 @@ specification:
   | RULES STRUCTURAL DOT   { rules := STRUCT; None }
   
   | formula DOT {
-    let clause_typecheck = deBruijn false $1 in
-    let _ = typeCheck clause_typecheck in
-    let clause = deBruijn true $1 in
+    let _ = typeCheck $1 in
+    let clause = deBruijn $1 in
   
     begin match !rules with
       | AXIOM ->
@@ -315,14 +314,14 @@ constraintPred:
   | MAXIDX LPAREN QUOTE formula QUOTE COMMA INT COMMA contextVar RPAREN    { [] }
   | NOTMAXIDX LPAREN QUOTE formula QUOTE COMMA INT COMMA contextVar RPAREN { [] }
   | INFINAL LPAREN QUOTE formula QUOTE COMMA contextVar COMMA INT RPAREN {
-    let f = deBruijn true $4 in
+    let f = deBruijn $4 in
     [Constraints.IN(f, $7, $9)]
   }
   | EMP LPAREN contextVar RPAREN { 
     [Constraints.EMP($3)]
   }
   | SETMINUS LPAREN contextVar COMMA QUOTE formula QUOTE COMMA contextVar RPAREN { 
-    let f = deBruijn true $6 in
+    let f = deBruijn $6 in
     [Constraints.SETMINUS($3, f, $9)]
   }
   | UNION LPAREN contextVar COMMA contextVar COMMA contextVar RPAREN { 
@@ -341,9 +340,8 @@ contextVar:
 
 goal:
   | formula DOT {
-    let clause_typecheck = deBruijn false $1 in
-    let _ = typeCheck clause_typecheck in
-    let clause = deBruijn true $1 in
+    let _ = typeCheck $1 in
+    let clause = deBruijn $1 in
     
     Term.goal := clause;
     if !Term.verbose then begin

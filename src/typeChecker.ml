@@ -3,14 +3,8 @@ open Types
 open Prints
 open Term
 
-(** Auxiliary method for introducing deBruijn indices to a parsed clause.
+(** Auxiliary method for introducing deBruijn indices to a formula.
     Called by {!TypeChekcer.deBruijn}.
-    It works in one of two modes: if @flag is true, all free variables are bound
-    and replaced by deBruijn indices; if @flag is false, no deBruijn indices are
-    introuced and free variables remain free. You should use flag=true if you
-    want a term that normalizes, and flag=false if you want to typecheck the
-    term.
-    @param flag [boolean] ([true] for introducing deBruijn indices, [false] otherwise)
     @param fVarC function from a [string] (variable name) to a triple [(id, nAbs,
     tAbs)], where [id] is used for hashing, [nAbs] is the deBruijn index and
     [tAbs] is [1] for bound terms and [0] otherwise.
@@ -18,69 +12,66 @@ open Term
     @param form the input formula
 *)
 (* TODO: find out why id changes when VAR remains VAR *)
-let rec deBruijn_aux flag fVarC nABS form = match form with
+let rec deBruijn_aux fVarC nABS form = match form with
   | VAR v -> begin 
     match (fVarC v.str) with
       | (id, _, 0) -> (* Free variable: keep it as is *)
         let (idNew, _, _ ) = fVarC v.str in
         let v2 = {str = v.str; id = idNew; tag = v.tag; ts = v.ts; lts = v.lts} in VAR v2
-      | (id, nABS1, 1) -> (* Bound variable: add deBruijn index if flag=true *) 
-        if flag then DB(id + nABS1) 
-        else let (idNew, _, _ ) = fVarC v.str in
-        let v2 = {str = v.str; id = idNew; tag = v.tag; ts = v.ts; lts = v.lts} in VAR v2
+      | (id, nABS1, 1) -> DB(id + nABS1) (* Bound variable: add deBruijn index if flag=true *) 
       | _ -> failwith "Impossible case reached in the De Bruijn Auxiliary."
     end
   | APP (term1, term2) -> 
-     APP (deBruijn_aux flag fVarC nABS term1, List.map (deBruijn_aux flag fVarC nABS) term2)
-  | ABS (str, i, body1) -> 
+     APP (deBruijn_aux fVarC nABS term1, List.map (deBruijn_aux fVarC nABS) term2)
+  | ABS (str, i, body) -> 
      let fVarCNew x = 
      begin match x with
        | x when x = str ->  (1, 0, 1)
        | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
      end
-     in ABS (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) body1)
-  | PLUS (f1, f2) -> PLUS (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | MINUS (f1, f2) -> MINUS (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | TIMES (f1, f2) -> TIMES (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2) 
-  | DIV (f1, f2) -> DIV (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | TENSOR (f1, f2) -> TENSOR (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | ADDOR (f1, f2) -> ADDOR (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | LOLLI (sub, f1, f2) -> LOLLI (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | BANG (sub, f1) -> BANG (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS f1) 
-  | QST (sub, f1) -> QST (deBruijn_aux flag fVarC nABS sub, deBruijn_aux flag fVarC nABS f1) 
-  | WITH (f1, f2) -> WITH (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | PARR (f1, f2) -> PARR (deBruijn_aux flag fVarC nABS f1, deBruijn_aux flag fVarC nABS f2)
-  | BRACKET (f1) -> BRACKET (deBruijn_aux flag fVarC nABS f1)
+     in ABS (str, 1, deBruijn_aux fVarCNew (nABS + 1) body)
+  | PLUS (f1, f2) -> PLUS (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | MINUS (f1, f2) -> MINUS (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | TIMES (f1, f2) -> TIMES (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2) 
+  | DIV (f1, f2) -> DIV (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | TENSOR (f1, f2) -> TENSOR (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | ADDOR (f1, f2) -> ADDOR (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | LOLLI (sub, f1, f2) -> LOLLI (deBruijn_aux fVarC nABS sub, deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | BANG (sub, f1) -> BANG (deBruijn_aux fVarC nABS sub, deBruijn_aux fVarC nABS f1) 
+  | QST (sub, f1) -> QST (deBruijn_aux fVarC nABS sub, deBruijn_aux fVarC nABS f1) 
+  | WITH (f1, f2) -> WITH (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | PARR (f1, f2) -> PARR (deBruijn_aux fVarC nABS f1, deBruijn_aux fVarC nABS f2)
+  | BRACKET (f1) -> BRACKET (deBruijn_aux fVarC nABS f1)
   | FORALL (str, _, f1) -> 
      let fVarCNew x = 
      begin match x with
        | x when x = str -> (1, 0, 1)
        | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
      end
-     in FORALL (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) f1)
+     in FORALL (str, 1, deBruijn_aux fVarCNew (nABS + 1) f1)
   | EXISTS (str, _, f1) -> 
      let fVarCNew x = 
      begin match x with
        | x when x = str -> (1, 0, 1)
        | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
      end
-     in EXISTS (str, 1, deBruijn_aux flag fVarCNew (nABS + 1) f1)
+     in EXISTS (str, 1, deBruijn_aux fVarCNew (nABS + 1) f1)
   | NEW (str, f1) -> 
      let fVarCNew x = 
      begin match x with
        | x when x = str -> (1, 0, 1)
        | x -> let (id, nABS_rest, tABS) = fVarC x in (id, nABS_rest + 1, tABS)
      end
-     in NEW (str, deBruijn_aux flag fVarCNew (nABS + 1) f1)
-  | PRED (srt, terms, p) ->  PRED (srt, deBruijn_aux flag fVarC nABS terms, p)
-  | NOT (f) -> NOT(deBruijn_aux flag fVarC nABS f)
+     in NEW (str, deBruijn_aux fVarCNew (nABS + 1) f1)
+  | PRED (srt, terms, p) ->  PRED (srt, deBruijn_aux fVarC nABS terms, p)
+  | NOT (f) -> NOT(deBruijn_aux fVarC nABS f)
   | EQU (str, _, terms) -> 
      let (id, nABS, tABS) =  fVarC str in 
-     EQU (str, id, deBruijn_aux flag fVarC nABS terms)
-  | CLS(tp, t1, t2) -> CLS(tp, deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | COMP(comp, t1, t2) -> COMP(comp, deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | ASGN(t1, t2) -> ASGN(deBruijn_aux flag fVarC nABS t1, deBruijn_aux flag fVarC nABS t2)
-  | PRINT(t1) -> PRINT(deBruijn_aux flag fVarC nABS t1)
+     EQU (str, id, deBruijn_aux fVarC nABS terms)
+  | CLS(tp, t1, t2) -> CLS(tp, deBruijn_aux fVarC nABS t1, deBruijn_aux fVarC nABS t2)
+  | COMP(comp, t1, t2) -> COMP(comp, deBruijn_aux fVarC nABS t1, deBruijn_aux fVarC nABS t2)
+  | ASGN(t1, t2) -> ASGN(deBruijn_aux fVarC nABS t1, deBruijn_aux fVarC nABS t2)
+  | PRINT(t1) -> PRINT(deBruijn_aux fVarC nABS t1)
   | TOP | ONE | BOT | ZERO | STRING(_) | CONST(_) -> form
   | DB(_) -> failwith "[ERROR] deBruijn index found while inserting deBruijn indices (typeChecker.ml)."
   | _ -> failwith ("[ERROR] Unexpected term while inserting deBruijn indices (typeChecker.ml): " ^ (termToString form))
@@ -126,17 +117,11 @@ let rec collect_free_variables clause =
   in 
   collect_free_variables_aux [] [] clause
 
-(** This method introduces deBruijn indices to a parsed clause.
-    It works in one of two modes: if @flag is [true], all free variables are bound
-    and replaced by deBruijn indices; if @flag is [false], no deBruijn indices are
-    introuced and free variables remain free. You should use [flag=true] if you
-    want a term that normalizes, and [flag=false] if you want to typecheck the
-    term.
-    @param flag [boolean]
+(** This method introduces deBruijn indices to a formula.
+    All free variables are bound by an abstraction and are replaced by DB indices.
     @param form the input formula
 *)
-(* TODO: find out why the false flag exists... *)
-let deBruijn flag form =
+let deBruijn form =
   let rec add_abstractions freeVar form = 
    begin 
     match freeVar with
@@ -145,9 +130,7 @@ let deBruijn flag form =
   end in
   let freeVar = collect_free_variables form in
   let form_abs = add_abstractions freeVar form in
-  match flag with
-    | true -> deBruijn_aux flag (fun (x: string) -> (0,0,0)) 0 form_abs
-    | false -> deBruijn_aux flag (fun (x: string) -> (0,0,0)) 0 form
+  deBruijn_aux (fun (x: string) -> (0,0,0)) 0 form_abs
 
 (*VN: Still have to check for occurchecks.*)
 
