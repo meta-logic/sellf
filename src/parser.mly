@@ -341,8 +341,7 @@ contextVar:
 
 goal:
   | formula DOT {
-    let raw_clause = (CLS (DEF,TOP, $1)) in 
-    let clause_typecheck = deBruijn false raw_clause in
+    let clause_typecheck = deBruijn false $1 in
     let _ = typeCheck clause_typecheck in
     let clause = deBruijn true $1 in
     
