@@ -69,7 +69,7 @@
 #
 # The Caml sources (including camlyacc and camllex source files)
 
-SOURCES = clique.ml clique.mli types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser.mly lexer.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml sellf.ml 
+SOURCES = types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser.mly lexer.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml sellf.ml 
 
 # The executable file to generate
 EXEC = sellf
@@ -89,8 +89,8 @@ CAMLOPT = ocamlopt -I +ocamlgraph
 CAMLDEP = ocamldep
 CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
-CAMLDOC = ocamldoc -latex
-CAMLDOT = ocamldoc -dot
+CAMLDOC = ocamldoc -latex -I +ocamlgraph
+CAMLDOT = ocamldoc -dot -I +ocalmgraph
 
 # The list of Caml libraries needed by the program
 # For instance:
