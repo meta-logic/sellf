@@ -358,12 +358,12 @@ let rec typeCheck formula =
       | PRED(_, x, _) -> 
           let (_, s, e, _) = tCheckAux x (TCONST (TPRED)) subInit env 0
           in let e2 = grEnvImgTerms s e x
-          in (s, e2) 
-      | TOP -> (subInit, env)
-      | BOT -> (subInit, env)
-      | ONE -> (subInit, env)
-      | ZERO -> (subInit, env)
-      | CUT -> (subInit, env)
+          in e2
+      | TOP -> env
+      | BOT -> env
+      | ONE -> env
+      | ZERO -> env
+      | CUT -> env
       | EQU (x, i, y) -> 
           let newType = TVAR (varName "typeVar" 0) in
           let (typeY, subY, envY, varC) = tCheckAux y newType subInit env 1
@@ -375,23 +375,23 @@ let rec typeCheck formula =
                   | (x1,i1) when (x1,i1) = (x,i) -> Some (typeY)
                   | (x1,i1) -> envY (x1,i1)
                 end
-              in (subY, env2)
-            | Some (typeY1) when typeY1 = typeY -> (subY,envY)
+              in env2
+            | Some (typeY1) when typeY1 = typeY -> envY
             | Some (_) -> failwith "Error: Type variable mismatched"
           end
       | COMP (_, int1, int2) -> 
           let (_,_,env1,_) = tCheckAux int1 (TCONST (TINT)) subInit env 0
           in let (_,_,env2,_) = (tCheckAux int2 (TCONST (TINT)) subInit env1 0)
-          in (subInit, env2)
+          in env2
       | ASGN (int1, int2) -> 
           let (_,_,env1,_) = tCheckAux int1 (TCONST (TINT)) subInit env 0
           in let (_,_,env2,_) = (tCheckAux int2 (TCONST (TINT)) subInit env1 0)
-          in (subInit, env2)
+          in env2
       (* We do not typecheck the terms in prints. *)
-      | PRINT _ ->  (subInit, env)
+      | PRINT _ -> env
       | LOLLI (subexp, f1, f2) ->
           let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
-          let (_,env2) = tCheckBody f1 env1 in
+          let env2 = tCheckBody f1 env1 in
           tCheckBody f2 env2
       | QST (subexp, f) -> 
               let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
@@ -399,13 +399,13 @@ let rec typeCheck formula =
       | BANG (subexp, f) -> 
               let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
               tCheckBody f env1
-      | TENSOR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+      | TENSOR (f1, f2) -> let env2 = tCheckBody f1 env in
               tCheckBody f2 env2
-      | PARR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+      | PARR (f1, f2) -> let env2 = tCheckBody f1 env in
               tCheckBody f2 env2
-      | ADDOR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+      | ADDOR (f1, f2) -> let env2 = tCheckBody f1 env in
               tCheckBody f2 env2
-      | WITH (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+      | WITH (f1, f2) -> let env2 = tCheckBody f1 env in
           tCheckBody f2 env2
       | FORALL (_, _, f) -> tCheckBody f env
       | EXISTS (_, _, f) -> tCheckBody f env
