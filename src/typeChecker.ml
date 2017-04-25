@@ -1,10 +1,11 @@
+(** Type checker and deBruijn indices *)
 
 open Types
 open Prints
 open Term
 
 (** Auxiliary method for introducing deBruijn indices to a formula.
-    Called by {!TypeChekcer.deBruijn}.
+    Called by {!TypeChecker.deBruijn}.
     @param fVarC function from a [string] (variable name) to a triple [(id, nAbs,
     tAbs)], where [id] is used for hashing, [nAbs] is the deBruijn index and
     [tAbs] is [1] for bound terms and [0] otherwise.
@@ -119,7 +120,8 @@ let rec collect_free_variables clause =
 
 (** This method introduces deBruijn indices to a formula.
     All free variables are bound by an abstraction and are replaced by DB indices.
-    @param form the input formula
+    @param form The input formula
+    @return The formula with bound variables replaced by deBruijn indices
 *)
 let deBruijn form =
   let rec add_abstractions freeVar form = 
@@ -184,7 +186,7 @@ let rec tCheckAux term typ sub env varC =
         | (x1,i1) -> env (x1,i1)) 
       in (subInit, env2)
       | Some (TCONST(TINT)) -> (subInit, env)
-      | Some (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
+      | Some (_) -> failwith ("[ERROR] Variable  "^v.str^" does not have type INT in a comparison."))
     | PLUS (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
       let (_,env2) = tCheckInt int2 env1 in (subInit, env2)

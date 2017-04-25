@@ -9,7 +9,7 @@
 
 (** Type constructors *)
 type types =
-| TCONST of basicTypes (** Tonstant (declared) types *)
+| TCONST of basicTypes (** Constant (declared) types *)
 | TVAR of string       (** Type variables *)
 | ARR of types * types (** Function type *)
 (**Built-in type constructors for constant types *)
@@ -53,7 +53,7 @@ type terms =
 | EXISTS of string * int * terms
 | CLS of clType * terms * terms
 | VAR of var
-| DB of int        (*This seems necessary for head normalization procedure.*)
+| DB of int        (* deBruijn indices (for normalization) *)
 | INT of int
 | CONST of string
 | STRING of string
