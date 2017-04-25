@@ -2,6 +2,6 @@
 
 type lolli form -> form -> form.
 type tensor  form -> form -> form.
-type lbang form -> form -> form \bigtriangledown.
+type lbang form -> form \bigtriangledown.
 type lone form.
 
