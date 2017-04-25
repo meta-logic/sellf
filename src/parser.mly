@@ -156,17 +156,17 @@ type_spec:
       | false -> print_string ("[ERROR] Kind not declared: "^$1);
         print_newline(); flush stdout; 
         assert false
-      | true -> if $1 = "o" then TBASIC (TPRED)
-        else TBASIC (TKIND ($1)) 
+      | true -> if $1 = "o" then TCONST (TPRED)
+        else TCONST (TKIND ($1)) 
   }
-  | TINT                           { TBASIC (TINT) }
-  | TSTRING                        { TBASIC (TSTRING) }
-  | TSUBEX                         { TBASIC (TSUBEX) }
+  | TINT                           { TCONST (TINT) }
+  | TSTRING                        { TCONST (TSTRING) }
+  | TSUBEX                         { TCONST (TSUBEX) }
   | type_spec TARR type_spec       { ARR ($1, $3) }
   | LPAREN type_spec RPAREN        { $2 }
   /* Lists of integers and strings */
-  | LPAREN TLIST TINT RPAREN       { TBASIC (TLIST (TINT)) }
-  | LPAREN TLIST TSTRING RPAREN    { TBASIC (TLIST (TSTRING)) }
+  | LPAREN TLIST TINT RPAREN       { TCONST (TLIST (TINT)) }
+  | LPAREN TLIST TSTRING RPAREN    { TCONST (TLIST (TSTRING)) }
 ;
 
 /************************ pl files **************************/

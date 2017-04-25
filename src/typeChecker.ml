@@ -140,14 +140,14 @@ Here we assume that type variables are defined as a kind.*)
 let rec unifyTypes gTyp vTyp sub = match (gTyp, vTyp) with 
   | (ARR (x1, y1), ARR (x2, y2)) -> 
     let sub2 = unifyTypes x1 x2 sub in (unifyTypes y1 y2 sub2)
-  | (TBASIC (TINT), TBASIC (TINT)) -> sub
-  | (TBASIC (TSUBEX), TBASIC (TSUBEX)) -> sub
-  | (TBASIC (TSTRING), TBASIC (TSTRING)) -> sub
-  | (TBASIC (TPRED), TBASIC (TPRED)) -> sub
-  | (x, TBASIC (TKIND (y))) -> begin
-    match sub (TBASIC (TKIND (y))) with
+  | (TCONST (TINT), TCONST (TINT)) -> sub
+  | (TCONST (TSUBEX), TCONST (TSUBEX)) -> sub
+  | (TCONST (TSTRING), TCONST (TSTRING)) -> sub
+  | (TCONST (TPRED), TCONST (TPRED)) -> sub
+  | (x, TCONST (TKIND (y))) -> begin
+    match sub (TCONST (TKIND (y))) with
       | None ->  let sub2 z = (match z with
-        | TBASIC (TKIND (d)) when d = y ->  Some (x)
+        | TCONST (TKIND (d)) when d = y ->  Some (x)
         | d -> sub d)
         in sub2
       | Some (x1) when x1 = x -> sub
@@ -180,10 +180,10 @@ let rec tCheckAux term typ sub env varC =
     | INT (x) -> (subInit, env)
     | VAR v -> (match env (v.str,v.id) with 
       | None -> let env2 z = (match z with
-        | (x1,i1) when (x1,i1) = (v.str,v.id) -> Some (TBASIC(TINT))
+        | (x1,i1) when (x1,i1) = (v.str,v.id) -> Some (TCONST(TINT))
         | (x1,i1) -> env (x1,i1)) 
       in (subInit, env2)
-      | Some (TBASIC(TINT)) -> (subInit, env)
+      | Some (TCONST(TINT)) -> (subInit, env)
       | Some (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
     | PLUS (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
@@ -201,11 +201,11 @@ let rec tCheckAux term typ sub env varC =
   in
   match term with 
     (*Typecheck terms and at the same time updating the environment and substitution functions.*)
-    | INT (x) -> ((TBASIC (TINT)), unifyTypes (TBASIC (TINT)) typ sub, env, varC)
-    | STRING (x) -> ((TBASIC (TSTRING)), unifyTypes (TBASIC (TSTRING)) typ sub, env, varC)
+    | INT (x) -> ((TCONST (TINT)), unifyTypes (TCONST (TINT)) typ sub, env, varC)
+    | STRING (x) -> ((TCONST (TSTRING)), unifyTypes (TCONST (TSTRING)) typ sub, env, varC)
     | CONST (x) -> begin
       match typ with 
-        | TBASIC(TSUBEX) -> begin try 
+        | TCONST(TSUBEX) -> begin try 
           let _ = Hashtbl.find (Subexponentials.typeTbl) x in (typ, sub, env, varC)
         with
           | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
@@ -248,14 +248,14 @@ let rec tCheckAux term typ sub env varC =
             in tCheckAux term2 t2 sub2 env2 varC)
         | _ -> print_string (typeToString typ); failwith " Expected an arrow type."
     end
-    | APP (head, body) -> print_endline ("typechecking app: " ^ (termToString term));
+    | APP (head, body) ->
       (*VN: Construct an arrow type for all body elements with type variables.*)
       let rec construct_type_arr args endType varC = begin
         match args with
           | [] -> (endType, varC)
           | t :: body -> 
             let (rTyp, varCup) = construct_type_arr body endType (varC+1) in
-            let lTyp = TBASIC (TKIND (varName "typeVar" varC)) in (ARR(lTyp, rTyp), varCup)
+            let lTyp = TCONST (TKIND (varName "typeVar" varC)) in (ARR(lTyp, rTyp), varCup)
       end
       in (*VN: Typecheck and unify types of the elements of the body.*)
       let rec construct_type_args args typ sub1 env1 varC = begin
@@ -278,16 +278,16 @@ let rec tCheckAux term typ sub env varC =
     (*Arithmetic comparisons do not require type variables since everything is integer, hence the value 0*)
     | PLUS (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
-      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+      let (_,env2) = tCheckInt int2 env1 in (TCONST(TINT), subInit, env2, 0)
     | MINUS (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
-      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+      let (_,env2) = tCheckInt int2 env1 in (TCONST(TINT), subInit, env2, 0)
     | TIMES (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
-      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+      let (_,env2) = tCheckInt int2 env1 in (TCONST(TINT), subInit, env2, 0)
     | DIV (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
-      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+      let (_,env2) = tCheckInt int2 env1 in (TCONST(TINT), subInit, env2, 0)
     | _ -> failwith ("[ERROR] Unexpected term while typechecking (typeChecker.ml): " ^ (termToString term))
 
 
@@ -331,7 +331,7 @@ let rec typeCheck formula =
   let rec tCheckBody form env = 
     begin match form with
       | PRED(_, x, _) -> 
-          let (_, s, e, _) = tCheckAux x (TBASIC (TPRED)) subInit env 0
+          let (_, s, e, _) = tCheckAux x (TCONST (TPRED)) subInit env 0
           in let e2 = grEnvImgTerms s e x
           in (s, e2) 
       | TOP -> (subInit, env)
@@ -340,7 +340,7 @@ let rec typeCheck formula =
       | ZERO -> (subInit, env)
       | CUT -> (subInit, env)
       | EQU (x, i, y) -> 
-          let newType = TBASIC (TKIND (varName "typeVar" 0)) in
+          let newType = TCONST (TKIND (varName "typeVar" 0)) in
           let (typeY, subY, envY, varC) = tCheckAux y newType subInit env 1
           in 
           begin
@@ -355,24 +355,24 @@ let rec typeCheck formula =
             | Some (_) -> failwith "Error: Type variable mismatched"
           end
       | COMP (_, int1, int2) -> 
-          let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
-          in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
+          let (_,_,env1,_) = tCheckAux int1 (TCONST (TINT)) subInit env 0
+          in let (_,_,env2,_) = (tCheckAux int2 (TCONST (TINT)) subInit env1 0)
           in (subInit, env2)
       | ASGN (int1, int2) -> 
-          let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
-          in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
+          let (_,_,env1,_) = tCheckAux int1 (TCONST (TINT)) subInit env 0
+          in let (_,_,env2,_) = (tCheckAux int2 (TCONST (TINT)) subInit env1 0)
           in (subInit, env2)
       (* We do not typecheck the terms in prints. *)
       | PRINT _ ->  (subInit, env)
       | LOLLI (subexp, f1, f2) ->
-          let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
+          let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
           let (_,env2) = tCheckBody f1 env1 in
           tCheckBody f2 env2
       | QST (subexp, f) -> 
-              let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
+              let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
               tCheckBody f env1
       | BANG (subexp, f) -> 
-              let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
+              let (_,_,env1,_) = tCheckAux subexp (TCONST(TSUBEX)) subInit env 0 in
               tCheckBody f env1
       | TENSOR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
               tCheckBody f2 env2

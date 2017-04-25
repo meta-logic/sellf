@@ -18,18 +18,19 @@ let clsTypeToString ty = match ty with
   | LOL -> " :- "
 
 let rec basicTypeToString btyp = match btyp with
-	| TKIND (x) -> x
-	| TINT -> "int"
-	| TSTRING -> "string"
-	| TPRED -> "o"
+  | TKIND (x) -> x
+  | TINT -> "int"
+  | TSTRING -> "string"
+  | TPRED -> "o"
   | TSUBEX -> "tsub"
-	| TLIST (x) -> "(list "^(basicTypeToString x)^") "
+  | TLIST (x) -> "(list "^(basicTypeToString x)^") "
 
 let rec typeToString typ = match typ with 
-	| TBASIC (x) -> basicTypeToString x
-	| ARR (x,y) -> 
+  | TCONST (x) -> basicTypeToString x
+  | TVAR (s) -> s (* TODO visual indication that this is a type variable *)
+  | ARR (x,y) -> 
     match x with
-      | TBASIC _ -> (typeToString x)^" -> "^(typeToString y)
+      | TCONST _ | TVAR _ -> (typeToString x)^" -> "^(typeToString y)
       | _ -> "("^(typeToString x)^") -> "^(typeToString y)
 
 (* Prints a term replacing deBruijn indices by the actual variable name. This
@@ -37,9 +38,9 @@ name is kept in the abstraction, and a stack of abstraction names is passed as
 argument *)
 let rec termToString_ term absList = match term with 
   | VAR v -> v.str (* Always parsed as a logical variable. Not sure if it will cause any problems... *) 
-		(*if v.tag = EIG then 
-			( (v.str)^"EIG_"^(string_of_int v.id) ) 
-		else ( (v.str)^"LOG_"^(string_of_int v.id) )*)
+                (*if v.tag = EIG then 
+                        ( (v.str)^"EIG_"^(string_of_int v.id) ) 
+                else ( (v.str)^"LOG_"^(string_of_int v.id) )*)
   | DB (i) -> 
     if (List.length absList) < i then failwith "Fail printing DB indices."
     else List.nth absList (i-1)
@@ -108,9 +109,9 @@ let compToTexString ct = match ct with
 
 let rec termToTexString_ term absList = match term with 
   | VAR v -> v.str
-		(*if v.tag = EIG then 
-			( (v.str)^"EIG-"^(string_of_int v.id) ) 
-		else ( (v.str)^"LOG-"^(string_of_int v.id) )*)
+                (*if v.tag = EIG then 
+                        ( (v.str)^"EIG-"^(string_of_int v.id) ) 
+                else ( (v.str)^"LOG-"^(string_of_int v.id) )*)
   | DB (i) ->
     if (List.length absList) < i then failwith "Fail printing DB indices."
     else List.nth absList (i-1)
@@ -171,10 +172,11 @@ let termsListToTexString args = List.fold_right (fun el acc ->
   (termToTexString el)^" :: "^acc) args ""
 
 let rec typeToTexString typ = match typ with 
-	| TBASIC (x) -> basicTypeToString x
-	| ARR (x,y) -> 
+  | TCONST (x) -> basicTypeToString x
+  | TVAR (s) -> s (* TODO visual indication that this is a type variable *)
+  | ARR (x,y) -> 
     match x with
-      | TBASIC _ -> (typeToTexString x)^" \\rightarrow "^(typeToTexString y)
+      | TCONST _ | TVAR _ -> (typeToTexString x)^" \\rightarrow "^(typeToTexString y)
       | _ -> "("^(typeToTexString x)^") \\rightarrow "^(typeToTexString y)
 
 let texFileHeader = (

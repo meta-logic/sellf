@@ -165,9 +165,9 @@ let initialize () =
   Hashtbl.add kindTbl "form" (TKIND("form")) ;
   Hashtbl.add kindTbl "term" (TKIND("term")) ;
   Hashtbl.add kindTbl "world" (TKIND("world")) ;
-  addTypeTbl "lft" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ;  (* type lft form -> o. *)
-  addTypeTbl "rght" (ARR (TBASIC (TKIND("form")), TBASIC (TPRED))) ; (* type rght form -> o. *) 
-  addTypeTbl "mlft" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mlft form -> world -> o. *)
-  addTypeTbl "mrght" (ARR (TBASIC (TKIND("form")), (ARR (TBASIC (TKIND("world")), TBASIC (TPRED))))) ;  (* type mrght form -> world -> o. *)
+  addTypeTbl "lft" (ARR (TCONST (TKIND("form")), TCONST (TPRED))) ;  (* type lft form -> o. *)
+  addTypeTbl "rght" (ARR (TCONST (TKIND("form")), TCONST (TPRED))) ; (* type rght form -> o. *) 
+  addTypeTbl "mlft" (ARR (TCONST (TKIND("form")), (ARR (TCONST (TKIND("world")), TCONST (TPRED))))) ;  (* type mlft form -> world -> o. *)
+  addTypeTbl "mrght" (ARR (TCONST (TKIND("form")), (ARR (TCONST (TKIND("world")), TCONST (TPRED))))) ;  (* type mrght form -> world -> o. *)
 ;;
 

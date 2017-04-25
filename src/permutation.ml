@@ -174,7 +174,7 @@ module Permutation : PERMUTATION = struct
     in
     (* We shouldn't have more than 4 existentially quantified variables... *)
     let constLst = ["b"; "a"; "d"; "c"; "e"] in
-    List.iter (fun c -> Specification.addTypeTbl c (TBASIC(TPRED)) ) constLst;
+    List.iter (fun c -> Specification.addTypeTbl c (TCONST(TPRED)) ) constLst;
     let (spec1norm, rest) = instantiate_ex spec1 constLst in
     let (spec2norm, rest2) = instantiate_ex spec2 rest in
 

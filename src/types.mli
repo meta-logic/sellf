@@ -7,21 +7,18 @@
 (** Basic data types. These are the elements that make formulas and terms in
     linear logic with subexponentials. *)
 
-(** The types of terms in the system are either basic (elementary) types or
-    complex types composed of elementary types and the arrow operation
-    -> (ARR). *)
+(** Type constructors *)
 type types =
-| TBASIC of basicTypes
-| ARR of types * types (* arrow -> *)
-(** The system has the built-in types int, string, pred (i.e. the boolean type
-    of predicates o), subex (type of subexponentials) and list. The user can also
-    declare his/her own elementary types using TKIND.*)
+| TCONST of basicTypes (** Tonstant (declared) types *)
+| TVAR of string       (** Type variables *)
+| ARR of types * types (** Function type *)
+(**Built-in type constructors for constant types *)
 and basicTypes =
-| TKIND of string (* Kind names *)
-| TINT            (* Int type *)
+| TKIND of string (** Kinds declared by the user *)
+| TINT            
 | TSTRING
-| TPRED           (* Predicate type "o" *)
-| TSUBEX
+| TPRED           (** Type "o" of formulas (in the meta-logic) *)
+| TSUBEX          (** Type of subexponentials *)
 | TLIST of basicTypes
 ;;
 

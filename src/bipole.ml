@@ -183,7 +183,7 @@ module Bipole : BIPOLE = struct
       let rec instantiate_ex spec constLst = match spec with
 	| EXISTS(s, i, f) ->
 	  let constant = CONST (List.hd constLst) in
-          Specification.addTypeTbl (List.hd constLst) (TBASIC (TPRED));
+          Specification.addTypeTbl (List.hd constLst) (TCONST (TPRED));
 	  let newf = Norm.hnorm (APP (ABS (s, 1, f), [constant])) in
 	  instantiate_ex newf (List.tl constLst)
 	| _ -> (spec, constLst)
