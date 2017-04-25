@@ -134,38 +134,62 @@ let deBruijn form =
   let form_abs = add_abstractions freeVar form in
   deBruijn_aux (fun (x: string) -> (0,0,0)) 0 form_abs
 
-(*VN: Still have to check for occurchecks.*)
+(** Unification of types. (TODO documentation notation)
 
-(* Function for unifying types. It returns a substitution with the unification. In the 
-case that the types are not unifyable, then the function fails with an error. 
-Here we assume that type variables are defined as a kind.*)
-let rec unifyTypes gTyp vTyp sub = match (gTyp, vTyp) with 
-  | (ARR (x1, y1), ARR (x2, y2)) -> 
-    let sub2 = unifyTypes x1 x2 sub in (unifyTypes y1 y2 sub2)
-  | (TCONST (TINT), TCONST (TINT)) -> sub
-  | (TCONST (TSUBEX), TCONST (TSUBEX)) -> sub
-  | (TCONST (TSTRING), TCONST (TSTRING)) -> sub
-  | (TCONST (TPRED), TCONST (TPRED)) -> sub
-  | (x, TCONST (TKIND (y))) -> begin
-    match sub (TCONST (TKIND (y))) with
-      | None ->  let sub2 z = (match z with
-        | TCONST (TKIND (d)) when d = y ->  Some (x)
-        | d -> sub d)
-        in sub2
-      | Some (x1) when x1 = x -> sub
-      | Some (_) -> failwith "Failed when unifying type variables."
-    end
-  | _ -> print_endline (" Type1:"^(typeToString gTyp)^"  Type2:"^(typeToString vTyp)); failwith "Failed when unifying type variables:"
+         s not in t
+    -----------------------
+    TVAR(s) = t | {s -> t}
 
-(* Function that applies a substitution eagerly to a type. *)
-let rec applySub sub typ = match typ with 
-  | ARR (t0, t1) -> ARR (applySub sub t0, applySub sub t1)
-  | x -> (match sub x with
-    | None -> typ
-    | Some (t) -> (match sub t with
-      | None -> t
-      | Some(t2) -> t2 ) )
- 
+         s not in t
+    -----------------------
+    t = TVAR(s) | {s -> t}
+
+    s1 = t1 | f1   s2 f1 = t2 f1 | f2
+    ----------------------------------
+    ARR(s1, s2) = ARR(t1, t2) | f1 f2
+
+              t1 = t2 (equality of basicTypes)
+    ----------------------------
+    TCONST(t1) = TCONST(t2) | {}
+
+    @param type1 {!Types.types} to be unified
+    @param type2 {!Types.types} to be unified
+    @return Substitution function [sub: {!Types.types} -> {!Types.types}]
+*)
+let rec unifyTypes type1 type2 = 
+  let rec occurCheck s t = match t with
+    | TVAR(s1) when s1 = s -> true
+    | ARR(t1, t2) -> occurCheck s t1 || occurCheck s t2
+    | _ -> false
+  in
+  match (type1, type2) with
+    | TVAR(s), t -> begin match occurCheck s t with
+      | false -> (* Substitution is a function that replaces a type variable s by a type t in a type *)
+        let rec sub x = match x with 
+          | TVAR(s1) when s1 = s -> t
+          | ARR(t1, t2) -> ARR(sub t1, sub t2)
+          | _ -> x
+        in sub
+      | true -> failwith ("[ERROR] Occur-check failed on " ^ (typeToString type1) ^ " and " ^ (typeToString type2))
+      end
+    | t, TVAR(s) -> begin match occurCheck s t with
+      | false -> 
+        let rec sub x = match x with
+          | TVAR(s1) when s1 = s -> t
+          | ARR(t1, t2) -> ARR(sub t1, sub t2)
+          | _ -> x
+        in sub
+      | true -> failwith ("[ERROR] Ocur-check failed on " ^ (typeToString type1) ^ " and " ^ (typeToString type2))
+      end
+    | ARR(s1, s2), ARR(t1, t2) -> 
+      let sub1 = unifyTypes s1 t1 in
+      let sub2 = unifyTypes (sub1 s2) (sub1 t2) in
+      (* Substitution composition is function composition :) *)
+      (fun x -> sub2 (sub1 x))
+    | TCONST(t1), TCONST(t2) when t1 = t2 -> (fun x -> x)
+    | _ -> failwith ("[ERROR] Cannot unify types " ^ (typeToString type1) ^ " and " ^ (typeToString type2))
+    
+
 (** Function that typechecks a term. 
     @param term term to be type-checked (possibly with variables)
     @param typ the supposed type of the term
@@ -174,9 +198,8 @@ let rec applySub sub typ = match typ with
     @param varC number of type variables used.
 *)
 let rec tCheckAux term typ sub env varC = 
-  (*Initialize the substitution for type variables as empty*)
-  let subInit x = (match x with | _ -> None) 
-  in 
+  let subInit = (fun x -> x)
+  in
   (*All variables appearing in a comparison must have type int.*)
   let rec tCheckInt intBody env = match intBody with
     | INT (x) -> (subInit, env)
@@ -203,8 +226,8 @@ let rec tCheckAux term typ sub env varC =
   in
   match term with 
     (*Typecheck terms and at the same time updating the environment and substitution functions.*)
-    | INT (x) -> ((TCONST (TINT)), unifyTypes (TCONST (TINT)) typ sub, env, varC)
-    | STRING (x) -> ((TCONST (TSTRING)), unifyTypes (TCONST (TSTRING)) typ sub, env, varC)
+    | INT (x) -> ((TCONST (TINT)), unifyTypes (TCONST (TINT)) typ, env, varC)
+    | STRING (x) -> ((TCONST (TSTRING)), unifyTypes (TCONST (TSTRING)) typ, env, varC)
     | CONST (x) -> begin
       match typ with 
         | TCONST(TSUBEX) -> begin try 
@@ -213,7 +236,7 @@ let rec tCheckAux term typ sub env varC =
           | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
         end
         | _ -> begin try 
-          let typC = Hashtbl.find Specification.typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
+          let typC = Hashtbl.find Specification.typeTbl x in (typC, unifyTypes typC typ, env, varC)
         with
           | Not_found -> failwith ("ERROR: Constant not declared -> "^x)
         end
@@ -226,8 +249,8 @@ let rec tCheckAux term typ sub env varC =
             | (x1,y1) -> env (x1,y1))
           in (typ, sub, env2, varC)
         | Some (typ2) -> 
-          let sub2 = unifyTypes typ2 typ sub in
-          let newTyp = applySub sub2 typ in  
+          let sub2 = unifyTypes typ2 typ in
+          let newTyp = sub2 typ in  
           let env2 z = (match z with
             | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
             | (x1,y1) -> env (x1,y1))
@@ -242,8 +265,8 @@ let rec tCheckAux term typ sub env varC =
               | (x1,y1) -> env (x1,y1))
             in tCheckAux term2 t2 sub env2 varC
           | Some (typ2) -> 
-            let sub2 = unifyTypes typ2 typ sub in
-            let newTyp = applySub sub2 typ in  
+            let sub2 = unifyTypes typ2 typ in
+            let newTyp = sub2 typ in  
             let env2 z = (match z with
               | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
               | (x1,y1) -> env (x1,y1))
@@ -257,7 +280,7 @@ let rec tCheckAux term typ sub env varC =
           | [] -> (endType, varC)
           | t :: body -> 
             let (rTyp, varCup) = construct_type_arr body endType (varC+1) in
-            let lTyp = TCONST (TKIND (varName "typeVar" varC)) in (ARR(lTyp, rTyp), varCup)
+            let lTyp = TVAR (varName "typeVar" varC) in (ARR(lTyp, rTyp), varCup)
       end
       in (*VN: Typecheck and unify types of the elements of the body.*)
       let rec construct_type_args args typ sub1 env1 varC = begin
@@ -276,7 +299,7 @@ let rec tCheckAux term typ sub env varC =
       in (*VN: Typecheck the body elements of the application.*)
       let (t_final, sub_final, env_final, varC_final) =  construct_type_args body t_head sub_head env_head varC_head 
       in (*VN: Return the type instantiated with the substitution computed.*)
-      ((applySub sub_final t_final), sub_final, env_final, varC_final)
+      ((sub_final t_final), sub_final, env_final, varC_final)
     (*Arithmetic comparisons do not require type variables since everything is integer, hence the value 0*)
     | PLUS (int1, int2) -> 
       let (_,env1) = tCheckInt int1 env in
@@ -302,7 +325,7 @@ let rec grEnvImgTerms sub env terms = match terms with
     let env2 z = (match z with
       | (x1,i1) when (x1,i1) = (x,i) -> begin
         match env (x1,i1) with
-          | Some (t) -> Some (applySub sub t)
+          | Some (t) -> Some (sub t)
           | _ -> None
       end
       | (x1,i1) -> env (x1,i1)) in env2
@@ -328,7 +351,7 @@ let rec grEnvImgProp sub env prop = match prop with
     @param formula formula to be type-checked
 *)
 let rec typeCheck formula = 
-  let subInit x = (match x with _ -> None) in 
+  let subInit = (fun x -> x) in 
   let envInit x = (match x with _ -> None) in
   let rec tCheckBody form env = 
     begin match form with
@@ -342,7 +365,7 @@ let rec typeCheck formula =
       | ZERO -> (subInit, env)
       | CUT -> (subInit, env)
       | EQU (x, i, y) -> 
-          let newType = TCONST (TKIND (varName "typeVar" 0)) in
+          let newType = TVAR (varName "typeVar" 0) in
           let (typeY, subY, envY, varC) = tCheckAux y newType subInit env 1
           in 
           begin
