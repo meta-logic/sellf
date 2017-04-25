@@ -164,128 +164,131 @@ let rec applySub sub typ = match typ with
       | None -> t
       | Some(t2) -> t2 ) )
  
-(*Function that typechecks a term. It takes a term, possibly with variables, a type, a subsitution for the 
-type variables, an environment that given a term variable returns its type, and a number varC with the 
-number of the type variables used. *)
+(** Function that typechecks a term. 
+    @param term term to be type-checked (possibly with variables)
+    @param typ the supposed type of the term
+    @param sub a substitution for the type variables
+    @param env an environment that given a term variable returns its type
+    @param varC number of type variables used.
+*)
 let rec tCheckAux term typ sub env varC = 
-(*Initialize the substitution for type variables as empty*)
-let subInit x = (match x with 
-                  | _ -> None) 
-in 
-(*All variables appearing in a comparison must have type int.*)
-let rec tCheckInt intBody env = 
-match intBody with
-  | INT (x) -> (subInit, env)
-  | VAR v -> (match env (v.str,v.id) with 
-    | None -> let env2 z = (match z with
-      | (x1,i1) when (x1,i1) = (v.str,v.id) -> Some (TBASIC(TINT))
-      | (x1,i1) -> env (x1,i1)) 
+  (*Initialize the substitution for type variables as empty*)
+  let subInit x = (match x with | _ -> None) 
+  in 
+  (*All variables appearing in a comparison must have type int.*)
+  let rec tCheckInt intBody env = match intBody with
+    | INT (x) -> (subInit, env)
+    | VAR v -> (match env (v.str,v.id) with 
+      | None -> let env2 z = (match z with
+        | (x1,i1) when (x1,i1) = (v.str,v.id) -> Some (TBASIC(TINT))
+        | (x1,i1) -> env (x1,i1)) 
       in (subInit, env2)
-    | Some (TBASIC(TINT)) -> (subInit, env)
-    | Some (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
-  | PLUS (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
-  | MINUS (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
-  | TIMES (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
-  | DIV (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (subInit, env2) 
-  | _ -> failwith "Error: Invalid term in a comparison."
-in
-match term with 
-  (*Typecheck terms and at the same time updating the environment and substitution functions.*)
-  | INT (x) -> ((TBASIC (TINT)), unifyTypes (TBASIC (TINT)) typ sub, env, varC)
-  | STRING (x) -> ((TBASIC (TSTRING)), unifyTypes (TBASIC (TSTRING)) typ sub, env, varC)
-  | CONST (x) -> begin
-    match typ with 
-      | TBASIC(TSUBEX) -> begin try 
-        let _ = Hashtbl.find (Subexponentials.typeTbl) x in (typ, sub, env, varC)
-      with
-        | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
-      end
-      | _ -> begin try 
-        let typC = Hashtbl.find Specification.typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
-      with
-        | Not_found -> failwith ("ERROR: Constant not declared -> "^x)
-      end
-  end
-  | VAR v -> let (x, y) = (v.str, v.id) in begin
-    match env (x,y) with
-      | None -> 
-        let env2 z = (match z with
-          | (x1,y1) when (x1,y1) = (x,y) -> Some (typ)
-          | (x1,y1) -> env (x1,y1))
-        in (typ, sub, env2, varC)
-      | Some (typ2) -> 
-        let sub2 = unifyTypes typ2 typ sub in
-        let newTyp = applySub sub2 typ in  
-        let env2 z = (match z with
-          | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
-          | (x1,y1) -> env (x1,y1))
-        in (newTyp, sub2, env2, varC)
-  end
-  | ABS (x, y, term2) -> begin
-    match typ with
-      | ARR(t1, t2) -> (match env (x,y) with
+      | Some (TBASIC(TINT)) -> (subInit, env)
+      | Some (_) -> failwith ("Error: Variable  "^v.str^" does not have type INT in a comparison."))
+    | PLUS (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
+    | MINUS (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
+    | TIMES (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (subInit, env2)
+    | DIV (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (subInit, env2) 
+    | _ -> failwith "Error: Invalid term in a comparison."
+  in
+  match term with 
+    (*Typecheck terms and at the same time updating the environment and substitution functions.*)
+    | INT (x) -> ((TBASIC (TINT)), unifyTypes (TBASIC (TINT)) typ sub, env, varC)
+    | STRING (x) -> ((TBASIC (TSTRING)), unifyTypes (TBASIC (TSTRING)) typ sub, env, varC)
+    | CONST (x) -> begin
+      match typ with 
+        | TBASIC(TSUBEX) -> begin try 
+          let _ = Hashtbl.find (Subexponentials.typeTbl) x in (typ, sub, env, varC)
+        with
+          | Not_found -> failwith ("ERROR: Subexponential name expected, but found -> "^x)
+        end
+        | _ -> begin try 
+          let typC = Hashtbl.find Specification.typeTbl x in (typC, unifyTypes typC typ sub, env, varC)
+        with
+          | Not_found -> failwith ("ERROR: Constant not declared -> "^x)
+        end
+    end
+    | VAR v -> let (x, y) = (v.str, v.id) in begin
+      match env (x,y) with
         | None -> 
           let env2 z = (match z with
-            | (x1,y1) when (x1,y1) = (x,y) -> Some (t1)
+            | (x1,y1) when (x1,y1) = (x,y) -> Some (typ)
             | (x1,y1) -> env (x1,y1))
-          in tCheckAux term2 t2 sub env2 varC
+          in (typ, sub, env2, varC)
         | Some (typ2) -> 
           let sub2 = unifyTypes typ2 typ sub in
           let newTyp = applySub sub2 typ in  
           let env2 z = (match z with
             | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
             | (x1,y1) -> env (x1,y1))
-          in tCheckAux term2 t2 sub2 env2 varC)
-      | _ -> print_string (typeToString typ); failwith " Expected an arrow type."
-  end
-  | APP (head, body) -> (*VN: Construct an arrow type for all body elements with type variables.*)
-    let rec construct_type_arr args endType varC = begin
-      match args with
-        | [] -> (endType, varC)
-        | t :: body -> 
-          let (rTyp, varCup) = construct_type_arr body endType (varC+1) in
-          let lTyp = TBASIC (TKIND (varName "typeVar" varC)) in (ARR(lTyp, rTyp), varCup)
+          in (newTyp, sub2, env2, varC)
     end
-    in (*VN: Typecheck and unify types of the elements of the body.*)
-    let rec construct_type_args args typ sub1 env1 varC = begin
-      match args, typ with
-        | [t], ARR(t1, tHead) -> let (t2, sub2, env2, varC2) = tCheckAux t t1 sub env (varC + 1) in
-          (ARR(t2, tHead), sub2, env2, varC2)
-        | tr::body, ARR(t1, t2) -> 
-          let (t3, sub2, env2, varC2) = tCheckAux tr t1 sub env (varC + 1) in
-          let (t4, sub3, env3, varC3) = construct_type_args body t2 sub2 env2 varC2  in (ARR(t3,t4), sub3, env3, varC3)
-        | _, _ -> failwith "Not expected arguments in 'cosntruct_type_args', typeChecker.ml"
+    | ABS (x, y, term2) -> begin
+      match typ with
+        | ARR(t1, t2) -> (match env (x,y) with
+          | None -> 
+            let env2 z = (match z with
+              | (x1,y1) when (x1,y1) = (x,y) -> Some (t1)
+              | (x1,y1) -> env (x1,y1))
+            in tCheckAux term2 t2 sub env2 varC
+          | Some (typ2) -> 
+            let sub2 = unifyTypes typ2 typ sub in
+            let newTyp = applySub sub2 typ in  
+            let env2 z = (match z with
+              | (x1,y1) when (x1,y1) = (x,y) -> Some (newTyp)
+              | (x1,y1) -> env (x1,y1))
+            in tCheckAux term2 t2 sub2 env2 varC)
+        | _ -> print_string (typeToString typ); failwith " Expected an arrow type."
     end
-    in (*VN: First construct the arrow type with type variables.*)
-    let (builtType, varC1) = construct_type_arr body typ varC 
-    in (*VN: Type check the head of the application using the arrow type created.*)
-    let (t_head, sub_head, env_head, varC_head) = tCheckAux head builtType sub env varC1
-    in (*VN: Typecheck the body elements of the application.*)
-    let (t_final, sub_final, env_final, varC_final) =  construct_type_args body t_head sub_head env_head varC_head 
-    in (*VN: Return the type instantiated with the substitution computed.*)
-    ((applySub sub_final t_final), sub_final, env_final, varC_final)
-  (*Arithmetic comparisons do not require type variables since everything is integer, hence the value 0*)
-  | PLUS (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
-  | MINUS (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
-  | TIMES (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
-  | DIV (int1, int2) -> 
-    let (_,env1) = tCheckInt int1 env in
-    let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
-  | _ -> failwith "Error: Encountered a Susp term when typechecking a term."
+    | APP (head, body) -> print_endline ("typechecking app: " ^ (termToString term));
+      (*VN: Construct an arrow type for all body elements with type variables.*)
+      let rec construct_type_arr args endType varC = begin
+        match args with
+          | [] -> (endType, varC)
+          | t :: body -> 
+            let (rTyp, varCup) = construct_type_arr body endType (varC+1) in
+            let lTyp = TBASIC (TKIND (varName "typeVar" varC)) in (ARR(lTyp, rTyp), varCup)
+      end
+      in (*VN: Typecheck and unify types of the elements of the body.*)
+      let rec construct_type_args args typ sub1 env1 varC = begin
+        match args, typ with
+          | [t], ARR(t1, tHead) -> let (t2, sub2, env2, varC2) = tCheckAux t t1 sub env (varC + 1) in
+            (ARR(t2, tHead), sub2, env2, varC2)
+          | tr::body, ARR(t1, t2) -> 
+            let (t3, sub2, env2, varC2) = tCheckAux tr t1 sub env (varC + 1) in
+            let (t4, sub3, env3, varC3) = construct_type_args body t2 sub2 env2 varC2  in (ARR(t3,t4), sub3, env3, varC3)
+          | _, _ -> failwith "Not expected arguments in 'construct_type_args', typeChecker.ml"
+      end
+      in (*VN: First construct the arrow type with type variables.*)
+      let (builtType, varC1) = construct_type_arr body typ varC 
+      in (*VN: Type check the head of the application using the arrow type created.*)
+      let (t_head, sub_head, env_head, varC_head) = tCheckAux head builtType sub env varC1
+      in (*VN: Typecheck the body elements of the application.*)
+      let (t_final, sub_final, env_final, varC_final) =  construct_type_args body t_head sub_head env_head varC_head 
+      in (*VN: Return the type instantiated with the substitution computed.*)
+      ((applySub sub_final t_final), sub_final, env_final, varC_final)
+    (*Arithmetic comparisons do not require type variables since everything is integer, hence the value 0*)
+    | PLUS (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+    | MINUS (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+    | TIMES (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+    | DIV (int1, int2) -> 
+      let (_,env1) = tCheckInt int1 env in
+      let (_,env2) = tCheckInt int2 env1 in (TBASIC(TINT), subInit, env2, 0)
+    | _ -> failwith ("[ERROR] Unexpected term while typechecking (typeChecker.ml): " ^ (termToString term))
 
 
  (* Functions that grounds the image of an environment, so that the type variables created in the 
@@ -316,24 +319,28 @@ let rec grEnvImgProp sub env prop = match prop with
   | _ -> env
 
 
-(*Main function used to typecheck a clause.
-  We do not typecheck terms inside prints.
-  G: We typecheck also terms that are not clauses (needed for init and cut clauses of specifications)
+(** Type checks a formula. 
+    Called recursively on a linear logic formula. The serious
+    type-checking is on terms by {!TypeChecker.tCheckAux}.
+    Terms inside prints are not type-checked.
+    @param formula formula to be type-checked
 *)
-let rec typeCheck clause = 
+let rec typeCheck formula = 
   let subInit x = (match x with _ -> None) in 
   let envInit x = (match x with _ -> None) in
-  let rec tCheckBody body env = 
-    begin match body with
-      | PRED(_, x, _) -> let (_, s, e, _) = tCheckAux x (TBASIC (TPRED)) subInit env 0
-            in let e2 = grEnvImgTerms s e x
-            in (s, e2) 
+  let rec tCheckBody form env = 
+    begin match form with
+      | PRED(_, x, _) -> 
+          let (_, s, e, _) = tCheckAux x (TBASIC (TPRED)) subInit env 0
+          in let e2 = grEnvImgTerms s e x
+          in (s, e2) 
       | TOP -> (subInit, env)
       | BOT -> (subInit, env)
       | ONE -> (subInit, env)
       | ZERO -> (subInit, env)
       | CUT -> (subInit, env)
-      | EQU (x, i, y) -> let newType = TBASIC (TKIND (varName "typeVar" 0)) in
+      | EQU (x, i, y) -> 
+          let newType = TBASIC (TKIND (varName "typeVar" 0)) in
           let (typeY, subY, envY, varC) = tCheckAux y newType subInit env 1
           in 
           begin
@@ -347,47 +354,44 @@ let rec typeCheck clause =
             | Some (typeY1) when typeY1 = typeY -> (subY,envY)
             | Some (_) -> failwith "Error: Type variable mismatched"
           end
-      | COMP (_, int1, int2) -> let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
-              in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
-              in (subInit, env2)
-      | ASGN (int1, int2) -> let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
-              in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
-              in (subInit, env2)
-        (*We do not typecheck the terms in prints.*)
+      | COMP (_, int1, int2) -> 
+          let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
+          in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
+          in (subInit, env2)
+      | ASGN (int1, int2) -> 
+          let (_,_,env1,_) = tCheckAux int1 (TBASIC (TINT)) subInit env 0
+          in let (_,_,env2,_) = (tCheckAux int2 (TBASIC (TINT)) subInit env1 0)
+          in (subInit, env2)
+      (* We do not typecheck the terms in prints. *)
       | PRINT _ ->  (subInit, env)
-      | LOLLI (subexp, body1, body2) -> (*print_term (LOLLI (subexp, body1, body2));*)
+      | LOLLI (subexp, f1, f2) ->
+          let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
+          let (_,env2) = tCheckBody f1 env1 in
+          tCheckBody f2 env2
+      | QST (subexp, f) -> 
               let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
-              let (_,env2) = tCheckBody body1 env1 in
-              tCheckBody body2 env2
-      | QST (subexp, body1) -> 
+              tCheckBody f env1
+      | BANG (subexp, f) -> 
               let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
-              tCheckBody body1 env1
-      | BANG (subexp, body1) -> 
-              let (_,_,env1,_) = tCheckAux subexp (TBASIC(TSUBEX)) subInit env 0 in
-              tCheckBody body1 env1
-      | TENSOR (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in
-              tCheckBody body2 env2
-      | PARR (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in
-              tCheckBody body2 env2
-      | ADDOR (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in
-              tCheckBody body2 env2
-      | WITH (body1, body2) -> let (sub2, env2) = tCheckBody body1 env in
-          tCheckBody body2 env2
-      | FORALL (_, _, body1) -> tCheckBody body1 env
-      | EXISTS (_, _, body1) -> tCheckBody body1 env
+              tCheckBody f env1
+      | TENSOR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+              tCheckBody f2 env2
+      | PARR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+              tCheckBody f2 env2
+      | ADDOR (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+              tCheckBody f2 env2
+      | WITH (f1, f2) -> let (sub2, env2) = tCheckBody f1 env in
+          tCheckBody f2 env2
+      | FORALL (_, _, f) -> tCheckBody f env
+      | EXISTS (_, _, f) -> tCheckBody f env
       | NEW (_, t) -> tCheckBody t env 
+      | BRACKET (f) -> tCheckBody f env
+      | NOT (f) -> tCheckBody f env
       (*VN: The following two cases are for when variables are of type o.*) 
       | VAR v ->  tCheckBody (PRED("", VAR v, NEG)) env
       | APP(head, args) -> tCheckBody (PRED("", APP(head, args), NEG)) env
-      | BRACKET (f) -> tCheckBody f env
-      | NOT body1 -> tCheckBody body1 env
-      | _ -> print_string (termToString body); failwith " Expected a body element while typechecking."
+      | _ -> failwith ("[ERROR] Unexpected formula while typechecking (typeChecker.ml): " ^ (termToString formula))
     end
-    in
-    match clause with
-      | CLS (_, head, body) -> let (sub, env2) = tCheckBody head envInit
-                                 in let envH = grEnvImgProp sub env2 head 
-                                 in  tCheckBody body envH
-      | body -> tCheckBody body envInit
-  (*| _ -> print_term clause; failwith " Expected a clause while typechecking."*)
+  in
+  tCheckBody formula envInit
   
