@@ -17,16 +17,16 @@ subexpctx r single suc.
 rules introduction.
 
 % Implication
-(not (lft (imp A B))) *  (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
-(not (rght (imp A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
+(not (lft (imp A B))) *  ((![l] (?[r] (rght A))) * (?[l] (lft B))).
+(not (rght (imp A B))) *  ((?[l] (lft A)) | (?[r] (rght B))).
 
 % Conjunction
-(not (lft (and A B))) * (([l]? (lft A)) + ([l]? (lft B))).
-(not (rght (and A B))) * (([r]? (rght A)) & ([r]? (rght B))).
+(not (lft (and A B))) * ((?[l] (lft A)) + (?[l] (lft B))).
+(not (rght (and A B))) * ((?[r] (rght A)) & (?[r] (rght B))).
 
 % Disjunction
-(not (lft (or A B))) * (([l]? (lft A)) & ([l]? (lft B))).
-(not (rght (or A B))) * (([r]? (rght A)) + ([r]? (rght B))).
+(not (lft (or A B))) * ((?[l] (lft A)) & (?[l] (lft B))).
+(not (rght (or A B))) * ((?[r] (rght A)) + (?[r] (rght B))).
 
 % False
 (not (lft false)) * top.
@@ -38,4 +38,4 @@ rules axiom.
 ((not (lft A)) * (not (rght A))).
 
 rules cut.
-(([l]bang ([r]? (rght A))) * ([l]? (lft A))).
+((![l] (?[r] (rght A))) * (?[l] (lft A))).

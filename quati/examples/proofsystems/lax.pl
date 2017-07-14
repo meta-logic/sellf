@@ -19,30 +19,30 @@ subexpctx cr single suc.
 
 rules introduction.
 % Conjunction
-(not (lft (and A B))) * ([l]? (lft A)) | ([l]? (lft B)).
-(not (rght (and A B))) * (([l]bang ([r]? (rght A))) * ([l]bang ([r]? (rght B)))).
+not (lft (and A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (and A B)) * ![l] ?[r] (rght A) * ![l] ?[r] (rght B).
 
 % Disjunction
-(not (lft (or A B))) * ([l]? (lft A)) & ([l]? (lft B)).
-(not (rght (or A B))) * ([l]bang ([r]? (rght A))) + ([l]bang ([r]? (rght B))).
+not (lft (or A B)) * ?[l] (lft A) & ?[l] (lft B).
+not (rght (or A B)) * ![l] ?[r] (rght A) + ![l] ?[r] (rght B).
 
 % Implication
-(not (lft (imp A B))) * (([l]bang (([r]? (rght A)))) * ([l]? (lft B))).
-(not (rght (imp A B))) * [l]bang (([l]? (lft A)) | (([r]? (rght B)))).
+not (lft (imp A B)) * ![l] ?[r] (rght A) * ?[l] (lft B).
+not (rght (imp A B)) * ![l] (?[l] (lft A) | ?[r] (rght B)).
 
 % Circ
-(not (lft (circ A))) * [cr]bang ([l]? (lft A)).
-(not (rght (circ A))) * [l]bang ([r]? (rght A)).
+not (lft (circ A)) * ![cr] ?[l] (lft A).
+not (rght (circ A)) * ![l] ?[r] (rght A).
 
 rules axiom.
 % Initial
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
 rules cut.
 % Cut
-(([l]? (lft A)) * ([l]bang ([r]? (rght A)))).
+?[l] (lft A) * ![l] ?[r] (rght A).
 
 rules structural.
 % Structural rule for circ
-((not (rght (circ A))) * ([cr]? (rght (circ A)))).
+not (rght (circ A)) * ?[cr] (rght (circ A)).
 

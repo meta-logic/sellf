@@ -21,52 +21,52 @@ subexprel bl < qr.
 rules introduction.
 
 % Implication
-(not (lft (lolli A B))) * (([r]? (rght A)) * ([l]? (lft B))).
-(not (rght (lolli A B))) *  (([l]? (lft A)) | ([r]? (rght B))).
+not (lft (lolli A B)) * ?[r] (rght A) * ?[l] (lft B).
+not (rght (lolli A B)) *  ?[l] (lft A) | ?[r] (rght B).
 
 % Tensor
-(not (lft (tensor A B))) * (([l]? (lft A)) | ([l]? (lft B))).
-(not (rght (tensor A B))) * (([r]? (rght A)) * ([r]? (rght B))).
+not (lft (tensor A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (tensor A B)) * ?[r] (rght A) * ?[r] (rght B).
 
 % With
-(not (lft (with A B))) * (([l]? (lft A)) + ([l]? (lft B))).
-(not (rght (with A B))) * (([r]? (rght A)) & ([r]? (rght B))).
+not (lft (with A B)) * ?[l] (lft A) + ?[l] (lft B).
+not (rght (with A B)) * ?[r] (rght A) & ?[r] (rght B).
 
 % Par
-(not (lft (par A B))) * (([l]? (lft A)) * ([l]? (lft B))).
-(not (rght (par A B))) * (([r]? (rght A)) | ([r]? (rght B))).
+not (lft (par A B)) * ?[l] (lft A) * ?[l] (lft B).
+not (rght (par A B)) * ?[r] (rght A) | ?[r] (rght B).
 
 % Oplus
-(not (lft (oplus A B))) * (([l]? (lft A)) & ([l]? (lft B))).
-(not (rght (oplus A B))) * (([r]? (rght A)) + ([r]? (rght B))).
+not (lft (oplus A B)) * ?[l] (lft A) & ?[l] (lft B).
+not (rght (oplus A B)) * ?[r] (rght A) + ?[r] (rght B).
 
 % Bang
-(not (lft (lbang A))) * ([l]? (lft A)).
-(not (rght (lbang A))) * ([bl]bang ([r]? (rght A))).
+not (lft (lbang A)) * ?[l] (lft A).
+not (rght (lbang A)) * ![bl] ?[r] (rght A).
 
 % Quest
-(not (lft (lquest A))) * ([bl]bang ([l]? (lft A))).
-(not (rght (lquest A))) * ([r]? (rght A)).
+not (lft (lquest A)) * ![bl] ?[l] (lft A).
+not (rght (lquest A)) * ?[r] (rght A).
 
 % One
-(not (lft lone)) * bot.
-(not (rght lone)) * one.
+not (lft lone) * bot.
+not (rght lone) * one.
 
 % Bottom
-(not (lft lbot)) * one.
-(not (rght lbot)) * bot.
+not (lft lbot) * one.
+not (rght lbot) * bot.
 
 % Zero
-(not (lft lzero)) * top.
+not (lft lzero) * top.
 
 % Top
-(not (rght ltop)) * top.
+not (rght ltop) * top.
 
 rules axiom.
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
 rules cut.
-(([r]? (rght A)) * ([l]? (lft A))).
+?[r] (rght A) * ?[l] (lft A).
 
 
 

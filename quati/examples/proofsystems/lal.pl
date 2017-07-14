@@ -54,58 +54,58 @@ subexpctx s2R single suc.
 
 rules introduction.
 % Tensor
-(not (lft (ten A B))) * ([l]? (lft A)) | ([l]? (lft B)).
-(not (rght (ten A B))) * ( ([l]bang ([r]? (rght A))) * ( [l]bang ([r]? (rght B)))).
+not (lft (ten A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (ten A B)) * ![l] ?[r] (rght A) * ![l] ?[r] (rght B).
 
 % Implication
-(not (lft (lol A B))) * (([l]bang ([r]? (rght A))) * ([l]? (lft B))).
-(not (rght (lol A B))) * ([l]bang (([l]? (lft A)) | ([r]? (rght B)))).
+not (lft (lol A B)) * ![l] ?[r] (rght A) * ?[l] (lft B).
+not (rght (lol A B)) * ![l] (?[l] (lft A) | ?[r] (rght B)).
 
 % Says
-(not (lft (says p1 A))) * [s1R]bang ([l]? (lft A)).
-(not (rght (says p1 A))) * [l]bang ([r]? (rght A)).
+not (lft (says p1 A)) * ![s1R] ?[l] (lft A).
+not (rght (says p1 A)) * ![l] ?[r] (rght A).
 
-(not (lft (says p2 A))) * [s2R]bang ([l]? (lft A)).
-(not (rght (says p2 A))) * [l]bang ([r]? (rght A)).
+not (lft (says p2 A)) * ![s2R] ?[l] (lft A).
+not (rght (says p2 A)) * ![l] ?[r] (rght A).
 
 % Has
-(not (lft (has p1 A))) * ([l]? (lft A)).
-(not (rght (has p1 A))) * [h1]bang ([r]? (rght A)).
+not (lft (has p1 A)) * ?[l] (lft A).
+not (rght (has p1 A)) * ![h1] ?[r] (rght A).
 
-(not (lft (has p2 A))) * ([l]? (lft A)).
-(not (rght (has p2 A))) * [h2]bang ([r]? (rght A)).
+not (lft (has p2 A)) * ?[l] (lft A).
+not (rght (has p2 A)) * ![h2] ?[r] (rght A).
 
 % Knows
 
-(not (lft (knows p1 A))) * ([l]? (lft A)).
-(not (rght (knows p1 A))) * [k1]bang ([r]? (rght A)).
+not (lft (knows p1 A)) * ?[l] (lft A).
+not (rght (knows p1 A)) * ![k1] ?[r] (rght A).
 
-(not (lft (knows p2 A))) * ([l]? (lft A)).
-(not (rght (knows p2 A))) * [k2]bang ([r]? (rght A)).
+not (lft (knows p2 A)) * ?[l] (lft A).
+not (rght (knows p2 A)) * ![k2] ?[r] (rght A).
 
 rules axiom.
 % Init
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
 rules cut.
 % Cut
-(([l]? (lft A)) * ([l]bang ([r]? (rght A)))).
+?[l] (lft A) * ![l] ?[r] (rght A).
 
 rules structural.
 % Structural rules for modals
-((not (lft (ten A B))) * ([ll]? (lft (ten A B)))).
-((not (lft (lol A B))) * ([ll]? (lft (lol A B)))).
+not (lft (ten A B)) * ?[ll] (lft (ten A B)).
+not (lft (lol A B)) * ?[ll] (lft (lol A B)).
 
-((not (lft (says p1 A))) * ([s1L]? (lft (says p1 A)))).
-((not (lft (says p2 A))) * ([s2L]? (lft (says p2 A)))).
+not (lft (says p1 A)) * ?[s1L] (lft (says p1 A)).
+not (lft (says p2 A)) * ?[s2L] (lft (says p2 A)).
 
-((not (rght (says p1 A))) * ([s1R]? (rght (says p1 A)))).
-((not (rght (says p2 A))) * ([s2R]? (rght (says p2 A)))).
+not (rght (says p1 A)) * ?[s1R] (rght (says p1 A)).
+not (rght (says p2 A)) * ?[s2R] (rght (says p2 A)).
 
-((not (lft (has p1 A))) * ([h1]? (lft (has p1 A)))).
-((not (lft (has p2 A))) * ([h2]? (lft (has p2 A)))).
+not (lft (has p1 A)) * ?[h1] (lft (has p1 A)).
+not (lft (has p2 A)) * ?[h2] (lft (has p2 A)).
 
-((not (lft (knows p1 A))) * ([k1]? (lft (knows p1 A)))).
-((not (lft (knows p2 A))) * ([k2]? (lft (knows p2 A)))).
+not (lft (knows p1 A)) * ?[k1] (lft (knows p1 A)).
+not (lft (knows p2 A)) * ?[k2] (lft (knows p2 A)).
 
 
