@@ -19,8 +19,8 @@ def load():
     print "% No example selected.##EOF##% No example selected."
     return
 
-  src_file = open("sellf/examples/proofsystems/"+name+".pl", 'r')
-  sig_file = open("sellf/examples/proofsystems/"+name+".sig", 'r')
+  src_file = open("../examples/proofsystems/"+name+".pl", 'r')
+  sig_file = open("../examples/proofsystems/"+name+".sig", 'r')
 
   src = src_file.read()
   sig = sig_file.read()

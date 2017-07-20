@@ -30,8 +30,8 @@ def submit():
         print "The signature is empty."
         return
 
-    src_file = open("files/spec.pl", 'w')
-    sig_file = open("files/spec.sig", 'w')
+    src_file = open("temp/spec.pl", 'w')
+    sig_file = open("temp/spec.sig", 'w')
 
     src_file.write(src)
     sig_file.write(sig)
@@ -40,13 +40,13 @@ def submit():
     sig_file.close()
 
     #input = open("principalcut.in", "r")
-    cmd = Popen('./sellf.bin -i files/spec -c atomicelim', shell=True, stdout=PIPE, stderr=PIPE)
+    cmd = Popen('ocamlrun sellf -i temp/spec -c atomicelim', shell=True, stdout=PIPE, stderr=PIPE, env={'PATH': '/usr/local/bin:/usr/bin'})
     stdout, stderr = cmd.communicate()
 
     print stdout
     print stderr
 
-    os.remove("files/spec.pl")
-    os.remove("files/spec.sig")
+    os.remove("temp/spec.pl")
+    os.remove("temp/spec.sig")
 
 submit()
