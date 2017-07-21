@@ -15,10 +15,14 @@ def submit():
   
   form = cgi.FieldStorage()
 
+  r1Name = form.getvalue('r1')
+  r2Name = form.getvalue('r2')
   src_enc = form.getvalue('src')
   sig_enc = form.getvalue('sig')
   textAreaId_enc = form.getvalue('id')
 
+  r1 = urllib.unquote(r1Name)
+  r2 = urllib.unquote(r2Name)
   src = urllib.unquote(src_enc)
   sig = urllib.unquote(sig_enc)
   textAreaId = urllib.unquote(textAreaId_enc)
@@ -39,7 +43,7 @@ def submit():
     cmdStr = 'ocamlrun sellf -c rules_to_file -i temp/spec_loadtex'
     fileName = 'rules.tex'
   elif textAreaId == 'permutationSourceCode':
-    cmdStr = 'ocamlrun sellf -c permute_to_file -i temp/spec_loadtex'
+    cmdStr = 'ocamlrun sellf -c permute_to_file -i temp/spec_loadtex -r1 ' + r1 + ' -r2 ' + r2
     fileName = 'permutation.tex'
   elif textAreaId == 'bipolesSourceCode':
     cmdStr = 'ocamlrun sellf -c bipoles_to_file -i temp/spec_loadtex'

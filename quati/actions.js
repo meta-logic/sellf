@@ -198,7 +198,10 @@ function loadTeX(id) {
   var sig_enc = encodeURIComponent(sig)
   var id_enc = encodeURIComponent(id)
 
-  var params = "src=" + src_enc + "&sig=" + sig_enc + "&id=" + id_enc
+  var r1 = document.getElementById('r1').value
+  var r2 = document.getElementById('r2').value
+
+  var params = "src=" + src_enc + "&sig=" + sig_enc + "&id=" + id_enc + "&r1=" + r1 + "&r2=" + r2
 
   var xmlhttp = getXMLHTTP()
 
