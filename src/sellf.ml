@@ -351,6 +351,20 @@ solve_query () =
     | "#help" -> print_help ();
     | "#exit" -> print_endline "Thank you for using SELLF."; exit 1
 
+    | "#coqspec" ->
+      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let coqspec = Sellf2coq.sellf2coq (Specification.getUserTypes ()) formulas in
+      print_newline ();
+      print_endline "Warning! This is work in progress. Only a partial \
+      specification will be generated.";
+      print_newline ();
+      print_endline "The specification of this system in Coq will be printed \
+      in a file. What shall it be called?";
+      let filename = read_line () in
+      let file = open_out (filename ^ ".v") in
+      Printf.fprintf file "%s" (coqspec);
+      close_out file
+
     (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
     | "#bipole" -> 
       let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in

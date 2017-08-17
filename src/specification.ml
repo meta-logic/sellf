@@ -150,6 +150,13 @@ let processIntroRule t =
 
 let getAllRules () = !others @ !introRules @ !structRules @ !cutRules @ !axioms ;;
 
+(* Returns only the types declared by the user in the .sig file (as a list of pairs) *)
+let getUserTypes () = Hashtbl.fold (fun name tp acc ->
+  match name with
+    | "lft" | "rght" | "mlft" | "mrght" -> acc
+    | _ -> (name, tp) :: acc
+  ) typeTbl []
+
 let initialize () =
   structRules := [];
   cutRules := [];
