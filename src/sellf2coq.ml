@@ -124,6 +124,13 @@ let rules spec = "
   | botL : forall (L L' :list LForm) G , L =mul= bot :: L' -> L ; 0 |-P- G
   | cR : forall L F G n m , L ; n |-P- F -> L ; m |-P- G -> L ; S (max n m) |-P- conj F G
   | cL : forall L G G' F L' n, L =mul= (conj G G') :: L' -> G :: G' :: L' ; n |-P- F -> L ; S n |-P- F
+
+  REMINDERS:
+    - Use multi-set equals (L =mul= F :: L') on the conclusion's context to
+      incorporate exchange
+    - Add height of the derivation, using 'max' for binary rules (n |-P-)
+    - rg and lf must be odd numbers, other predicates can be any number (might
+      not be relevant for this part specifically, but for smt later)
   *)
   "
   where \"L ; n |-P- F\" := (sq L n F).
