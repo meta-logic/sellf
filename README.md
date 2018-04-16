@@ -37,7 +37,7 @@ and print the rules of the object logic similar to a way they would appear in a
 text book. This is very useful for checking whether the specification actually
 corresponds to the intended sequent calculus rule. The implementation has a
 web-interface with some examples at:
-[QUATI](hhttp://quati.gisellereis.com/).
+[QUATI](http://quati.gisellereis.com/).
 
 ### Requirements
 
