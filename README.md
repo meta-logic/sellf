@@ -30,14 +30,14 @@ sequent calculus systems in linear logic with subexponentials and checks:
 
 Basically, the system checks the admissibility of the cut rule(s). This
 implementation can be tested online at:
-[TATU](http://www.logic.at/people/giselle/tatu).
+[TATU](http://tatu.gisellereis.com/).
 
 Another part of SELLF, called QUATI, is a tool that can check permutation lemmas
 and print the rules of the object logic similar to a way they would appear in a
 text book. This is very useful for checking whether the specification actually
 corresponds to the intended sequent calculus rule. The implementation has a
 web-interface with some examples at:
-[QUATI](http://www.logic.at/staff/giselle/quati).
+[QUATI](hhttp://quati.gisellereis.com/).
 
 ### Requirements
 
