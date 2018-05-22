@@ -102,15 +102,105 @@ let parse file_name = begin
     end
 end ;;
 
-let print_rulenames () =
+(* Auxiliary functions *)
+let permutationToTex f1 f2 cl = 
+  let permutationTex pairs cl =
+    (match cl with
+     | false -> Permutation.permutationsToTexString pairs
+     | true -> Permutation.permutationsToTexStringCl pairs) in
+  let nonPermutationTex pairs cl =
+    (match cl with
+     | false -> Permutation.nonPermutationsToTexString pairs
+     | true -> Permutation.nonPermutationsToTexStringCl pairs) in
+  match Permutation.permute f1 f2 with
+  | (true, [], []) -> 
+    "Could not build a derivation with the two chosen rules.\n\n";
+
+  | (true, pairs, []) -> 
+    "The rules permute. Here are the permutations:\n" ^ 
+    (permutationTex pairs cl);
+  
+  | (false, ok, notok) -> 
+    "The rules might not permute. These are the configurations for which a \
+    permutation was found:\n" ^ 
+    (permutationTex ok cl);
+
+    "These are the configurations for which a permutation was not found:\n" ^
+    (nonPermutationTex notok cl);
+  
+  | _ -> failwith ("Invalid result for permutation checking.")
+;;
+
+(* Functions related to the standard output, they are mainly
+   used to provide strings to Quati's website *)
+let print_rules_names () =
   let names = Specification.getAllRulesName () in
   List.iter (fun s ->
     print_endline s
   ) names
 ;;
 
-let printOLrules bipoles fileName =
-  let file = open_out (fileName ^ ".tex") in
+let print_bipoles_cl () =
+  let formulas = Specification.getFormulas () in
+  let bipoles = Bipole.get_bipoles formulas in
+  List.iter (fun (pt, model) ->
+    print_endline "\\[";
+    print_endline (ProofTreeSchema.toTexString (pt));
+    print_endline "\\]";
+    print_endline "\\[";
+    print_endline "CONSTRAINTS = ";
+    print_endline (Constraints.toJaxString (model));
+    print_endline "\\]";
+  ) bipoles
+;;
+
+let print_olrules_cl () =
+  let formulas = Specification.getFormulas () in
+  let bipoles = Bipole.get_bipoles formulas in
+  List.iter (fun bipole ->
+    (* TODO: this is always a list with one element, one bipole (which is a pair
+    <proof_tree, model>. All methods in olRule should be modified to work with
+    only one derivation at a time *)
+      let olpt = apply_derivation bipole in
+      print_endline "\\[";
+      print_endline (OlProofTree.toTexString olpt);
+      print_endline "\\]";
+  ) bipoles
+;;
+
+(* Needed for debugging, only prints yes/no without showing the derivations *)
+let print_permute_bool name1 name2 = 
+  let formula1 = Specification.getSpecificationOf name1 in
+  let formula2 = Specification.getSpecificationOf name2 in
+  match Permutation.permute formula1 formula2 with 
+    (* If both lists are empty, no bipoles could be constructed. *)
+    | (true, [], []) -> print_endline "N/A."
+    (* Else if there are no failures the second list should be empty. *)
+    | (true, pairs, []) -> print_endline "Yes.";
+    (* Else, some permutation was not possible. *)
+    | (false, _, bipoles) -> print_endline "No.";
+    | _ -> failwith ("Invalid result for permutation checking.")
+;;
+
+let print_permutation_cl name1 name2 = 
+  let formula1 = Specification.getSpecificationOf name1 in
+  let formula2 = Specification.getSpecificationOf name2 in
+  print_endline (permutationToTex formula1 formula2 true)
+;;
+
+let print_formulas formulas = 
+  let i = ref 0 in
+  print_endline "\nThese are the formulas available: ";
+  List.iter ( fun f ->
+    print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
+    i := !i + 1
+  ) formulas;
+  print_newline ()
+;;
+
+(* file output related *)
+let fprint_olrules bipoles file_name =
+  let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
     (* TODO: this is always a list with one element, one bipole (which is a pair
@@ -128,8 +218,8 @@ let printOLrules bipoles fileName =
   close_out file
 ;;
 
-let printBipoles bipoles fileName = 
-  let file = open_out (fileName ^ ".tex") in
+let fprint_bipoles bipoles file_name = 
+  let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
     Printf.fprintf file "%s" "{\\scriptsize";
@@ -145,101 +235,22 @@ let printBipoles bipoles fileName =
   close_out file
 ;;
 
-(* Command line #bipoles *)
-let bipoles_cl () =
-  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = Bipole.get_bipoles formulas in
-  List.iter (fun (pt, model) ->
-    print_endline "\\[";
-    print_endline (ProofTreeSchema.toTexString (pt));
-    print_endline "\\]";
-    print_endline "\\[";
-    print_endline "CONSTRAINTS = ";
-    print_endline (Constraints.toJaxString (model));
-    print_endline "\\]";
-  ) bipoles
-;;
-
-(* Command line #rules *)
-let rules_cl () =
-  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
-  let bipoles = Bipole.get_bipoles formulas in
-  List.iter (fun bipole ->
-    (* TODO: this is always a list with one element, one bipole (which is a pair
-    <proof_tree, model>. All methods in olRule should be modified to work with
-    only one derivation at a time *)
-      let olpt = apply_derivation bipole in
-      print_endline "\\[";
-      print_endline (OlProofTree.toTexString olpt);
-      print_endline "\\]";
-  ) bipoles
-;;
-
-let permutationTex f1 f2 cl = match Permutation.permute f1 f2 with
-  | (true, [], []) -> 
-    "Could not build a derivation with the two chosen rules.\n\n";
-
-  | (true, pairs, []) -> 
-    "The rules permute. Here are the permutations:\n" ^ 
-    (Permutation.permutationsToTexString pairs cl);
-  
-  | (false, ok, notok) -> 
-    "The rules might not permute. These are the configurations for which a \
-    permutation was found:\n" ^
-    (Permutation.permutationsToTexString ok cl) ^ 
-    "These are the configurations for which a permutation was not found:\n" ^
-    (Permutation.nonPermutationsToTexString notok cl);
-  
-  | _ -> failwith ("Invalid result for permutation checking.")
-;;
-
-let permute forms_lst fileName =
-  let file = open_out (fileName ^ ".tex") in
+let fprint_permutation forms_lst file_name =
+  let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun (f1, f2) ->
     let name1 = Specification.getRuleName f1 in
     let name2 = Specification.getRuleName f2 in
     Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
-    Printf.fprintf file "%s" (permutationTex f1 f2 false);
+    Printf.fprintf file "%s" (permutationToTex f1 f2 false);
   ) forms_lst;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
 ;;
 
-(* permute_bin: prints yes/no, without showing the derivations *)
-let permute_bin name1 name2 = 
-  let formula1 = Specification.getSpecificationOf name1 in
-  let formula2 = Specification.getSpecificationOf name2 in
-  match Permutation.permute formula1 formula2 with 
-    (* If both lists are empty, no bipoles could be constructed. *)
-    | (true, [], []) -> print_endline "N/A."
-    (* Else if there are no failures the second list should be empty. *)
-    | (true, pairs, []) -> print_endline "Yes.";
-    (* Else, some permutation was not possible. *)
-    | (false, _, bipoles) -> print_endline "No.";
-    | _ -> failwith ("Invalid result for permutation checking.")
-;;
-
-
-(* Command line #permute *)
-let permute_cl name1 name2 = 
-  let formula1 = Specification.getSpecificationOf name1 in
-  let formula2 = Specification.getSpecificationOf name2 in
-  print_endline (permutationTex formula1 formula2 true)
-;;
-
-let print_formulas formulas = 
-  let i = ref 0 in
-  print_endline "\nThese are the formulas available: ";
-  List.iter ( fun f ->
-    print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
-    i := !i + 1
-  ) formulas;
-  print_newline ()
-;;
-
+(* Functions related to the download option of Quati's website *)
 let permute_to_file name1 name2 =
-  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+  let formulas = Specification.getFormulas () in
   let index = ref (-1) in
   let counter () = index := !index + 1; !index in
   let i1 = ref 0 in
@@ -251,19 +262,19 @@ let permute_to_file name1 name2 =
       else index := !index + 1;
     end
   );
-  permute [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
+  fprint_permutation [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
 ;;
 
 let rules_to_file () =
-  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+  let formulas = Specification.getFormulas () in
   let bipoles = Bipole.get_bipoles formulas in
-  printOLrules bipoles "rules"
+  fprint_olrules bipoles "rules"
 ;;
 
 let bipoles_to_file () =
-  let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+  let formulas = Specification.getFormulas () in
   let bipoles = Bipole.get_bipoles formulas in
-  printBipoles bipoles "bipoles"
+  fprint_bipoles bipoles "bipoles"
 ;;
 
 let print_help () = 
@@ -352,7 +363,7 @@ solve_query () =
     | "#exit" -> print_endline "Thank you for using SELLF."; exit 1
 
     | "#coqspec" ->
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       let coqspec = Sellf2coq.sellf2coq (Specification.getUserTypes ()) formulas in
       print_newline ();
       print_endline "Warning! This is work in progress. Only a partial \
@@ -367,7 +378,7 @@ solve_query () =
 
     (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
     | "#bipole" -> 
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       print_formulas formulas;
       print_endline "The bipoles for the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -375,7 +386,7 @@ solve_query () =
       print_endline "Please choose a name for the file:";
       let f = read_line () in
       let bp = Bipole.bipole (List.nth formulas i1) in
-      printBipoles bp f
+      fprint_bipoles bp f
 
     (* Generates all bipoles of all rules of the object logic and prints a latex file with them *)
     | "#bipoles" ->
@@ -383,9 +394,9 @@ solve_query () =
       print_endline "All the bipoles of the specification will be generated \
       and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       let bipoles = Bipole.get_bipoles formulas in
-      printBipoles bipoles f
+      fprint_bipoles bipoles f
 
     (* Check if all rules are bipoles *)
     | "#check_rules" -> 
@@ -397,7 +408,7 @@ solve_query () =
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       print_formulas formulas;
       print_endline "The object logic rule of the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -405,7 +416,7 @@ solve_query () =
       print_endline "Please choose a name for the file:";
       let f = read_line () in
       let bp = Bipole.bipole (List.nth formulas i1) in
-      printOLrules bp f
+      fprint_olrules bp f
 
     (* Generates all rules of the object logic and prints a latex file with them *)
     | "#rules" ->
@@ -413,13 +424,13 @@ solve_query () =
       print_endline "The object logic rules of all the formulas of the specification \
       will be generated and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       let bipoles = Bipole.get_bipoles formulas in
-      printOLrules bipoles f
+      fprint_olrules bipoles f
 
     (* Check if two rules permute *)
     | "#permute" -> 
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       print_formulas formulas;
       print_endline "Checking whether a rule R1 permutes up a rule R2.\n";
       print_endline "Please type the number of R1: ";
@@ -428,11 +439,11 @@ solve_query () =
       let i2 = int_of_string (read_line ()) in
       print_endline "Please type a file name for the results:";
       let f = read_line () in
-      permute [((List.nth formulas i1), (List.nth formulas i2))] f
+      fprint_permutation [((List.nth formulas i1), (List.nth formulas i2))] f
 
     (* Check if all rules permute *)
     | "#permute_all" ->
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       print_endline "Checking the permutation of all formulas over all \
       formulas.\nPlease type a file name for the results:";
       let f = read_line () in
@@ -441,7 +452,7 @@ solve_query () =
           (f1, f2) :: acc2 
         ) formulas acc
       ) formulas [] in
-      permute pairs f
+      fprint_permutation pairs f
 
     (* Prints all sets of rules (one per line) such that all rules within one
      * set permute over each other.
@@ -451,7 +462,7 @@ solve_query () =
       print_endline "Rules belonging to the same group permute over each other.";
       print_endline "Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci, i.e., rj -> ri in G.";
       print_endline "This may take a while, please be patient...\n";
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       let cliques = Permutation.getPermutationCliques formulas in
       let graph = Permutation.getPermutationGraph formulas in
       let pairs = Permutation.getCliquesOrdering cliques graph in
@@ -476,7 +487,7 @@ solve_query () =
       filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
       let filename = read_line () in
       let file = open_out (filename ^ ".dot") in
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       Printf.fprintf file "%s" (Permutation.getPermutationDotGraph formulas);
       close_out file
 
@@ -487,7 +498,7 @@ solve_query () =
       a name for the file:";
       let filename = read_line () in
       let file = open_out (filename ^ ".tex") in
-      let formulas = !Specification.others @ !Specification.introRules @ !Specification.structRules in
+      let formulas = Specification.getFormulas () in
       Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
     | "#cutcoherence" -> check_cutcoherence specName
@@ -571,19 +582,19 @@ match (!check, !fileName, !rule1, !rule2) with
     if parse file then check_scopebang ()
   | ("bipoles", file, _, _) ->
     initAll ();
-    if parse file then bipoles_cl ()
+    if parse file then print_bipoles_cl ()
   | ("rules", file, _, _) ->
     initAll ();
-    if parse file then rules_cl ()
+    if parse file then print_olrules_cl ()
   | ("permute", file, r1, r2) ->
     initAll ();
-    if parse file then permute_cl r1 r2
+    if parse file then print_permutation_cl r1 r2
   | ("rulenames", file, _, _) ->
     initAll ();
-    if parse file then print_rulenames ()
+    if parse file then print_rules_names ()
   | ("permutebin", file, r1, r2) ->
     initAll ();
-    if parse file then permute_bin r1 r2
+    if parse file then print_permute_bool r1 r2
   | ("bipoles_to_file", file, _, _) ->
     initAll ();
     if parse file then bipoles_to_file ()

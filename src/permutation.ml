@@ -50,8 +50,10 @@ module type PERMUTATION =
     val getCliquesOrdering : (string list, string) Hashtbl.t -> DG.t -> (string * string) list
     val getPermutationDotGraph : terms list -> string
     val getPermutationTable : terms list -> string
-    val permutationsToTexString : (Rewriting.derivation * Rewriting.derivation) list -> bool -> string
-    val nonPermutationsToTexString : Rewriting.derivation list -> bool -> string
+    val permutationsToTexStringCl : (Rewriting.derivation * Rewriting.derivation) list -> string
+    val nonPermutationsToTexStringCl : Rewriting.derivation list -> string
+    val permutationsToTexString : (Rewriting.derivation * Rewriting.derivation) list -> string
+    val nonPermutationsToTexString : Rewriting.derivation list -> string
     val setShowBipole: bool -> unit
   end
 
@@ -305,52 +307,72 @@ module Permutation : PERMUTATION = struct
     preamble ^ rows ^ closing
   ;;
 
-  (* cl is a boolean that is true if it's called from command line functions
-   * it is necessary because \scriptsize and \\ are not needed in this case 
-   *)
+  (* two functions are needed because the format is different when the function
+     is called from command line *)
 
-  let permutationsToTexString lst cl =
-    let fontSize = if cl then "" else "{\\scriptsize\n" in
-    let fontSizeEnd = if cl then "\n\n" else "\n}\n\\\\[0.7cm]\n\n" in
-    if !showBipole then
-    List.fold_right (fun (b12, b21) acc ->
-      fontSize ^ 
-      "\\[\n" ^
-      ProofTreeSchema.toTexString (fst(b12)) ^
-      "\n\\]" ^
-      fontSizeEnd ^
-      "CONSTRAINTS 1\n\n" ^ (Constraints.toTexString (snd(b12))) ^ 
-      fontSize ^ 
-      "\\[\n" ^
-      ProofTreeSchema.toTexString (fst(b21)) ^
-      "\n\\]" ^
-      fontSizeEnd ^
-      "CONSTRAINTS 2\n\n" ^ (Constraints.toTexString (snd(b21)))
-      ^ acc
-    ) lst ""
-    else let olPt = apply_permute lst in
-    List.fold_right (fun (b12, b21) acc ->
-      fontSize ^ 
+  let permutationsToTexStringCl lst =
+    let olPt = apply_permute lst in
+    List.fold_right (fun (b12, b21) acc -> 
       "\\[\n" ^
       OlProofTree.toTexString (fst(b12)) ^
       "\n\\quad\\rightsquigarrow\\\\\\qquad\\qquad\\qquad\n" ^
       OlProofTree.toTexString (fst(b21)) ^
       "\n\\]" ^
-      fontSizeEnd ^ acc
+      "\n\n" ^ acc
     ) olPt ""
   ;;
 
-  let nonPermutationsToTexString lst cl = 
-    let fontSize = if cl then "" else "{\\scriptsize\n" in
-    let fontSizeEnd = if cl then "\n\n" else "\n}\n\\\\[0.7cm]\n\n" in
+  let permutationsToTexString lst =
+    (* showBipole is useful for debugging *)
+    if !showBipole then
+    List.fold_right (fun (b12, b21) acc ->
+      "{\\scriptsize\n" ^ 
+      "\\[\n" ^
+      ProofTreeSchema.toTexString (fst(b12)) ^
+      "\n\\]" ^
+      "\n}\n\\\\[0.7cm]\n\n" ^
+      "CONSTRAINTS 1\n\n" ^ (Constraints.toTexString (snd(b12))) ^ 
+      "{\\scriptsize\n" ^ 
+      "\\[\n" ^
+      ProofTreeSchema.toTexString (fst(b21)) ^
+      "\n\\]" ^
+      "\n}\n\\\\[0.7cm]\n\n" ^
+      "CONSTRAINTS 2\n\n" ^ (Constraints.toTexString (snd(b21)))
+      ^ acc
+    ) lst ""
+    else let olPt = apply_permute lst in
+    List.fold_right (fun (b12, b21) acc ->
+      "{\\scriptsize\n" ^ 
+      "\\[\n" ^
+      OlProofTree.toTexString (fst(b12)) ^
+      "\n\\quad\\rightsquigarrow\\\\\\qquad\\qquad\\qquad\n" ^
+      OlProofTree.toTexString (fst(b21)) ^
+      "\n\\]" ^
+      "\n}\n\\\\[0.7cm]\n\n" ^ acc
+    ) olPt ""
+  ;;
+
+  let nonPermutationsToTexStringCl lst = 
     let olPt = apply_perm_not_found lst in
     List.fold_right (fun (olt, mdl) acc ->
       OlProofTree.toPermutation olt;
-      fontSize ^ 
       "\\[\n" ^
       OlProofTree.toTexString olt ^
       "\n\\]" ^
-      fontSizeEnd ^ acc
+      "\n\n" ^ acc
     ) olPt ""
+  ;;
+
+  let nonPermutationsToTexString lst = 
+    let olPt = apply_perm_not_found lst in
+    List.fold_right (fun (olt, mdl) acc ->
+      OlProofTree.toPermutation olt;
+      "{\\scriptsize\n" ^ 
+      "\\[\n" ^
+      OlProofTree.toTexString olt ^
+      "\n\\]" ^
+      "\n}\n\\\\[0.7cm]\n\n" ^ acc
+    ) olPt ""
+  ;;
 
 end;;
