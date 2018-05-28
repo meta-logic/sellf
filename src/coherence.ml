@@ -78,10 +78,26 @@ let cutCoherence system_name =
   else print_string "\nThe system is NOT cut coherent.\n";
 ;;
 
+(* For testing *)
+let cutCoherence_t system_name =
+  cutcoherent := true;
+  Hashtbl.iter (checkDuality system_name) Specification.lr_hash;
+  if !cutcoherent then 1
+  else 0;
+;;
+
 let initialCoherence system_name =
   initcoherent := true;
   Hashtbl.iter (checkInitCoher system_name) Specification.lr_hash;
   if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
+;;
+
+(* For testing *)
+let initialCoherence_t system_name =
+  initcoherent := true;
+  Hashtbl.iter (checkInitCoher system_name) Specification.lr_hash;
+  if !initcoherent then 1
+  else 0;
 ;;
 
