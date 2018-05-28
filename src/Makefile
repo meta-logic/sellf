@@ -70,7 +70,7 @@
 # The Caml sources (including camlyacc and camllex source files)
 
 SOURCES = types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser.mly lexer.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml sellf2coq.ml sellf.ml 
-
+TESTS = types.mli term.ml prints.ml basic.ml llrules.ml subexponentials.ml specification.ml typeChecker.ml context.ml contextSchema.ml constraints.ml constraints.mli sequent.ml norm.ml proofTree.ml proofTreeSchema.ml parser.mly lexer.mll dlv.ml bipole.ml olRule.ml permutation.ml unify.ml staticpermutationcheck.ml boundedproofsearch.ml coherence.ml
 # The executable file to generate
 EXEC = sellf
 
@@ -91,7 +91,7 @@ CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
 CAMLDOC = ocamldoc -latex -I +ocamlgraph
 CAMLDOT = ocamldoc -dot -I +ocalmgraph
-
+CAMLTEST = ocamlfind ocamlc -o test -package oUnit -package ocamlgraph -package Str -linkpkg -g
 # The list of Caml libraries needed by the program
 # For instance:
 # LIBS=$(WITHGRAPHICS) $(WITHUNIX) $(WITHSTR) $(WITHNUMS) $(WITHTHREADS)\
@@ -140,6 +140,7 @@ doc:: $(EXEC)-doc
 
 dot:: $(EXEC)-dot
 
+test:: $(EXEC)-test
 #ocamlc -custom other options graphics.cma other files -cclib -lgraphics -cclib -lX11
 #ocamlc -thread -custom other options threads.cma other files -cclib -lthreads
 #ocamlc -custom other options str.cma other files -cclib -lstr
@@ -157,6 +158,11 @@ SMLIYDOC = $(SOURCES:.mly=.ml)
 SMLIYLDOC = $(SMLIYDOC:.mll=.ml)
 SMLYLDOC = $(filter %.ml,$(SMLIYLDOC))
 
+SMLIYTEST = $(TESTS:.mly=.ml)
+SMLIYLTEST = $(SMLIYTEST:.mll=.ml)
+SMLYLTEST = $(filter %.ml,$(SMLIYLTEST))
+OBJSTESTS = $(SMLYLTEST:.ml=.cmo)
+
 $(EXEC): $(OBJS) 
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(LIBS) $(OBJS)
 
@@ -168,6 +174,9 @@ $(EXEC)-doc:
 
 $(EXEC)-dot: 
 	$(CAMLDOT) -o ../doc/$(DOT) $(SMLIYLDOC)
+
+$(EXEC)-test:
+	$(CAMLTEST) $(OBJSTESTS) test_cc.ml test_ic.ml test_main.ml
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly 
 
@@ -208,6 +217,7 @@ $(EXEC)-dot:
 .mly.ml:
 	$(CAMLYACC) $<
 
+
 clean::
 	rm -f *.cm[iox] *~ .*~ #*#
 	rm -f $(EXEC)
@@ -233,3 +243,4 @@ depend: .depend
 	$(CAMLDEP) $(SMLIY) $(SMLIY:.ml=.mli) > .depend
 
 include .depend
+
