@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                           %
-% SELLF specification for LJ with           %
-% additive and multiplicative connectives   %
+% SELLF specification for LJF               %
+% (LJ with additive and multiplicative      %
+% connectives)                              %
 %                                           %
 % Giselle Reis   -   2015                   %
 %                                           %
