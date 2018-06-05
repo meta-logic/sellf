@@ -91,3 +91,11 @@ let test9_ic test_ctxt =
       let specName = Str.string_after !fileName (idx+1) in 
         assert_equal 1 (check_initialcoherence specName);;
 
+let test10_ic test_ctxt = 
+  initAll();
+  let fileName = ref "../examples/proofsystems/lax";
+       in
+    let idx = String.rindex !fileName '/' in
+      let specName = Str.string_after !fileName (idx+1) in 
+        assert_equal 1 (check_initialcoherence specName);;
+
