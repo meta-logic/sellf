@@ -1,7 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                                           %
-% SELLF specification for LK with           %
-% additive and multiplicative connectives   %
+% SELLF specification for LKF               %
+% (LK with additive and multiplicative      %
+% connectives)                              %
 %                                           %
 % Giselle Reis   -   2015                   %
 %                                           %
