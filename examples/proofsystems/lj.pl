@@ -6,13 +6,14 @@
 %                                           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-subexp r lin.
-subexp l unb.
+subexp r lin. % lin -> Forces singleton on rhs for init
+subexp l unb. % unb -> Implicit weakening on init
 
+%% For printing object level rules.
 subexpctx l many ant.
 subexpctx r single suc.
 
-%subexprel r < l.
+%subexprel r < l. %% optional
 
 rules introduction.
 
