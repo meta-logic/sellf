@@ -34,7 +34,7 @@ not (lft (and A B)) * ![r] (?[l] (lft A) | ?[l] (lft B)).
 not (rght (and A B)) * ![r] ?[f] (rght A) * ![r] ?[f] (rght B).
 
 % Bottom
-%(not (lft bottom)).
+%not (lft bottom).
 
 % TODO: implement all cut rules
 

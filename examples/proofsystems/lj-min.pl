@@ -18,12 +18,12 @@ subexpctx r single suc.
 rules introduction.
 
 % Conjunction
-(not (lft (conj A B))) * ((?[l] (lft A)) | (?[l] (lft B))).
-(not (rght (conj A B))) * ((?[r] (rght A)) & (?[r] (rght B))).
+not (lft (conj A B)) * ?[l] (lft A) | ?[l] (lft B).
+not (rght (conj A B)) * ?[r] (rght A) & ?[r] (rght B).
 
 % False
-(not (lft bottom)) * top.
+not (lft bottom) * top.
 
 rules axiom.
-((not (lft A)) * (not (rght A))).
+not (lft A) * not (rght A).
 
