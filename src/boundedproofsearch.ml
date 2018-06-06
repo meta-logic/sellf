@@ -25,7 +25,7 @@ let unify =
   in Unify.pattern_unify
 ;;
 
-let failStack : (unit -> unit) Stack.t = Stack.create () ;;
+let failStack : (unit -> bool) Stack.t = Stack.create () ;;
 
 let initProof formula =
   let ctx = Context.getInitial () in

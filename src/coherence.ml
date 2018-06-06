@@ -20,9 +20,6 @@ open Boundedproofsearch
 open Prints
 open TypeChecker
 
-let cutcoherent = ref true ;;
-let initcoherent = ref true ;;
-
 (* Procedure to actually check the coherence of a system *)
 
 let checkInitCoher system_name connective_name (spec_left, spec_right) =
@@ -32,20 +29,11 @@ let checkInitCoher system_name connective_name (spec_left, spec_right) =
   
   let spec_left_infty = QST(CONST("infty"), spec_left) in
   let spec_right_infty = QST(CONST("infty"), spec_right) in
-  (* print_endline "Proving initial coherence of:";
-  print_endline (termToString spec_left_infty);
-  print_endline (termToString spec_right_infty); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn (PARR(spec_left_infty, spec_right_infty)) in
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
-  prove f 4 (fun () ->
-          print_string ("====> Connective "^connective_name^" is initial-coherent.\n"); ()
-        )  
-        (fun () ->
-          initcoherent := false;
-          print_string ("x ==> Connective "^connective_name^" is not initial-coherent.\n");
-        )
+    prove f 4 (fun () -> true) (fun () -> false)
 ;;
 
 let checkDuality system_name connective_name (spec_left, spec_right) =
@@ -55,49 +43,22 @@ let checkDuality system_name connective_name (spec_left, spec_right) =
   
   let spec_left_normalized = Term.nnf (NOT(spec_left)) in
   let spec_right_normalized = Term.nnf (NOT(spec_right)) in
-  (* print_endline "Proving cut coherence of:";
-  print_endline (termToString spec_left_normalized);
-  print_endline (termToString spec_right_normalized); *)
   (* Assign deBruijn indices correctly, after the two formulas are joined *)
   let f0 = deBruijn (PARR(spec_left_normalized, spec_right_normalized)) in 
   (* Replace abstractions by universal quantifiers *)
   let f = Term.abs2forall f0 in
-  prove f 4 (fun () ->
-          print_string ("====> Connective "^connective_name^" has dual specification.\n"); ()
-        )  
-        (fun () ->
-          cutcoherent := false;
-          print_string ("x ==> Connective "^connective_name^" does not have dual specifications.\n");
-        )
+    prove f 4 (fun () -> true) (fun () -> false)
 ;;
 
 let cutCoherence system_name =
-  cutcoherent := true;
-  Hashtbl.iter (checkDuality system_name) Specification.lr_hash;
-  if !cutcoherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
-  else print_string "\nThe system is NOT cut coherent.\n";
-;;
-
-(* For testing *)
-let cutCoherence_t system_name =
-  cutcoherent := true;
-  Hashtbl.iter (checkDuality system_name) Specification.lr_hash;
-  if !cutcoherent then 1
-  else 0;
+  Hashtbl.fold (fun conn specs res -> 
+    (checkDuality system_name conn specs) && res 
+  ) Specification.lr_hash true
 ;;
 
 let initialCoherence system_name =
-  initcoherent := true;
-  Hashtbl.iter (checkInitCoher system_name) Specification.lr_hash;
-  if !initcoherent then print_string "\nTatu could prove that the system is initial coherent.\n"
-  else print_string "\nThe system is NOT initial coherent.\n"
-;;
-
-(* For testing *)
-let initialCoherence_t system_name =
-  initcoherent := true;
-  Hashtbl.iter (checkInitCoher system_name) Specification.lr_hash;
-  if !initcoherent then 1
-  else 0;
+  Hashtbl.fold (fun conn specs res -> 
+    (checkInitCoher system_name conn specs) && res 
+  ) Specification.lr_hash true
 ;;
 

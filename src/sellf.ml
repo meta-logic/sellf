@@ -60,8 +60,31 @@ let check_atomicelim () = begin
   print_endline "\nCould not infer how to eliminate atomic cuts."  
 end ;;
 
-let check_cutcoherence system_name = Coherence.cutCoherence system_name ;;
-let check_initialcoherence system_name = Coherence.initialCoherence system_name ;;
+let check_cutcoherence system_name = 
+  let coherent = Hashtbl.fold (fun conn specs res -> 
+    let d = Coherence.checkDuality system_name conn specs
+    in
+      if d then print_string ("====> Connective "^conn^" has dual specification.\n")
+      else print_string ("x ==> Connective "^conn^" does not have dual specifications.\n") ;
+      d && res 
+  ) Specification.lr_hash true
+  in
+    if coherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
+    else print_string "\nThe system is NOT cut coherent.\n"
+;;
+
+let check_initialcoherence system_name = 
+  let coherent = Hashtbl.fold (fun conn specs res -> 
+    let d = Coherence.checkInitCoher system_name conn specs
+    in
+      if d then print_string ("====> Connective "^conn^" is initial-coherent.\n")
+      else print_string ("x ==> Connective "^conn^" is not initial-coherent.\n");
+      d && res 
+  ) Specification.lr_hash true
+  in
+    if coherent then print_string "\nTatu could prove that the system is initial coherent.\n"
+    else print_string "\nThe system is NOT initial coherent.\n"
+;;
 
 let check_scopebang () = begin
   print_endline "Please type the subexponential:";
@@ -519,9 +542,9 @@ solve_query () =
         let _ = Parser.goal Lexer.token query in 
           begin
             Context.createProofSearchContext ();
-            Boundedproofsearch.prove !Term.goal !Term.psBound (fun () ->
-              print_string "\nYes.\n";
-            ) (fun () -> print_string "\nNo.\n")
+            if Boundedproofsearch.prove !Term.goal !Term.psBound (fun () -> true) (fun () -> false) then
+              print_string "\nYes.\n"
+            else print_string "\nNo.\n"
           end
       with
         | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
