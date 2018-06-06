@@ -19,7 +19,7 @@ rules introduction.
 
 % Conjunction
 not (lft (conj A B)) * ?[l] (lft A) | ?[l] (lft B).
-not (rght (conj A B)) * ?[r] (rght A) & ?[r] (rght B).
+not (rght (conj A B)) * ![l] ?[r] (rght A) & ![l] ?[r] (rght B).
 
 % False
 not (lft bottom) * top.
