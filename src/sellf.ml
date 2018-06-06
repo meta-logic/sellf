@@ -18,10 +18,10 @@ let position lexbuf =
   let file = curr.Lexing.pos_fname in
   let line = curr.Lexing.pos_lnum in
   let char = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
-    if file = "" then
-      () (* lexbuf information is rarely accurate at the toplevel *)
-    else
-      print_string ""; Format.sprintf ": line %d, character %d" line char
+  if file = "" then
+    () (* lexbuf information is rarely accurate at the toplevel *)
+  else
+    print_string ""; Format.sprintf ": line %d, character %d" line char
 
 let samefile = ref true ;;
 let fileName = ref "" ;;
@@ -47,46 +47,48 @@ let initAll () =
   Subexponentials.initialize ();
 ;;
 
-let check_principalcut () = begin
+let check_principalcut () =
   if Staticpermutationcheck.cut_principal () then 
-    print_endline "Tatu could infer that reduction to principal cuts is possible." else
+    print_endline "Tatu could infer that reduction to principal cuts is possible." 
+  else
     print_endline "\nCould not reduce to principal cuts.
       \nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
-end ;;
+;;
 
-let check_atomicelim () = begin
+let check_atomicelim () =
   if Staticpermutationcheck.weak_coherent () then 
-  print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." else
-  print_endline "\nCould not infer how to eliminate atomic cuts."  
-end ;;
+    print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." 
+  else
+    print_endline "\nCould not infer how to eliminate atomic cuts."  
+;;
 
 let check_cutcoherence system_name = 
   let coherent = Hashtbl.fold (fun conn specs res -> 
     let d = Coherence.checkDuality system_name conn specs
     in
-      if d then print_string ("====> Connective "^conn^" has dual specification.\n")
-      else print_string ("x ==> Connective "^conn^" does not have dual specifications.\n") ;
-      d && res 
+    if d then print_string ("====> Connective "^conn^" has dual specification.\n")
+    else print_string ("x ==> Connective "^conn^" does not have dual specifications.\n") ;
+    d && res 
   ) Specification.lr_hash true
   in
-    if coherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
-    else print_string "\nThe system is NOT cut coherent.\n"
+  if coherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
+  else print_string "\nThe system is NOT cut coherent.\n"
 ;;
 
 let check_initialcoherence system_name = 
   let coherent = Hashtbl.fold (fun conn specs res -> 
     let d = Coherence.checkInitCoher system_name conn specs
     in
-      if d then print_string ("====> Connective "^conn^" is initial-coherent.\n")
-      else print_string ("x ==> Connective "^conn^" is not initial-coherent.\n");
-      d && res 
+    if d then print_string ("====> Connective "^conn^" is initial-coherent.\n")
+    else print_string ("x ==> Connective "^conn^" is not initial-coherent.\n");
+    d && res 
   ) Specification.lr_hash true
   in
-    if coherent then print_string "\nTatu could prove that the system is initial coherent.\n"
-    else print_string "\nThe system is NOT initial coherent.\n"
+  if coherent then print_string "\nTatu could prove that the system is initial coherent.\n"
+  else print_string "\nThe system is NOT initial coherent.\n"
 ;;
 
-let check_scopebang () = begin
+let check_scopebang () =
   print_endline "Please type the subexponential:";
   let s = read_line() in
   let ers = Subexponentials.erased_bang s in
@@ -96,9 +98,9 @@ let check_scopebang () = begin
   List.iter (fun a -> print_string (a^", ")) ers; print_newline ();
   print_endline "The following should be empty: ";
   List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
-end ;;
+;;
 
-let parse file_name = begin
+let parse file_name =
   let file_sig = open_in (file_name^".sig") in
   let lexbuf = Lexing.from_channel file_sig in
   begin
@@ -107,23 +109,23 @@ let parse file_name = begin
         let _ = Parser.types Lexer.token lexbuf in ();
       done; true
     with 
-      | Lexer.Eof -> 
-         let file_prog = open_in (file_name^".pl") in 
-         let lexbuf = Lexing.from_channel file_prog in
-           begin
-           try
-             while true do
-               let _ = Parser.specification Lexer.token lexbuf in ();
-             done; true 
-           with
-             | Lexer.Eof -> true
-             | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
-             | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
-           end
-      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
-      | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
-    end
-end ;;
+    | Lexer.Eof -> 
+       let file_prog = open_in (file_name^".pl") in 
+       let lexbuf = Lexing.from_channel file_prog in
+       begin
+         try
+           while true do
+             let _ = Parser.specification Lexer.token lexbuf in ();
+           done; true 
+         with
+         | Lexer.Eof -> true
+         | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
+         | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+       end
+    | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
+    | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
+  end
+;;
 
 (* Auxiliary functions *)
 let permutationToTex f1 f2 cl = 
@@ -137,20 +139,19 @@ let permutationToTex f1 f2 cl =
      | true -> Permutation.nonPermutationsToTexStringCl pairs) in
   match Permutation.permute f1 f2 with
   | (true, [], []) -> 
-    "Could not build a derivation with the two chosen rules.\n\n";
+     "Could not build a derivation with the two chosen rules.\n\n";
 
   | (true, pairs, []) -> 
-    "The rules permute. Here are the permutations:\n" ^ 
-    (permutationTex pairs cl);
-  
+     "The rules permute. Here are the permutations:\n" ^ 
+       (permutationTex pairs cl);
+     
   | (false, ok, notok) -> 
-    "The rules might not permute. These are the configurations for which a \
-    permutation was found:\n" ^ 
-    (permutationTex ok cl);
-
-    "These are the configurations for which a permutation was not found:\n" ^
-    (nonPermutationTex notok cl);
-  
+     "The rules might not permute.\n" ^
+       "These are the configurations for which a permutation was found:\n" ^ 
+         (permutationTex ok cl) ^
+           "These are the configurations for which a permutation was not found:\n" ^
+             (nonPermutationTex notok cl);
+     
   | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
@@ -159,36 +160,36 @@ let permutationToTex f1 f2 cl =
 let print_rules_names () =
   let names = Specification.getAllRulesName () in
   List.iter (fun s ->
-    print_endline s
-  ) names
+      print_endline s
+    ) names
 ;;
 
 let print_bipoles_cl () =
   let formulas = Specification.getFormulas () in
   let bipoles = Bipole.get_bipoles formulas in
   List.iter (fun (pt, model) ->
-    print_endline "\\[";
-    print_endline (ProofTreeSchema.toTexString (pt));
-    print_endline "\\]";
-    print_endline "\\[";
-    print_endline "CONSTRAINTS = ";
-    print_endline (Constraints.toJaxString (model));
-    print_endline "\\]";
-  ) bipoles
+      print_endline "\\[";
+      print_endline (ProofTreeSchema.toTexString (pt));
+      print_endline "\\]";
+      print_endline "\\[";
+      print_endline "CONSTRAINTS = ";
+      print_endline (Constraints.toJaxString (model));
+      print_endline "\\]";
+    ) bipoles
 ;;
 
 let print_olrules_cl () =
   let formulas = Specification.getFormulas () in
   let bipoles = Bipole.get_bipoles formulas in
   List.iter (fun bipole ->
-    (* TODO: this is always a list with one element, one bipole (which is a pair
+      (* TODO: this is always a list with one element, one bipole (which is a pair
     <proof_tree, model>. All methods in olRule should be modified to work with
     only one derivation at a time *)
       let olpt = apply_derivation bipole in
       print_endline "\\[";
       print_endline (OlProofTree.toTexString olpt);
       print_endline "\\]";
-  ) bipoles
+    ) bipoles
 ;;
 
 (* Needed for debugging, only prints yes/no without showing the derivations *)
@@ -196,13 +197,13 @@ let print_permute_bool name1 name2 =
   let formula1 = Specification.getSpecificationOf name1 in
   let formula2 = Specification.getSpecificationOf name2 in
   match Permutation.permute formula1 formula2 with 
-    (* If both lists are empty, no bipoles could be constructed. *)
-    | (true, [], []) -> print_endline "N/A."
-    (* Else if there are no failures the second list should be empty. *)
-    | (true, pairs, []) -> print_endline "Yes.";
-    (* Else, some permutation was not possible. *)
-    | (false, _, bipoles) -> print_endline "No.";
-    | _ -> failwith ("Invalid result for permutation checking.")
+  (* If both lists are empty, no bipoles could be constructed. *)
+  | (true, [], []) -> print_endline "N/A."
+  (* Else if there are no failures the second list should be empty. *)
+  | (true, pairs, []) -> print_endline "Yes.";
+  (* Else, some permutation was not possible. *)
+  | (false, _, bipoles) -> print_endline "No.";
+  | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
 let print_permutation_cl name1 name2 = 
@@ -215,9 +216,9 @@ let print_formulas formulas =
   let i = ref 0 in
   print_endline "\nThese are the formulas available: ";
   List.iter ( fun f ->
-    print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
-    i := !i + 1
-  ) formulas;
+              print_endline ((string_of_int !i) ^ ". " ^ (Prints.termToString f));
+              i := !i + 1
+            ) formulas;
   print_newline ()
 ;;
 
@@ -226,17 +227,17 @@ let fprint_olrules bipoles file_name =
   let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
-    (* TODO: this is always a list with one element, one bipole (which is a pair
-    <proof_tree, model>. All methods in olRule should be modified to work with
-    only one derivation at a time *)
-    let olpt = apply_derivation bipole in
-    Printf.fprintf file "%s" "{\\scriptsize";
-    Printf.fprintf file "%s" "\\[";
-    Printf.fprintf file "%s" (OlProofTree.toTexString olpt);
-    Printf.fprintf file "%s" "\\]";
-    Printf.fprintf file "%s" "}";
+      (* TODO: this is always a list with one element, one bipole (which is a pair
+      <proof_tree, model>. All methods in olRule should be modified to work with
+      only one derivation at a time *)
+      let olpt = apply_derivation bipole in
+      Printf.fprintf file "%s" "{\\scriptsize";
+      Printf.fprintf file "%s" "\\[";
+      Printf.fprintf file "%s" (OlProofTree.toTexString olpt);
+      Printf.fprintf file "%s" "\\]";
+      Printf.fprintf file "%s" "}";
     (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString model);*)
-  ) bipoles;
+    ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
 ;;
@@ -245,15 +246,15 @@ let fprint_bipoles bipoles file_name =
   let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun bipole ->
-    Printf.fprintf file "%s" "{\\scriptsize";
-    Printf.fprintf file "%s" "\\[";
-    Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(bipole)));
-    Printf.fprintf file "%s" "\\]";
-    Printf.fprintf file "%s" "}";
-    Printf.fprintf file "%s" "CONSTRAINTS\n";
-    Printf.fprintf file "%s" (Constraints.toTexString (snd(bipole)));
+      Printf.fprintf file "%s" "{\\scriptsize";
+      Printf.fprintf file "%s" "\\[";
+      Printf.fprintf file "%s" (ProofTreeSchema.toTexString (fst(bipole)));
+      Printf.fprintf file "%s" "\\]";
+      Printf.fprintf file "%s" "}";
+      Printf.fprintf file "%s" "CONSTRAINTS\n";
+      Printf.fprintf file "%s" (Constraints.toTexString (snd(bipole)));
     (*Printf.fprintf file "Constraints: %s" (Constraints.toTexString (snd(bipole)));*)
-  ) bipoles;
+    ) bipoles;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
 ;;
@@ -262,11 +263,11 @@ let fprint_permutation forms_lst file_name =
   let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun (f1, f2) ->
-    let name1 = Specification.getRuleName f1 in
-    let name2 = Specification.getRuleName f2 in
-    Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
-    Printf.fprintf file "%s" (permutationToTex f1 f2 false);
-  ) forms_lst;
+      let name1 = Specification.getRuleName f1 in
+      let name2 = Specification.getRuleName f2 in
+      Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
+      Printf.fprintf file "%s" (permutationToTex f1 f2 false);
+    ) forms_lst;
   Printf.fprintf file "%s" Prints.texFileFooter;
   close_out file
 ;;
@@ -279,12 +280,12 @@ let permute_to_file name1 name2 =
   let i1 = ref 0 in
   let i2 = ref 0 in
   List.iter (fun f -> 
-    if (Specification.getRuleName f) = name1 then i1 := counter()
-    else begin
-      if (Specification.getRuleName f) = name2 then i2 := counter()
-      else index := !index + 1;
-    end
-  );
+      if (Specification.getRuleName f) = name1 then i1 := counter()
+      else begin
+          if (Specification.getRuleName f) = name2 then i2 := counter()
+          else index := !index + 1;
+        end
+    );
   fprint_permutation [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
 ;;
 
