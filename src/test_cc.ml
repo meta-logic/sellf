@@ -14,7 +14,7 @@ let initAll () =
   Subexponentials.initialize ();
 ;;
 
-let check_cutcoherence system_name = Coherence.cutCoherence_t system_name ;;
+let check_cutcoherence system_name = Coherence.cutCoherence system_name ;;
 
 (* test cut coherence  *)
 let test1_cc test_ctxt = 
@@ -23,7 +23,7 @@ let test1_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test2_cc test_ctxt = 
   initAll();
@@ -31,7 +31,7 @@ let test2_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test3_cc test_ctxt = 
   initAll();
@@ -39,7 +39,7 @@ let test3_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test4_cc test_ctxt = 
   initAll();
@@ -47,7 +47,7 @@ let test4_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test5_cc test_ctxt = 
   initAll();
@@ -55,6 +55,6 @@ let test5_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 

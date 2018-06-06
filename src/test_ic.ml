@@ -14,7 +14,7 @@ let initAll () =
   Subexponentials.initialize ();
 ;;
 
-let check_initialcoherence system_name = Coherence.initialCoherence_t system_name ;;
+let check_initialcoherence system_name = Coherence.initialCoherence system_name ;;
 
 (* Test initial coherence *)
 
@@ -24,5 +24,5 @@ let test1_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
