@@ -425,10 +425,13 @@ solve_query () =
     (* Check if all rules are bipoles *)
     | "#check_rules" -> 
       let formulas = Specification.getAllRules () in
-      List.iter (fun f -> match Term.isBipole f with
-        | true -> ()
-        | false -> print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f))
-      ) formulas
+      let not_bipoles = List.filter (fun f -> not (Term.isBipole f)) formulas in
+      begin match not_bipoles with
+        | [] -> print_endline ("All formulas are bipoles.")
+        | _ -> List.iter (fun f -> 
+          print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f)) 
+        ) not_bipoles 
+      end
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
