@@ -73,129 +73,132 @@ let permute_bin name1 name2 =
 
 
 let test_pr_lj test_cxtx = 
+  
+  (* ------------------ Testing LL ------------------------*)
   initAll();
-  let sameFile = parse "../examples/proofsystems/ll";
-  in 
-    (* tensor left permutes up*)
+  parse "../examples/proofsystems/ll";
+  
+  (* tensor left permutes up*)
 
-    assert_bool "tensor_l -> tensor_r" (permute_bin "tensor_l" "tensor_r" = FALSE);
-    assert_bool "tensor_l -> tensor_l" (permute_bin "tensor_l" "tensor_l" = TRUE);
+  assert_bool "tensor_l -> tensor_r" (permute_bin "tensor_l" "tensor_r" = FALSE);
+  assert_bool "tensor_l -> tensor_l" (permute_bin "tensor_l" "tensor_l" = TRUE);
 
-    assert_bool "tensor_l -> lolli_r" (permute_bin "tensor_l" "lolli_r" = TRUE);
-    assert_bool "tensor_l -> lolli_l" (permute_bin "tensor_l" "lolli_l" = FALSE);
+  assert_bool "tensor_l -> lolli_r" (permute_bin "tensor_l" "lolli_r" = TRUE);
+  assert_bool "tensor_l -> lolli_l" (permute_bin "tensor_l" "lolli_l" = FALSE);
 
-    assert_bool "tensor_l -> oplus_r" (permute_bin "tensor_l" "oplus_r" = TRUE);
-    assert_bool "tensor_l -> oplus_l" (permute_bin "tensor_l" "oplus_l" = TRUE);
+  assert_bool "tensor_l -> oplus_r" (permute_bin "tensor_l" "oplus_r" = TRUE);
+  assert_bool "tensor_l -> oplus_l" (permute_bin "tensor_l" "oplus_l" = TRUE);
 
-    assert_bool "tensor_l -> with_r" (permute_bin "tensor_l" "with_r" = TRUE);
-    assert_bool "tensor_l -> with_l" (permute_bin "tensor_l" "with_l" = TRUE);
+  assert_bool "tensor_l -> with_r" (permute_bin "tensor_l" "with_r" = TRUE);
+  assert_bool "tensor_l -> with_l" (permute_bin "tensor_l" "with_l" = TRUE);
 
-    assert_bool "tensor_l -> par_r" (permute_bin "tensor_l" "par_r" = TRUE);
-    assert_bool "tensor_l -> par_l" (permute_bin "tensor_l" "par_l" = FALSE);
+  assert_bool "tensor_l -> par_r" (permute_bin "tensor_l" "par_r" = TRUE);
+  assert_bool "tensor_l -> par_l" (permute_bin "tensor_l" "par_l" = FALSE);
 
-    assert_bool "tensor_l -> lbang_r" (permute_bin "tensor_l" "lbang_r" = FALSE);
-    assert_bool "tensor_l -> lbang_l" (permute_bin "tensor_l" "lbang_l" = TRUE);
+  assert_bool "tensor_l -> lbang_r" (permute_bin "tensor_l" "lbang_r" = FALSE);
+  assert_bool "tensor_l -> lbang_l" (permute_bin "tensor_l" "lbang_l" = TRUE);
 
-    assert_bool "tensor_l -> lquest_r" (permute_bin "tensor_l" "lquest_r" = TRUE);
-    assert_bool "tensor_l -> lquest_l" (permute_bin "tensor_l" "lquest_l" = FALSE);
+  assert_bool "tensor_l -> lquest_r" (permute_bin "tensor_l" "lquest_r" = TRUE);
+  assert_bool "tensor_l -> lquest_l" (permute_bin "tensor_l" "lquest_l" = FALSE);
 
-    assert_bool "tensor_l -> lone_r" (permute_bin "tensor_l" "lone_r" = FALSE);
-    assert_bool "tensor_l -> lone_l" (permute_bin "tensor_l" "lone_l" = TRUE);
+  assert_bool "tensor_l -> lone_r" (permute_bin "tensor_l" "lone_r" = FALSE);
+  assert_bool "tensor_l -> lone_l" (permute_bin "tensor_l" "lone_l" = TRUE);
 
-    assert_bool "tensor_l -> lbot_r" (permute_bin "tensor_l" "lone_r" = TRUE);
-    assert_bool "tensor_l -> lbot_l" (permute_bin "tensor_l" "lone_l" = FALSE);
+  assert_bool "tensor_l -> lbot_r" (permute_bin "tensor_l" "lone_r" = TRUE);
+  assert_bool "tensor_l -> lbot_l" (permute_bin "tensor_l" "lone_l" = FALSE);
 
 
-    (* tensor right permutes up *)
+  (* tensor right permutes up *)
 
-    assert_bool "tensor_r -> tenor_r" (permute_bin "tensor_r" "tensor_r" = TRUE);
-    assert_bool "tensor_r -> tensor_l" (permute_bin "tensor_r" "tensor_l" = TRUE);
+  assert_bool "tensor_r -> tenor_r" (permute_bin "tensor_r" "tensor_r" = TRUE);
+  assert_bool "tensor_r -> tensor_l" (permute_bin "tensor_r" "tensor_l" = TRUE);
 
-    assert_bool "tensor_r -> lolli_r" (permute_bin "tensor_r" "lolli_r" = TRUE);
-    assert_bool "tensor_r -> lolli_l" (permute_bin "tensor_r" "lolli_l" = TRUE);
+  assert_bool "tensor_r -> lolli_r" (permute_bin "tensor_r" "lolli_r" = TRUE);
+  assert_bool "tensor_r -> lolli_l" (permute_bin "tensor_r" "lolli_l" = TRUE);
 
-    assert_bool "tensor_r -> oplus_r" (permute_bin "tensor_r" "oplus_r" = TRUE);
-    assert_bool "tensor_r -> oplus_l" (permute_bin "tensor_r" "oplus_l" = TRUE);
+  assert_bool "tensor_r -> oplus_r" (permute_bin "tensor_r" "oplus_r" = TRUE);
+  assert_bool "tensor_r -> oplus_l" (permute_bin "tensor_r" "oplus_l" = TRUE);
 
-    assert_bool "tensor_r -> with_r" (permute_bin "tensor_r" "with_r" = TRUE);
-    assert_bool "tensor_r -> with_l" (permute_bin "tensor_r" "with_l" = TRUE);
+  assert_bool "tensor_r -> with_r" (permute_bin "tensor_r" "with_r" = TRUE);
+  assert_bool "tensor_r -> with_l" (permute_bin "tensor_r" "with_l" = TRUE);
 
-    assert_bool "tensor_r -> par_r" (permute_bin "tensor_r" "par_r" = TRUE);
-    assert_bool "tensor_r -> par_l" (permute_bin "tensor_r" "par_l" = TRUE);
+  assert_bool "tensor_r -> par_r" (permute_bin "tensor_r" "par_r" = TRUE);
+  assert_bool "tensor_r -> par_l" (permute_bin "tensor_r" "par_l" = TRUE);
 
-    assert_bool "tensor_r -> lbang_r" (permute_bin "tensor_r" "lbang_r" = FALSE);
-    assert_bool "tensor_r -> lbang_l" (permute_bin "tensor_r" "lbang_l" = TRUE);
+  assert_bool "tensor_r -> lbang_r" (permute_bin "tensor_r" "lbang_r" = FALSE);
+  assert_bool "tensor_r -> lbang_l" (permute_bin "tensor_r" "lbang_l" = TRUE);
 
-    assert_bool "tensor_r -> lquest_r" (permute_bin "tensor_r" "lquest_r" = TRUE);
-    assert_bool "tensor_r -> lquest_l" (permute_bin "tensor_r" "lquest_l" = FALSE);
+  assert_bool "tensor_r -> lquest_r" (permute_bin "tensor_r" "lquest_r" = TRUE);
+  assert_bool "tensor_r -> lquest_l" (permute_bin "tensor_r" "lquest_l" = FALSE);
 
-    assert_bool "tensor_r -> lone_r" (permute_bin "tensor_r" "lone_r" = FALSE);
-    assert_bool "tensor_r -> lone_l" (permute_bin "tensor_r" "lone_l" = TRUE);
+  assert_bool "tensor_r -> lone_r" (permute_bin "tensor_r" "lone_r" = FALSE);
+  assert_bool "tensor_r -> lone_l" (permute_bin "tensor_r" "lone_l" = TRUE);
 
-    assert_bool "tensor_r -> lbot_r" (permute_bin "tensor_r" "lone_r" = TRUE);
-    assert_bool "tensor_r -> lbot_l" (permute_bin "tensor_r" "lone_l" = FALSE);
+  assert_bool "tensor_r -> lbot_r" (permute_bin "tensor_r" "lone_r" = TRUE);
+  assert_bool "tensor_r -> lbot_l" (permute_bin "tensor_r" "lone_l" = FALSE);
 
-    (* plus right permutes up *)
+  (* plus right permutes up *)
 
-    assert_bool "oplus_r -> tenor_r" (permute_bin "oplus_r" "tensor_r" = TRUE);
-    assert_bool "oplus_r -> tensor_l" (permute_bin "oplus_r" "tensor_l" = TRUE);
+  assert_bool "oplus_r -> tenor_r" (permute_bin "oplus_r" "tensor_r" = TRUE);
+  assert_bool "oplus_r -> tensor_l" (permute_bin "oplus_r" "tensor_l" = TRUE);
 
-    assert_bool "oplus_r -> lolli_r" (permute_bin "oplus_r" "lolli_r" = TRUE);
-    assert_bool "oplus_r -> lolli_l" (permute_bin "oplus_r" "lolli_l" = TRUE);
+  assert_bool "oplus_r -> lolli_r" (permute_bin "oplus_r" "lolli_r" = TRUE);
+  assert_bool "oplus_r -> lolli_l" (permute_bin "oplus_r" "lolli_l" = TRUE);
 
-    assert_bool "oplus_r -> oplus_r" (permute_bin "oplus_r" "oplus_r" = TRUE);
-    assert_bool "oplus_r -> oplus_l" (permute_bin "oplus_r" "oplus_l" = TRUE);
+  assert_bool "oplus_r -> oplus_r" (permute_bin "oplus_r" "oplus_r" = TRUE);
+  assert_bool "oplus_r -> oplus_l" (permute_bin "oplus_r" "oplus_l" = TRUE);
 
-    assert_bool "oplus_r -> with_r" (permute_bin "oplus_r" "with_r" = TRUE);
-    assert_bool "oplus_r -> with_l" (permute_bin "oplus_r" "with_l" = TRUE);
+  assert_bool "oplus_r -> with_r" (permute_bin "oplus_r" "with_r" = TRUE);
+  assert_bool "oplus_r -> with_l" (permute_bin "oplus_r" "with_l" = TRUE);
 
-    assert_bool "oplus_r -> par_r" (permute_bin "oplus_r" "par_r" = TRUE);
-    assert_bool "oplus_r -> par_l" (permute_bin "oplus_r" "par_l" = TRUE);
+  assert_bool "oplus_r -> par_r" (permute_bin "oplus_r" "par_r" = TRUE);
+  assert_bool "oplus_r -> par_l" (permute_bin "oplus_r" "par_l" = TRUE);
 
-    assert_bool "oplus_r -> lbang_r" (permute_bin "oplus_r" "lbang_r" = FALSE);
-    assert_bool "oplus_r -> lbang_l" (permute_bin "oplus_r" "lbang_l" = TRUE);
+  assert_bool "oplus_r -> lbang_r" (permute_bin "oplus_r" "lbang_r" = FALSE);
+  assert_bool "oplus_r -> lbang_l" (permute_bin "oplus_r" "lbang_l" = TRUE);
 
-    assert_bool "oplus_r -> lquest_r" (permute_bin "oplus_r" "lquest_r" = TRUE);
-    assert_bool "oplus_r -> lquest_l" (permute_bin "oplus_r" "lquest_l" = FALSE);
+  assert_bool "oplus_r -> lquest_r" (permute_bin "oplus_r" "lquest_r" = TRUE);
+  assert_bool "oplus_r -> lquest_l" (permute_bin "oplus_r" "lquest_l" = FALSE);
 
-    assert_bool "oplus_r -> lone_r" (permute_bin "oplus_r" "lone_r" = FALSE);
-    assert_bool "oplus_r -> lone_l" (permute_bin "oplus_r" "lone_l" = TRUE);
+  assert_bool "oplus_r -> lone_r" (permute_bin "oplus_r" "lone_r" = FALSE);
+  assert_bool "oplus_r -> lone_l" (permute_bin "oplus_r" "lone_l" = TRUE);
 
-    assert_bool "oplus_r -> lbot_r" (permute_bin "oplus_r" "lone_r" = TRUE);
-    assert_bool "oplus_r -> lbot_l" (permute_bin "oplus_r" "lone_l" = FALSE);
+  assert_bool "oplus_r -> lbot_r" (permute_bin "oplus_r" "lone_r" = TRUE);
+  assert_bool "oplus_r -> lbot_l" (permute_bin "oplus_r" "lone_l" = FALSE);
 
-     (* with right permutes up *)
+   (* with right permutes up *)
 
-    assert_bool "with_r -> tenor_r" (permute_bin "with_r" "tensor_r" = FALSE);
-    assert_bool "with_r -> tensor_l" (permute_bin "with_r" "tensor_l" = TRUE);
+  assert_bool "with_r -> tenor_r" (permute_bin "with_r" "tensor_r" = FALSE);
+  assert_bool "with_r -> tensor_l" (permute_bin "with_r" "tensor_l" = TRUE);
 
-    assert_bool "with_r -> lolli_r" (permute_bin "with_r" "lolli_r" = TRUE);
-    assert_bool "with_r -> lolli_l" (permute_bin "with_r" "lolli_l" = FALSE);
+  assert_bool "with_r -> lolli_r" (permute_bin "with_r" "lolli_r" = TRUE);
+  assert_bool "with_r -> lolli_l" (permute_bin "with_r" "lolli_l" = FALSE);
 
-    assert_bool "with_r -> oplus_r" (permute_bin "with_r" "oplus_r" = FALSE);
-    assert_bool "with_r -> oplus_l" (permute_bin "with_r" "oplus_l" = TRUE);
+  assert_bool "with_r -> oplus_r" (permute_bin "with_r" "oplus_r" = FALSE);
+  assert_bool "with_r -> oplus_l" (permute_bin "with_r" "oplus_l" = TRUE);
 
-    assert_bool "with_r -> with_r" (permute_bin "with_r" "with_r" = TRUE);
-    assert_bool "with_r -> with_l" (permute_bin "with_r" "with_l" = FALSE);
+  assert_bool "with_r -> with_r" (permute_bin "with_r" "with_r" = TRUE);
+  assert_bool "with_r -> with_l" (permute_bin "with_r" "with_l" = FALSE);
 
-    assert_bool "with_r -> par_r" (permute_bin "with_r" "par_r" = TRUE);
-    assert_bool "with_r -> par_l" (permute_bin "with_r" "par_l" = FALSE);
+  assert_bool "with_r -> par_r" (permute_bin "with_r" "par_r" = TRUE);
+  assert_bool "with_r -> par_l" (permute_bin "with_r" "par_l" = FALSE);
 
-    assert_bool "with_r -> lbang_r" (permute_bin "with_r" "lbang_r" = FALSE);
-    assert_bool "with_r -> lbang_l" (permute_bin "with_r" "lbang_l" = TRUE);
+  assert_bool "with_r -> lbang_r" (permute_bin "with_r" "lbang_r" = FALSE);
+  assert_bool "with_r -> lbang_l" (permute_bin "with_r" "lbang_l" = TRUE);
 
-    assert_bool "with_r -> lquest_r" (permute_bin "with_r" "lquest_r" = TRUE);
-    assert_bool "with_r -> lquest_l" (permute_bin "with_r" "lquest_l" = FALSE);
+  assert_bool "with_r -> lquest_r" (permute_bin "with_r" "lquest_r" = TRUE);
+  assert_bool "with_r -> lquest_l" (permute_bin "with_r" "lquest_l" = FALSE);
 
-    assert_bool "with_r -> lone_r" (permute_bin "with_r" "lone_r" = FALSE);
-    assert_bool "with_r -> lone_l" (permute_bin "with_r" "lone_l" = TRUE);
+  assert_bool "with_r -> lone_r" (permute_bin "with_r" "lone_r" = FALSE);
+  assert_bool "with_r -> lone_l" (permute_bin "with_r" "lone_l" = TRUE);
 
-    assert_bool "with_r -> lbot_r" (permute_bin "oplus_r" "lone_r" = TRUE);
-    assert_bool "with_r -> lbot_l" (permute_bin "oplus_r" "lone_l" = FALSE);
+  assert_bool "with_r -> lbot_r" (permute_bin "oplus_r" "lone_r" = TRUE);
+  assert_bool "with_r -> lbot_l" (permute_bin "oplus_r" "lone_l" = FALSE);
 
-  initAll();
-  let sameFile = parse "../examples/proofsystems/lj" 
-  in
+
+  (*------------------ Testing LJ ------------------------*)
+  initAll ();
+  parse "../examples/proofsystems/lj";
 
   (* impl left permutes up *)
   assert_bool "imp_l -> imp_l" (permute_bin "imp_l" "imp_l" = TRUE);
@@ -237,8 +240,11 @@ let test_pr_lj test_cxtx =
   assert_bool "and_r -> or_l" (permute_bin "and_l" "or_l" = TRUE);
   assert_bool "and_r -> or_r" (permute_bin "and_l" "or_r" = NA);
 
-  let sameFile = parse "../examples/proofsystems/mlj"
-  in 
+
+  (*------------------ Testing MLJ ------------------------*)
+  initAll ();
+  parse "../examples/proofsystems/mlj";
+   
   (* impl right permutes up *)
   assert_bool "imp_r -> imp_l" (permute_bin "imp_r" "imp_l" = FALSE);
   assert_bool "imp_r -> imp_r" (permute_bin "imp_r" "imp_r" = NA);

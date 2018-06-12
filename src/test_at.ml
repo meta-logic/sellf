@@ -57,62 +57,61 @@ end ;;
 (* test atomicelim *)
 let test1_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/g1m";
-    in
-    assert_equal true (check_atomicelim ());;
-
+  parse "../examples/proofsystems/g1m";
+  assert_equal true (check_atomicelim ())
+;;
 
 let test2_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/lal";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/lal";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test3_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/lax";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/lax";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test4_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/lj";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/lj";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test5_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/lk";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/lk";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test6_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/ll";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/ll";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test7_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/ill";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/ill";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test8_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/mlj";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/mlj";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test9_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/s4";
-    in
-    assert_equal true (check_atomicelim ());; 
+  parse "../examples/proofsystems/s4";
+  assert_equal true (check_atomicelim ())
+;; 
 
 let test10_at test_ctxt = 
   initAll();
-  let samefile = parse "../examples/proofsystems/g3k";
-    in
-    assert_equal false (check_atomicelim ());; 
+  parse "../examples/proofsystems/g3k";
+  assert_equal false (check_atomicelim ())
+;; 
 

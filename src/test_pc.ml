@@ -57,64 +57,63 @@ let check_principalcut () = begin
 end ;;
 
 
-(*	Test principalcut *)
+(*      Test principalcut *)
 let test1_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/g1m";
-    in
-    assert_equal true (check_principalcut ());;
-
+  initAll();
+  parse "../examples/proofsystems/g1m";
+  assert_equal true (check_principalcut ())
+;;
 
 let test2_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/lal";
-    in
-    assert_equal true (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/lal";
+  assert_equal true (check_principalcut ())
+;; 
 
 let test3_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/lax";
-    in
-    assert_equal true (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/lax";
+  assert_equal true (check_principalcut ())
+;; 
 
 let test4_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/lj";
-    in
-    assert_equal true (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/lj";
+  assert_equal true (check_principalcut ())
+;; 
 
 let test5_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/lk";
-    in
-    assert_equal true (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/lk";
+  assert_equal true (check_principalcut ())
+;; 
 
 let test6_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/ll";
-    in
-    assert_equal true (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/ll";
+  assert_equal true (check_principalcut ())
+;; 
 
 let test7_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/ill";
-    in
-    assert_equal false (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/ill";
+  assert_equal false (check_principalcut ())
+;; 
 
 let test8_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/mlj";
-    in
-    assert_equal false (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/mlj";
+  assert_equal false (check_principalcut ())
+;; 
 
 let test9_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/s4";
-    in
-    assert_equal false (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/s4";
+  assert_equal false (check_principalcut ())
+;;
 
 let test10_pc test_ctxt = 
-	initAll();
- 	let samefile = parse "../examples/proofsystems/g3k";
-    in
-    assert_equal false (check_principalcut ());; 
+  initAll();
+  parse "../examples/proofsystems/g3k";
+  assert_equal false (check_principalcut ())
+;; 
