@@ -61,7 +61,7 @@ rule token = parse
 | subtype as s          { TSUB(s) }
 
 (* Reserved keywords for the top-level *)
-| "#load" (filepath as s) { LOAD(s) }
+| "#load " (filepath as s) { LOAD(s) }
 | "#help"               { HELP }
 | "#verbose"            { VERBOSE }
 | "#time"               { TIME }
