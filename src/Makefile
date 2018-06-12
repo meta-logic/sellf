@@ -91,7 +91,7 @@ CAMLLEX = ocamllex
 CAMLYACC = ocamlyacc
 CAMLDOC = ocamldoc -latex -I +ocamlgraph
 CAMLDOT = ocamldoc -dot -I +ocalmgraph
-CAMLTEST = ocamlfind ocamlc -o test -package oUnit -package ocamlgraph -package Str -linkpkg -g
+CAMLTEST = ocamlfind ocamlc -o test -package oUnit -package ocamlgraph -package str -linkpkg -g
 # The list of Caml libraries needed by the program
 # For instance:
 # LIBS=$(WITHGRAPHICS) $(WITHUNIX) $(WITHSTR) $(WITHNUMS) $(WITHTHREADS)\
