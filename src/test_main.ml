@@ -36,6 +36,18 @@ let suite =
   "test8_ic">:: Test_ic.test8_ic;
   "test9_ic">:: Test_ic.test9_ic;
   "test9_ic">:: Test_ic.test10_ic;
+ 
+ (* Testing principal cut *)
+  "test1_pc">:: Test_pc.test1_pc;
+  "test2_pc">:: Test_pc.test2_pc;
+  "test3_pc">:: Test_pc.test3_pc;
+  "test4_pc">:: Test_pc.test4_pc;
+  "test5_pc">:: Test_pc.test5_pc;
+  "test6_pc">:: Test_pc.test6_pc;
+  "test7_pc">:: Test_pc.test7_pc;
+  "test8_pc">:: Test_pc.test8_pc;
+  "test9_pc">:: Test_pc.test9_pc;
+  "test10_pc">:: Test_pc.test10_pc;
 
   ]
 ;;
