@@ -8,6 +8,7 @@ open OlRule
 open ProofTreeSchema
 open Permutation
 
+
 let suite =
 "suite">:::
  [
@@ -60,8 +61,13 @@ let suite =
   "test7_at">:: Test_at.test7_at;
   "test8_at">:: Test_at.test8_at;
   "test9_at">:: Test_at.test9_at;
-  "test10_at">:: Test_at.test10_at
+  "test10_at">:: Test_at.test10_at;
 
+  (* Testing permutations *)
+  (*"test_pr_ll">:: Test_pr.test_pr_0*)
+  "test_pr_lj">:: Test_pr_lj.test_pr_lj
+  (*"test_pr_lj">:: Test_pr.test_pr_lj;*)
+  (*"test_pr_mlj">:: Test_pr.test_pr_mlj*)
   ]
 ;;
 
