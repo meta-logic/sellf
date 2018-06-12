@@ -49,6 +49,19 @@ let suite =
   "test9_pc">:: Test_pc.test9_pc;
   "test10_pc">:: Test_pc.test10_pc;
 
+ (* Testing atomicelim *)
+
+  "test1_at">:: Test_at.test1_at;
+  "test2_at">:: Test_at.test2_at;
+  "test3_at">:: Test_at.test3_at;
+  "test4_at">:: Test_at.test4_at;
+  "test5_at">:: Test_at.test5_at;
+  "test6_at">:: Test_at.test6_at;
+  "test7_at">:: Test_at.test7_at;
+  "test8_at">:: Test_at.test8_at;
+  "test9_at">:: Test_at.test9_at;
+  "test10_at">:: Test_at.test10_at
+
   ]
 ;;
 
