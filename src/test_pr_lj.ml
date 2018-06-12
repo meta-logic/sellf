@@ -35,7 +35,7 @@ let parse file_name = begin
     try 
       while true do
         let _ = Parser.types Lexer.token lexbuf in ();
-      done; true
+      done
     with 
       | Lexer.Eof -> 
          let file_prog = open_in (file_name^".pl") in 
@@ -44,14 +44,14 @@ let parse file_name = begin
            try
              while true do
                let _ = Parser.specification Lexer.token lexbuf in ();
-             done; true 
+             done
            with
-             | Lexer.Eof -> true
-             | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
-             | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+             | Lexer.Eof -> ()
+             | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf)
+             | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str
            end
-      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
-      | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
+      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf)
+      | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf)
     end
 end ;;
 
