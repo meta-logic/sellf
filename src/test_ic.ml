@@ -32,7 +32,7 @@ let test2_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test3_ic test_ctxt = 
   initAll();
@@ -40,7 +40,7 @@ let test3_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test4_ic test_ctxt = 
   initAll();
@@ -48,7 +48,7 @@ let test4_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test5_ic test_ctxt = 
   initAll();
@@ -56,7 +56,7 @@ let test5_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 
 let test6_ic test_ctxt = 
@@ -65,7 +65,7 @@ let test6_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test7_ic test_ctxt = 
   initAll();
@@ -73,7 +73,7 @@ let test7_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test8_ic test_ctxt = 
   initAll();
@@ -81,7 +81,7 @@ let test8_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test9_ic test_ctxt = 
   initAll();
@@ -89,7 +89,7 @@ let test9_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 
 let test10_ic test_ctxt = 
   initAll();
@@ -97,5 +97,5 @@ let test10_ic test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_initialcoherence specName);;
+        assert_equal true (check_initialcoherence specName);;
 

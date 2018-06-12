@@ -64,7 +64,7 @@ let test6_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test7_cc test_ctxt = 
   initAll();
@@ -72,7 +72,7 @@ let test7_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test8_cc test_ctxt = 
   initAll();
@@ -80,7 +80,7 @@ let test8_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 let test9_cc test_ctxt = 
   initAll();
@@ -88,7 +88,7 @@ let test9_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
 
 let test10_cc test_ctxt = 
@@ -97,5 +97,5 @@ let test10_cc test_ctxt =
        in
     let idx = String.rindex !fileName '/' in
       let specName = Str.string_after !fileName (idx+1) in 
-        assert_equal 1 (check_cutcoherence specName);;
+        assert_equal true (check_cutcoherence specName);;
 
