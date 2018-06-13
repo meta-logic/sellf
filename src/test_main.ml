@@ -9,11 +9,10 @@ open ProofTreeSchema
 open Permutation
 
 
-let suite =
-"suite">:::
+let suite_cc =
+"suite_cc">:::
  [
-
-(* Testing cut coherence *)
+ (* Testing cut coherence *)
  "test1_cc">:: Test_cc.test1_cc;
  "test2_cc">:: Test_cc.test2_cc;
  "test3_cc">:: Test_cc.test3_cc;
@@ -24,9 +23,13 @@ let suite =
  "test8_cc">:: Test_cc.test8_cc;
  "test9_cc">:: Test_cc.test9_cc;
  "test10_cc">:: Test_cc.test10_cc;
+ ]
+;;
 
-
- (* Testing initial coherence *)
+let suite_ic =
+"suite_ic">:::
+ [
+  (* Testing initial coherence *)
   "test1_ic">:: Test_ic.test1_ic;
   "test2_ic">:: Test_ic.test2_ic;
   "test3_ic">:: Test_ic.test3_ic;
@@ -36,9 +39,14 @@ let suite =
   "test7_ic">:: Test_ic.test7_ic;
   "test8_ic">:: Test_ic.test8_ic;
   "test9_ic">:: Test_ic.test9_ic;
-  "test9_ic">:: Test_ic.test10_ic;
+  "test9_ic">:: Test_ic.test10_ic
+  ]
+;;
  
- (* Testing principal cut *)
+let suite_pc =
+"suite_pc">:::
+ [
+  (* Testing principal cut *)
   "test1_pc">:: Test_pc.test1_pc;
   "test2_pc">:: Test_pc.test2_pc;
   "test3_pc">:: Test_pc.test3_pc;
@@ -48,10 +56,14 @@ let suite =
   "test7_pc">:: Test_pc.test7_pc;
   "test8_pc">:: Test_pc.test8_pc;
   "test9_pc">:: Test_pc.test9_pc;
-  "test10_pc">:: Test_pc.test10_pc;
+  "test10_pc">:: Test_pc.test10_pc
+  ]
+;;
 
- (* Testing atomicelim *)
-
+let suite_at =
+"suite_at">:::
+ [
+  (* Testing atomicelim *)
   "test1_at">:: Test_at.test1_at;
   "test2_at">:: Test_at.test2_at;
   "test3_at">:: Test_at.test3_at;
@@ -61,8 +73,13 @@ let suite =
   "test7_at">:: Test_at.test7_at;
   "test8_at">:: Test_at.test8_at;
   "test9_at">:: Test_at.test9_at;
-  "test10_at">:: Test_at.test10_at;
+  "test10_at">:: Test_at.test10_at
+  ]
+;;
 
+let suite_pr =
+"suite_pr">:::
+ [
   (* Testing permutations *)
   (*"test_pr_ll">:: Test_pr.test_pr_0*)
   "test_pr_lj">:: Test_pr_lj.test_pr_lj
@@ -73,5 +90,21 @@ let suite =
 
 
 let () =
-  run_test_tt_main suite
+  print_endline "----------------------------------------------------------";
+  print_endline "- Running tests for cut coherence...";
+  run_test_tt_main suite_cc;
+  print_endline "----------------------------------------------------------";
+  print_endline "- Running tests for initial coherence...";
+  run_test_tt_main suite_ic;
+  print_endline "----------------------------------------------------------";
+  print_endline "- Running tests for principal cut...";
+  run_test_tt_main suite_pc;
+  print_endline "----------------------------------------------------------";
+  print_endline "- Running tests for atomic cut elimination...";
+  run_test_tt_main suite_at;
+  print_endline "----------------------------------------------------------";
+  print_endline "- Running tests for permutations...";
+  run_test_tt_main suite_pr;
+  print_endline "----------------------------------------------------------";
+  print_endline "Done."
 ;;
