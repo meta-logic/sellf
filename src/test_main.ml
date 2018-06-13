@@ -9,9 +9,7 @@ open ProofTreeSchema
 open Permutation
 
 
-let suite =
-"suite">:::
- [
+let test_case = ([
 
 (* Testing cut coherence *)
  "test1_cc">:: Test_cc.test1_cc;
@@ -63,12 +61,10 @@ let suite =
   "test9_at">:: Test_at.test9_at;
   "test10_at">:: Test_at.test10_at;
 
-  (* Testing permutations *)
-  (*"test_pr_ll">:: Test_pr.test_pr_0*)
-  "test_pr_lj">:: Test_pr_lj.test_pr_lj
-  (*"test_pr_lj">:: Test_pr.test_pr_lj;*)
-  (*"test_pr_mlj">:: Test_pr.test_pr_mlj*)
-  ]
+
+  ] (* Testing permutations *) @ Test_pr.permutation_list);;
+let suite =
+"suite">:::test_case 
 ;;
 
 
