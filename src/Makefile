@@ -257,6 +257,8 @@ clean::
 	rm -f parser.mli
 	rm -f parser.ml
 	rm -f lexer.ml
+	rm -f *.log
+	rm -f *.cache
 
 .depend.input: Makefile
 	@echo -n '--Checking Ocaml input files: '
