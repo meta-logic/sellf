@@ -79,13 +79,7 @@ let suite_at =
 
 let suite_pr =
 "suite_pr">:::
- [
-  (* Testing permutations *)
-  (*"test_pr_ll">:: Test_pr.test_pr_0*)
-  "test_pr_lj">:: Test_pr_lj.test_pr_lj
-  (*"test_pr_lj">:: Test_pr.test_pr_lj;*)
-  (*"test_pr_mlj">:: Test_pr.test_pr_mlj*)
-  ]
+  Test_pr.permutation_list
 ;;
 
 
