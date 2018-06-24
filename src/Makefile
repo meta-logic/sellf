@@ -206,7 +206,7 @@ $(EXEC)-dot:
 	$(CAMLDOT) -o ../doc/$(DOT) $(SMLIYLDOC)
 
 $(EXEC)-test:
-	$(CAMLTEST) $(OBJSTESTS) test_pc.ml test_pr_lj.ml test_at.ml test_cc.ml test_ic.ml test_main.ml
+	$(CAMLTEST) $(OBJSTESTS) test_pc.ml test_pr.ml test_at.ml test_cc.ml test_ic.ml test_main.ml
 
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly 
 
