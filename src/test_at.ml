@@ -65,37 +65,37 @@ let test2_at test_ctxt =
   initAll();
   parse "../examples/proofsystems/lal";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test3_at test_ctxt = 
   initAll();
   parse "../examples/proofsystems/lax";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test4_at test_ctxt = 
   initAll();
   parse "../examples/proofsystems/lj";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test5_at test_ctxt = 
   initAll();
   parse "../examples/proofsystems/lk";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test6_at test_ctxt = 
   initAll();
   parse "../examples/proofsystems/ll";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test7_at test_ctxt = 
   initAll();
   parse "../examples/proofsystems/ill";
   assert_equal true (check_atomicelim ())
-;; 
+;;
 
 let test8_at test_ctxt = 
   initAll();
@@ -113,5 +113,5 @@ let test10_at test_ctxt =
   initAll();
   parse "../examples/proofsystems/g3k";
   assert_equal false (check_atomicelim ())
-;; 
+;;
 

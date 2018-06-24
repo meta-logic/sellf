@@ -56,8 +56,7 @@ let check_principalcut () = begin
      else false
 end ;;
 
-
-(*      Test principalcut *)
+(* Test principalcut *)
 let test1_pc test_ctxt = 
   initAll();
   parse "../examples/proofsystems/g1m";
@@ -110,7 +109,7 @@ let test9_pc test_ctxt =
   initAll();
   parse "../examples/proofsystems/s4";
   assert_equal false (check_principalcut ())
-;;
+;; 
 
 let test10_pc test_ctxt = 
   initAll();
