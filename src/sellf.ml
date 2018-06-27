@@ -103,28 +103,28 @@ let check_scopebang () =
 let parse file_name =
   let file_sig = open_in (file_name^".sig") in
   let lexbuf = Lexing.from_channel file_sig in
-  begin
-    try 
-      while true do
-        let _ = Parser.types Lexer.token lexbuf in ();
-      done; true
-    with 
-    | Lexer.Eof -> 
-       let file_prog = open_in (file_name^".pl") in 
-       let lexbuf = Lexing.from_channel file_prog in
-       begin
-         try
-           while true do
-             let _ = Parser.specification Lexer.token lexbuf in ();
-           done; true 
-         with
-         | Lexer.Eof -> true
-         | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
-         | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
-       end
-    | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
-    | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
-  end
+  try
+    let (kt, tt) = Parser.signature Lexer.token lexbuf in
+      Specification.initialize ();
+      (* Copying one table into another. This is a hack that will be removed
+      once specification.ml is transformed into a proper module. *)
+      Hashtbl.iter (fun _ v -> let _ = Specification.addKindTbl v in ()) kt;
+      Hashtbl.iter (fun k v -> Specification.addTypeTbl k v) tt;
+      let file_prog = open_in (file_name^".pl") in 
+      let lexbuf = Lexing.from_channel file_prog in
+      try
+        let (s, c, i, a) = Parser.specification Lexer.token lexbuf in
+          (* Hack to be removed once specification.ml is a proper module *)
+          Specification.structRules := List.rev s;
+          Specification.cutRules := List.rev c;
+          Specification.introRules := List.rev i;
+          Specification.axioms := List.rev a; true
+      with
+      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
+      | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+  with
+  | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
+  | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
 ;;
 
 (* Auxiliary functions *)

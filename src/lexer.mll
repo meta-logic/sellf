@@ -122,6 +122,6 @@ rule token = parse
 | valid_name as s       { NAME(s) }
 | var_name as s         { VAR(s) }
 | ['0'-'9']+ as s       { INT(int_of_string s) }
-| eof                   { raise Eof }
+| eof                   { EOF }
 
 

@@ -88,9 +88,10 @@ let addRSpec str t = try match Hashtbl.find lr_hash str with
 let rec getHeadPredicate f = match f with 
   | TENSOR(NOT(prd), spc) -> prd
   | EXISTS(s, i, t) -> getHeadPredicate t
+  | ABS(s, i, t) -> getHeadPredicate t
   | NOT(prd) -> prd
   | PRED(_, _, _) -> f
-  | _ -> failwith ("Not expected formula in specification: " ^ Prints.termToString f)
+  | _ -> failwith ("getHeadPredicate: Not expected formula in specification: " ^ Prints.termToString f)
 ;;
 
 (* Returns the side of the introduction rule *)
@@ -140,7 +141,7 @@ let processIntroRule t =
     | TENSOR(NOT(prd), spc) -> spc
     | ABS(s, i, t) -> ABS(s, i, getBodyFormula t)
     | NOT(prd) -> TOP (* Specification has no body. *)
-    | _ -> failwith "Not expected formula in specification."
+    | _ -> failwith "processIntroRule: Not expected formula in specification."
   in
   match getSide t with
     | "l" -> addLSpec (getConnectiveName t) (getBodyFormula t)

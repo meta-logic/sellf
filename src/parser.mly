@@ -12,6 +12,8 @@ open Context
 open Subexponentials
 open Staticpermutationcheck
 
+exception ParsingError of string
+
 type ruleType = 
   | AXIOM
   | CUT
@@ -51,7 +53,7 @@ let check_val_subexp sub1 sub2 =
        LOAD HELP VERBOSE TIME ON OFF EXIT
        TINT TLIST TSTRING
        TARR DOT LPAREN RPAREN LBRACKET RBRACKET LCURLY RCURLY LESS GEQ SEMICOLON
-       UNDERSCORE QUOTE COMMA NEWLINE
+       UNDERSCORE QUOTE COMMA NEWLINE EOF
        TOP BOT ONE ZERO BANG QST FORALL EXISTS TIMES PLUS PIPE WITH LOLLI NOT INVLOLLI
        IN INUNQ INFINAL EMP UNION SETMINUS CONTAINED MAXIDX NOTMAXIDX
 %token <string> CONNTEX CTXTYPE CTXSIDE TSUB NAME VAR LOAD
@@ -72,12 +74,12 @@ let check_val_subexp sub1 sub2 =
 /* Call these parsers depending on what you want */
 
 /* Parse a signature file with type declarations */
-%start types
-%type <string option> types 
+%start signature
+%type <((string, Types.basicTypes) Hashtbl.t * (string, Types.types) Hashtbl.t)> signature
 
 /* Parse a specification containing clauses and subexponentials sigs */
 %start specification
-%type <string option> specification
+%type <(Types.terms list * Types.terms list * Types.terms list * Types.terms list)> specification
 
 /* Parse a query on the top-level */
 %start goal
@@ -95,70 +97,73 @@ let check_val_subexp sub1 sub2 =
 
 /*********************** sig files **************************/
 
-types:
-  | KIND NAME TYPE DOT { 
-    let result = Specification.addKindTbl (TKIND ($2)) in
-    match result with
-      | None -> 
-        if !Term.verbose then begin 
-          print_string (" New kind "^$2^" created.\n")
-        end;
-        None
-      | Some (k) -> print_endline ("[ERROR] Kind already declared: "^$2);
-        flush stdout; Some (k)
+signature: 
+  | /* empty */ { 
+    let kt = Hashtbl.create 100 in
+    let tt = Hashtbl.create 100 in
+    (* Built-in kinds and types *)
+    Hashtbl.add kt "o" (TPRED) ;
+    Hashtbl.add kt "form" (TKIND("form")) ;
+    Hashtbl.add kt "term" (TKIND("term")) ;
+    Hashtbl.add kt "world" (TKIND("world")) ;
+    Hashtbl.add tt "lft" (ARR (TCONST (TKIND("form")), TCONST (TPRED))) ;  (* type lft form -> o. *)
+    Hashtbl.add tt "rght" (ARR (TCONST (TKIND("form")), TCONST (TPRED))) ; (* type rght form -> o. *) 
+    Hashtbl.add tt "mlft" (ARR (TCONST (TKIND("form")), (ARR (TCONST (TKIND("world")), TCONST (TPRED))))) ;  (* type mlft form -> world -> o. *)
+    Hashtbl.add tt "mrght" (ARR (TCONST (TKIND("form")), (ARR (TCONST (TKIND("world")), TCONST (TPRED))))) ;  (* type mrght form -> world -> o. *)
+    (* kind table, type table *) 
+    (kt, tt)
   }
-  | TYPE NAME type_spec CONNTEX DOT {
-    let dupChk = Specification.isKindDeclared $2 in
-    let dupChk2 = Specification.isTypeDeclared $2 in
-    match dupChk, dupChk2 with
-      | false, false -> 
-        Specification.addTypeTbl $2 $3; 
-        Hashtbl.add Subexponentials.conTexTbl $2 $4;
-        if !Term.verbose then begin
-          print_endline (" New type created: "^$2^" : "^(typeToString $3));
+  | signature kind_decl {
+    let (kt, tt) = $1 in
+    let k = $2 in
+    match Hashtbl.find_opt kt k with
+      | Some _ -> raise (ParsingError ("[ERROR] Kind already declared: " ^ k))
+      | None -> Hashtbl.add kt k (TKIND (k)); 
+        if !Term.verbose then 
+          print_endline ("log: New kind: " ^ k);
           flush stdout;
-        end;
-        None
-      | true, _ -> 
-        print_string ("[ERROR] Type previously declared as a kind: "^$2);
-        print_newline(); flush stdout; 
-        Some ($2)
-      | _, true -> 
-        print_string ("[ERROR] Type previously declared as a type: "^$2);
-        print_newline(); flush stdout; 
-        Some($2) 
+          (kt, tt)
   }
-  | TYPE NAME type_spec DOT { 
-    let dupChk = Specification.isKindDeclared $2 in
-    let dupChk2 = Specification.isTypeDeclared $2 in
-    match dupChk, dupChk2 with
-      | false, false -> 
-        Specification.addTypeTbl $2 $3; 
-        if !Term.verbose then begin
-          print_endline (" New type created: "^$2^" : "^(typeToString $3));
-          flush stdout;
-        end;
-        None
-      | true, _ -> 
-        print_string ("[ERROR] Type previously declared as a kind: "^$2);
-        print_newline(); flush stdout; 
-        Some ($2)
-      | _, true -> 
-        print_string ("[ERROR] Type previously declared as a type: "^$2);
-        print_newline(); flush stdout; 
-        Some($2) 
+  | signature type_decl {
+    let (kt, tt) = $1 in
+    let (id, t, conn) = $2 in
+    match Hashtbl.mem kt id with
+      | true -> raise (ParsingError ("[ERROR] Type previously declared as a kind: " ^ id))
+      | false -> match Hashtbl.mem tt id with
+        | true -> raise (ParsingError ("[ERROR] Type already declared: " ^ id))
+        | false ->
+          let rec get_type_names t = match t with
+            | TCONST t' -> ( match t' with
+              | TKIND id -> [id]
+              | TINT | TSTRING | TPRED | TSUBEX | TLIST _ -> [] )
+            | TVAR _ -> raise (ParsingError ("[ERROR] Type variable not allowed: " ^ (typeToString t)))
+            | ARR (t1, t2) -> (get_type_names t1) @ (get_type_names t2)
+          in
+          if List.for_all (fun id -> Hashtbl.mem kt id) (get_type_names t) then begin
+            (match conn with
+              | Some c -> Hashtbl.add Subexponentials.conTexTbl id c
+              | None -> ());
+            Hashtbl.add tt id t;
+            if !Term.verbose then 
+              print_endline ("log: New type: " ^ id ^ " : " ^ (typeToString t));
+              flush stdout;
+              (kt, tt)
+          end
+          else raise (ParsingError ("[ERROR] Undeclared kind in: " ^ (typeToString t)))
   }
 ;
 
+kind_decl:
+  | KIND NAME TYPE DOT { $2 }
+;
+
+type_decl:
+  | TYPE NAME type_spec CONNTEX DOT { ($2, $3, Some($4)) }
+  | TYPE NAME type_spec DOT         { ($2, $3, None) }
+;
+
 type_spec: 
-  | NAME { 
-    match Specification.isKindDeclared $1 with 
-      | false -> print_string ("[ERROR] Kind not declared: "^$1);
-        print_newline(); flush stdout; 
-        assert false
-      | true -> if $1 = "o" then TCONST (TPRED)
-        else TCONST (TKIND ($1)) 
-  }
+  | NAME { if $1 = "o" then TCONST (TPRED) else TCONST (TKIND ($1)) }
   | TINT                           { TCONST (TINT) }
   | TSTRING                        { TCONST (TSTRING) }
   | TSUBEX                         { TCONST (TSUBEX) }
@@ -171,7 +176,30 @@ type_spec:
 
 /************************ pl files **************************/
 
-specification: 
+specification:
+  | /* empty */ {
+    (* structural, cut, introduction, axiom rules *)
+    ([], [], [], [])
+  }
+  | specification subexp_decl { $1 }
+  | specification subexp_prop { $1 }
+  | specification rule_decl   { $1 }
+  | specification rule {
+    let (s, c, i, a) = $1 in
+    let r = Term.abs2exists $2 in
+    if !Term.verbose then begin
+      print_endline ("log: New rule: "^(termToString r))
+    end;
+    match !rules with
+      | AXIOM -> (s, c, i, r::a)
+      | CUT -> (s, r::c, i, a)
+      | INTRO -> (s, c, r::i, a)
+      | STRUCT -> (r::s, c, i, a)
+      | NORULE -> raise (ParsingError ("[ERROR] Rule is not axiom, cut, structural or introduction: " ^ (termToString r))) 
+  }
+;
+
+subexp_decl: 
   | SUBEX NAME TSUB DOT { 
     match Subexponentials.isSubexponentialDeclared $2 with
       | false -> begin
@@ -179,44 +207,43 @@ specification:
           | "lin" ->
             initSubexp $2;
             Subexponentials.addType $2 LIN;
-            if !Term.verbose then print_endline ("New linear subexponential: "^$2);
-            None
+            if !Term.verbose then print_endline ("log: New linear subexponential: "^$2);
           | "aff" -> 
             initSubexp $2;
             Subexponentials.addType $2 AFF;
-            if !Term.verbose then print_endline ("New affine subexponential: "^$2);
-            None
+            if !Term.verbose then print_endline ("log: New affine subexponential: "^$2);
           | "rel" -> 
             initSubexp $2;
             Subexponentials.addType $2 REL;
-            if !Term.verbose then print_endline ("New relevant subexponential: "^$2);
-            None
+            if !Term.verbose then print_endline ("log: New relevant subexponential: "^$2);
           | "unb" -> 
             initSubexp $2;
             Subexponentials.addType $2 UNB;
-            if !Term.verbose then print_endline ("New unbounded subexponential: "^$2);
-            None
-          | str -> failwith ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'.")
+            if !Term.verbose then print_endline ("log: New unbounded subexponential: "^$2);
+          | str -> raise (ParsingError ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'."))
       end
-      | true -> failwith ("Subexponential name previously declared: "^$2)
+      | true -> raise (ParsingError ("[ERROR] Subexponential name previously declared: "^$2))
   }
+;
+
+subexp_prop:
   | SUBEXPREL NAME LESS NAME DOT { 
     match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
       | true, true -> 
         if check_val_subexp $2 $4 then
-          (Hashtbl.add Subexponentials.orderTbl $2 $4; None) 
-        else failwith ("ERROR: More powerful subexponential "^$2^" cannot be smaller than the less powerful subexponential "^$4)
-      | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
-      | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
+          Hashtbl.add Subexponentials.orderTbl $2 $4
+        else raise (ParsingError ("[ERROR] More powerful subexponential "^$2^" cannot be smaller than the less powerful subexponential "^$4))
+      | false, _ -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$2))
+      | _, false -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$4))
   }
   | SUBEXPREL NAME GEQ NAME DOT {
     match (Subexponentials.isSubexponentialDeclared $2), (Subexponentials.isSubexponentialDeclared $4) with
       | true, true -> 
         if check_val_subexp $4 $2 then
-          (Hashtbl.add Subexponentials.orderTbl $4 $2; None) 
-        else failwith ("ERROR: More powerful subexponential "^$4^" cannot be smaller than the less powerful subexponential "^$2)
-      | false, _ -> failwith ("ERROR: Subexponential name not declared: "^$2) 
-      | _, false -> failwith ("ERROR: Subexponential name not declared: "^$4) 
+          Hashtbl.add Subexponentials.orderTbl $4 $2
+        else raise (ParsingError ("[ERROR] More powerful subexponential "^$4^" cannot be smaller than the less powerful subexponential "^$2))
+      | false, _ -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$2))
+      | _, false -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$4))
   }
   | SUBEXCTX NAME CTXTYPE CTXSIDE DOT {
     match (Subexponentials.isSubexponentialDeclared $2) with
@@ -224,16 +251,16 @@ specification:
         let arity = match $3 with
           | "single" -> SINGLE
           | "many" -> MANY
-          | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
+          | _ -> raise (ParsingError ("[ERROR] Subexpctx invalid arity: "^$3))
         in
         let side = match $4 with 
           | "ant" -> LEFT
           | "suc" -> RIGHT
           | "antsuc" -> RIGHTLEFT
-          | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
+          | _ -> raise (ParsingError ("[ERROR] Subexpctx invalid side: "^$4))
         in
-        Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
-      | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
+        Hashtbl.add Subexponentials.ctxTbl $2 (arity, side)
+      | false -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$2))
   }
   | SUBEXCTX NAME CTXTYPE CTXSIDE LBRACKET connective_list RBRACKET DOT {
     match (Subexponentials.isSubexponentialDeclared $2) with
@@ -241,61 +268,38 @@ specification:
         let arity = match $3 with
           | "single" -> SINGLE
           | "many" -> MANY
-          | _ -> failwith ("ERROR: Subexpctx invalid arity: "^$3)
+          | _ -> raise (ParsingError ("[ERROR] Subexpctx invalid arity: "^$3))
         in
         let side = match $4 with 
           | "ant" -> LEFT
           | "suc" -> RIGHT
           | "antsuc" -> RIGHTLEFT
-          | _ -> failwith ("ERROR: Subexpctx invalid side: "^$4)
+          | _ -> raise (ParsingError ("[ERROR] Subexpctx invalid side: "^$4))
         in
         List.iter (fun con ->
           let conList' = try Hashtbl.find Subexponentials.conTbl $2 
           with Not_found -> [] in
           Hashtbl.replace Subexponentials.conTbl $2 (con :: conList')
         ) $6;
-        Hashtbl.add Subexponentials.ctxTbl $2 (arity, side); None
-      | false -> failwith ("ERROR: Subexponential name not declared: "^$2) 
-  }
-  
-  | RULES AXIOM DOT        { rules := AXIOM; None }
-  | RULES CUTRULE DOT      { rules := CUT; None }
-  | RULES INTRODUCTION DOT { rules := INTRO; None }
-  | RULES STRUCTURAL DOT   { rules := STRUCT; None }
-  
-  | formula DOT {
-    let _ = typeCheck $1 in
-    let clause = deBruijn $1 in
-  
-    begin match !rules with
-      | AXIOM ->
-        (* For coherence *)
-        Specification.addAxiom clause
-      | CUT -> 
-        (* For principal cut and coherence *)
-        Specification.addCutRule clause
-      | INTRO ->
-        (* For coherence *)
-        Specification.processIntroRule $1;
-        (* For principal cut *)
-        Specification.addIntroRule clause
-      | STRUCT ->
-        (* For principal cut *)
-        Specification.addStructRule clause 
-      | NORULE -> Specification.addOthers clause
-    end;
-  
-    if !Term.verbose then begin
-      print_endline ("New formula: "^(termToString clause));
-      flush stdout
-    end;
-    None
+        Hashtbl.add Subexponentials.ctxTbl $2 (arity, side)
+      | false -> raise (ParsingError ("[ERROR] Subexponential name not declared: "^$2))
   }
 ;
 
 connective_list: 
   | NAME { [$1] }
   | NAME SEMICOLON connective_list { $1 :: $3 }
+;
+
+rule_decl:
+  | RULES AXIOM DOT        { rules := AXIOM }
+  | RULES CUTRULE DOT      { rules := CUT }
+  | RULES INTRODUCTION DOT { rules := INTRO }
+  | RULES STRUCTURAL DOT   { rules := STRUCT }
+;
+
+rule:
+  | formula DOT { let _ = typeCheck $1 in (if !rules = INTRO then Specification.processIntroRule $1); (deBruijn $1) }
 ;
 
 /************************ DLV models **************************/
@@ -345,7 +349,7 @@ goal:
     
     Term.goal := clause;
     if !Term.verbose then begin
-      print_endline (" New goal: "^(termToString $1));
+      print_endline ("log: New goal: "^(termToString $1));
       flush stdout
     end;
     None
