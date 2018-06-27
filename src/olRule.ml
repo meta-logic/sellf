@@ -49,8 +49,8 @@ module OlContext : OLCONTEXT = struct
   (* Colorize a formula according to its height on the prooftree *)
   let colorizeForm f currentHeight =
     match (currentHeight mod 2) with
-    | 0 -> "{\\color{red}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
-    | 1 -> "{\\color{blue}" ^ (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ "}"
+    | 0 -> "{\\color{red}" ^ (Prints.termToTexString (Term.getObjectLogicMainFormula f)) ^ "}"
+    | 1 -> "{\\color{blue}" ^ (Prints.termToTexString (Term.getObjectLogicMainFormula f)) ^ "}"
     | _ -> failwith "Wrong result of module operation (colorizeForm)."
          
   (* Print context variables according to their side; it also takes into account 
@@ -90,13 +90,13 @@ module OlContext : OLCONTEXT = struct
    *)
   let toStringForms formulas side subLabel currentHeight mainRule = 
     (List.fold_right (fun f acc ->
-         let formSide = Specification.getSide f in
+         let formSide = Term.getSide f in
          let sameSide = Subexponentials.isSameSide subLabel formSide in
          match sameSide with
          | true -> if formSide = side then begin
-		       let rule = Specification.getObjectLogicMainFormula f in
+		       let rule = Term.getObjectLogicMainFormula f in
 		       if rule = mainRule then (colorizeForm f currentHeight) ^ ", " ^ acc
-		       else (Prints.termToTexString (Specification.getObjectLogicMainFormula f)) ^ ", " ^ acc end
+		       else (Prints.termToTexString (Term.getObjectLogicMainFormula f)) ^ ", " ^ acc end
 		   else acc
          | false -> (print_string ("\nWarning: the following formula can't belong to the context " ^ subLabel ^ 
 				     ": " ^ (Prints.termToString f) ^ "\nPlease verify your especification.\n"); acc)
@@ -327,13 +327,13 @@ module OlProofTree : OLPROOFTREE = struct
       match pt.rule with
       | Some(r) ->
 	 let seq = getConclusion pt in
-	 let mainRule = Specification.getObjectLogicMainFormula (List.hd seq.OlSequent.goals) in
+	 let mainRule = Term.getObjectLogicMainFormula (List.hd seq.OlSequent.goals) in
 	 let topproof = match pt.premises with
 	   | [] -> ""
 	   | hd::tl -> (toTexString' hd (level + 1))^(List.fold_right (fun el acc -> "\n\\quad\n"^(toTexString' el (level + 1))) tl "") 
 	 in
          let pred = List.hd seq.OlSequent.goals in
-         let ruleNameTex = Specification.getRuleName pred in
+         let ruleNameTex = Term.getRuleName pred in
 	 (*"\\infer[" ^ ruleNameTex ^ "]{" ^ (OlSequent.toTexString (getConclusion pt)) ^ "}\n{" ^ topproof ^ "}"*)
 	 "\\cfrac{" ^ topproof ^ "}\n{" ^ (OlSequent.toTexString (getConclusion pt) index mainRule level) ^ "} \\;\\; " ^ ruleNameTex 
       (* FIXME: using ZERO as a workaround... *)

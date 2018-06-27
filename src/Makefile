@@ -70,13 +70,13 @@
 # The Caml sources (including camlyacc and camllex source files)
 
 CORE = types.mli \
-       term.ml \
        prints.ml \
+       term.ml \
        basic.ml \
        llrules.ml \
        subexponentials.ml \
-       specification.ml \
        typeChecker.ml \
+       specification.ml \
        context.ml \
        contextSchema.ml \
        constraints.ml \

@@ -50,10 +50,10 @@ let isIn f subexp ctx =
 ;;
 
 (* TODO: decent error handling. *)
-let inEndSequent spec ctx = 
-  let head = Specification.getHeadPredicate spec in
-  let side = Specification.getSide spec in
-  let main = Specification.getConnectiveName spec in
+let inEndSequent f ctx = 
+  let head = Term.getHeadPredicate f in
+  let side = Term.getSide f in
+  let main = Term.getConnectiveName f in
   let conDeclared s = Hashtbl.mem Subexponentials.conTbl s in
   List.fold_right (fun (s, i) acc -> 
     let conList = try Hashtbl.find Subexponentials.conTbl s with Not_found -> [] in
@@ -130,7 +130,7 @@ let initial ctx f =
     (requireIn dualf (sub, i)) :: empty
   in
   let cstrs = List.fold_right (fun c acc ->
-    let formSide = Specification.getSide (nnf (NOT f)) in
+    let formSide = Term.getSide (nnf (NOT f)) in
     (* Gamma and infty contexts aren't being processed. If the theory isn't bipole, this is wrong. *)
     if (fst(c)) = "gamma" || (fst(c)) = "infty" || not (Subexponentials.isSameSide (fst(c)) formSide) then acc
     else ( isHere c (nnf (NOT(f))) ) :: acc 

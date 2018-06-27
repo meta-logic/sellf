@@ -16,16 +16,17 @@
 
 open Context
 open Types
-open Boundedproofsearch
 open Prints
+open Boundedproofsearch
 open TypeChecker
+open Specification
 
 (* Procedure to actually check the coherence of a system *)
 
-let checkInitCoher system_name connective_name (spec_left, spec_right) =
+let checkInitCoher system_name connective_name (spec_left, spec_right) spec =
   Boundedproofsearch.file_name := (system_name^"_initCoh_"^connective_name); 
   (* Put axiom formulas on the context *)
-  Context.createInitialCoherenceContext ();
+  Context.createInitialCoherenceContext spec;
   
   let spec_left_infty = QST(CONST("infty"), spec_left) in
   let spec_right_infty = QST(CONST("infty"), spec_right) in
@@ -36,10 +37,10 @@ let checkInitCoher system_name connective_name (spec_left, spec_right) =
     prove f 4 (fun () -> true) (fun () -> false)
 ;;
 
-let checkDuality system_name connective_name (spec_left, spec_right) =
+let checkDuality system_name connective_name (spec_left, spec_right) spec =
   Boundedproofsearch.file_name := system_name^"_cutCoh_"^connective_name; 
   (* Put cut formulas on the context *)
-  Context.createCutCoherenceContext ();
+  Context.createCutCoherenceContext spec;
   
   let spec_left_normalized = Term.nnf (NOT(spec_left)) in
   let spec_right_normalized = Term.nnf (NOT(spec_right)) in
@@ -50,15 +51,15 @@ let checkDuality system_name connective_name (spec_left, spec_right) =
     prove f 4 (fun () -> true) (fun () -> false)
 ;;
 
-let cutCoherence system_name =
+let cutCoherence system_name spec =
   Hashtbl.fold (fun conn specs res -> 
-    (checkDuality system_name conn specs) && res 
-  ) Specification.lr_hash true
+    (checkDuality system_name conn specs spec) && res 
+  ) (Specification.getLRHash spec) true
 ;;
 
-let initialCoherence system_name =
+let initialCoherence system_name spec =
   Hashtbl.fold (fun conn specs res -> 
-    (checkInitCoher system_name conn specs) && res 
-  ) Specification.lr_hash true
+    (checkInitCoher system_name conn specs spec) && res 
+  ) (Specification.getLRHash spec) true
 ;;
 

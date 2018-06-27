@@ -83,7 +83,7 @@ let check_val_subexp sub1 sub2 =
 
 /* Parse a query on the top-level */
 %start goal
-%type <string option> goal
+%type <Types.terms> goal
 
 /* Parse commands on the top level */
 %start top
@@ -186,7 +186,7 @@ specification:
   | specification rule_decl   { $1 }
   | specification rule {
     let (s, c, i, a) = $1 in
-    let r = Term.abs2exists $2 in
+    let r = $2 in
     if !Term.verbose then begin
       print_endline ("log: New rule: "^(termToString r))
     end;
@@ -299,7 +299,7 @@ rule_decl:
 ;
 
 rule:
-  | formula DOT { let _ = typeCheck $1 in (if !rules = INTRO then Specification.processIntroRule $1); (deBruijn $1) }
+  | formula DOT { $1 }
 ;
 
 /************************ DLV models **************************/
@@ -344,15 +344,8 @@ contextVar:
 
 goal:
   | formula DOT {
-    let _ = typeCheck $1 in
-    let clause = deBruijn $1 in
-    
-    Term.goal := clause;
-    if !Term.verbose then begin
-      print_endline ("log: New goal: "^(termToString $1));
-      flush stdout
-    end;
-    None
+    if !Term.verbose then print_endline ("log: New goal: " ^ (termToString $1));
+    $1
   }
 ;
 

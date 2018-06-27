@@ -1,5 +1,6 @@
 (**/**)
 open Types
+open Prints
 
 (* Verbose on/off *)
 let verbose = ref false ;;
@@ -13,6 +14,47 @@ let psBound = ref 1000 ;;
 (* Each logical variable is identified by this number. 
  * A new logical variable should increment one in this identifier. *)
 let varid = ref 0 ;;
+
+(***** Extracts information from the specification of an object logic rule *****)
+
+(* Returns the predicate in the head of a specification. 
+ * TODO: if there are existential quantifiers, the DB indices are messed up with
+ * this method... *)
+let rec getHeadPredicate f = match f with 
+  | TENSOR(NOT(prd), spc) -> prd
+  | EXISTS(s, i, t) -> getHeadPredicate t
+  | NOT(prd) -> prd
+  | PRED(_, _, _) -> f
+  | _ -> failwith ("No head: " ^ Prints.termToString f)
+;;
+
+(* Returns the side of the introduction rule *)
+let rec getSide f = match getHeadPredicate f with 
+  | PRED("lft", _, _) -> "l"
+  | PRED("rght", _, _) -> "r"
+  | PRED("mlft", _, _) -> "l"
+  | PRED("mrght", _, _) -> "r"
+  | _ -> failwith ("No side information available (predicate not corresponding to a specification's head or not a predicate): " ^ Prints.termToString f)
+;;
+
+let getConnectiveName f = match getHeadPredicate f with
+  | PRED(_, APP(CONST(_), args), _) -> begin match args with
+    | CONST(s) :: t -> s
+    | APP(CONST(s), _) :: t -> s
+    | _ -> "noname"
+    (* TODO FIXME commented out because this method is sometimes called for structural rules *)
+    (*failwith "Error while getting the name of a connective. Are you sure this is an introduction rule specification?"*)
+    end
+  | _ -> failwith ("Error getting the name of a connective: " ^ (Prints.termToString (getHeadPredicate f)))
+;;
+
+let getObjectLogicMainFormula f = match getHeadPredicate f with
+  | PRED(_, APP(CONST(_), h::tl), _) -> h
+  | _ -> failwith ("Error getting the object logic's main formula from a specification: " ^ (Prints.termToString (getHeadPredicate f)))
+;;
+
+let getRuleName f = (getConnectiveName f) ^ "_" ^ (getSide f) ;; 
+
 
 (* Checks if a formula is a bipole *)
 (* 

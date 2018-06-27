@@ -10,6 +10,7 @@ by Vivek Nigam, Elaine Pimentel, and Giselle Reis"
 *)
 open Basic
 open Types
+open Specification
 
 let unify = 
   let module Unify = 
@@ -391,19 +392,19 @@ let rec areBipoles rules = match rules with
     print_endline ("The following clause is NOT a bipole -> \n"^Prints.termToString rl); 
     false
 
-let rec cut_principal () = 
+let rec cut_principal spec = 
 let rec cut_principal_aux cuts = 
   match cuts with
   | [] -> true
-  | cut :: lst when check_permutation cut !Specification.introRules !Specification.structRules -> 
+  | cut :: lst when check_permutation cut (Specification.getIntroRules spec) (Specification.getStructRules spec) -> 
         cut_principal_aux lst 
   | _ -> false
 in 
-if areBipoles !Specification.introRules then 
-  cut_principal_aux !Specification.cutRules
+if areBipoles (Specification.getIntroRules spec) then 
+  cut_principal_aux (Specification.getCutRules spec)
 else false
 
-let rec weak_coherent () =
+let rec weak_coherent spec =
 let rec collect_quests_aux rule str = 
 match rule with
   | NOT(_) | PRED(_,_,_) | ONE | BOT | ZERO | TOP | EQU(_,_,_)  -> []
@@ -417,11 +418,11 @@ match rule with
 in
 let all_subs_lft = 
   List.fold_left (fun acc ele -> 
-    List.append ( (collect_quests_aux ele "lft") @ (collect_quests_aux ele "mlft") ) acc) [] !Specification.introRules 
+    List.append ( (collect_quests_aux ele "lft") @ (collect_quests_aux ele "mlft") ) acc) [] (Specification.getIntroRules spec)
 in
 let all_subs_rght = 
   List.fold_left (fun acc ele -> 
-    List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] !Specification.introRules 
+    List.append ( (collect_quests_aux ele "rght") @ (collect_quests_aux ele "mrght") ) acc) [] (Specification.getIntroRules spec)
 in
 let check_lft_subs b lft_subs = 
   List.fold_left (fun acc (Some(s)) -> 
@@ -442,8 +443,8 @@ match cuts with
         weak_cut_aux_lst lst 
 | _ -> false
 in
-if areBipoles !Specification.introRules then 
-  weak_cut_aux_lst !Specification.cutRules
+if areBipoles (Specification.getIntroRules spec) then 
+  weak_cut_aux_lst (Specification.getCutRules spec)
 else false
 
 (* Some testing functions, for debugging only.*)

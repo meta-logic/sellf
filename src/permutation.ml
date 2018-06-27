@@ -176,7 +176,7 @@ module Permutation : PERMUTATION = struct
     in
     (* We shouldn't have more than 4 existentially quantified variables... *)
     let constLst = ["b"; "a"; "d"; "c"; "e"] in
-    List.iter (fun c -> Specification.addTypeTbl c (TCONST(TPRED)) ) constLst;
+    (*List.iter (fun c -> Specification.addTypeTbl c (TCONST(TPRED)) ) constLst;*)
     let (spec1norm, rest) = instantiate_ex spec1 constLst in
     let (spec2norm, rest2) = instantiate_ex spec2 rest in
 
@@ -211,10 +211,10 @@ module Permutation : PERMUTATION = struct
    * means that r1 permutes up r2.
    *)
   let getPermutationGraph rules = 
-    let vertices = Specification.getAllRulesName () in
+    let vertices = List.map (fun r -> Term.getRuleName r) rules in
     let edges = List.fold_left (fun acc1 rule1 ->
       List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
-	| true -> ((Specification.getRuleName rule1), (Specification.getRuleName rule2)) :: acc2
+	| true -> ((Term.getRuleName rule1), (Term.getRuleName rule2)) :: acc2
 	| false -> acc2
       ) acc1 rules
     ) [] rules in
@@ -225,10 +225,10 @@ module Permutation : PERMUTATION = struct
    * vertices r1, r2 means that r1 permutes up r2 and vice versa.
    *)
   let getUndirectedPermutationGraph rules = 
-    let vertices = Specification.getAllRulesName () in
+    let vertices = List.map (fun r -> Term.getRuleName r) rules in
     let dir_edges = List.fold_left (fun acc1 rule1 ->
       List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
-	| true -> ((Specification.getRuleName rule1), (Specification.getRuleName rule2)) :: acc2
+	| true -> ((Term.getRuleName rule1), (Term.getRuleName rule2)) :: acc2
 	| false -> acc2
       ) acc1 rules
     ) [] rules in
@@ -269,7 +269,7 @@ module Permutation : PERMUTATION = struct
   let getPermutationDotGraph rules =
     let edges = List.fold_left (fun acc1 rule1 ->
       List.fold_left (fun acc2 rule2 -> match isPermutable rule1 rule2 with
-        | true -> (Specification.getRuleName rule1) ^ " -> " ^ (Specification.getRuleName rule2) ^ ";\n" ^ acc2
+        | true -> (Term.getRuleName rule1) ^ " -> " ^ (Term.getRuleName rule2) ^ ";\n" ^ acc2
         | false -> acc2
       ) acc1 rules
     ) "" rules in
@@ -281,7 +281,7 @@ module Permutation : PERMUTATION = struct
    *)
   let getPermutationTable rules =
     let cols = List.fold_left (fun acc r -> acc ^ "c|") "|c|" rules in
-    let first_row = List.fold_left (fun acc r -> acc ^ "& $" ^ Specification.getRuleName r ^ "$ ") "$\\cdot$ " rules in
+    let first_row = List.fold_left (fun acc r -> acc ^ "& $" ^ Term.getRuleName r ^ "$ ") "$\\cdot$ " rules in
     let preamble = "\\documentclass[a4paper, 11pt]{article}\n\n \
       \\usepackage[landscape, margin=1cm]{geometry}\n \
       \\usepackage{xcolor}\n \
@@ -299,7 +299,7 @@ module Permutation : PERMUTATION = struct
 	| (true, _, []) -> acc2 ^ "& \\y "
 	| (false, _, _) -> acc2 ^ "& \\n"
 	| _ -> failwith ("Invalid result for permutation checking.")
-      ) ("$" ^ Specification.getRuleName rule1 ^ "$ ") rules in
+      ) ("$" ^ Term.getRuleName rule1 ^ "$ ") rules in
       acc1 ^ row ^ " \\\\\n\\hline\n"
     ) "" rules in
     let closing = "\\end{tabular}\n \

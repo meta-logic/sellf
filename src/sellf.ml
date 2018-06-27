@@ -2,10 +2,12 @@ open Bipole
 open Context
 open ProofTree
 open Subexponentials
+open Specification
 open Prints
 open OlRule
 open ProofTreeSchema
 open Permutation
+open TypeChecker
 
 module TestUnify = 
   Unify.Make(struct
@@ -42,47 +44,46 @@ let argslst = [
 ]
 
 let initAll () = 
-  Specification.initialize ();
   Context.initialize ();
   Subexponentials.initialize ();
 ;;
 
-let check_principalcut () =
-  if Staticpermutationcheck.cut_principal () then 
+let check_principalcut spec =
+  if Staticpermutationcheck.cut_principal spec then 
     print_endline "Tatu could infer that reduction to principal cuts is possible." 
   else
     print_endline "\nCould not reduce to principal cuts.
       \nObservation: It is very likely that the cases shown above are valid permutations by vacuosly."
 ;;
 
-let check_atomicelim () =
-  if Staticpermutationcheck.weak_coherent () then 
+let check_atomicelim spec =
+  if Staticpermutationcheck.weak_coherent spec then 
     print_endline "Tatu could infer that it is always possible to eliminate atomic cuts." 
   else
     print_endline "\nCould not infer how to eliminate atomic cuts."  
 ;;
 
-let check_cutcoherence system_name = 
+let check_cutcoherence system_name spec = 
   let coherent = Hashtbl.fold (fun conn specs res -> 
-    let d = Coherence.checkDuality system_name conn specs
+    let d = Coherence.checkDuality system_name conn specs spec
     in
     if d then print_string ("====> Connective "^conn^" has dual specification.\n")
     else print_string ("x ==> Connective "^conn^" does not have dual specifications.\n") ;
     d && res 
-  ) Specification.lr_hash true
+  ) (Specification.getLRHash spec) true
   in
   if coherent then print_string "\nTatu coud prove that the system is cut coherent.\n"
   else print_string "\nThe system is NOT cut coherent.\n"
 ;;
 
-let check_initialcoherence system_name = 
+let check_initialcoherence system_name spec = 
   let coherent = Hashtbl.fold (fun conn specs res -> 
-    let d = Coherence.checkInitCoher system_name conn specs
+    let d = Coherence.checkInitCoher system_name conn specs spec
     in
     if d then print_string ("====> Connective "^conn^" is initial-coherent.\n")
     else print_string ("x ==> Connective "^conn^" is not initial-coherent.\n");
     d && res 
-  ) Specification.lr_hash true
+  ) (Specification.getLRHash spec) true
   in
   if coherent then print_string "\nTatu could prove that the system is initial coherent.\n"
   else print_string "\nThe system is NOT initial coherent.\n"
@@ -105,26 +106,17 @@ let parse file_name =
   let lexbuf = Lexing.from_channel file_sig in
   try
     let (kt, tt) = Parser.signature Lexer.token lexbuf in
-      Specification.initialize ();
-      (* Copying one table into another. This is a hack that will be removed
-      once specification.ml is transformed into a proper module. *)
-      Hashtbl.iter (fun _ v -> let _ = Specification.addKindTbl v in ()) kt;
-      Hashtbl.iter (fun k v -> Specification.addTypeTbl k v) tt;
       let file_prog = open_in (file_name^".pl") in 
       let lexbuf = Lexing.from_channel file_prog in
       try
         let (s, c, i, a) = Parser.specification Lexer.token lexbuf in
-          (* Hack to be removed once specification.ml is a proper module *)
-          Specification.structRules := List.rev s;
-          Specification.cutRules := List.rev c;
-          Specification.introRules := List.rev i;
-          Specification.axioms := List.rev a; true
+          Specification.create (kt, tt, s, c, i, a)
       with
-      | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .pl file%s.\n%!" (position lexbuf); false
-      | Failure str -> Format.printf ("ERROR:%s\n%!") (position lexbuf); print_endline str; false
+      | Parsing.Parse_error -> failwith ("Syntax error while parsing .pl file: " ^ (position lexbuf))
+      | Failure str -> failwith ("[ERROR] " ^ (position lexbuf))
   with
-  | Parsing.Parse_error ->  Format.printf "Syntax error while parsing .sig file%s.\n%!" (position lexbuf); false
-  | Failure _ -> Format.printf "Syntax error%s.\n%!" (position lexbuf); false
+  | Parsing.Parse_error -> failwith ("Syntax error while parsing .sig file: " ^ (position lexbuf))
+  | Failure _ -> failwith ("[ERROR] " ^ (position lexbuf))
 ;;
 
 (* Auxiliary functions *)
@@ -157,15 +149,15 @@ let permutationToTex f1 f2 cl =
 
 (* Functions related to the standard output, they are mainly
    used to provide strings to Quati's website *)
-let print_rules_names () =
-  let names = Specification.getAllRulesName () in
+let print_rules_names spec =
+  let names = Specification.getIntroRulesNames spec in
   List.iter (fun s ->
       print_endline s
     ) names
 ;;
 
-let print_bipoles_cl () =
-  let formulas = Specification.getFormulas () in
+let print_bipoles_cl spec =
+  let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
   let bipoles = Bipole.get_bipoles formulas in
   List.iter (fun (pt, model) ->
       print_endline "\\[";
@@ -178,8 +170,8 @@ let print_bipoles_cl () =
     ) bipoles
 ;;
 
-let print_olrules_cl () =
-  let formulas = Specification.getFormulas () in
+let print_olrules_cl spec =
+  let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
   let bipoles = Bipole.get_bipoles formulas in
   List.iter (fun bipole ->
       (* TODO: this is always a list with one element, one bipole (which is a pair
@@ -193,9 +185,9 @@ let print_olrules_cl () =
 ;;
 
 (* Needed for debugging, only prints yes/no without showing the derivations *)
-let print_permute_bool name1 name2 = 
-  let formula1 = Specification.getSpecificationOf name1 in
-  let formula2 = Specification.getSpecificationOf name2 in
+let print_permute_bool spec name1 name2 = 
+  let formula1 = Specification.getSpecificationOf spec name1 in
+  let formula2 = Specification.getSpecificationOf spec name2 in
   match Permutation.permute formula1 formula2 with 
   (* If both lists are empty, no bipoles could be constructed. *)
   | (true, [], []) -> print_endline "N/A."
@@ -206,9 +198,9 @@ let print_permute_bool name1 name2 =
   | _ -> failwith ("Invalid result for permutation checking.")
 ;;
 
-let print_permutation_cl name1 name2 = 
-  let formula1 = Specification.getSpecificationOf name1 in
-  let formula2 = Specification.getSpecificationOf name2 in
+let print_permutation_cl spec name1 name2 = 
+  let formula1 = Specification.getSpecificationOf spec name1 in
+  let formula2 = Specification.getSpecificationOf spec name2 in
   print_endline (permutationToTex formula1 formula2 true)
 ;;
 
@@ -263,8 +255,8 @@ let fprint_permutation forms_lst file_name =
   let file = open_out (file_name ^ ".tex") in
   Printf.fprintf file "%s" Prints.texFileHeader;
   List.iter (fun (f1, f2) ->
-      let name1 = Specification.getRuleName f1 in
-      let name2 = Specification.getRuleName f2 in
+      let name1 = Term.getRuleName f1 in
+      let name2 = Term.getRuleName f2 in
       Printf.fprintf file "\\section{Permutation of $%s$ and $%s$}\n\n" name1 name2;
       Printf.fprintf file "%s" (permutationToTex f1 f2 false);
     ) forms_lst;
@@ -273,30 +265,30 @@ let fprint_permutation forms_lst file_name =
 ;;
 
 (* Functions related to the download option of Quati's website *)
-let permute_to_file name1 name2 =
-  let formulas = Specification.getFormulas () in
+let permute_to_file spec name1 name2 =
+  let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
   let index = ref (-1) in
   let counter () = index := !index + 1; !index in
   let i1 = ref 0 in
   let i2 = ref 0 in
   List.iter (fun f -> 
-      if (Specification.getRuleName f) = name1 then i1 := counter()
+      if (Term.getRuleName f) = name1 then i1 := counter()
       else begin
-          if (Specification.getRuleName f) = name2 then i2 := counter()
+          if (Term.getRuleName f) = name2 then i2 := counter()
           else index := !index + 1;
         end
     );
   fprint_permutation [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
 ;;
 
-let rules_to_file () =
-  let formulas = Specification.getFormulas () in
+let rules_to_file spec =
+  let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
   let bipoles = Bipole.get_bipoles formulas in
   fprint_olrules bipoles "rules"
 ;;
 
-let bipoles_to_file () =
-  let formulas = Specification.getFormulas () in
+let bipoles_to_file spec =
+  let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
   let bipoles = Bipole.get_bipoles formulas in
   fprint_bipoles bipoles "bipoles"
 ;;
@@ -349,7 +341,7 @@ let print_help () =
 let rec start () =
   initAll ();
   print_string ":> ";
-    let command = read_line() in
+    let command = read_line () in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer.token lexbuf_top in 
@@ -363,22 +355,20 @@ let rec start () =
       | file_name -> 
         print_endline ("Loading file "^file_name);
         fileName := file_name;
-        if parse file_name then begin
+        let spec = parse file_name in
           samefile := true;
           while !samefile do 
-            solve_query (); 
+            solve_query spec; 
           done
-        end
-        else start ();
     with
     |  Parsing.Parse_error ->  print_endline "Invalid command. For more information type #help."; start  ()
     |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
 and
-solve_query () = 
+solve_query spec = 
   let idx = String.rindex !fileName '/' in
   let specName = Str.string_after !fileName (idx+1) in
   print_string (specName ^ " > ");
-  let query_string = read_line() in
+  let query_string = read_line () in
   if query_string = "#done" then samefile := false
   else begin
   match query_string with
@@ -387,8 +377,8 @@ solve_query () =
     | "#exit" -> print_endline "Thank you for using SELLF."; exit 1
 
     | "#coqspec" ->
-      let formulas = Specification.getFormulas () in
-      let coqspec = Sellf2coq.sellf2coq (Specification.getUserTypes ()) formulas in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
+      let coqspec = Sellf2coq.sellf2coq (Specification.getUserTypes spec) formulas in
       print_newline ();
       print_endline "Warning! This is work in progress. Only a partial \
       specification will be generated.";
@@ -402,7 +392,7 @@ solve_query () =
 
     (* Generates the bipole of a rule of the object logic and prints a latex file with it *)
     | "#bipole" -> 
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       print_formulas formulas;
       print_endline "The bipoles for the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -418,13 +408,13 @@ solve_query () =
       print_endline "All the bipoles of the specification will be generated \
       and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       let bipoles = Bipole.get_bipoles formulas in
       fprint_bipoles bipoles f
 
     (* Check if all rules are bipoles *)
     | "#check_rules" -> 
-      let formulas = Specification.getAllRules () in
+      let formulas = Specification.getRules spec in
       let not_bipoles = List.filter (fun f -> not (Term.isBipole f)) formulas in
       begin match not_bipoles with
         | [] -> print_endline ("All formulas are bipoles.")
@@ -435,7 +425,7 @@ solve_query () =
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       print_formulas formulas;
       print_endline "The object logic rule of the chosen formula will be generated and \
       printed to a LaTeX file.\nPlease choose a formula by its number:";
@@ -451,13 +441,13 @@ solve_query () =
       print_endline "The object logic rules of all the formulas of the specification \
       will be generated and printed in a latex file.\nPlease choose a name for the file:";
       let f = read_line () in
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       let bipoles = Bipole.get_bipoles formulas in
       fprint_olrules bipoles f
 
     (* Check if two rules permute *)
     | "#permute" -> 
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       print_formulas formulas;
       print_endline "Checking whether a rule R1 permutes up a rule R2.\n";
       print_endline "Please type the number of R1: ";
@@ -470,7 +460,7 @@ solve_query () =
 
     (* Check if all rules permute *)
     | "#permute_all" ->
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       print_endline "Checking the permutation of all formulas over all \
       formulas.\nPlease type a file name for the results:";
       let f = read_line () in
@@ -489,7 +479,7 @@ solve_query () =
       print_endline "Rules belonging to the same group permute over each other.";
       print_endline "Ci < Cj iff every rule rj in Cj permutes up every rule ri in Ci, i.e., rj -> ri in G.";
       print_endline "This may take a while, please be patient...\n";
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       let cliques = Permutation.getPermutationCliques formulas in
       let graph = Permutation.getPermutationGraph formulas in
       let pairs = Permutation.getCliquesOrdering cliques graph in
@@ -514,7 +504,7 @@ solve_query () =
       filename.dot -o filename.pdf'.\nPlease choose a name for the file:";
       let filename = read_line () in
       let file = open_out (filename ^ ".dot") in
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       Printf.fprintf file "%s" (Permutation.getPermutationDotGraph formulas);
       close_out file
 
@@ -525,36 +515,33 @@ solve_query () =
       a name for the file:";
       let filename = read_line () in
       let file = open_out (filename ^ ".tex") in
-      let formulas = Specification.getFormulas () in
+      let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
-    | "#cutcoherence" -> check_cutcoherence specName
+    | "#cutcoherence" -> check_cutcoherence specName spec
     
-    | "#initialcoherence" -> check_initialcoherence specName
+    | "#initialcoherence" -> check_initialcoherence specName spec
 
     | "#scopebang" -> check_scopebang ()
 
-    | "#atomicelim" -> check_atomicelim () 
+    | "#atomicelim" -> check_atomicelim spec 
 
-    | "#principalcut" -> check_principalcut ()
+    | "#principalcut" -> check_principalcut spec
 
     (* Query *)
-    | _ -> begin
+    | _ ->
       let query = Lexing.from_string query_string in
-      begin
-      try 
-        let _ = Parser.goal Lexer.token query in 
-          begin
-            Context.createProofSearchContext ();
-            if Boundedproofsearch.prove !Term.goal !Term.psBound (fun () -> true) (fun () -> false) then
-              print_string "\nYes.\n"
-            else print_string "\nNo.\n"
-          end
+      try
+        let g = Parser.goal Lexer.token query in
+        let _ = typeCheck g (Specification.getTypes spec) in
+        let goal = deBruijn g in
+          Context.createProofSearchContext spec;
+          if Boundedproofsearch.prove goal !Term.psBound (fun () -> true) (fun () -> false) then
+            print_string "\nYes.\n"
+          else print_string "\nNo.\n"
       with
-        | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query ()
-        | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
-      end      
-    end
+      | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query spec
+      | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
 
     (*| _ -> print_endline "Function not implemented. Try again or type #done
      * and #help."*)
@@ -574,14 +561,15 @@ match (!check, !fileName, !rule1, !rule2) with
   (* Load file from the command line *)
   | ("", file, _, _) ->
     initAll();
-    if parse file then begin
+    let spec = parse file in
+    begin
       print_endline "SELLF -- A linear logic framework for systems with locations.";
       print_endline "Version 0.5.\n";
       print_endline "Type #help for a list of available commands.\n";
       print_endline ("The file: " ^ file ^ " was loaded.\n");
       samefile := true;
       while !samefile do 
-        solve_query ()
+        solve_query spec
       done;
       while true do
         start ()
@@ -590,51 +578,54 @@ match (!check, !fileName, !rule1, !rule2) with
   (* Running in batch mode *)
   | ("principalcut", file, _, _) -> 
     initAll ();
-    if parse file then check_principalcut ()
+    check_principalcut (parse file)
   | ("cutcoherence", file, _, _) -> 
     let idx = String.rindex file '/' in
     let specName = Str.string_after file (idx+1) in
     initAll ();
-    if parse file then check_cutcoherence specName
+    check_cutcoherence specName (parse file)
   | ("initialcoherence", file, _, _) -> 
     let idx = String.rindex file '/' in
     let specName = Str.string_after file (idx+1) in
     initAll ();
-    if parse file then check_initialcoherence specName
+    check_initialcoherence specName (parse file)
   | ("atomicelim", file, _, _) -> 
     initAll ();
-    if parse file then check_atomicelim ()
+    check_atomicelim (parse file)
   | ("scopebang", file, _, _) ->
     initAll ();
-    if parse file then check_scopebang ()
+    let _ = parse file in
+    check_scopebang ()
   | ("bipoles", file, _, _) ->
     initAll ();
-    if parse file then print_bipoles_cl ()
+    print_bipoles_cl (parse file)
   | ("rules", file, _, _) ->
     initAll ();
-    if parse file then print_olrules_cl ()
+    print_olrules_cl (parse file)
   | ("permute", file, r1, r2) ->
     initAll ();
-    if parse file then print_permutation_cl r1 r2
+    print_permutation_cl (parse file) r1 r2
   | ("rulenames", file, _, _) ->
     initAll ();
-    if parse file then print_rules_names ()
+    print_rules_names (parse file)
   | ("permutebin", file, r1, r2) ->
     initAll ();
-    if parse file then print_permute_bool r1 r2
+    print_permute_bool (parse file) r1 r2
   | ("bipoles_to_file", file, _, _) ->
     initAll ();
-    if parse file then bipoles_to_file ()
+    bipoles_to_file (parse file)
   | ("rules_to_file", file, _, _) ->
     initAll ();
-    if parse file then rules_to_file ()
+    rules_to_file (parse file)
   | ("permute_to_file", file, r1, r2) ->
     initAll ();
-    if parse file then permute_to_file r1 r2
+    permute_to_file (parse file) r1 r2
   | ("parse", file, _, _) ->
     initAll ();
-    if parse file then print_endline "Yes."
-    else print_endline "No."
+    (try let _ = parse file in
+      print_endline "Yes."
+    with
+    | _ -> print_endline "No." )
   | (x, y, _, _) -> failwith ("Invalid arguments.")
 ;;
 

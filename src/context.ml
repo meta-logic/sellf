@@ -12,6 +12,7 @@
 open Basic
 open Types
 open Subexponentials
+open Specification
 open Prints
 
 module type CONTEXT = sig
@@ -21,9 +22,9 @@ module type CONTEXT = sig
     val initSubexp : string -> unit
     val store : terms -> string -> unit
     val clearInitial : unit -> unit
-    val createCutCoherenceContext : unit -> unit
-    val createInitialCoherenceContext : unit -> unit
-    val createProofSearchContext : unit -> unit
+    val createCutCoherenceContext : Specification.specification -> unit
+    val createInitialCoherenceContext : Specification.specification -> unit
+    val createProofSearchContext : Specification.specification -> unit
     val createEmpty : unit -> context
     val create : (string, terms list) Hashtbl.t -> context
     val copy : context -> context
@@ -62,19 +63,19 @@ module Context : CONTEXT = struct
 
   (* Create proper contexts for each functionality of the system *)
 
-  let createCutCoherenceContext () = 
+  let createCutCoherenceContext spec = 
     (* Adding cut rules' specifications *)
-    List.iter (fun e -> store e "infty") !Specification.cutRules ;;
+    List.iter (fun e -> store e "infty") (Specification.getCutRules spec) ;;
     
-  let createInitialCoherenceContext () = 
+  let createInitialCoherenceContext spec = 
     (* Adding identity rules' specifications *)
-    List.iter (fun e -> store e "infty") !Specification.axioms ;;
+    List.iter (fun e -> store e "infty") (Specification.getAxioms spec) ;;
     
-  let createProofSearchContext () = 
+  let createProofSearchContext spec = 
     (* Adding rules' specifications (proof search without cut) *)
-    List.iter (fun e -> store e "infty") !Specification.axioms;
-    List.iter (fun e -> store e "infty") !Specification.introRules;
-    List.iter (fun e -> store e "infty") !Specification.structRules ;;
+    List.iter (fun e -> store e "infty") (Specification.getAxioms spec);
+    List.iter (fun e -> store e "infty") (Specification.getIntroRules spec);
+    List.iter (fun e -> store e "infty") (Specification.getStructRules spec);;
 
   (* GR TODO organize the methods above *)
 
