@@ -15,16 +15,6 @@ module TestUnify =
     let constant_like = Types.EIG
   end)
 
-let position lexbuf =
-  let curr = lexbuf.Lexing.lex_curr_p in
-  let file = curr.Lexing.pos_fname in
-  let line = curr.Lexing.pos_lnum in
-  let char = curr.Lexing.pos_cnum - curr.Lexing.pos_bol in
-  if file = "" then
-    () (* lexbuf information is rarely accurate at the toplevel *)
-  else
-    print_string ""; Format.sprintf ": line %d, character %d" line char
-
 let samefile = ref true ;;
 let fileName = ref "" ;;
 let check = ref "" ;;
@@ -99,24 +89,6 @@ let check_scopebang () =
   List.iter (fun a -> print_string (a^", ")) ers; print_newline ();
   print_endline "The following should be empty: ";
   List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
-;;
-
-let parse file_name =
-  let file_sig = open_in (file_name^".sig") in
-  let lexbuf = Lexing.from_channel file_sig in
-  try
-    let (kt, tt) = Parser.signature Lexer.token lexbuf in
-      let file_prog = open_in (file_name^".pl") in 
-      let lexbuf = Lexing.from_channel file_prog in
-      try
-        let (s, c, i, a) = Parser.specification Lexer.token lexbuf in
-          Specification.create (file_name, kt, tt, s, c, i, a)
-      with
-      | Parsing.Parse_error -> failwith ("Syntax error while parsing .pl file: " ^ (position lexbuf))
-      | Failure str -> failwith ("[ERROR] " ^ (position lexbuf))
-  with
-  | Parsing.Parse_error -> failwith ("Syntax error while parsing .sig file: " ^ (position lexbuf))
-  | Failure _ -> failwith ("[ERROR] " ^ (position lexbuf))
 ;;
 
 (* Auxiliary functions *)
@@ -355,7 +327,7 @@ let rec start () =
       | file_name -> 
         print_endline ("Loading file "^file_name);
         fileName := file_name;
-        let spec = parse file_name in
+        let spec = FileParser.parse file_name in
           samefile := true;
           while !samefile do 
             solve_query spec; 
@@ -540,8 +512,8 @@ solve_query spec =
             print_string "\nYes.\n"
           else print_string "\nNo.\n"
       with
-      | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (position query); solve_query spec
-      | Failure str -> Format.printf "ERROR:%s\n%!" (position query); print_endline str; start()
+      | Parsing.Parse_error -> Format.printf "Syntax error%s.\n%!" (FileParser.position query); solve_query spec
+      | Failure str -> Format.printf "ERROR:%s\n%!" (FileParser.position query); print_endline str; start()
 
     (*| _ -> print_endline "Function not implemented. Try again or type #done
      * and #help."*)
@@ -561,7 +533,7 @@ match (!check, !fileName, !rule1, !rule2) with
   (* Load file from the command line *)
   | ("", file, _, _) ->
     initAll();
-    let spec = parse file in
+    let spec = FileParser.parse file in
     begin
       print_endline "SELLF -- A linear logic framework for systems with locations.";
       print_endline "Version 0.5.\n";
@@ -578,51 +550,51 @@ match (!check, !fileName, !rule1, !rule2) with
   (* Running in batch mode *)
   | ("principalcut", file, _, _) -> 
     initAll ();
-    check_principalcut (parse file)
+    check_principalcut (FileParser.parse file)
   | ("cutcoherence", file, _, _) -> 
     let idx = String.rindex file '/' in
     let specName = Str.string_after file (idx+1) in
     initAll ();
-    check_cutcoherence specName (parse file)
+    check_cutcoherence specName (FileParser.parse file)
   | ("initialcoherence", file, _, _) -> 
     let idx = String.rindex file '/' in
     let specName = Str.string_after file (idx+1) in
     initAll ();
-    check_initialcoherence specName (parse file)
+    check_initialcoherence specName (FileParser.parse file)
   | ("atomicelim", file, _, _) -> 
     initAll ();
-    check_atomicelim (parse file)
+    check_atomicelim (FileParser.parse file)
   | ("scopebang", file, _, _) ->
     initAll ();
-    let _ = parse file in
+    let _ = FileParser.parse file in
     check_scopebang ()
   | ("bipoles", file, _, _) ->
     initAll ();
-    print_bipoles_cl (parse file)
+    print_bipoles_cl (FileParser.parse file)
   | ("rules", file, _, _) ->
     initAll ();
-    print_olrules_cl (parse file)
+    print_olrules_cl (FileParser.parse file)
   | ("permute", file, r1, r2) ->
     initAll ();
-    print_permutation_cl (parse file) r1 r2
+    print_permutation_cl (FileParser.parse file) r1 r2
   | ("rulenames", file, _, _) ->
     initAll ();
-    print_rules_names (parse file)
+    print_rules_names (FileParser.parse file)
   | ("permutebin", file, r1, r2) ->
     initAll ();
-    print_permute_bool (parse file) r1 r2
+    print_permute_bool (FileParser.parse file) r1 r2
   | ("bipoles_to_file", file, _, _) ->
     initAll ();
-    bipoles_to_file (parse file)
+    bipoles_to_file (FileParser.parse file)
   | ("rules_to_file", file, _, _) ->
     initAll ();
-    rules_to_file (parse file)
+    rules_to_file (FileParser.parse file)
   | ("permute_to_file", file, r1, r2) ->
     initAll ();
-    permute_to_file (parse file) r1 r2
+    permute_to_file (FileParser.parse file) r1 r2
   | ("parse", file, _, _) ->
     initAll ();
-    (try let _ = parse file in
+    (try let _ = FileParser.parse file in
       print_endline "Yes."
     with
     | _ -> print_endline "No." )

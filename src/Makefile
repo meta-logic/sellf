@@ -87,6 +87,7 @@ CORE = types.mli \
        proofTreeSchema.ml \
        parser.mly \
        lexer.mll \
+       fileParser.ml \
        dlv.ml \
        bipole.ml \
        olRule.ml \
