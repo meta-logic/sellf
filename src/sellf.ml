@@ -16,22 +16,6 @@ module TestUnify =
   end)
 
 let samefile = ref true ;;
-let fileName = ref "" ;;
-let check = ref "" ;;
-let rule1 = ref "" ;;
-let rule2 = ref "" ;;
-
-let usage = "Usage: " ^ Sys.argv.(0) ^ " [-v] [-i string] [-c string]"
-
-let argslst = [
-  ("-v", Arg.Unit (fun () -> Term.verbose := true), ": set verbose on.");
-  ("-i", Arg.String (fun s -> fileName := s), ": prefix of .pl and .sig file (with path)");
-  ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'cutcoherence',
-    'initialcoherence', 'atomicelim', 'scopebang', 'rulenames', 'permute', 'bipoles' or 'rules' (depending on what you want to check)");
-  ("-r1", Arg.String (fun r -> rule1 := r), ": set the name of the first rule to check the permutation above the second rule.");
-  ("-r2", Arg.String (fun r -> rule2 := r), ": set the name of the second rule.");
-  ("-bipole", Arg.Unit (fun () -> Permutation.setShowBipole true), ": show bipole.");
-]
 
 let initAll () = 
   Context.initialize ();
@@ -326,7 +310,6 @@ let rec start () =
       | "exit" -> print_endline "Thank you for using SELLF."; exit 1
       | file_name -> 
         print_endline ("Loading file "^file_name);
-        fileName := file_name;
         let spec = FileParser.parse file_name in
           samefile := true;
           while !samefile do 
@@ -337,9 +320,8 @@ let rec start () =
     |  Sys_error str -> print_string ("Error"^str); print_endline ". Please double check the name of the file."; start ()
 and
 solve_query spec = 
-  let idx = String.rindex !fileName '/' in
-  let specName = Str.string_after !fileName (idx+1) in
-  print_string (specName ^ " > ");
+  let sysName = Specification.getName spec in
+  print_string (sysName ^ " > ");
   let query_string = read_line () in
   if query_string = "#done" then samefile := false
   else begin
@@ -490,9 +472,9 @@ solve_query spec =
       let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
       Printf.fprintf file "%s" (Permutation.getPermutationTable formulas);
 
-    | "#cutcoherence" -> check_cutcoherence specName spec
+    | "#cutcoherence" -> check_cutcoherence sysName spec
     
-    | "#initialcoherence" -> check_initialcoherence specName spec
+    | "#initialcoherence" -> check_initialcoherence sysName spec
 
     | "#scopebang" -> check_scopebang ()
 
@@ -519,6 +501,24 @@ solve_query spec =
      * and #help."*)
 
   end
+
+(*********** FOR BATCH MORE PROCESSING ************)
+
+let fileName = ref "" ;;
+let check = ref "" ;;
+let rule1 = ref "" ;;
+let rule2 = ref "" ;;
+
+let usage = "Usage: " ^ Sys.argv.(0) ^ " [-v] [-i string] [-c string]"
+
+let argslst = [
+  ("-v", Arg.Unit (fun () -> Term.verbose := true), ": set verbose on.");
+  ("-i", Arg.String (fun s -> fileName := s), ": prefix of .pl and .sig file (with path)");
+  ("-c", Arg.String (fun s -> check := s), ": 'principalcut', 'cutcoherence', 'initialcoherence', 'atomicelim', 'scopebang', 'rulenames', 'permute', 'bipoles' or 'rules' (depending on what you want to check)");
+  ("-r1", Arg.String (fun r -> rule1 := r), ": set the name of the first rule to check the permutation above the second rule.");
+  ("-r2", Arg.String (fun r -> rule2 := r), ": set the name of the second rule.");
+  ("-bipole", Arg.Unit (fun () -> Permutation.setShowBipole true), ": show bipole.");
+]
 
 let _ = 
 Arg.parse argslst (fun x -> raise (Arg.Bad ("Bad argument: "^x))) usage;

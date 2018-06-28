@@ -29,6 +29,7 @@ module type SPECIFICATION = sig
   }
 
   val create : string * (string, basicTypes) Hashtbl.t * (string, types) Hashtbl.t * terms list * terms list * terms list * terms list -> specification
+  val getName : specification -> string
   val isKindDeclared : specification -> string -> bool
   val isTypeDeclared : specification -> string -> bool
   val getTypes : specification -> (string, types) Hashtbl.t
@@ -93,8 +94,11 @@ module Specification : SPECIFICATION = struct
     let adb = List.map (fun f -> Term.abs2exists (TypeChecker.deBruijn f)) a in
     let _ = List.iter (fun f -> let _ = TypeChecker.typeCheck f tt in ()) (s @ c @ i @ a) in
     let lr = processIntroRules i in
+    (* Extracting the system name from the full path *)
+    let idx = String.rindex n '/' in
+    let specName = Str.string_after n (idx+1) in
     { 
-      name = n;
+      name = specName;
       kindTbl = kt;
       typeTbl = tt;
       structRules = sdb;
@@ -103,6 +107,8 @@ module Specification : SPECIFICATION = struct
       axioms = adb;
       lr_hash = lr
     }
+
+  let getName spec = spec.name
 
   let isKindDeclared spec name = Hashtbl.mem spec.kindTbl name
 
