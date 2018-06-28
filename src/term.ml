@@ -173,9 +173,6 @@ let rec deref t = match t with
   | t -> t
 ;;
 
-(* Saves a goal in the query mode *)
-let goal : terms ref = ref TOP ;;
-
 (* Transforms abstractions into universal quantifiers *)
 let rec abs2forall f = match f with
   | ABS(s, i, t) -> FORALL(s, i, abs2forall t)
