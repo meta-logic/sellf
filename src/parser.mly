@@ -3,14 +3,11 @@
 */
 
 %{
-open Context
 open Types
 open Prints
 open TypeChecker
-open Coherence
 open Context
 open Subexponentials
-open Staticpermutationcheck
 
 exception ParsingError of string
 
@@ -205,19 +202,19 @@ subexp_decl:
       | false -> begin
         match $3 with 
           | "lin" ->
-            initSubexp $2;
+            Context.initSubexp $2;
             Subexponentials.addType $2 LIN;
             if !Term.verbose then print_endline ("log: New linear subexponential: "^$2);
           | "aff" -> 
-            initSubexp $2;
+            Context.initSubexp $2;
             Subexponentials.addType $2 AFF;
             if !Term.verbose then print_endline ("log: New affine subexponential: "^$2);
           | "rel" -> 
-            initSubexp $2;
+            Context.initSubexp $2;
             Subexponentials.addType $2 REL;
             if !Term.verbose then print_endline ("log: New relevant subexponential: "^$2);
           | "unb" -> 
-            initSubexp $2;
+            Context.initSubexp $2;
             Subexponentials.addType $2 UNB;
             if !Term.verbose then print_endline ("log: New unbounded subexponential: "^$2);
           | str -> raise (ParsingError ("[ERROR] "^str^" is not a valid subexponential type. Use 'lin', 'aff', 'rel' or 'unb'."))
