@@ -14,6 +14,7 @@ open Term
 module type SPECIFICATION = sig
 
   type specification = {
+    name : string;
     (* From .sig file *)
     kindTbl : (string, basicTypes) Hashtbl.t;
     typeTbl : (string, types) Hashtbl.t;
@@ -27,7 +28,7 @@ module type SPECIFICATION = sig
     lr_hash : (string, (terms * terms)) Hashtbl.t;
   }
 
-  val create : (string, basicTypes) Hashtbl.t * (string, types) Hashtbl.t * terms list * terms list * terms list * terms list -> specification
+  val create : string * (string, basicTypes) Hashtbl.t * (string, types) Hashtbl.t * terms list * terms list * terms list * terms list -> specification
   val isKindDeclared : specification -> string -> bool
   val isTypeDeclared : specification -> string -> bool
   val getTypes : specification -> (string, types) Hashtbl.t
@@ -46,6 +47,7 @@ end ;;
 module Specification : SPECIFICATION = struct
   
   type specification = {
+    name : string;
     (* From .sig file *)
     kindTbl : (string, basicTypes) Hashtbl.t;
     typeTbl : (string, types) Hashtbl.t;
@@ -84,7 +86,7 @@ module Specification : SPECIFICATION = struct
         | _ -> failwith "Valid predicates are 'lft' or 'right' or 'mlft' or 'mrght'."
     ) l; lr
   
-  let create (kt, tt, s, c, i, a) =
+  let create (n, kt, tt, s, c, i, a) =
     let sdb = List.map (fun f -> Term.abs2exists (TypeChecker.deBruijn f)) s in
     let cdb = List.map (fun f -> Term.abs2exists (TypeChecker.deBruijn f)) c in
     let idb = List.map (fun f -> Term.abs2exists (TypeChecker.deBruijn f)) i in
@@ -92,6 +94,7 @@ module Specification : SPECIFICATION = struct
     let _ = List.iter (fun f -> let _ = TypeChecker.typeCheck f tt in ()) (s @ c @ i @ a) in
     let lr = processIntroRules i in
     { 
+      name = n;
       kindTbl = kt;
       typeTbl = tt;
       structRules = sdb;

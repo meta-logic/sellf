@@ -42,7 +42,7 @@ let parse file_name =
       let lexbuf = Lexing.from_channel file_prog in
       try
         let (s, c, i, a) = Parser.specification Lexer.token lexbuf in
-          Specification.create (kt, tt, s, c, i, a)
+          Specification.create (file_name, kt, tt, s, c, i, a)
       with
       | Parsing.Parse_error -> failwith ("Syntax error while parsing .pl file: " ^ (position lexbuf))
       | Failure str -> failwith ("[ERROR] " ^ (position lexbuf))
