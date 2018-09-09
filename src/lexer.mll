@@ -68,6 +68,7 @@ rule token = parse
 | "on"                  { ON }
 | "off"                 { OFF }
 | "#exit"               { EXIT }
+| "#monopoles"         { POLES }
 
 (* Built-in types *)
 | "int"                 { TINT }
