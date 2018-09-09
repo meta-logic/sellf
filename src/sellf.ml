@@ -22,6 +22,8 @@ let initAll () =
   Subexponentials.initialize ();
 ;;
 
+let fn = ref "" ;;
+
 let check_principalcut spec =
   if Staticpermutationcheck.cut_principal spec then 
     print_endline "Tatu could infer that reduction to principal cuts is possible." 
@@ -75,7 +77,197 @@ let check_scopebang () =
   List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
 ;;
 
+
+
+
+
+
+
+
 (* Auxiliary functions *)
+
+let remove_elt e l =
+  let rec go l acc = match l with
+    | [] -> List.rev acc
+    | x::xs when e = x -> go xs acc
+    | x::xs -> go xs (x::acc)
+  in go l []
+;;
+
+let remove_duplicates l =
+  let rec go l acc = match l with
+    | [] -> List.rev acc
+    | x :: xs -> go (remove_elt x xs) (x::acc)
+  in go l []
+;;
+
+let rec prefix w1 w2 =
+  match w1 with 
+  | "" -> true
+  | w1 -> 
+    if String.length w1 <= String.length w2 then
+      if Char.equal (w1.[0]) (w2.[0]) then
+        let w1' = String.sub w1 1 (String.length w1 - 1) in
+        let w2' = String.sub w2 1 (String.length w2 - 1) in 
+          prefix w1' w2'
+      else false
+    else false
+;;
+
+let get1char () =
+    let termio = Unix.tcgetattr Unix.stdin in
+    let () =
+        Unix.tcsetattr Unix.stdin Unix.TCSADRAIN
+            { termio with Unix.c_icanon = false } in
+    let res = input_char stdin in
+    Unix.tcsetattr Unix.stdin Unix.TCSADRAIN termio;
+    res
+
+let rec check_input intro str1 =
+    let res = get1char () in
+    let str2 = Char.escaped res in
+    let check_tab = Char.equal '\t' res in
+    let check_back = Char.equal (Char.chr 127) res 
+                  || Char.equal '\b' res in
+    let check_end = Char.equal '\n' res in
+      if check_back then
+        let str_len = String.length str1 in
+          if str_len == 0 then 
+            let () = () in
+            output_char stdout '\r';
+            output_string stdout intro;
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_string stdout "\b\b";
+            flush stdout;
+            check_input intro str1
+          else
+            let str1' = String.sub str1 0 (str_len - 1) in
+            output_char stdout '\r';
+            output_string stdout (intro^str1');
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_string stdout "\b\b\b";
+            flush stdout;
+            check_input intro str1'
+      else if check_tab then approximate intro str1
+      else if check_end then str1
+      else check_input intro (str1^str2) 
+and
+approximate intro inp = 
+   match (prefix "#load " inp) with 
+    | true ->
+      let dir = 
+        (Sys.getcwd ())^"/"^(String.sub inp 6 (String.length(inp) - 6)) in
+      if Sys.file_exists dir then
+        if Sys.is_directory dir then
+          let dir_list = Array.to_list(Sys.readdir dir) in
+          output_string stdout "\n";
+          List.iter (fun a -> print_endline a) dir_list;
+          output_char stdout '\r';
+          output_string stdout (intro^inp);
+          flush stdout;
+          check_input intro inp
+        else let () = () in
+          output_char stdout '\r';
+          output_string stdout (intro^inp);
+          flush stdout;
+          check_input intro inp
+      else let () = () in
+        output_char stdout '\r';
+        output_string stdout (intro^inp);
+        flush stdout;
+        check_input intro inp
+    | false ->
+      let command_list = 
+        ["#load";
+         "#help"; 
+         "#monopoles";
+         "#exit";
+         "#check_rules";
+         "#check_polarity";
+         "#invertible";
+         "#scopebang";
+         "#done";
+         "#rule";
+         "#rules";
+         "#bipole";
+         "#bipoles";
+         "#permute";
+         "#permute_all";
+         "#permutation_cliques";
+         "#permutation_dot_graph";
+         "#permutation_table";
+         "#principalcut";
+         "#cutcoherence";
+         "#initialcoherence";
+         "#atomicelim"] in
+      let newCom = List.filter (fun cm -> prefix inp cm) command_list in
+          match newCom with 
+          | [wrd] ->
+                output_char stdout '\r';
+                output_string stdout (intro^wrd);
+                flush stdout;
+                check_input intro wrd
+          | _ ->
+               output_string stdout "\n";
+               List.iter (fun a -> print_endline a) newCom;
+               output_string stdout (intro^inp);
+               flush stdout;
+               check_input intro inp
+  ;;
+
+
+
+
+
+
+
+(* Check polarity-of-body count for each logic in the proofsystems *)
+let print_pole_count () = 
+  let dir = "../examples/proofsystems" in
+  let children = Array.to_list(Sys.readdir dir) in
+  let children = List.map(fun child -> Str.split (Str.regexp "\\.") child) children in
+  let children = List.filter(fun child -> 
+    List.length child = 2 && (List.nth child 1 = "pl" || List.nth child 1 = "sig")) children in
+  let children = remove_duplicates (List.map(fun child -> List.nth child 0)children) in
+  let specs = List.map (fun file -> 
+    fn := dir^"/"^file;
+    initAll ();
+    let spec = FileParser.parse !fn in
+    let rules = Specification.getLRHash spec in
+    let rulesM1 = Hashtbl.copy(rules) in
+    let rulesM2 = Hashtbl.copy(rules) in 
+
+    let rulesB1 = Hashtbl.copy(rules) in
+    let rulesB2 = Hashtbl.copy(rules) in
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if Term.isBipole bl && Term.isBipole br 
+         then Some (bl, br) else None) rulesB1;
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if (Term.isBipole bl && not (Term.isBipole br)) || (not (Term.isBipole bl) && Term.isBipole br) 
+         then Some (bl, br) else None) rulesB2;
+    let bip1 = 2*Hashtbl.length rulesB1 in
+    let bip2 = Hashtbl.length rulesB2 in
+    let bipoleNum = string_of_int (bip1 + bip2) in
+
+    let rulesM1 = Hashtbl.copy(rules) in
+    let rulesM2 = Hashtbl.copy(rules) in 
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if Term.isMonopole bl && Term.isMonopole br then Some (bl, br) else None) rulesM1;
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if (Term.isMonopole bl && not (Term.isMonopole br)) || (not (Term.isMonopole bl) && Term.isMonopole br) then Some (bl, br) else None) rulesM2;
+    let monop1 = 2*Hashtbl.length rulesM1 in
+    let monop2 = Hashtbl.length rulesM2 in 
+    let monopNum = string_of_int (monop1 + monop2) in
+
+    let neitherNum = string_of_int (2*Hashtbl.length(rules) - int_of_string bipoleNum) in
+    (Specification.getName spec, monopNum, bipoleNum, neitherNum)
+  ) children in 
+  List.iter (fun (a,b,c,d) -> print_endline (a^"   Monopoles: "^b^"   Bipoles: "^c^"   Neither: "^d)) specs
+;;
+
 let permutationToTex f1 f2 cl = 
   let permutationTex pairs cl =
     (match cl with
@@ -259,12 +451,15 @@ let print_help () =
   execution time of a query. The default value is 'off'. (Note that the time
   measurement of the permutation checking is always on);";*)
   print_endline "#help displays this message.";
+  print_endline "#monopoles provides a count on the number of monopoles for each logic.";
   print_endline "#exit terminates the program.";
   
   print_endline "\n* The following commands are available during state 'file_name >':";
   
   print_endline "\n** Helper commands **";
   print_endline "#check_rules: checks if all the rules of a file are bipoles.";
+  print_endline "#check_polarity: checks all formulas of selected logic for monopole, bipole, or niether";
+  print_endline "#invertible: checks invertibilty by checking if monopole and initcoherent";
   print_endline "#scopebang: prints which subexponentials will have their \
     formulas erased and which should be empty when a !s formula is going to be \
     used.";
@@ -294,10 +489,12 @@ let print_help () =
   print_endline ""
 ;;
 
+
 let rec start () =
   initAll ();
-  print_string ":> ";
-    let command = read_line () in
+  output_string stdout ":> ";
+  flush stdout;
+  let command = check_input ":> " "" in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer.token lexbuf_top in 
@@ -307,6 +504,7 @@ let rec start () =
       | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
       | "time-off" -> Term.time := false; print_endline "Time is set to off."; start ()
       | "help" -> print_help ();
+      | "monopoles" -> print_pole_count(); start ()
       | "exit" -> print_endline "Thank you for using SELLF."; exit 1
       | file_name -> 
         print_endline ("Loading file "^file_name);
@@ -321,8 +519,9 @@ let rec start () =
 and
 solve_query spec = 
   let sysName = Specification.getName spec in
-  print_string (sysName ^ " > ");
-  let query_string = read_line () in
+  output_string stdout (sysName ^ " > ");
+  flush stdout;
+  let query_string = check_input (sysName^" > ") "" in
   if query_string = "#done" then samefile := false
   else begin
   match query_string with
@@ -376,6 +575,48 @@ solve_query spec =
           print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f)) 
         ) not_bipoles 
       end
+
+    (* Check the polarity of rules in the given logic *)
+    | "#check_polarity" -> 
+      let hash_formulas = Specification.getLRHash spec in
+      print_endline ("Number of rules: "^string_of_int (2*Hashtbl.length hash_formulas));
+      Hashtbl.iter (fun name value -> 
+          let (left_body, right_body) = value in  
+          if Term.isMonopole left_body then
+          print_endline (name^"_left: monopole")
+          else if Term.isBipole left_body then 
+          print_endline (name^"_left: bipole")
+          else 
+          print_endline (name^"_left: neither");
+          if Term.isMonopole right_body then
+          print_endline (name^"_right: monopole")
+          else if Term.isBipole right_body then 
+          print_endline (name^"_right: bipole")
+          else 
+          print_endline (name^"_right: neither")
+        ) hash_formulas
+
+    (* Check the invertibility of rules in the given logic *)
+    | "#invertible" -> 
+      let hash_formulas = Specification.getLRHash spec in
+      print_endline ("Number of rules: "^string_of_int (2*Hashtbl.length hash_formulas));
+      Hashtbl.iter (fun conn specs -> 
+          let (left_body, right_body) = specs in  
+          if Coherence.checkInitCoher sysName conn specs spec then
+              if Term.isMonopole left_body then 
+                 print_endline (conn^"_left: invertible")
+              else if Term.isBipole left_body then 
+                 print_endline (conn^"_left: Unknown")
+              else print_endline (conn^"_left: N/A (non-bipole)")
+          else print_endline (conn^"_left: non-invertible");
+          if Coherence.checkInitCoher sysName conn specs spec then
+              if Term.isMonopole right_body then 
+                 print_endline (conn^"_right: invertible")
+              else if Term.isBipole right_body then 
+                 print_endline (conn^"_right: Unknown")
+              else print_endline (conn^"_right: N/A (non-bipole)")
+          else print_endline (conn^"_right: non-invertible")
+        ) hash_formulas
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
