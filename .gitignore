@@ -19,3 +19,8 @@ quati/test.py
 
 *.log
 *.aux
+
+.DS_Store
+doc/sellfdoc.pdf
+sellf
+src/sellf
