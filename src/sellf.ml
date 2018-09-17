@@ -101,6 +101,122 @@ let remove_duplicates l =
   in go l []
 ;;
 
+let rec prefix w1 w2 =
+  match w1 with 
+  | "" -> true
+  | w1 -> 
+    if String.length w1 <= String.length w2 then
+      if Char.equal (w1.[0]) (w2.[0]) then
+        let w1' = String.sub w1 1 (String.length w1 - 1) in
+        let w2' = String.sub w2 1 (String.length w2 - 1) in 
+          prefix w1' w2'
+      else false
+    else false
+;;
+
+let get1char () =
+    let termio = Unix.tcgetattr Unix.stdin in
+    let () =
+        Unix.tcsetattr Unix.stdin Unix.TCSADRAIN
+            { termio with Unix.c_icanon = false } in
+    let res = input_char stdin in
+    Unix.tcsetattr Unix.stdin Unix.TCSADRAIN termio;
+    res
+
+let rec check_input intro str1 =
+    let res = get1char () in
+    let str2 = Char.escaped res in
+    let check_tab = Char.equal '\t' res in
+    let check_back = Char.equal (Char.chr 127) res 
+                  || Char.equal '\b' res in
+    let check_end = Char.equal '\n' res in
+      if check_back then
+        let str_len = String.length str1 in
+          if str_len == 0 then 
+            let () = () in
+            output_char stdout '\r';
+            output_string stdout intro;
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_string stdout "\b\b";
+            flush stdout;
+            check_input intro str1
+          else
+            let str1' = String.sub str1 0 (str_len - 1) in
+            output_char stdout '\r';
+            output_string stdout (intro^str1');
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_char stdout (Char.chr 32);
+            output_string stdout "\b\b\b";
+            flush stdout;
+            check_input intro str1'
+      else if check_tab then approximate intro str1
+      else if check_end then str1
+      else check_input intro (str1^str2) 
+and
+approximate intro inp = 
+   match (prefix "#load " inp) with 
+    | true ->
+      let dir = 
+        (Sys.getcwd ())^"/"^(String.sub inp 6 (String.length(inp) - 6)) in
+      if Sys.file_exists dir then
+        if Sys.is_directory dir then
+          let dir_list = Array.to_list(Sys.readdir dir) in
+          output_string stdout "\n";
+          List.iter (fun a -> print_endline a) dir_list;
+          output_char stdout '\r';
+          output_string stdout (intro^inp);
+          flush stdout;
+          check_input intro inp
+        else let () = () in
+          output_char stdout '\r';
+          output_string stdout (intro^inp);
+          flush stdout;
+          check_input intro inp
+      else let () = () in
+        output_char stdout '\r';
+        output_string stdout (intro^inp);
+        flush stdout;
+        check_input intro inp
+    | false ->
+      let command_list = 
+        ["#load";
+         "#help"; 
+         "#monopoles";
+         "#exit";
+         "#check_rules";
+         "#check_polarity";
+         "#invertible";
+         "#scopebang";
+         "#done";
+         "#rule";
+         "#rules";
+         "#bipole";
+         "#bipoles";
+         "#permute";
+         "#permute_all";
+         "#permutation_cliques";
+         "#permutation_dot_graph";
+         "#permutation_table";
+         "#principalcut";
+         "#cutcoherence";
+         "#initialcoherence";
+         "#atomicelim"] in
+      let newCom = List.filter (fun cm -> prefix inp cm) command_list in
+          match newCom with 
+          | [wrd] ->
+                output_char stdout '\r';
+                output_string stdout (intro^wrd);
+                flush stdout;
+                check_input intro wrd
+          | _ ->
+               output_string stdout "\n";
+               List.iter (fun a -> print_endline a) newCom;
+               output_string stdout (intro^inp);
+               flush stdout;
+               check_input intro inp
+  ;;
 
 
 
@@ -376,8 +492,9 @@ let print_help () =
 
 let rec start () =
   initAll ();
-  print_string ":> ";
-  let command = read_line () in
+  output_string stdout ":> ";
+  flush stdout;
+  let command = check_input ":> " "" in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer.token lexbuf_top in 
@@ -402,8 +519,9 @@ let rec start () =
 and
 solve_query spec = 
   let sysName = Specification.getName spec in
-  print_string (sysName ^ " > ");
-  let query_string = read_line () in
+  output_string stdout (sysName ^ " > ");
+  flush stdout;
+  let query_string = check_input (sysName^" > ") "" in
   if query_string = "#done" then samefile := false
   else begin
   match query_string with
