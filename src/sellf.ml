@@ -22,6 +22,8 @@ let initAll () =
   Subexponentials.initialize ();
 ;;
 
+let fn = ref "" ;;
+
 let check_principalcut spec =
   if Staticpermutationcheck.cut_principal spec then 
     print_endline "Tatu could infer that reduction to principal cuts is possible." 
@@ -75,7 +77,81 @@ let check_scopebang () =
   List.iter (fun a -> print_string (a^", ")) ept; print_newline ();
 ;;
 
+
+
+
+
+
+
+
 (* Auxiliary functions *)
+
+let remove_elt e l =
+  let rec go l acc = match l with
+    | [] -> List.rev acc
+    | x::xs when e = x -> go xs acc
+    | x::xs -> go xs (x::acc)
+  in go l []
+;;
+
+let remove_duplicates l =
+  let rec go l acc = match l with
+    | [] -> List.rev acc
+    | x :: xs -> go (remove_elt x xs) (x::acc)
+  in go l []
+;;
+
+
+
+
+
+
+
+
+(* Check polarity-of-body count for each logic in the proofsystems *)
+let print_pole_count () = 
+  let dir = "../examples/proofsystems" in
+  let children = Array.to_list(Sys.readdir dir) in
+  let children = List.map(fun child -> Str.split (Str.regexp "\\.") child) children in
+  let children = List.filter(fun child -> 
+    List.length child = 2 && (List.nth child 1 = "pl" || List.nth child 1 = "sig")) children in
+  let children = remove_duplicates (List.map(fun child -> List.nth child 0)children) in
+  let specs = List.map (fun file -> 
+    fn := dir^"/"^file;
+    initAll ();
+    let spec = FileParser.parse !fn in
+    let rules = Specification.getLRHash spec in
+    let rulesM1 = Hashtbl.copy(rules) in
+    let rulesM2 = Hashtbl.copy(rules) in 
+
+    let rulesB1 = Hashtbl.copy(rules) in
+    let rulesB2 = Hashtbl.copy(rules) in
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if Term.isBipole bl && Term.isBipole br 
+         then Some (bl, br) else None) rulesB1;
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if (Term.isBipole bl && not (Term.isBipole br)) || (not (Term.isBipole bl) && Term.isBipole br) 
+         then Some (bl, br) else None) rulesB2;
+    let bip1 = 2*Hashtbl.length rulesB1 in
+    let bip2 = Hashtbl.length rulesB2 in
+    let bipoleNum = string_of_int (bip1 + bip2) in
+
+    let rulesM1 = Hashtbl.copy(rules) in
+    let rulesM2 = Hashtbl.copy(rules) in 
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if Term.isMonopole bl && Term.isMonopole br then Some (bl, br) else None) rulesM1;
+    Hashtbl.filter_map_inplace (fun name (bl, br) -> 
+      if (Term.isMonopole bl && not (Term.isMonopole br)) || (not (Term.isMonopole bl) && Term.isMonopole br) then Some (bl, br) else None) rulesM2;
+    let monop1 = 2*Hashtbl.length rulesM1 in
+    let monop2 = Hashtbl.length rulesM2 in 
+    let monopNum = string_of_int (monop1 + monop2) in
+
+    let neitherNum = string_of_int (2*Hashtbl.length(rules) - int_of_string bipoleNum) in
+    (Specification.getName spec, monopNum, bipoleNum, neitherNum)
+  ) children in 
+  List.iter (fun (a,b,c,d) -> print_endline (a^"   Monopoles: "^b^"   Bipoles: "^c^"   Neither: "^d)) specs
+;;
+
 let permutationToTex f1 f2 cl = 
   let permutationTex pairs cl =
     (match cl with
@@ -259,12 +335,14 @@ let print_help () =
   execution time of a query. The default value is 'off'. (Note that the time
   measurement of the permutation checking is always on);";*)
   print_endline "#help displays this message.";
+  print_endline "#monopoles provides a count on the number of monopoles for each logic.";
   print_endline "#exit terminates the program.";
   
   print_endline "\n* The following commands are available during state 'file_name >':";
   
   print_endline "\n** Helper commands **";
   print_endline "#check_rules: checks if all the rules of a file are bipoles.";
+  print_endline "#check_polarity: checks all formulas of selected logic for monopole, bipole, or niether";
   print_endline "#scopebang: prints which subexponentials will have their \
     formulas erased and which should be empty when a !s formula is going to be \
     used.";
@@ -294,10 +372,11 @@ let print_help () =
   print_endline ""
 ;;
 
+
 let rec start () =
   initAll ();
   print_string ":> ";
-    let command = read_line () in
+  let command = read_line () in
     try 
       let lexbuf_top = Lexing.from_string command in 
       let action = Parser.top Lexer.token lexbuf_top in 
@@ -307,6 +386,7 @@ let rec start () =
       | "time-on" -> Term.time := true; print_endline "Time is set to on."; start ()
       | "time-off" -> Term.time := false; print_endline "Time is set to off."; start ()
       | "help" -> print_help ();
+      | "monopoles" -> print_pole_count(); start ()
       | "exit" -> print_endline "Thank you for using SELLF."; exit 1
       | file_name -> 
         print_endline ("Loading file "^file_name);
@@ -376,6 +456,26 @@ solve_query spec =
           print_endline ("The following formula is NOT a bipole: " ^ (Prints.termToString f)) 
         ) not_bipoles 
       end
+
+    (* Check the polarity of rules in the given logic *)
+    | "#check_polarity" -> 
+      let hash_formulas = Specification.getLRHash spec in
+      print_endline ("Number of rules: "^string_of_int (2*Hashtbl.length hash_formulas));
+      Hashtbl.iter (fun name value -> 
+          let (left_body, right_body) = value in  
+          if Term.isMonopole left_body then
+          print_endline (name^"_left: monopole")
+          else if Term.isBipole left_body then 
+          print_endline (name^"_left: bipole")
+          else 
+          print_endline (name^"_left: neither");
+          if Term.isMonopole right_body then
+          print_endline (name^"_right: monopole")
+          else if Term.isBipole right_body then 
+          print_endline (name^"_right: bipole")
+          else 
+          print_endline (name^"_right: neither")
+        ) hash_formulas
 
     (* Generates a rule of the object logic and prints a latex file with it *)
     | "#rule" -> 
