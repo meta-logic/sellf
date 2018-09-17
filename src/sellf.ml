@@ -343,6 +343,7 @@ let print_help () =
   print_endline "\n** Helper commands **";
   print_endline "#check_rules: checks if all the rules of a file are bipoles.";
   print_endline "#check_polarity: checks all formulas of selected logic for monopole, bipole, or niether";
+  print_endline "#invertible: checks invertibilty by checking if monopole and initcoherent";
   print_endline "#scopebang: prints which subexponentials will have their \
     formulas erased and which should be empty when a !s formula is going to be \
     used.";
@@ -475,6 +476,28 @@ solve_query spec =
           print_endline (name^"_right: bipole")
           else 
           print_endline (name^"_right: neither")
+        ) hash_formulas
+
+    (* Check the invertibility of rules in the given logic *)
+    | "#invertible" -> 
+      let hash_formulas = Specification.getLRHash spec in
+      print_endline ("Number of rules: "^string_of_int (2*Hashtbl.length hash_formulas));
+      Hashtbl.iter (fun conn specs -> 
+          let (left_body, right_body) = specs in  
+          if Coherence.checkInitCoher sysName conn specs spec then
+              if Term.isMonopole left_body then 
+                 print_endline (conn^"_left: invertible")
+              else if Term.isBipole left_body then 
+                 print_endline (conn^"_left: Unknown")
+              else print_endline (conn^"_left: N/A (non-bipole)")
+          else print_endline (conn^"_left: non-invertible");
+          if Coherence.checkInitCoher sysName conn specs spec then
+              if Term.isMonopole right_body then 
+                 print_endline (conn^"_right: invertible")
+              else if Term.isBipole right_body then 
+                 print_endline (conn^"_right: Unknown")
+              else print_endline (conn^"_right: N/A (non-bipole)")
+          else print_endline (conn^"_right: non-invertible")
         ) hash_formulas
 
     (* Generates a rule of the object logic and prints a latex file with it *)
