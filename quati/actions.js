@@ -153,6 +153,7 @@ function checkPermutation() {
   xmlhttp.onreadystatechange = function () {
     if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
       var response = xmlhttp.responseText
+      // MathJax rendering
       document.getElementById('result').style.display = 'block'
       setText(document.getElementById('permutationsTex'), response)
       var math = document.getElementById("permutationsTex");
@@ -189,37 +190,23 @@ function getExample() {
 
 }
 
-function loadTeX(id) {
+function downloadTexRules() {
 
   var src = document.getElementById("specification").value
   var sig = document.getElementById("signature").value
 
   var src_enc = encodeURIComponent(src)
   var sig_enc = encodeURIComponent(sig)
-  var id_enc = encodeURIComponent(id)
 
-  var r1 = document.getElementById('r1').value
-  var r2 = document.getElementById('r2').value
-
-  var params = "src=" + src_enc + "&sig=" + sig_enc + "&id=" + id_enc + "&r1=" + r1 + "&r2=" + r2
+  var params = "src=" + src_enc + "&sig=" + sig_enc
 
   var xmlhttp = getXMLHTTP()
 
   // When the answer is received:
   xmlhttp.onreadystatechange = function () {
     if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      var str = xmlhttp.responseText
-      switch(id) {
-        case 'rulesSourceCode':
-          var fileName = 'rules.tex'
-          break;
-        case 'permutationSourceCode':
-          var fileName = 'permutation.tex'
-          break;
-        case 'bipolesSourceCode':
-          var fileName = 'bipoles.tex'
-          break;
-      }
+      var str = xmlhttp.responseText;
+      var fileName = 'rules.tex';
       // Download is enabled using FileSaver.js and Blob.js
       // Probably it won't work in all browsers
       var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
@@ -227,7 +214,70 @@ function loadTeX(id) {
     }
   }
 
-  xmlhttp.open("POST", "loadtex.py", true)
+  xmlhttp.open("POST", "downloadTexRules.py", true)
+  xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xmlhttp.send(params)
+
+}
+
+function downloadTexPermutation() {
+
+  var src = document.getElementById("specification").value
+  var sig = document.getElementById("signature").value
+
+  var src_enc = encodeURIComponent(src)
+  var sig_enc = encodeURIComponent(sig)
+
+  var r1 = document.getElementById('r1').value
+  var r2 = document.getElementById('r2').value
+
+  var params = "src=" + src_enc + "&sig=" + sig_enc + "&r1=" + r1 + "&r2=" + r2
+
+  var xmlhttp = getXMLHTTP()
+
+  // When the answer is received:
+  xmlhttp.onreadystatechange = function () {
+    if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      var str = xmlhttp.responseText;
+      var fileName = 'permutation.tex';
+      // Download is enabled using FileSaver.js and Blob.js
+      // Probably it won't work in all browsers
+      var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, fileName);
+    }
+  }
+
+  xmlhttp.open("POST", "downloadTexPermutation.py", true)
+  xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xmlhttp.send(params)
+
+}
+
+function downloadTexBipoles() {
+
+  var src = document.getElementById("specification").value
+  var sig = document.getElementById("signature").value
+
+  var src_enc = encodeURIComponent(src)
+  var sig_enc = encodeURIComponent(sig)
+
+  var params = "src=" + src_enc + "&sig=" + sig_enc
+
+  var xmlhttp = getXMLHTTP()
+
+  // When the answer is received:
+  xmlhttp.onreadystatechange = function () {
+    if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      var str = xmlhttp.responseText;
+      var fileName = 'bipoles.tex';
+      // Download is enabled using FileSaver.js and Blob.js
+      // Probably it won't work in all browsers
+      var blob = new Blob([str], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, fileName);
+    }
+  }
+
+  xmlhttp.open("POST", "downloadTexBipoles.py", true)
   xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   xmlhttp.send(params)
 

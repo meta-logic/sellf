@@ -415,18 +415,9 @@ let fprint_permutation forms_lst file_name =
 (* Functions related to the download option of Quati's website *)
 let permute_to_file spec name1 name2 =
   let formulas = (Specification.getIntroRules spec) @ (Specification.getStructRules spec) in
-  let index = ref (-1) in
-  let counter () = index := !index + 1; !index in
-  let i1 = ref 0 in
-  let i2 = ref 0 in
-  List.iter (fun f -> 
-      if (Term.getRuleName f) = name1 then i1 := counter()
-      else begin
-          if (Term.getRuleName f) = name2 then i2 := counter()
-          else index := !index + 1;
-        end
-    );
-  fprint_permutation [((List.nth formulas !i1), (List.nth formulas !i2))] "permutation"
+  let f1 = List.find(fun f -> (Term.getRuleName f) = name1) formulas in
+  let f2 = List.find(fun f -> (Term.getRuleName f) = name2) formulas in
+  fprint_permutation [(f1, f2)] "permutation"
 ;;
 
 let rules_to_file spec =

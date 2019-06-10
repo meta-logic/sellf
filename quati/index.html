@@ -10,7 +10,7 @@
     </script>
     <!-- jQuery only seems to work if the code below is here -->
     <!-- Download related-->
-    <script defer src="https://cdn.rawgit.com/eligrey/FileSaver.js/master/FileSaver.js"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js" integrity="sha256-htuR1Owx8i9hm4h4Y4d/FjlPLoj2teQmhJ5WnNSo3w0=" crossorigin="anonymous"></script>
     <!-- MathJax to display LaTeX code -->
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
@@ -150,7 +150,7 @@
                   <p id="rulesTex"></p>
                 </div>
 
-                <button id="downloadRules" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('rulesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
+                <button id="downloadRules" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="downloadTexRules();"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
               </div>
 
@@ -171,7 +171,7 @@
                     <p id="permutationsTex"></p>
                   </div>
 
-                  <button id="downloadPermutation" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('permutationSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
+                  <button id="downloadPermutation" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="downloadTexPermutation();"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
                 </div>
 
@@ -185,7 +185,7 @@
                   </div>
                 </div>
 
-                <button id="downloadBipoles" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="loadTeX('bipolesSourceCode');"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
+                <button id="downloadBipoles" style="font-size: 11pt" class="btn btn-primary btn-lg" onclick="downloadTexBipoles();"><span class="ui-icon ui-icon-shuffle"></span>&nbsp;&nbsp;Download <span class="latex">L<sup>a</sup>T<sub>e</sub>X</span></button>
 
               </div>
 
