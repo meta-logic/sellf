@@ -22,8 +22,8 @@ let parse file_name =
           Specification.create (file_name, kt, tt, s, c, i, a)
       with
       | Parsing.Parse_error -> failwith ("Syntax error while parsing .pl file: " ^ (position lexbuf))
-      | Failure str -> failwith ("[ERROR] " ^ (position lexbuf))
+      | Failure str -> failwith ("[ERROR] " ^ str ^ ": " ^ (position lexbuf))
   with
   | Parsing.Parse_error -> failwith ("Syntax error while parsing .sig file: " ^ (position lexbuf))
-  | Failure _ -> failwith ("[ERROR] " ^ (position lexbuf))
+  | Failure str -> failwith ("[ERROR] " ^ str ^ ": " ^ (position lexbuf))
 ;;

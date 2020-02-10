@@ -1,5 +1,5 @@
 (*
- * A hashtable implements the context of a sequent. The key is the
+ * A hashtable implements the context of a SELLF sequent. The key is the
  * name of the subexponential, and this is mapped to a list of formulas.
  * The linear formulas (not marked with ?l) are stored with the key 'gamma'.
  * The formulas of specification of systems are stored with the key 'infty'
@@ -16,7 +16,11 @@ open Specification
 open Prints
 
 module type CONTEXT = sig
-    type context = { hash : (string, terms list) Hashtbl.t; }
+    
+    type context = { 
+      hash : (string, terms list) Hashtbl.t; 
+    }
+
     val initial : (string, terms list) Hashtbl.t 
     val erasableByTop : (string, terms list) Hashtbl.t ref
     val initSubexp : string -> unit
