@@ -8,22 +8,22 @@
 
 %% N.B.: encoding for one principal K.
 
-subexp r lin.
-subexp l unb.
-subexp kr lin.
-subexp kl unb.
-subexp loc unb.
+subexp r   lin.
+subexp kr  lin.
+subexp l   unb.
+subexp kl  unb.
+subexp res unb.
 
-subexpctx r single suc.
-subexpctx l many ant.
-subexpctx kr single suc.
-subexpctx kl many ant.
-subexpctx loc many ant.
+subexpctx r   single suc.
+subexpctx kr  single suc.
+subexpctx l   many ant.
+subexpctx kl  many ant.
+subexpctx res many ant.
 
-subexprel r < kr.
-subexprel l < kl.
+subexprel r  < kr.
+subexprel l  < kl.
 subexprel kr < l.
-subexprel kl < loc.
+subexprel kl < res.
 
 rules introduction.
 
@@ -44,8 +44,8 @@ not (lft (att A)) * ![kr] ?[l] (lft A).
 not (rght (att A)) * ![l] ?[r] (rght A). % First bang for duality of rules
 
 % Locality
-not (lft (loc A)) * ?[l] (lft A).
-not (rght (loc A)) * ![loc] ?[r] (rght  A).
+not (lft (res A)) * ?[res] (lft A).
+not (rght (res A)) * ![res] ?[r] (rght A).
 
 % False
 (not (lft false)) * top.
